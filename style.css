@@ -1,5 +1,5 @@
 /* ============================================
-   R3ADS — Design tokens (Manual de Marca 2026)
+   R3ADS · Design tokens (Manual de Marca 2026)
    ============================================ */
 :root {
   --naranja: #FD7D20;
@@ -93,7 +93,7 @@ img {
   padding-bottom: 0.9rem;
 }
 
-.brand-logo { height: 28px; width: auto; }
+.brand-logo { height: 44px; width: auto; }
 
 .site-nav {
   display: flex;
