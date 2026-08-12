@@ -452,42 +452,97 @@ img {
 
 .df-fase p { color: #4a4846; font-size: 0.95rem; }
 
-/* El paquete unico */
+/* Alcance fijo — lo que va en los 3 niveles */
 .df-paquete { padding: 6rem 0; }
 
-.df-incluye {
+.df-alcance {
+  list-style: none;
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-  gap: 2.5rem;
-  margin: 3rem 0;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 2rem;
+  margin-top: 3rem;
 }
 
-.df-bloque {
+.df-alcance li {
   border-top: 3px solid var(--naranja);
   padding-top: 1.25rem;
 }
 
-.df-bloque-num {
-  font-family: var(--font-display);
-  font-weight: 900;
-  color: var(--gris);
-  font-size: 1.1rem;
-}
-
-.df-bloque h3 {
+.df-alcance h3 {
   font-family: var(--font-display);
   font-weight: 700;
   text-transform: uppercase;
-  font-size: 1.15rem;
-  margin: 0.5rem 0 0.6rem;
+  font-size: 1.05rem;
+  line-height: 1.2;
+  margin-bottom: 0.6rem;
 }
 
-.df-bloque p {
+.df-alcance p {
   color: #4a4846;
   font-size: 0.95rem;
 }
 
-.df-bloque strong { color: var(--grafito); font-weight: 600; }
+/* Niveles — lo unico que cambia */
+.df-niveles-seccion {
+  background-color: #F7F6F5;
+  padding: 6rem 0;
+}
+
+.df-niveles {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 2rem;
+  margin-top: 3rem;
+}
+
+.df-nivel {
+  background-color: var(--blanco);
+  border: 1px solid #e7e5e3;
+  border-top: 3px solid var(--naranja);
+  border-radius: 4px;
+  padding: 2rem 1.75rem;
+}
+
+.df-nivel-top {
+  background-color: var(--grafito);
+  border-color: var(--grafito);
+  border-top-color: var(--naranja);
+}
+
+.df-nivel h3 {
+  font-family: var(--font-display);
+  font-weight: 900;
+  text-transform: uppercase;
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.df-nivel-top h3 { color: var(--blanco); }
+
+.df-nivel-video {
+  font-family: var(--font-display);
+  font-size: 1rem;
+  color: var(--grafito);
+  padding-bottom: 1rem;
+  margin-bottom: 1rem;
+  border-bottom: 1px solid #e7e5e3;
+}
+
+.df-nivel-video strong {
+  font-weight: 900;
+  font-size: 1.6rem;
+  color: var(--naranja);
+}
+
+.df-nivel-video span { color: var(--naranja); font-weight: 700; }
+
+.df-nivel-top .df-nivel-video {
+  color: var(--blanco);
+  border-bottom-color: #3a3835;
+}
+
+.df-nivel-desc { color: #4a4846; font-size: 0.95rem; }
+.df-nivel-top .df-nivel-desc { color: var(--gris); }
 
 /* Notas al pie de una seccion */
 .df-notas {
@@ -581,5 +636,5 @@ img {
   .equipo-hero { padding: 3rem 0 2rem; }
   .equipo { padding: 1rem 0 4rem; }
   .df-hero { padding: 3rem 0 2rem; }
-  .df-que-es, .df-paquete, .df-elegir { padding: 4rem 0; }
+  .df-que-es, .df-paquete, .df-niveles-seccion, .df-elegir { padding: 4rem 0; }
 }
