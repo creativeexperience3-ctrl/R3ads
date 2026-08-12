@@ -404,6 +404,242 @@ img {
 
 .site-nav a.is-active { color: var(--naranja); }
 
+/* ---------- Digital Footprint ---------- */
+.df-hero { padding: 5rem 0 3rem; }
+.df-hero-inner { max-width: 780px; }
+
+.df-lead {
+  max-width: 680px;
+  color: #4a4846;
+  font-size: 1.05rem;
+  margin-top: 1rem;
+}
+
+/* Fases */
+.df-que-es {
+  background-color: #F7F6F5;
+  padding: 5rem 0;
+}
+
+.df-fases {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 2.5rem;
+  margin-top: 3rem;
+}
+
+.df-fase {
+  border-left: 2px solid var(--naranja);
+  padding-left: 1.5rem;
+}
+
+.df-fase-num {
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.8rem;
+  color: var(--naranja);
+  font-weight: 700;
+}
+
+.df-fase h3 {
+  font-family: var(--font-display);
+  font-weight: 700;
+  text-transform: uppercase;
+  font-size: 1.2rem;
+  margin: 0.5rem 0 0.75rem;
+}
+
+.df-fase p { color: #4a4846; font-size: 0.95rem; }
+
+/* Tarjetas de paquete */
+.df-paquetes { padding: 6rem 0; }
+
+.df-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 2rem;
+  margin-top: 3rem;
+}
+
+.df-card {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid #e7e5e3;
+  border-top: 3px solid var(--naranja);
+  border-radius: 4px;
+  padding: 2rem 1.75rem;
+}
+
+.df-card-flagship {
+  background-color: var(--grafito);
+  border-color: var(--grafito);
+  border-top-color: var(--naranja);
+}
+
+.df-card-para {
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--naranja);
+  margin-bottom: 0.4rem;
+}
+
+.df-card-nombre {
+  font-family: var(--font-display);
+  font-weight: 900;
+  text-transform: uppercase;
+  font-size: 1.6rem;
+  line-height: 1.1;
+  margin-bottom: 0.9rem;
+}
+
+.df-card-flagship .df-card-nombre { color: var(--blanco); }
+
+.df-card-desc {
+  color: #4a4846;
+  font-size: 0.95rem;
+  margin-bottom: 1.5rem;
+}
+
+.df-card-flagship .df-card-desc { color: var(--gris); }
+
+.df-card-lista {
+  list-style: none;
+  margin-bottom: 2rem;
+  border-top: 1px solid #e7e5e3;
+}
+
+.df-card-flagship .df-card-lista { border-top-color: #3a3835; }
+
+.df-card-lista li {
+  font-size: 0.95rem;
+  color: #4a4846;
+  padding: 0.6rem 0;
+  border-bottom: 1px solid #e7e5e3;
+}
+
+.df-card-flagship .df-card-lista li {
+  color: var(--gris);
+  border-bottom-color: #3a3835;
+}
+
+.df-card-lista strong {
+  font-family: var(--font-display);
+  font-weight: 900;
+  color: var(--grafito);
+}
+
+.df-card-flagship .df-card-lista strong { color: var(--blanco); }
+
+.df-card-extra { color: var(--naranja) !important; font-weight: 600; }
+
+.df-card-cta {
+  margin-top: auto;
+  font-size: 0.85rem;
+}
+
+.df-card-flagship .btn-outline {
+  border-color: var(--blanco);
+  color: var(--blanco);
+}
+
+/* Tabla comparativa */
+.df-tabla-seccion {
+  background-color: #F7F6F5;
+  padding: 6rem 0;
+}
+
+.df-tabla-scroll {
+  overflow-x: auto;
+  margin-top: 3rem;
+  background-color: var(--blanco);
+  border-radius: 4px;
+}
+
+.df-tabla {
+  width: 100%;
+  min-width: 560px;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+}
+
+.df-tabla th,
+.df-tabla td {
+  padding: 0.85rem 1rem;
+  text-align: center;
+  border-bottom: 1px solid #e7e5e3;
+}
+
+.df-tabla thead th {
+  font-family: var(--font-display);
+  font-weight: 700;
+  text-transform: uppercase;
+  font-size: 0.8rem;
+  letter-spacing: 0.05em;
+  background-color: var(--grafito);
+  color: var(--blanco);
+}
+
+.df-tabla tbody th[scope="row"],
+.df-tabla thead th:first-child {
+  text-align: left;
+  font-weight: 500;
+  color: var(--grafito);
+}
+
+.df-tabla thead th:first-child { color: var(--blanco); }
+
+.df-fila-grupo th {
+  text-align: left !important;
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--naranja) !important;
+  background-color: #FAF9F8;
+  padding-top: 1.25rem;
+}
+
+.df-tabla td {
+  font-family: var(--font-display);
+  font-weight: 700;
+  color: var(--grafito);
+}
+
+.df-col-flagship { background-color: rgba(253, 125, 32, 0.07); }
+.df-tabla thead th.df-col-flagship { background-color: var(--naranja); }
+
+/* Especificidad: .df-tabla td (0,1,1) le gana a una sola clase, por eso van calificadas */
+.df-tabla td.df-col-flagship { color: var(--naranja); }
+.df-tabla td.df-no { color: var(--gris); font-weight: 500; }
+
+.df-notas {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.5rem;
+  margin-top: 2rem;
+}
+
+.df-notas p {
+  font-size: 0.9rem;
+  color: #4a4846;
+  border-left: 2px solid var(--naranja);
+  padding-left: 1rem;
+}
+
+/* Cómo elegir */
+.df-elegir { padding: 6rem 0; }
+
+.df-elegir-body {
+  max-width: 680px;
+  color: #4a4846;
+  margin-top: 1.5rem;
+}
+
 /* ---------- CTA final ---------- */
 .cta-final {
   background-color: var(--naranja);
@@ -471,4 +707,6 @@ img {
   .servicios, .metodologia, .posicionamiento, .cta-final { padding: 4rem 0; }
   .equipo-hero { padding: 3rem 0 2rem; }
   .equipo { padding: 1rem 0 4rem; }
+  .df-hero { padding: 3rem 0 2rem; }
+  .df-que-es, .df-paquetes, .df-tabla-seccion, .df-elegir { padding: 4rem 0; }
 }
