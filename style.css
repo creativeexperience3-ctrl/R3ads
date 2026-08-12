@@ -519,27 +519,35 @@ img {
 
 .df-nivel-top h3 { color: var(--blanco); }
 
-.df-nivel-video {
-  font-family: var(--font-display);
-  font-size: 1rem;
-  color: var(--grafito);
+.df-nivel-entrega {
+  display: grid;
+  gap: 0.4rem;
   padding-bottom: 1rem;
   margin-bottom: 1rem;
   border-bottom: 1px solid #e7e5e3;
 }
 
-.df-nivel-video strong {
+.df-nivel-video,
+.df-nivel-foto {
+  font-family: var(--font-display);
+  font-size: 1rem;
+  color: var(--grafito);
+}
+
+.df-nivel-video strong,
+.df-nivel-foto strong {
   font-weight: 900;
   font-size: 1.6rem;
   color: var(--naranja);
 }
 
-.df-nivel-video span { color: var(--naranja); font-weight: 700; }
+.df-nivel-video span,
+.df-nivel-foto span { color: var(--naranja); font-weight: 700; }
 
-.df-nivel-top .df-nivel-video {
-  color: var(--blanco);
-  border-bottom-color: #3a3835;
-}
+.df-nivel-top .df-nivel-entrega { border-bottom-color: #3a3835; }
+
+.df-nivel-top .df-nivel-video,
+.df-nivel-top .df-nivel-foto { color: var(--blanco); }
 
 .df-nivel-desc { color: #4a4846; font-size: 0.95rem; }
 .df-nivel-top .df-nivel-desc { color: var(--gris); }
