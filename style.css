@@ -305,6 +305,105 @@ img {
   color: #4a4846;
 }
 
+/* ---------- Equipo ---------- */
+.equipo-hero {
+  padding: 5rem 0 3rem;
+}
+
+.equipo-hero-inner {
+  max-width: 780px;
+}
+
+.equipo {
+  padding: 2rem 0 6rem;
+}
+
+.equipo-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 2rem;
+}
+
+.perfil-card {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid #e7e5e3;
+  border-top: 3px solid var(--naranja);
+  border-radius: 4px;
+  padding: 2rem 1.75rem;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.perfil-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 28px rgba(33, 31, 29, 0.08);
+}
+
+.perfil-monograma {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 64px;
+  height: 64px;
+  border-radius: 4px;
+  background-color: var(--grafito);
+  color: var(--naranja);
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: 1.5rem;
+  letter-spacing: 0.02em;
+  margin-bottom: 1.5rem;
+}
+
+.perfil-rol {
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--naranja);
+  margin-bottom: 0.4rem;
+}
+
+.perfil-nombre {
+  font-family: var(--font-display);
+  font-weight: 900;
+  text-transform: uppercase;
+  font-size: 1.35rem;
+  line-height: 1.15;
+  margin-bottom: 0.9rem;
+}
+
+.perfil-bio {
+  color: #4a4846;
+  font-size: 0.95rem;
+  margin-bottom: 1.5rem;
+}
+
+.perfil-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  list-style: none;
+  margin-bottom: 2rem;
+}
+
+.perfil-tags li {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: #4a4846;
+  background-color: #F7F6F5;
+  border-radius: 999px;
+  padding: 0.3rem 0.75rem;
+}
+
+.perfil-cta {
+  margin-top: auto;
+  font-size: 0.9rem;
+}
+
+.site-nav a.is-active { color: var(--naranja); }
+
 /* ---------- CTA final ---------- */
 .cta-final {
   background-color: var(--naranja);
@@ -370,4 +469,6 @@ img {
   .site-nav a:not(.btn) { display: none; }
   .hero { padding: 4rem 0 3rem; }
   .servicios, .metodologia, .posicionamiento, .cta-final { padding: 4rem 0; }
+  .equipo-hero { padding: 3rem 0 2rem; }
+  .equipo { padding: 1rem 0 4rem; }
 }
