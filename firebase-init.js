@@ -9,12 +9,12 @@
    ============================================================ */
 (function () {
   var config = {
-    apiKey           : 'PENDIENTE',
-    authDomain       : 'PENDIENTE.firebaseapp.com',
-    projectId        : 'PENDIENTE',
-    storageBucket    : 'PENDIENTE.firebasestorage.app',
-    messagingSenderId: 'PENDIENTE',
-    appId            : 'PENDIENTE'
+    apiKey           : 'AIzaSyDEugPITETLwrD5HJHq9KQPr3G2MR8WD1k',
+    authDomain       : 'r3ads-59bd8.firebaseapp.com',
+    projectId        : 'r3ads-59bd8',
+    storageBucket    : 'r3ads-59bd8.firebasestorage.app',
+    messagingSenderId: '684140109584',
+    appId            : '1:684140109584:web:00c216621b729343b68f95'
   };
 
   // Mientras la config esté sin llenar, el sitio sigue funcionando:
