@@ -164,6 +164,8 @@ function abrirDetalle(id) {
   document.getElementById('txtNotas').value = i.notas || '';
   document.getElementById('guardadoAviso').hidden = true;
 
+  document.getElementById('btnSesionCero').href = 'sesion.html?intake=' + encodeURIComponent(i.id);
+
   document.getElementById('btnWaProspecto').href = R3Intake.waLink(
     i.telPersona,
     `Hola ${i.nombre || ''}, te escribimos de R3ADS. Recibimos el formulario de ${i.empresa || 'tu empresa'} y queremos agendar tu diagnóstico.`

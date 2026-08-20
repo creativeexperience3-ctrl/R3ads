@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sesión Cero · R3ADS</title>
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="icon" type="image/png" href="assets/logo-isotipo-aislado.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;900&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css?v=20260820c">
+</head>
+<body>
+
+  <header class="site-header">
+    <div class="wrap header-inner">
+      <a href="admin.html" class="brand">
+        <img src="assets/logo-sobre-blanco.png" alt="R3ADS" class="brand-logo">
+      </a>
+      <nav class="site-nav">
+        <span class="admin-usuario" id="guardadoEstado"></span>
+        <a href="admin.html" class="btn btn-outline btn-sm">Panel</a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="top">
+    <section class="admin">
+      <div class="wrap">
+
+        <p class="admin-verificando" id="vistaCargando">Verificando sesión…</p>
+
+        <!-- ELEGIR INTAKE -->
+        <div id="vistaElegir" hidden>
+          <p class="section-eyebrow">Documento 00 · Sesión Cero</p>
+          <h1 class="section-title">¿Con qué cliente?</h1>
+          <p class="ses-intro">
+            Elegí el intake del cliente con el que vas a correr la sesión. Sus respuestas
+            quedan a mano durante toda la reunión, y el reporte final sale amarrado a él.
+          </p>
+          <p class="admin-estado" id="elegirEstado">Cargando intakes…</p>
+          <div class="admin-lista" id="listaIntakes"></div>
+        </div>
+
+        <!-- MESA DE TRABAJO -->
+        <div id="vistaSesion" hidden>
+
+          <div class="ses-cabecera">
+            <div>
+              <p class="section-eyebrow">Documento 00 · Sesión Cero</p>
+              <h1 class="section-title" id="sesEmpresa">—</h1>
+              <p class="ses-meta" id="sesMeta"></p>
+            </div>
+            <div class="ses-cabecera-acciones">
+              <label for="sesFecha" class="ses-fecha-label">Fecha de la sesión</label>
+              <input type="date" id="sesFecha" class="admin-select ses-fecha">
+            </div>
+          </div>
+
+          <div class="ses-tabs" role="tablist">
+            <button type="button" class="ses-tab is-activo" data-panel="modulos">Módulos</button>
+            <button type="button" class="ses-tab" data-panel="hallazgos">
+              Hallazgos <span class="ses-tab-num" id="numHallazgos">0</span>
+            </button>
+            <button type="button" class="ses-tab" data-panel="foda">FODA</button>
+            <button type="button" class="ses-tab" data-panel="intake">Intake</button>
+            <button type="button" class="ses-tab" data-panel="reporte">Reporte</button>
+          </div>
+
+          <!-- PANEL: MÓDULOS -->
+          <div class="ses-panel" id="panel-modulos">
+            <div class="callout-r3">
+              <p class="ses-eyebrow">48 horas antes · insumos por escrito</p>
+              <p id="insumosTexto"></p>
+            </div>
+            <div class="callout-r3 callout-r3--regla">
+              <p class="ses-eyebrow">La regla que ordena todo</p>
+              <p>Nunca se le pregunta al dueño por conclusiones. Se le piden <strong>hechos</strong>,
+              y la conclusión la produce el estudio.</p>
+            </div>
+            <div id="modulos"></div>
+          </div>
+
+          <!-- PANEL: HALLAZGOS -->
+          <div class="ses-panel" id="panel-hallazgos" hidden>
+            <div class="ses-panel-top">
+              <p class="ses-intro">
+                Ocho campos, siempre los mismos. Si un campo no se puede llenar, el hallazgo
+                todavía no está listo. <strong>Un hallazgo sin tensión es solo un apunte.</strong>
+              </p>
+              <button type="button" class="btn btn-primary btn-sm" id="btnNuevoHallazgo">Nuevo hallazgo</button>
+            </div>
+
+            <div class="ses-gates" id="gates"></div>
+            <div id="hallazgos"></div>
+          </div>
+
+          <!-- PANEL: FODA -->
+          <div class="ses-panel" id="panel-foda" hidden>
+            <p class="ses-intro">
+              Solo entran los <strong>datos</strong>. Las creencias y los puntos ciegos van
+              a información pendiente hasta convertirse en dato. Cada entrada cita los
+              códigos que la sostienen: una entrada sin código es una opinión del estudio.
+            </p>
+            <div class="ses-reglas" id="reglasFoda"></div>
+            <div id="foda"></div>
+          </div>
+
+          <!-- PANEL: INTAKE -->
+          <div class="ses-panel" id="panel-intake" hidden>
+            <p class="ses-intro">
+              Lo que el cliente respondió antes de la reunión. Sirve para contrastar:
+              lo que dice de su marca contra lo que muestran los hechos.
+            </p>
+            <div class="intake-doc" id="intakeDoc"></div>
+          </div>
+
+          <!-- PANEL: REPORTE -->
+          <div class="ses-panel" id="panel-reporte" hidden>
+            <div class="ses-panel-top">
+              <p class="ses-intro">
+                Esto es lo que se le entrega al cliente al terminar. Las notas de los módulos
+                no van acá: son material de trabajo, y su destilado ya son los hallazgos.
+              </p>
+            </div>
+            <div class="form-resultado-acciones">
+              <button type="button" class="btn btn-primary btn-sm" id="btnDescargarReporte">Descargar reporte</button>
+              <button type="button" class="btn btn-outline btn-sm" id="btnCopiarReporte">Copiar texto</button>
+              <a href="#" class="btn btn-outline btn-sm" id="btnWaCliente" target="_blank" rel="noopener">WhatsApp al cliente</a>
+            </div>
+            <div class="ses-reporte" id="reporte"></div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+  <script src="firebase-init.js?v=20260820c"></script>
+  <script src="intake-doc.js?v=20260820c"></script>
+  <script src="sesion-guion.js?v=20260820c"></script>
+  <script src="sesion-doc.js?v=20260820c"></script>
+  <script src="sesion.js?v=20260820c"></script>
+</body>
+</html>

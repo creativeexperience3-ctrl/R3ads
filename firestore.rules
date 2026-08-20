@@ -60,6 +60,14 @@ service cloud.firestore {
       allow delete: if esAdmin();
     }
 
+    // ═══ /sesiones/{id} ════════════════════════════════════════
+    // Sesión Cero: notas de los 8 módulos, hallazgos y destilación
+    // al FODA. Es material de trabajo interno — el cliente recibe el
+    // reporte generado, nunca escribe acá. Sin create público.
+    match /sesiones/{sesionId} {
+      allow read, write: if esAdmin();
+    }
+
     // ═══ Bloqueo por defecto ═══════════════════════════════════
     match /{document=**} {
       allow read, write: if false;
