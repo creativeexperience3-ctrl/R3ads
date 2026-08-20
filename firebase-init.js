@@ -17,6 +17,12 @@
     appId            : '1:684140109584:web:00c216621b729343b68f95'
   };
 
+  // Correos con acceso al panel. Esconder la interfaz no protege nada:
+  // el control real está en firestore.rules. Si agregás a alguien acá,
+  // agregalo también allá y desplegá:
+  //   firebase deploy --only firestore:rules
+  window.R3_ADMINS = ['creativeexperience3@gmail.com'];
+
   // Mientras la config esté sin llenar, el sitio sigue funcionando:
   // el formulario cae a descarga + WhatsApp y el panel avisa que falta.
   window.r3Configurado = config.apiKey !== 'PENDIENTE';
@@ -27,6 +33,11 @@
   }
 
   if (!firebase.apps.length) firebase.initializeApp(config);
-  window.r3Db = firebase.firestore();
+
+  // Cada página carga solo los SDK que necesita: login.html no incluye
+  // Firestore, formulario.html no incluye Auth. Llamar a un servicio que
+  // no se cargó lanza excepción y corta el resto de este script, así que
+  // se crea cada uno solo si su SDK está presente.
+  if (firebase.firestore) window.r3Db = firebase.firestore();
   if (firebase.auth) window.r3Auth = firebase.auth();
 })();

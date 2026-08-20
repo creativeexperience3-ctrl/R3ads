@@ -5,8 +5,6 @@
    interfaz no protege nada, solo evita mostrar un panel inservible.
    ============================================================ */
 
-const ADMINS = ['creativeexperience3@gmail.com'];
-
 const ESTADOS = {
   nuevo:      { texto: 'Nuevo',      clase: 'estado-nuevo' },
   contactado: { texto: 'Contactado', clase: 'estado-contactado' },
@@ -14,12 +12,11 @@ const ESTADOS = {
   descartado: { texto: 'Descartado', clase: 'estado-descartado' }
 };
 
-const vistaLogin   = document.getElementById('vistaLogin');
+const vistaCargando = document.getElementById('vistaCargando');
 const vistaLista   = document.getElementById('vistaLista');
 const vistaDetalle = document.getElementById('vistaDetalle');
 const listaEl      = document.getElementById('lista');
 const listaEstado  = document.getElementById('listaEstado');
-const loginError   = document.getElementById('loginError');
 const adminUsuario = document.getElementById('adminUsuario');
 const btnSalir     = document.getElementById('btnSalir');
 const buscador     = document.getElementById('buscador');
@@ -30,9 +27,9 @@ let intakeAbierto = null;
 
 /* ---------- Utilidades ---------- */
 function mostrarVista(cual) {
-  vistaLogin.hidden   = cual !== 'login';
-  vistaLista.hidden   = cual !== 'lista';
-  vistaDetalle.hidden = cual !== 'detalle';
+  vistaCargando.hidden = cual !== 'cargando';
+  vistaLista.hidden    = cual !== 'lista';
+  vistaDetalle.hidden  = cual !== 'detalle';
 }
 
 function fechaDe(intake) {
@@ -45,43 +42,26 @@ function fechaCorta(d) {
     ' · ' + d.toLocaleTimeString('es-HN', { hour: '2-digit', minute: '2-digit' });
 }
 
-function errorFatal(msg) {
-  loginError.textContent = msg;
-  loginError.hidden = false;
-  mostrarVista('login');
-}
-
-/* ---------- Autenticación ---------- */
+/* ---------- Sesión ----------
+   Esta página asume que ya hay sesión: quien no la tenga vuelve a
+   login.html, que es el único punto de entrada. */
 if (!window.r3Configurado || !window.r3Auth) {
-  errorFatal('Firebase todavía no está configurado. Falta pegar la config del proyecto en firebase-init.js.');
-  document.getElementById('btnEntrar').disabled = true;
+  vistaCargando.textContent =
+    'Firebase todavía no está configurado. Falta la config del proyecto en firebase-init.js.';
 } else {
-  document.getElementById('btnEntrar').addEventListener('click', async () => {
-    loginError.hidden = true;
-    const proveedor = new firebase.auth.GoogleAuthProvider();
-    try {
-      await window.r3Auth.signInWithPopup(proveedor);
-    } catch (err) {
-      console.error(err);
-      if (err.code !== 'auth/popup-closed-by-user') {
-        loginError.textContent = 'No se pudo iniciar sesión: ' + (err.message || err.code);
-        loginError.hidden = false;
-      }
-    }
+  btnSalir.addEventListener('click', async () => {
+    await window.r3Auth.signOut();
+    location.replace('login.html');
   });
 
-  btnSalir.addEventListener('click', () => window.r3Auth.signOut());
-
-  window.r3Auth.onAuthStateChanged((user) => {
+  window.r3Auth.onAuthStateChanged(async (user) => {
     if (!user) {
-      adminUsuario.hidden = true;
-      btnSalir.hidden = true;
-      mostrarVista('login');
+      location.replace('login.html');
       return;
     }
-    if (!ADMINS.includes(user.email)) {
-      window.r3Auth.signOut();
-      errorFatal(`La cuenta ${user.email} no tiene acceso a este panel.`);
+    if (!window.R3_ADMINS.includes(user.email)) {
+      await window.r3Auth.signOut();
+      location.replace('login.html?e=acceso');
       return;
     }
     adminUsuario.textContent = user.email;

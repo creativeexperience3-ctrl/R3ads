@@ -29,17 +29,8 @@
     <section class="admin">
       <div class="wrap">
 
-        <!-- LOGIN -->
-        <div class="admin-login" id="vistaLogin" hidden>
-          <p class="section-eyebrow">Panel interno</p>
-          <h1 class="section-title">Intakes de R3ADS</h1>
-          <p class="admin-login-sub">
-            Entrá con la cuenta de Google de R3ADS para ver los formularios
-            que enviaron los prospectos.
-          </p>
-          <button type="button" class="btn btn-primary btn-lg" id="btnEntrar">Entrar con Google</button>
-          <p class="form-envio form-envio-error" id="loginError" hidden></p>
-        </div>
+        <!-- Mientras Firebase resuelve si hay sesión. Sin sesión, login.html. -->
+        <p class="admin-verificando" id="vistaCargando">Verificando sesión…</p>
 
         <!-- LISTA -->
         <div class="admin-panel" id="vistaLista" hidden>

@@ -884,15 +884,71 @@ img {
   color: var(--gris);
 }
 
-.admin-login { max-width: 520px; }
-
-.admin-login-sub {
-  color: #4a4846;
-  margin: 1rem 0 2rem;
+.admin-verificando {
+  color: var(--gris);
+  font-size: 0.95rem;
 }
 
-.admin-login .btn { cursor: pointer; }
-.admin-login .form-envio { margin-top: 1.5rem; }
+/* ---------- Pantalla de acceso (login.html) ---------- */
+.login-body { background-color: #F7F6F5; }
+
+.login-pantalla {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 2rem 1.5rem;
+}
+
+.login-card {
+  width: 100%;
+  max-width: 420px;
+  background-color: var(--blanco);
+  border: 1px solid #e7e5e3;
+  border-top: 3px solid var(--naranja);
+  border-radius: 4px;
+  padding: 2.5rem 2rem;
+  text-align: center;
+  box-shadow: 0 16px 40px rgba(33, 31, 29, 0.06);
+}
+
+.login-brand { display: inline-block; margin-bottom: 2rem; }
+.login-logo { height: 44px; width: auto; }
+
+.login-titulo {
+  font-family: var(--font-display);
+  font-weight: 900;
+  text-transform: uppercase;
+  font-size: 1.75rem;
+  line-height: 1.1;
+  margin-bottom: 0.75rem;
+}
+
+.login-sub {
+  color: #4a4846;
+  font-size: 0.95rem;
+  margin-bottom: 2rem;
+}
+
+.login-btn { width: 100%; cursor: pointer; }
+.login-btn:disabled { opacity: 0.6; cursor: default; transform: none; }
+
+.login-error { margin-top: 1.5rem; text-align: left; }
+
+.login-estado {
+  color: var(--gris);
+  font-size: 0.9rem;
+  padding: 1rem 0;
+}
+
+.login-volver {
+  display: inline-block;
+  margin-top: 2rem;
+  font-size: 0.85rem;
+  color: var(--gris);
+  text-decoration: none;
+}
+.login-volver:hover { color: var(--naranja); }
 
 /* Filtros */
 .admin-filtros {

@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Acceso interno · R3ADS</title>
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="icon" type="image/png" href="assets/logo-isotipo-aislado.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;900&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="login-body">
+
+  <main class="login-pantalla">
+    <div class="login-card">
+      <a href="index.html" class="login-brand">
+        <img src="assets/logo-sobre-blanco.png" alt="R3ADS" class="login-logo">
+      </a>
+
+      <p class="section-eyebrow">Acceso interno</p>
+      <h1 class="login-titulo">Panel de intakes</h1>
+      <p class="login-sub">
+        Entrá con la cuenta de Google de R3ADS para ver los formularios
+        que enviaron los prospectos.
+      </p>
+
+      <button type="button" class="btn btn-primary btn-lg login-btn" id="btnEntrar">
+        Entrar con Google
+      </button>
+
+      <p class="form-envio form-envio-error login-error" id="loginError" hidden></p>
+      <p class="login-estado" id="loginEstado" hidden>Verificando sesión…</p>
+
+      <a href="index.html" class="login-volver">← Volver al sitio</a>
+    </div>
+  </main>
+
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+  <script src="firebase-init.js"></script>
+  <script src="login.js"></script>
+</body>
+</html>
