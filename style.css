@@ -402,7 +402,7 @@ img {
   font-size: 0.9rem;
 }
 
-.site-nav a.is-active { color: var(--naranja); }
+.site-nav a.is-active:not(.btn) { color: var(--naranja); }
 
 /* ---------- Digital Footprint ---------- */
 .df-hero { padding: 5rem 0 3rem; }
@@ -576,6 +576,292 @@ img {
   margin-top: 1.5rem;
 }
 
+/* ---------- Formulario de intake ---------- */
+.form-hero { padding: 5rem 0 3rem; }
+.form-hero-inner { max-width: 780px; }
+
+.form-nota-guardado {
+  margin-top: 1.5rem;
+  font-size: 0.85rem;
+  color: #4a4846;
+  border-left: 2px solid var(--naranja);
+  padding-left: 1rem;
+}
+
+.form-seccion { padding: 1rem 0 6rem; }
+.form-wrap { max-width: 720px; scroll-margin-top: 90px; }
+
+/* Progreso */
+.form-progreso { margin-bottom: 2.5rem; }
+
+.form-progreso-barra {
+  height: 4px;
+  background-color: #ecebea;
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.form-progreso-barra span {
+  display: block;
+  height: 100%;
+  width: 0;
+  background-color: var(--naranja);
+  transition: width 0.25s ease;
+}
+
+.form-progreso-texto {
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--gris);
+  margin-top: 0.6rem;
+}
+
+/* Pasos */
+.form-step { border: 0; }
+
+.form-step-legend { display: block; margin-bottom: 0.5rem; }
+
+.form-step-num {
+  display: block;
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--naranja);
+  margin-bottom: 0.3rem;
+}
+
+.form-step-titulo {
+  display: block;
+  font-family: var(--font-display);
+  font-weight: 900;
+  text-transform: uppercase;
+  font-size: clamp(1.5rem, 3.5vw, 2rem);
+  line-height: 1.1;
+}
+
+.form-step-intro {
+  color: #4a4846;
+  font-size: 0.95rem;
+  margin-bottom: 2.5rem;
+}
+
+/* Campos */
+.form-campo { margin-bottom: 2rem; }
+
+.form-campo > label,
+.form-grupo-label {
+  display: block;
+  font-weight: 600;
+  font-size: 0.95rem;
+  margin-bottom: 0.6rem;
+}
+
+.form-campo .req { color: var(--naranja); }
+.form-campo .opt { color: var(--gris); font-weight: 400; }
+
+.form-campo input[type="text"],
+.form-campo input[type="tel"],
+.form-campo textarea {
+  width: 100%;
+  font-family: var(--font-body);
+  font-size: 1rem;
+  color: var(--grafito);
+  background-color: var(--blanco);
+  border: 1px solid #d8d6d4;
+  border-radius: 4px;
+  padding: 0.85rem 1rem;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.form-campo textarea { resize: vertical; line-height: 1.55; }
+
+.form-campo input:focus,
+.form-campo textarea:focus {
+  outline: none;
+  border-color: var(--naranja);
+  box-shadow: 0 0 0 3px rgba(253, 125, 32, 0.15);
+}
+
+.form-campo input.campo-invalido,
+.form-campo textarea.campo-invalido { border-color: #d64545; }
+
+.form-otra { margin-top: 0.75rem; }
+
+/* Opciones (radio / checkbox) */
+.form-opciones {
+  display: grid;
+  gap: 0.6rem;
+}
+
+.form-opcion {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  border: 1px solid #e7e5e3;
+  border-radius: 4px;
+  padding: 0.9rem 1rem;
+  cursor: pointer;
+  font-weight: 400;
+  margin-bottom: 0;
+  transition: border-color 0.15s ease, background-color 0.15s ease;
+}
+
+.form-opcion:hover { border-color: var(--naranja); }
+
+.form-opcion input {
+  margin-top: 0.25rem;
+  accent-color: var(--naranja);
+  flex-shrink: 0;
+}
+
+.form-opcion span {
+  font-size: 0.95rem;
+  color: #4a4846;
+  line-height: 1.45;
+}
+
+.form-opcion span strong {
+  display: block;
+  font-family: var(--font-display);
+  font-weight: 700;
+  color: var(--grafito);
+  font-size: 0.95rem;
+}
+
+.form-opcion:has(input:checked) {
+  border-color: var(--naranja);
+  background-color: #FFF6EF;
+}
+
+.form-opciones-check { grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }
+
+/* Navegación del formulario */
+.form-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  border-top: 1px solid #e7e5e3;
+  padding-top: 2rem;
+  margin-top: 1rem;
+}
+
+.form-nav .btn { cursor: pointer; font-size: 0.95rem; }
+.form-nav [hidden] { display: none; }
+
+.form-error {
+  margin-top: 1rem;
+  color: #d64545;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+/* Resultado */
+.form-resultado { scroll-margin-top: 90px; }
+
+.form-resultado-sub {
+  color: #4a4846;
+  max-width: 560px;
+  margin-bottom: 2rem;
+}
+
+.form-resultado-acciones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-bottom: 3rem;
+}
+
+.form-resultado-acciones .btn { cursor: pointer; font-size: 0.9rem; }
+
+/* Documento de intake (vista previa) */
+.intake-doc {
+  border: 1px solid #e7e5e3;
+  border-radius: 4px;
+  padding: 2.5rem 2rem;
+  background-color: var(--blanco);
+}
+
+.intake-header {
+  border-bottom: 3px solid var(--naranja);
+  padding-bottom: 1.5rem;
+  margin-bottom: 2.5rem;
+}
+
+.intake-marca {
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: 1.35rem;
+  letter-spacing: -0.02em;
+}
+.intake-marca span { color: var(--naranja); }
+
+.intake-tipo {
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-size: 0.72rem;
+  color: var(--naranja);
+  font-weight: 700;
+  margin-top: 1.25rem;
+}
+
+.intake-empresa {
+  font-family: var(--font-display);
+  font-weight: 900;
+  text-transform: uppercase;
+  font-size: clamp(1.5rem, 4vw, 2rem);
+  line-height: 1.1;
+  margin: 0.25rem 0;
+}
+
+.intake-fecha { color: var(--gris); font-size: 0.85rem; }
+
+.intake-seccion { margin-bottom: 2.5rem; }
+
+.intake-seccion h2 {
+  font-family: var(--font-display);
+  font-weight: 900;
+  text-transform: uppercase;
+  font-size: 1.05rem;
+  border-bottom: 1px solid #e7e5e3;
+  padding-bottom: 0.5rem;
+  margin-bottom: 1.25rem;
+}
+
+.intake-seccion h2 span { color: var(--naranja); margin-right: 0.4rem; }
+
+.intake-campo { margin-bottom: 1.25rem; }
+
+.intake-label {
+  font-family: var(--font-display);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-weight: 700;
+  color: var(--gris);
+  margin-bottom: 0.25rem;
+}
+
+.intake-valor { color: #4a4846; }
+
+.intake-lista {
+  margin: 0.25rem 0 0 1.1rem;
+  color: #4a4846;
+}
+
+.intake-pie {
+  border-top: 1px solid #e7e5e3;
+  padding-top: 1.25rem;
+  margin-top: 3rem;
+  font-size: 0.8rem;
+  color: var(--gris);
+}
+
 /* ---------- CTA final ---------- */
 .cta-final {
   background-color: var(--naranja);
@@ -610,6 +896,20 @@ img {
 }
 .cta-final .btn-primary:hover { background-color: #000; }
 
+.cta-final .cta-alt {
+  margin: 1.75rem auto 0;
+  max-width: 480px;
+  font-size: 0.9rem;
+  color: var(--blanco);
+  opacity: 0.95;
+}
+
+.cta-alt a {
+  color: var(--blanco);
+  font-weight: 600;
+  text-decoration: underline;
+}
+
 /* ---------- Footer ---------- */
 .site-footer {
   background-color: var(--grafito);
@@ -636,6 +936,14 @@ img {
 .site-footer a:hover { text-decoration: underline; }
 
 /* ---------- Responsive ---------- */
+/* Zona intermedia: el nav ya no cabe en una linea con "Llenar formulario" */
+@media (max-width: 1000px) {
+  .site-nav { gap: 1.15rem; }
+  .site-nav a:not(.btn) { font-size: 0.88rem; }
+  .site-nav a[href="#servicios"],
+  .site-nav a[href="#metodologia"] { display: none; }
+}
+
 @media (max-width: 640px) {
   .site-nav { gap: 1rem; }
   .site-nav a:not(.btn) { display: none; }
@@ -645,4 +953,8 @@ img {
   .equipo { padding: 1rem 0 4rem; }
   .df-hero { padding: 3rem 0 2rem; }
   .df-que-es, .df-paquete, .df-niveles-seccion, .df-elegir { padding: 4rem 0; }
+  .form-hero { padding: 3rem 0 2rem; }
+  .form-seccion { padding: 0 0 4rem; }
+  .intake-doc { padding: 1.75rem 1.25rem; }
+  .form-nav .btn { flex: 1 1 auto; }
 }

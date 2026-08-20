@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Formulario de Intake · R3ADS | Arrancá tu Digital Footprint</title>
+  <meta name="description" content="Completá el formulario de intake de R3ADS: datos de contacto, propósito de marca, competencia, clientes, personalidad, voz y tono. Al terminar se genera tu documento de intake.">
+  <meta name="robots" content="noindex">
+  <link rel="icon" type="image/png" href="assets/logo-isotipo-aislado.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;900&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <header class="site-header">
+    <div class="wrap header-inner">
+      <a href="index.html" class="brand">
+        <img src="assets/logo-sobre-blanco.png" alt="R3ADS" class="brand-logo">
+      </a>
+      <nav class="site-nav">
+        <a href="digital-footprint.html">Digital Footprint</a>
+        <a href="equipo.html">Equipo</a>
+        <a href="formulario.html" class="btn btn-primary btn-sm is-active">Llenar formulario</a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="top">
+
+    <!-- HERO -->
+    <section class="form-hero">
+      <div class="wrap form-hero-inner">
+        <p class="eyebrow">Formulario de intake</p>
+        <h1 class="hero-title">
+          Contanos tu marca<br>
+          <span class="accent">antes de construirla.</span>
+        </h1>
+        <p class="hero-sub">
+          Son 7 pasos y toma entre 15 y 25 minutos. Respondé con tus palabras, sin
+          preocuparte por la redacción: nosotros ordenamos. Al terminar se genera tu
+          documento de intake, que es con el que trabajamos tu proyecto.
+        </p>
+        <p class="form-nota-guardado">
+          Tus respuestas se guardan solas en este navegador. Podés cerrar y volver después.
+        </p>
+      </div>
+    </section>
+
+    <!-- FORMULARIO -->
+    <section class="form-seccion">
+      <div class="wrap form-wrap">
+
+        <div class="form-progreso" id="progreso" aria-hidden="true">
+          <div class="form-progreso-barra"><span id="progresoBarra"></span></div>
+          <p class="form-progreso-texto"><span id="progresoPaso">1</span> de <span id="progresoTotal">7</span></p>
+        </div>
+
+        <form id="intakeForm" novalidate>
+
+          <!-- PASO 1 -->
+          <fieldset class="form-step" data-titulo="Datos de contacto">
+            <legend class="form-step-legend">
+              <span class="form-step-num">Paso 01</span>
+              <span class="form-step-titulo">Datos de contacto</span>
+            </legend>
+            <p class="form-step-intro">Con estos datos te contactamos para agendar la sesión de diagnóstico.</p>
+
+            <div class="form-campo">
+              <label for="f_nombre">Nombre completo <span class="req">*</span></label>
+              <input type="text" id="f_nombre" name="nombre" data-label="Nombre" autocomplete="name" required>
+            </div>
+
+            <div class="form-campo">
+              <label for="f_empresa">Nombre de la empresa <span class="req">*</span></label>
+              <input type="text" id="f_empresa" name="empresa" data-label="Nombre de la empresa" autocomplete="organization" required>
+            </div>
+
+            <div class="form-campo">
+              <label for="f_tel_persona">Número de teléfono de la persona que solicita la información <span class="req">*</span></label>
+              <input type="tel" id="f_tel_persona" name="tel_persona" data-label="Teléfono de la persona que solicita" autocomplete="tel" required>
+            </div>
+
+            <div class="form-campo">
+              <label for="f_tel_empresa">Número de teléfono de la empresa <span class="req">*</span></label>
+              <input type="tel" id="f_tel_empresa" name="tel_empresa" data-label="Teléfono de la empresa" required>
+            </div>
+
+            <div class="form-campo">
+              <label for="f_instagram">Perfil de Instagram <span class="opt">(opcional)</span></label>
+              <input type="text" id="f_instagram" name="instagram" data-label="Perfil de Instagram" placeholder="@tumarca">
+            </div>
+          </fieldset>
+
+          <!-- PASO 2 -->
+          <fieldset class="form-step" data-titulo="Propósito de la marca">
+            <legend class="form-step-legend">
+              <span class="form-step-num">Paso 02</span>
+              <span class="form-step-titulo">Propósito de la marca</span>
+            </legend>
+            <p class="form-step-intro">La base de todo el sistema. Si algo no lo tenés definido, escribilo como lo sentís hoy.</p>
+
+            <div class="form-campo">
+              <label for="f_porque">¿Por qué existe la marca?</label>
+              <textarea id="f_porque" name="porque" data-label="¿Por qué existe la marca?" rows="4"></textarea>
+            </div>
+
+            <div class="form-campo">
+              <label for="f_futuro">¿Qué futuro deseas crear?</label>
+              <textarea id="f_futuro" name="futuro" data-label="¿Qué futuro deseas crear?" rows="4"></textarea>
+            </div>
+
+            <div class="form-campo">
+              <label for="f_principios">¿Cuáles son los principios que definen quién eres como marca?</label>
+              <textarea id="f_principios" name="principios" data-label="Principios que definen quién eres como marca" rows="4"></textarea>
+            </div>
+
+            <div class="form-campo">
+              <label for="f_mision">Misión</label>
+              <textarea id="f_mision" name="mision" data-label="Misión" rows="3"></textarea>
+            </div>
+
+            <div class="form-campo">
+              <label for="f_vision">Visión</label>
+              <textarea id="f_vision" name="vision" data-label="Visión" rows="3"></textarea>
+            </div>
+
+            <div class="form-campo">
+              <label for="f_valores">Valores</label>
+              <textarea id="f_valores" name="valores" data-label="Valores" rows="3"></textarea>
+            </div>
+          </fieldset>
+
+          <!-- PASO 3 -->
+          <fieldset class="form-step" data-titulo="Competencia y diferenciación">
+            <legend class="form-step-legend">
+              <span class="form-step-num">Paso 03</span>
+              <span class="form-step-titulo">Competencia y diferenciación</span>
+            </legend>
+            <p class="form-step-intro">Nos sirve para ubicar tu marca en el mercado y encontrar el ángulo que nadie más está usando.</p>
+
+            <div class="form-campo">
+              <label for="f_competencia">¿Quién es tu competencia directa? <span class="opt">(en caso de conocerla)</span></label>
+              <textarea id="f_competencia" name="competencia" data-label="Competencia directa" rows="3"></textarea>
+            </div>
+
+            <div class="form-campo">
+              <label for="f_diferencia">¿Qué te diferencia de la competencia?</label>
+              <textarea id="f_diferencia" name="diferencia" data-label="Qué te diferencia de la competencia" rows="4"></textarea>
+            </div>
+          </fieldset>
+
+          <!-- PASO 4 -->
+          <fieldset class="form-step" data-titulo="Tus clientes">
+            <legend class="form-step-legend">
+              <span class="form-step-num">Paso 04</span>
+              <span class="form-step-titulo">Tus clientes</span>
+            </legend>
+            <p class="form-step-intro">Lo que ya sabés de tus clientes vale más que cualquier estudio: contanos lo que ves todos los días.</p>
+
+            <div class="form-campo">
+              <label for="f_demandan_mas">¿Qué es lo que tus consumidores demandan más de tu negocio?</label>
+              <textarea id="f_demandan_mas" name="demandan_mas" data-label="Lo que los consumidores demandan más" rows="3"></textarea>
+            </div>
+
+            <div class="form-campo">
+              <label for="f_demandan_menos">¿Qué es lo que tus consumidores demandan menos?</label>
+              <textarea id="f_demandan_menos" name="demandan_menos" data-label="Lo que los consumidores demandan menos" rows="3"></textarea>
+            </div>
+
+            <div class="form-campo">
+              <label for="f_mejorar">¿Cómo puedes mejorar?</label>
+              <textarea id="f_mejorar" name="mejorar" data-label="Cómo puede mejorar" rows="3"></textarea>
+            </div>
+
+            <div class="form-campo">
+              <label for="f_ahorro">¿Puedes ahorrarle dinero a tus consumidores? ¿Cómo?</label>
+              <textarea id="f_ahorro" name="ahorro" data-label="Puede ahorrarle dinero a sus consumidores / cómo" rows="3"></textarea>
+            </div>
+          </fieldset>
+
+          <!-- PASO 5 -->
+          <fieldset class="form-step" data-titulo="Personalidad, voz y tono">
+            <legend class="form-step-legend">
+              <span class="form-step-num">Paso 05</span>
+              <span class="form-step-titulo">Personalidad, voz y tono</span>
+            </legend>
+            <p class="form-step-intro">Elegí la opción que más se identifique con la empresa. Si ninguna encaja, usá el campo “Otra”.</p>
+
+            <div class="form-campo">
+              <p class="form-grupo-label">Personalidad: elegí la opción que más se identifique con la empresa</p>
+              <div class="form-opciones">
+                <label class="form-opcion"><input type="radio" name="personalidad" value="Cercana y amigable" data-label="Personalidad"><span><strong>Cercana y amigable</strong>Habla de tú a tú, se siente como alguien conocido.</span></label>
+                <label class="form-opcion"><input type="radio" name="personalidad" value="Profesional y confiable" data-label="Personalidad"><span><strong>Profesional y confiable</strong>Seria y ordenada, transmite seguridad y respaldo.</span></label>
+                <label class="form-opcion"><input type="radio" name="personalidad" value="Innovadora y disruptiva" data-label="Personalidad"><span><strong>Innovadora y disruptiva</strong>Se adelanta, rompe lo convencional, propone.</span></label>
+                <label class="form-opcion"><input type="radio" name="personalidad" value="Elegante y exclusiva" data-label="Personalidad"><span><strong>Elegante y exclusiva</strong>Cuidada y sobria, para quien busca lo mejor.</span></label>
+                <label class="form-opcion"><input type="radio" name="personalidad" value="Enérgica y divertida" data-label="Personalidad"><span><strong>Enérgica y divertida</strong>Alegre, con humor y con ritmo.</span></label>
+                <label class="form-opcion"><input type="radio" name="personalidad" value="Sólida y tradicional" data-label="Personalidad"><span><strong>Sólida y tradicional</strong>Con trayectoria, oficio y experiencia comprobada.</span></label>
+              </div>
+              <input type="text" name="personalidad_otra" data-label="Personalidad — otra" class="form-otra" placeholder="Otra: ¿cómo describirías la personalidad de tu marca?">
+            </div>
+
+            <div class="form-campo">
+              <p class="form-grupo-label">Voz: elegí la opción que más se identifique con la empresa</p>
+              <div class="form-opciones">
+                <label class="form-opcion"><input type="radio" name="voz" value="Conversacional" data-label="Voz"><span><strong>Conversacional</strong>Como una plática entre dos personas.</span></label>
+                <label class="form-opcion"><input type="radio" name="voz" value="Corporativa y formal" data-label="Voz"><span><strong>Corporativa y formal</strong>Institucional, sin coloquialismos.</span></label>
+                <label class="form-opcion"><input type="radio" name="voz" value="Experta y educativa" data-label="Voz"><span><strong>Experta y educativa</strong>Explica, enseña y respalda con datos.</span></label>
+                <label class="form-opcion"><input type="radio" name="voz" value="Inspiradora" data-label="Voz"><span><strong>Inspiradora</strong>Motiva y apela a lo que el cliente quiere lograr.</span></label>
+                <label class="form-opcion"><input type="radio" name="voz" value="Directa y sin rodeos" data-label="Voz"><span><strong>Directa y sin rodeos</strong>Frases cortas, al grano, sin adornos.</span></label>
+              </div>
+              <input type="text" name="voz_otra" data-label="Voz — otra" class="form-otra" placeholder="Otra: ¿cómo suena tu marca cuando habla?">
+            </div>
+
+            <div class="form-campo">
+              <p class="form-grupo-label">Tono: elegí la opción que más se identifique con la empresa</p>
+              <div class="form-opciones">
+                <label class="form-opcion"><input type="radio" name="tono" value="Optimista y positivo" data-label="Tono"><span><strong>Optimista y positivo</strong>Enfocado en lo que sí se puede lograr.</span></label>
+                <label class="form-opcion"><input type="radio" name="tono" value="Empático y humano" data-label="Tono"><span><strong>Empático y humano</strong>Reconoce lo que siente la persona del otro lado.</span></label>
+                <label class="form-opcion"><input type="radio" name="tono" value="Seguro y contundente" data-label="Tono"><span><strong>Seguro y contundente</strong>Afirma sin titubear.</span></label>
+                <label class="form-opcion"><input type="radio" name="tono" value="Serio y sobrio" data-label="Tono"><span><strong>Serio y sobrio</strong>Mesurado, sin estridencias.</span></label>
+                <label class="form-opcion"><input type="radio" name="tono" value="Entusiasta y celebratorio" data-label="Tono"><span><strong>Entusiasta y celebratorio</strong>Festeja logros y momentos.</span></label>
+                <label class="form-opcion"><input type="radio" name="tono" value="Respetuoso y prudente" data-label="Tono"><span><strong>Respetuoso y prudente</strong>Cuidadoso con temas delicados.</span></label>
+              </div>
+              <input type="text" name="tono_otra" data-label="Tono — otro" class="form-otra" placeholder="Otro: ¿con qué actitud querés que hable tu marca?">
+            </div>
+          </fieldset>
+
+          <!-- PASO 6 -->
+          <fieldset class="form-step" data-titulo="Checklist de assets">
+            <legend class="form-step-legend">
+              <span class="form-step-num">Paso 06</span>
+              <span class="form-step-titulo">Checklist de assets</span>
+            </legend>
+            <p class="form-step-intro">
+              Envío de assets e información necesaria para comenzar con el proyecto.
+              Marcá lo que ya tenés disponible. Lo que no marques no detiene el arranque:
+              lo resolvemos juntos en la primera fase.
+            </p>
+
+            <div class="form-campo">
+              <p class="form-grupo-label">¿Qué tenés listo para entregar?</p>
+              <div class="form-opciones form-opciones-check">
+                <label class="form-opcion"><input type="checkbox" name="assets" value="Logotipo en vectores (AI, EPS o SVG)" data-label="Assets disponibles"><span>Logotipo en vectores (AI, EPS o SVG)</span></label>
+                <label class="form-opcion"><input type="checkbox" name="assets" value="Manual de marca o brandbook" data-label="Assets disponibles"><span>Manual de marca o brandbook</span></label>
+                <label class="form-opcion"><input type="checkbox" name="assets" value="Paleta de colores y tipografías" data-label="Assets disponibles"><span>Paleta de colores y tipografías</span></label>
+                <label class="form-opcion"><input type="checkbox" name="assets" value="Fotografías del negocio, producto o equipo" data-label="Assets disponibles"><span>Fotografías del negocio, producto o equipo</span></label>
+                <label class="form-opcion"><input type="checkbox" name="assets" value="Videos existentes" data-label="Assets disponibles"><span>Videos existentes</span></label>
+                <label class="form-opcion"><input type="checkbox" name="assets" value="Accesos a redes sociales (Facebook, Instagram, TikTok)" data-label="Assets disponibles"><span>Accesos a redes sociales (Facebook, Instagram, TikTok)</span></label>
+                <label class="form-opcion"><input type="checkbox" name="assets" value="Acceso a Meta Business Suite o cuenta publicitaria" data-label="Assets disponibles"><span>Acceso a Meta Business Suite o cuenta publicitaria</span></label>
+                <label class="form-opcion"><input type="checkbox" name="assets" value="Acceso al sitio web, dominio y hosting" data-label="Assets disponibles"><span>Acceso al sitio web, dominio y hosting</span></label>
+                <label class="form-opcion"><input type="checkbox" name="assets" value="Catálogo de productos o servicios con precios" data-label="Assets disponibles"><span>Catálogo de productos o servicios con precios</span></label>
+                <label class="form-opcion"><input type="checkbox" name="assets" value="Promociones vigentes" data-label="Assets disponibles"><span>Promociones vigentes</span></label>
+                <label class="form-opcion"><input type="checkbox" name="assets" value="Testimonios o reseñas de clientes" data-label="Assets disponibles"><span>Testimonios o reseñas de clientes</span></label>
+                <label class="form-opcion"><input type="checkbox" name="assets" value="Datos de contacto oficiales (WhatsApp, dirección, horarios)" data-label="Assets disponibles"><span>Datos de contacto oficiales (WhatsApp, dirección, horarios)</span></label>
+              </div>
+              <input type="text" name="assets_otros" data-label="Otros assets" class="form-otra" placeholder="Otros materiales que quieras entregar">
+            </div>
+          </fieldset>
+
+          <!-- PASO 7 -->
+          <fieldset class="form-step" data-titulo="Información adicional">
+            <legend class="form-step-legend">
+              <span class="form-step-num">Paso 07</span>
+              <span class="form-step-titulo">Información adicional</span>
+            </legend>
+            <p class="form-step-intro">Cualquier cosa que debamos saber y que no te preguntamos arriba.</p>
+
+            <div class="form-campo">
+              <label for="f_adicional">Información adicional</label>
+              <textarea id="f_adicional" name="adicional" data-label="Información adicional" rows="6"></textarea>
+            </div>
+          </fieldset>
+
+          <div class="form-nav">
+            <button type="button" class="btn btn-outline" id="btnAtras">Atrás</button>
+            <button type="button" class="btn btn-primary" id="btnSiguiente">Siguiente</button>
+            <button type="button" class="btn btn-primary" id="btnGenerar">Generar documento de intake</button>
+          </div>
+
+          <p class="form-error" id="formError" role="alert" hidden></p>
+        </form>
+
+        <!-- RESULTADO -->
+        <div class="form-resultado" id="resultado" hidden>
+          <p class="section-eyebrow">Listo</p>
+          <h2 class="section-title">Tu documento de intake</h2>
+          <p class="form-resultado-sub">
+            Descargalo y enviánoslo por WhatsApp, o mandanos el resumen directo desde acá.
+            Nos ponemos en contacto con vos para agendar el diagnóstico.
+          </p>
+
+          <div class="form-resultado-acciones">
+            <button type="button" class="btn btn-primary" id="btnDescargar">Descargar documento</button>
+            <a href="#" class="btn btn-outline" id="btnWhatsapp" target="_blank" rel="noopener">Enviar por WhatsApp</a>
+            <button type="button" class="btn btn-outline" id="btnCopiar">Copiar texto</button>
+            <button type="button" class="btn btn-outline" id="btnEditar">Volver a editar</button>
+          </div>
+
+          <div class="intake-doc" id="intakeDoc"></div>
+        </div>
+
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap footer-inner">
+      <img src="assets/logo-isotipo-aislado.png" alt="R3ADS" class="footer-isotipo">
+      <p>&copy; 2026 R3ADS · Agencia de Marketing Digital · Digital Footprint</p>
+      <a href="https://wa.me/50495652894" target="_blank" rel="noopener">WhatsApp</a>
+    </div>
+  </footer>
+
+  <script src="formulario.js"></script>
+</body>
+</html>
