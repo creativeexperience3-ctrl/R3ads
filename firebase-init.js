@@ -1,0 +1,32 @@
+/* ============================================================
+   R3ADS · Inicialización de Firebase
+   Requiere firebase-app-compat + firebase-firestore-compat
+   (y firebase-auth-compat en el panel de administración)
+   cargados antes de este script.
+
+   La config de un proyecto Firebase web NO es secreta: identifica el
+   proyecto, no autoriza nada. Quien protege los datos es firestore.rules.
+   ============================================================ */
+(function () {
+  var config = {
+    apiKey           : 'PENDIENTE',
+    authDomain       : 'PENDIENTE.firebaseapp.com',
+    projectId        : 'PENDIENTE',
+    storageBucket    : 'PENDIENTE.firebasestorage.app',
+    messagingSenderId: 'PENDIENTE',
+    appId            : 'PENDIENTE'
+  };
+
+  // Mientras la config esté sin llenar, el sitio sigue funcionando:
+  // el formulario cae a descarga + WhatsApp y el panel avisa que falta.
+  window.r3Configurado = config.apiKey !== 'PENDIENTE';
+
+  if (!window.r3Configurado) {
+    console.warn('[R3ADS] Firebase todavía sin configurar (firebase-init.js).');
+    return;
+  }
+
+  if (!firebase.apps.length) firebase.initializeApp(config);
+  window.r3Db = firebase.firestore();
+  if (firebase.auth) window.r3Auth = firebase.auth();
+})();

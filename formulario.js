@@ -127,119 +127,64 @@ function valorDe(nombre) {
   return el ? el.value.trim() : '';
 }
 
-function fechaHoy() {
-  return new Date().toLocaleDateString('es-HN', { day: '2-digit', month: 'long', year: 'numeric' });
+function empresaActual() {
+  return valorDe('empresa');
 }
 
-/* ---------- Render del documento ---------- */
-function esc(s) {
-  return String(s)
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;');
+/* ---------- Render del documento ----------
+   La construccion del documento vive en intake-doc.js, compartida con
+   el panel de administracion. Aca solo se le pasan los datos. */
+
+/* ---------- Envío a Firestore ----------
+   El envío es un extra, no un requisito: si Firebase no está configurado
+   o la red falla, el cliente igual se lleva su documento por descarga y
+   WhatsApp. Nunca se le bloquea el resultado por un error de backend. */
+let huellaEnviada = null;
+
+function estadoEnvio(clase, texto) {
+  const el = document.getElementById('envioEstado');
+  el.className = 'form-envio ' + clase;
+  el.textContent = texto;
+  el.hidden = false;
 }
 
-function docHTML(secciones) {
-  const empresa = valorDe('empresa') || 'Sin nombre de empresa';
-  let html = `
-    <div class="intake-header">
-      <p class="intake-marca">R3<span>ADS</span></p>
-      <p class="intake-tipo">Documento de intake</p>
-      <h1 class="intake-empresa">${esc(empresa)}</h1>
-      <p class="intake-fecha">Generado el ${esc(fechaHoy())}</p>
-    </div>`;
+async function enviarAFirestore(secciones) {
+  if (!window.r3Configurado || !window.r3Db) {
+    estadoEnvio('form-envio-aviso',
+      'Descargá el documento y enviánoslo por WhatsApp: el envío automático todavía no está activo.');
+    return;
+  }
 
-  secciones.forEach((sec, i) => {
-    html += `<section class="intake-seccion">
-      <h2><span>${String(i + 1).padStart(2, '0')}</span> ${esc(sec.titulo)}</h2>`;
-    sec.campos.forEach((campo) => {
-      html += `<div class="intake-campo"><p class="intake-label">${esc(campo.label)}</p>`;
-      if (campo.lista) {
-        html += '<ul class="intake-lista">' +
-          campo.valores.map((v) => `<li>${esc(v)}</li>`).join('') + '</ul>';
-      } else {
-        html += campo.valores
-          .map((v) => `<p class="intake-valor">${esc(v).replace(/\n/g, '<br>')}</p>`)
-          .join('');
-      }
-      html += '</div>';
-    });
-    html += '</section>';
-  });
+  const huella = JSON.stringify(secciones);
+  if (huellaEnviada === huella) {
+    estadoEnvio('form-envio-ok', 'Ya recibimos estas respuestas. No hace falta enviarlas de nuevo.');
+    return;
+  }
 
-  html += `<p class="intake-pie">
-    R3ADS · Agencia de Marketing Digital · Construimos Digital Footprints.<br>
-    WhatsApp +504 9565-2894
-  </p>`;
-  return html;
-}
+  estadoEnvio('form-envio-cargando', 'Enviando tus respuestas a R3ADS…');
 
-function docTexto(secciones) {
-  const lineas = [
-    'DOCUMENTO DE INTAKE · R3ADS',
-    (valorDe('empresa') || 'Sin nombre de empresa').toUpperCase(),
-    'Generado el ' + fechaHoy(),
-    ''
-  ];
-  secciones.forEach((sec, i) => {
-    lineas.push('', `${String(i + 1).padStart(2, '0')}. ${sec.titulo.toUpperCase()}`, '');
-    sec.campos.forEach((campo) => {
-      lineas.push(campo.label + ':');
-      campo.valores.forEach((v) => lineas.push(campo.lista ? '  - ' + v : '  ' + v));
-      lineas.push('');
-    });
-  });
-  lineas.push('R3ADS · Agencia de Marketing Digital · WhatsApp +504 9565-2894');
-  return lineas.join('\n');
-}
+  const datos = {
+    creado: firebase.firestore.FieldValue.serverTimestamp(),
+    estado: 'nuevo',
+    nombre: valorDe('nombre'),
+    empresa: valorDe('empresa'),
+    telPersona: valorDe('tel_persona'),
+    telEmpresa: valorDe('tel_empresa'),
+    secciones,
+    origen: location.href.slice(0, 200)
+  };
+  if (valorDe('instagram')) datos.instagram = valorDe('instagram');
 
-/* Documento independiente descargable (no depende de style.css) */
-function archivoHTML(secciones) {
-  const empresa = valorDe('empresa') || 'Intake';
-  return `<!DOCTYPE html>
-<html lang="es"><head><meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Intake R3ADS · ${esc(empresa)}</title>
-<style>
-  :root { --naranja:#FD7D20; --grafito:#211F1D; --gris:#A3A2A1; }
-  * { box-sizing:border-box; margin:0; padding:0; }
-  body { font-family: 'Inter', 'Segoe UI', system-ui, sans-serif; color:var(--grafito);
-         line-height:1.6; background:#fff; padding:3rem 1.5rem; }
-  .doc { max-width:760px; margin:0 auto; }
-  .intake-header { border-bottom:3px solid var(--naranja); padding-bottom:1.5rem; margin-bottom:2.5rem; }
-  .intake-marca { font-weight:900; font-size:1.5rem; letter-spacing:-0.02em; }
-  .intake-marca span { color:var(--naranja); }
-  .intake-tipo { text-transform:uppercase; letter-spacing:0.12em; font-size:0.72rem;
-                 color:var(--naranja); font-weight:700; margin-top:1.25rem; }
-  .intake-empresa { font-size:2rem; font-weight:900; text-transform:uppercase; line-height:1.1; margin:0.25rem 0; }
-  .intake-fecha { color:var(--gris); font-size:0.85rem; }
-  .intake-seccion { margin-bottom:2.5rem; page-break-inside:avoid; }
-  .intake-seccion h2 { font-size:1.05rem; font-weight:900; text-transform:uppercase;
-                       letter-spacing:0.02em; border-bottom:1px solid #e7e5e3;
-                       padding-bottom:0.5rem; margin-bottom:1.25rem; }
-  .intake-seccion h2 span { color:var(--naranja); margin-right:0.4rem; }
-  .intake-campo { margin-bottom:1.25rem; }
-  .intake-label { font-size:0.78rem; text-transform:uppercase; letter-spacing:0.06em;
-                  font-weight:700; color:var(--gris); margin-bottom:0.25rem; }
-  .intake-valor { white-space:pre-wrap; }
-  .intake-lista { margin:0.25rem 0 0 1.1rem; }
-  .intake-lista li { margin-bottom:0.15rem; }
-  .intake-pie { border-top:1px solid #e7e5e3; padding-top:1.25rem; margin-top:3rem;
-                font-size:0.8rem; color:var(--gris); }
-  @media print { body { padding:0; } }
-</style></head>
-<body><div class="doc">${docHTML(secciones)}</div></body></html>`;
-}
-
-function nombreArchivo() {
-  const empresa = (valorDe('empresa') || 'intake')
-    .normalize('NFD').replace(/[̀-ͯ]/g, '')
-    .replace(/[^a-zA-Z0-9]+/g, '-')
-    .replace(/^-|-$/g, '')
-    .slice(0, 40) || 'intake';
-  const f = new Date().toISOString().slice(0, 10);
-  return `Intake-R3ADS-${empresa}-${f}.html`;
+  try {
+    await window.r3Db.collection('intakes').add(datos);
+    huellaEnviada = huella;
+    estadoEnvio('form-envio-ok',
+      'Recibido. Tus respuestas ya llegaron a R3ADS y te contactamos al ' + valorDe('tel_persona') + '.');
+  } catch (err) {
+    console.error('[R3ADS] No se pudo guardar el intake:', err);
+    estadoEnvio('form-envio-error',
+      'No pudimos enviarlo automáticamente. Descargá el documento y mandanoslo por WhatsApp: nos llega igual.');
+  }
 }
 
 /* ---------- Generar ---------- */
@@ -259,7 +204,7 @@ btnGenerar.addEventListener('click', () => {
   }
 
   seccionesActuales = recolectar();
-  intakeDoc.innerHTML = docHTML(seccionesActuales);
+  intakeDoc.innerHTML = R3Intake.docHTML(seccionesActuales, empresaActual());
 
   const mensaje =
     `Hola R3ADS, completé el formulario de intake.\n\n` +
@@ -276,36 +221,19 @@ btnGenerar.addEventListener('click', () => {
   formWrapSecciones.hidden = true;
   resultado.hidden = false;
   resultado.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+  enviarAFirestore(seccionesActuales);
 });
 
 document.getElementById('btnDescargar').addEventListener('click', () => {
-  const blob = new Blob([archivoHTML(seccionesActuales)], { type: 'text/html;charset=utf-8' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = nombreArchivo();
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
-  setTimeout(() => URL.revokeObjectURL(url), 1000);
+  R3Intake.descargar(seccionesActuales, empresaActual());
 });
 
 document.getElementById('btnCopiar').addEventListener('click', async (e) => {
-  const texto = docTexto(seccionesActuales);
   const boton = e.currentTarget;
   const original = boton.textContent;
-  try {
-    await navigator.clipboard.writeText(texto);
-    boton.textContent = 'Copiado';
-  } catch (err) {
-    const ta = document.createElement('textarea');
-    ta.value = texto;
-    document.body.appendChild(ta);
-    ta.select();
-    document.execCommand('copy');
-    ta.remove();
-    boton.textContent = 'Copiado';
-  }
+  await R3Intake.copiar(R3Intake.docTexto(seccionesActuales, empresaActual()));
+  boton.textContent = 'Copiado';
   setTimeout(() => { boton.textContent = original; }, 2000);
 });
 

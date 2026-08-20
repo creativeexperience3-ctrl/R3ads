@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Panel de Intakes · R3ADS</title>
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="icon" type="image/png" href="assets/logo-isotipo-aislado.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;900&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <header class="site-header">
+    <div class="wrap header-inner">
+      <a href="index.html" class="brand">
+        <img src="assets/logo-sobre-blanco.png" alt="R3ADS" class="brand-logo">
+      </a>
+      <nav class="site-nav">
+        <span class="admin-usuario" id="adminUsuario" hidden></span>
+        <button type="button" class="btn btn-outline btn-sm" id="btnSalir" hidden>Cerrar sesión</button>
+      </nav>
+    </div>
+  </header>
+
+  <main id="top">
+    <section class="admin">
+      <div class="wrap">
+
+        <!-- LOGIN -->
+        <div class="admin-login" id="vistaLogin" hidden>
+          <p class="section-eyebrow">Panel interno</p>
+          <h1 class="section-title">Intakes de R3ADS</h1>
+          <p class="admin-login-sub">
+            Entrá con la cuenta de Google de R3ADS para ver los formularios
+            que enviaron los prospectos.
+          </p>
+          <button type="button" class="btn btn-primary btn-lg" id="btnEntrar">Entrar con Google</button>
+          <p class="form-envio form-envio-error" id="loginError" hidden></p>
+        </div>
+
+        <!-- LISTA -->
+        <div class="admin-panel" id="vistaLista" hidden>
+          <p class="section-eyebrow">Panel interno</p>
+          <h1 class="section-title">Intakes recibidos</h1>
+
+          <div class="admin-filtros">
+            <div class="admin-chips" id="filtros">
+              <button type="button" class="admin-chip is-activo" data-estado="todos">Todos</button>
+              <button type="button" class="admin-chip" data-estado="nuevo">Nuevos</button>
+              <button type="button" class="admin-chip" data-estado="contactado">Contactados</button>
+              <button type="button" class="admin-chip" data-estado="cerrado">Cerrados</button>
+              <button type="button" class="admin-chip" data-estado="descartado">Descartados</button>
+            </div>
+            <input type="search" id="buscador" class="admin-buscador" placeholder="Buscar por empresa, nombre o teléfono">
+          </div>
+
+          <p class="admin-estado" id="listaEstado">Cargando intakes…</p>
+          <div class="admin-lista" id="lista"></div>
+        </div>
+
+        <!-- DETALLE -->
+        <div class="admin-detalle" id="vistaDetalle" hidden>
+          <button type="button" class="admin-volver" id="btnVolver">← Volver a la lista</button>
+
+          <div class="admin-acciones">
+            <a href="#" class="btn btn-primary btn-sm" id="btnWaProspecto" target="_blank" rel="noopener">WhatsApp al prospecto</a>
+            <button type="button" class="btn btn-outline btn-sm" id="btnDescargarIntake">Descargar</button>
+            <button type="button" class="btn btn-outline btn-sm" id="btnCopiarIntake">Copiar texto</button>
+            <button type="button" class="btn btn-outline btn-sm admin-borrar" id="btnBorrarIntake">Eliminar</button>
+          </div>
+
+          <div class="admin-seguimiento">
+            <label for="selEstado">Estado del seguimiento</label>
+            <select id="selEstado" class="admin-select">
+              <option value="nuevo">Nuevo</option>
+              <option value="contactado">Contactado</option>
+              <option value="cerrado">Cerrado</option>
+              <option value="descartado">Descartado</option>
+            </select>
+
+            <label for="txtNotas">Notas internas</label>
+            <textarea id="txtNotas" rows="3" placeholder="Qué se habló, próximos pasos, objeciones…"></textarea>
+
+            <div class="admin-guardar">
+              <button type="button" class="btn btn-primary btn-sm" id="btnGuardarSeguimiento">Guardar seguimiento</button>
+              <span class="admin-guardado" id="guardadoAviso" hidden>Guardado</span>
+            </div>
+          </div>
+
+          <div class="intake-doc" id="detalleDoc"></div>
+        </div>
+
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap footer-inner">
+      <img src="assets/logo-isotipo-aislado.png" alt="R3ADS" class="footer-isotipo">
+      <p>&copy; 2026 R3ADS · Panel interno</p>
+    </div>
+  </footer>
+
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+  <script src="firebase-init.js"></script>
+  <script src="intake-doc.js"></script>
+  <script src="admin.js"></script>
+</body>
+</html>

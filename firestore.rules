@@ -1,0 +1,68 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ═══ Helpers ═══════════════════════════════════════════════
+    // Único administrador del panel. Para sumar a alguien del equipo
+    // (José Miguel, Stanley) se agrega su correo a esta lista y se
+    // vuelve a desplegar: firebase deploy --only firestore:rules
+    function esAdmin() {
+      return request.auth != null
+        && request.auth.token.email_verified == true
+        && request.auth.token.email in [
+          'creativeexperience3@gmail.com'
+        ];
+    }
+
+    // ═══ /intakes/{id} ═════════════════════════════════════════
+    // Formularios de intake enviados desde formulario.html.
+    //
+    // CREATE es público: quien llena el formulario es un prospecto sin
+    // cuenta. Por eso la creación se valida con lupa — un create público
+    // sin validar es una invitación a que llenen la base de basura.
+    //   · solo las claves esperadas, ninguna extra
+    //   · los 4 datos de contacto obligatorios, con tope de largo
+    //   · estado forzado a 'nuevo' (nadie llega marcado como cerrado)
+    //   · creado forzado al reloj del servidor, no al del cliente
+    //
+    // Firestore no puede validar en profundidad el contenido de la lista
+    // 'secciones'; el tope de 1 MB por documento es el límite real. Si
+    // aparece spam, el siguiente paso es activar App Check con reCAPTCHA.
+    function intakeValido() {
+      let d = request.resource.data;
+      return d.keys().hasAll(['creado', 'estado', 'nombre', 'empresa', 'telPersona', 'telEmpresa', 'secciones'])
+        && d.keys().hasOnly(['creado', 'estado', 'nombre', 'empresa', 'telPersona', 'telEmpresa',
+                             'instagram', 'secciones', 'origen'])
+        && d.estado == 'nuevo'
+        && d.creado == request.time
+        && d.nombre is string      && d.nombre.size() > 0      && d.nombre.size() <= 120
+        && d.empresa is string     && d.empresa.size() > 0     && d.empresa.size() <= 140
+        && d.telPersona is string  && d.telPersona.size() > 0  && d.telPersona.size() <= 40
+        && d.telEmpresa is string  && d.telEmpresa.size() > 0  && d.telEmpresa.size() <= 40
+        && (!('instagram' in d) || (d.instagram is string && d.instagram.size() <= 140))
+        && (!('origen' in d)    || (d.origen is string    && d.origen.size() <= 200))
+        && d.secciones is list && d.secciones.size() > 0 && d.secciones.size() <= 15;
+    }
+
+    // El admin solo mueve el seguimiento comercial: estado y notas.
+    // Las respuestas del cliente quedan inmutables — son el registro de
+    // lo que dijo, no un borrador para editar.
+    function seguimientoValido() {
+      return request.resource.data.diff(resource.data).affectedKeys()
+               .hasOnly(['estado', 'notas', 'actualizado'])
+        && request.resource.data.estado in ['nuevo', 'contactado', 'cerrado', 'descartado'];
+    }
+
+    match /intakes/{intakeId} {
+      allow create: if intakeValido();
+      allow read:   if esAdmin();
+      allow update: if esAdmin() && seguimientoValido();
+      allow delete: if esAdmin();
+    }
+
+    // ═══ Bloqueo por defecto ═══════════════════════════════════
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
