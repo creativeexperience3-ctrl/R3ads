@@ -1,0 +1,309 @@
+<title>Etapa 0 · Workflow de Cliente — R3ads</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800&family=Inter:wght@400;500;600&family=Azeret+Mono:wght@400;500;600&display=swap">
+
+<style>
+:root{
+  --naranja:#FD7D20;
+  --grafito:#211F1D;
+  --gris:#A3A2A1;
+
+  --ground:#FFFFFF;
+  --panel:#F5F3F1;
+  --panel-2:#EDE9E5;
+  --line:#E2DEDA;
+  --line-soft:#EFEBE7;
+  --text:#211F1D;
+  --muted:#6B6764;
+  --accent:#FD7D20;
+  --solid:#211F1D;
+  --solid-ink:#FFFFFF;
+  --hero:#211F1D;
+  --hero-text:#FFFFFF;
+  --hero-muted:#A3A2A1;
+
+  --f-display:"Archivo","Archivo Black",system-ui,sans-serif;
+  --f-body:"Inter","Archivo",system-ui,-apple-system,sans-serif;
+  --f-mono:"Azeret Mono",ui-monospace,"Cascadia Mono",monospace;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --ground:#141211; --panel:#1E1B19; --panel-2:#262220; --line:#332E2B; --line-soft:#241F1D;
+    --text:#F0EDEA; --muted:#A3A2A1; --solid:#F0EDEA; --solid-ink:#211F1D; --hero:#0E0C0B; --hero-muted:#A3A2A1;
+  }
+}
+:root[data-theme="dark"]{
+  --ground:#141211; --panel:#1E1B19; --panel-2:#262220; --line:#332E2B; --line-soft:#241F1D;
+  --text:#F0EDEA; --muted:#A3A2A1; --solid:#F0EDEA; --solid-ink:#211F1D; --hero:#0E0C0B; --hero-muted:#A3A2A1;
+}
+
+*,*::before,*::after{box-sizing:border-box}
+body{margin:0;background:var(--ground);color:var(--text);font-family:var(--f-body);font-size:16.5px;line-height:1.62;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+::selection{background:var(--naranja);color:#fff}
+a{color:var(--text);text-decoration-color:var(--naranja);text-underline-offset:3px}
+:focus-visible{outline:3px solid var(--naranja);outline-offset:3px;border-radius:2px}
+#progress{position:fixed;top:0;left:0;height:3px;width:0;background:var(--naranja);z-index:50}
+
+.wrap{max-width:1080px;margin:0 auto;padding:0 clamp(20px,5vw,52px)}
+.col{max-width:68ch}
+
+.cover{background:var(--hero);color:var(--hero-text);padding:clamp(52px,8vw,92px) 0 clamp(38px,5vw,58px);position:relative;overflow:hidden}
+.cover::before{content:"";position:absolute;inset:0;pointer-events:none;background-image:radial-gradient(circle at 1px 1px,rgba(253,125,32,.30) 1px,transparent 0);background-size:22px 22px}
+.cover .wrap{position:relative}
+.brandline{display:flex;align-items:center;gap:13px;font-family:var(--f-mono);font-size:.72rem;letter-spacing:.16em;text-transform:uppercase;color:var(--hero-muted)}
+.brandline b{color:var(--naranja);font-weight:600;letter-spacing:.16em}
+.brandline .sq{width:9px;height:9px;background:var(--naranja);flex:none}
+.docnum{font-family:var(--f-mono);font-size:.72rem;letter-spacing:.16em;text-transform:uppercase;color:var(--naranja);margin-top:36px}
+h1{font-family:var(--f-display);font-weight:800;font-size:clamp(2.6rem,8vw,5rem);line-height:.98;letter-spacing:-.035em;margin:.16em 0 0;text-wrap:balance;max-width:13ch}
+h1 em{font-style:normal;color:var(--naranja)}
+.deck{margin:24px 0 0;max-width:58ch;color:#D8D4D1;font-size:clamp(1.02rem,1.6vw,1.16rem)}
+.metagrid{display:grid;gap:1px;background:rgba(163,162,161,.35);grid-template-columns:repeat(auto-fit,minmax(190px,1fr));margin-top:clamp(36px,5vw,54px);border:1px solid rgba(163,162,161,.35)}
+.metagrid div{background:var(--hero);padding:15px 18px}
+.metagrid dt{font-family:var(--f-mono);font-size:.64rem;letter-spacing:.14em;text-transform:uppercase;color:var(--hero-muted);margin:0 0 6px}
+.metagrid dd{margin:0;font-size:.92rem;font-weight:500;color:#fff}
+
+.toc{border-bottom:1px solid var(--line);background:var(--panel)}
+.toc ol{list-style:none;margin:0;padding:24px 0;display:grid;gap:2px;grid-template-columns:repeat(auto-fit,minmax(235px,1fr))}
+.toc a{display:flex;gap:12px;align-items:baseline;padding:8px 10px;text-decoration:none;color:var(--text)}
+.toc a:hover{background:var(--ground)}
+.toc .n{font-family:var(--f-mono);font-size:.74rem;color:var(--naranja);font-weight:600}
+.toc .t{font-family:var(--f-display);font-weight:600;font-size:.94rem}
+
+section{padding:clamp(46px,7vw,84px) 0;border-bottom:1px solid var(--line-soft)}
+.shead{display:flex;gap:20px;align-items:flex-start;margin-bottom:32px}
+.shead .num{font-family:var(--f-mono);font-weight:600;font-size:.78rem;letter-spacing:.08em;color:var(--naranja);padding-top:.6em;flex:none;border-top:3px solid var(--naranja)}
+h2{font-family:var(--f-display);font-weight:700;font-size:clamp(1.55rem,3.3vw,2.25rem);line-height:1.08;letter-spacing:-.025em;margin:0;text-wrap:balance}
+.shead p{margin:.5em 0 0;color:var(--muted);max-width:62ch}
+p{margin:0 0 1.05em}
+.lead{font-size:1.1rem}
+strong{font-weight:600}
+.eyebrow{font-family:var(--f-mono);font-size:.68rem;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);margin:0 0 11px}
+.mono{font-family:var(--f-mono);font-size:.87em}
+
+.callout{border-left:3px solid var(--naranja);background:var(--panel);padding:19px 23px;margin:0 0 1.5em}
+.callout p:last-child{margin-bottom:0}
+.callout .eyebrow{color:var(--naranja)}
+.card{border:1px solid var(--line);background:var(--ground);padding:21px 23px}
+.card h4{margin-top:0;font-family:var(--f-display);font-weight:600;font-size:1rem}
+.card p:last-child{margin-bottom:0}
+.grid2{display:grid;gap:18px;grid-template-columns:repeat(auto-fit,minmax(290px,1fr))}
+
+.statement{background:var(--hero);color:#fff;padding:clamp(32px,5vw,50px);position:relative;overflow:hidden}
+.statement::before{content:"";position:absolute;inset:0;background-image:radial-gradient(circle at 1px 1px,rgba(253,125,32,.28) 1px,transparent 0);background-size:22px 22px}
+.statement > *{position:relative}
+.statement .eyebrow{color:var(--naranja)}
+.statement .big{font-family:var(--f-display);font-weight:800;letter-spacing:-.028em;font-size:clamp(1.45rem,3.6vw,2.35rem);line-height:1.1;margin:0 0 .65em;text-wrap:balance;max-width:24ch}
+.statement .big em{font-style:normal;color:var(--naranja)}
+.statement p{color:#D8D4D1;max-width:60ch}
+.statement p:last-child{margin-bottom:0}
+
+.modulo{border:1px solid var(--line);background:var(--ground);margin-bottom:18px}
+.mhead{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:baseline;padding:16px 22px;border-bottom:1px solid var(--line-soft);background:var(--panel)}
+.mhead .code{font-family:var(--f-mono);font-weight:600;font-size:.75rem;color:var(--naranja);flex:none}
+.mhead h3{margin:0;font-size:1.05rem;flex:1 1 260px;font-family:var(--f-display);font-weight:600;letter-spacing:-.01em}
+.mhead .owner{font-family:var(--f-mono);font-size:.68rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.mbody{padding:18px 22px 20px}
+.mbody > :last-child{margin-bottom:0}
+.mbody .out{font-size:.9rem;color:var(--muted);border-top:1px dashed var(--line);margin-top:14px;padding-top:12px}
+.mbody .out b{color:var(--text);font-weight:600}
+.qs{list-style:none;counter-reset:q;margin:0;padding:0}
+.qs li{counter-increment:q;padding:9px 0 9px 32px;position:relative;font-size:.95rem;border-bottom:1px dashed var(--line)}
+.qs li:last-child{border-bottom:0}
+.qs li::before{content:counter(q,decimal-leading-zero);position:absolute;left:0;top:.72em;font-family:var(--f-mono);font-size:.68rem;color:var(--naranja);font-weight:600}
+
+.next{background:var(--panel);border-top:1px solid var(--line);padding:clamp(42px,6vw,68px) 0}
+footer{padding:32px 0 58px;color:var(--muted);font-size:.83rem}
+footer .row{display:flex;flex-wrap:wrap;gap:9px 24px;align-items:center;font-family:var(--f-mono);letter-spacing:.05em;text-transform:uppercase;font-size:.66rem}
+footer .bar{height:5px;background:var(--naranja);width:70px;margin-bottom:24px}
+
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+html{scroll-behavior:smooth}
+</style>
+
+<div id="progress"></div>
+
+<header class="cover">
+  <div class="wrap">
+    <div class="brandline"><span class="sq"></span><b>R3ADS</b><span>Metodología · mapa de proceso</span></div>
+    <div class="docnum">Etapa 0 · Antes de que arranque la producción mensual</div>
+    <h1>Workflow de <em>Cliente</em></h1>
+    <p class="deck">Los nueve pasos, siempre en el mismo orden, entre que un cliente firma y el momento en que R3ads empieza a producir sobre su marca. Es el mapa: cada paso remite a su propio instrumento cuando ya existe uno.</p>
+
+    <dl class="metagrid">
+      <div><dt>Qué es</dt><dd>Secuencia fija de onboarding para todo cliente nuevo R3ads</dd></div>
+      <div><dt>Cuándo se corre</dt><dd>Entre el cierre de venta y el inicio del retainer mensual</dd></div>
+      <div><dt>Responsables</dt><dd>SSM (Rubén) + Diseñador (José Miguel)</dd></div>
+      <div><dt>Salida</dt><dd>Expediente, auditoría, FODA y Propuesta Estratégica de 90 días</dd></div>
+      <div><dt>Versión</dt><dd>v1.0</dd></div>
+    </dl>
+  </div>
+</header>
+
+<nav class="toc" aria-label="Índice">
+  <div class="wrap">
+    <ol>
+      <li><a href="#s0"><span class="n">00</span><span class="t">Client intake / expediente</span></a></li>
+      <li><a href="#s1"><span class="n">01</span><span class="t">Reuniones de coordinación</span></a></li>
+      <li><a href="#s2"><span class="n">02</span><span class="t">Sesión de inmersión</span></a></li>
+      <li><a href="#s3"><span class="n">03</span><span class="t">Auditoría de presencia digital</span></a></li>
+      <li><a href="#s4"><span class="n">04</span><span class="t">Ficha de Google Business</span></a></li>
+      <li><a href="#s5"><span class="n">05</span><span class="t">Cohesión de marca entre canales</span></a></li>
+      <li><a href="#s6"><span class="n">06</span><span class="t">FODA + Misión/Visión/Valores</span></a></li>
+      <li><a href="#s7"><span class="n">07</span><span class="t">Matriz BCG + Buyer Persona</span></a></li>
+      <li><a href="#s8"><span class="n">08</span><span class="t">Propuesta Estratégica · 90 días</span></a></li>
+    </ol>
+  </div>
+</nav>
+
+<main>
+
+<section id="s0">
+  <div class="wrap">
+    <div class="shead"><span class="num">00</span><div><h2>Los nueve pasos</h2><p>Etapa 0 no produce todavía ninguna pieza de marca: produce el expediente sobre el que se apoya todo lo demás. Cada paso alimenta al siguiente — saltarse uno se paga más caro después, en la fase de producción.</p></div></div>
+    <div class="statement">
+      <p class="eyebrow">La regla que ordena la etapa</p>
+      <p class="big">Entregamos un <em>digital footprint</em>, no le decimos al cliente qué hacer.</p>
+      <p>Cada paso de esta etapa termina en una decisión documentada — canal por canal, activo por activo — nunca en una recomendación suelta.</p>
+    </div>
+  </div>
+</section>
+
+<section id="s1">
+  <div class="wrap">
+    <div class="shead"><span class="num">01</span><div><h2>Los nueve pasos de Etapa 0</h2><p>En orden. Los pasos 02 y 06 tienen su propio instrumento documentado aparte — aquí solo se referencian.</p></div></div>
+
+    <div class="modulo" id="s0-1">
+      <div class="mhead"><span class="code">00</span><h3>Client Intake / expediente del cliente</h3></div>
+      <div class="mbody">
+        <ul class="qs">
+          <li>Utilizar el portal en R3ads.com, o el dominio propio cuando se cree, para abrir el expediente digital del cliente.</li>
+        </ul>
+        <p class="out"><b>Salida:</b> expediente del cliente abierto — punto de partida de todo el resto de la etapa.</p>
+      </div>
+    </div>
+
+    <div class="modulo" id="s0-2">
+      <div class="mhead"><span class="code">01</span><h3>Reuniones de coordinación</h3><span class="owner">SSM + diseñador</span></div>
+      <div class="mbody">
+        <ul class="qs">
+          <li>Coordinar una hora disponible para ambos — SSM y diseñador.</li>
+          <li>Utilizar Google Meet para la reunión.</li>
+        </ul>
+        <p class="out"><b>Salida:</b> agenda alineada entre las dos disciplinas antes de tocar al cliente.</p>
+      </div>
+    </div>
+
+    <div class="modulo" id="s0-3">
+      <div class="mhead"><span class="code">02</span><h3>Sesión de Inmersión en el negocio</h3></div>
+      <div class="mbody">
+        <ul class="qs">
+          <li>Coordinar fecha para la visita del negocio (solo negocios presenciales B2C).</li>
+        </ul>
+        <p class="out"><b>Salida:</b> hallazgos codificados de la sesión. Protocolo completo en <a href="sesion-cero.html"><strong>Documento 00 · Sesión Cero</strong></a> — mismo instrumento, sin importar el cliente.</p>
+      </div>
+    </div>
+
+    <div class="modulo" id="s0-4">
+      <div class="mhead"><span class="code">03</span><h3>Auditoría de Presencia Digital</h3></div>
+      <div class="mbody">
+        <ul class="qs">
+          <li>Análisis de todos los canales digitales, incluyendo los faltantes.</li>
+          <li>Toma de decisiones sobre los canales adecuados para el negocio.</li>
+          <li>Descartar o agregar canales según conveniencia.</li>
+          <li>Realizar el informe de auditoría.</li>
+          <li>Realizar los cambios — R3ads entrega un digital footprint, no le dice al cliente qué hacer.</li>
+        </ul>
+        <p class="out"><b>Salida:</b> informe de auditoría + canales del cliente ya ajustados.</p>
+      </div>
+    </div>
+
+    <div class="modulo" id="s0-5">
+      <div class="mhead"><span class="code">04</span><h3>Ficha de Google Business verificada</h3></div>
+      <div class="mbody">
+        <ul class="qs">
+          <li>Proceso digital de inscripción del negocio.</li>
+          <li>Solicitud de los documentos necesarios para la verificación.</li>
+        </ul>
+        <p class="out"><b>Salida:</b> ficha de Google Business inscrita y en proceso de verificación.</p>
+      </div>
+    </div>
+
+    <div class="modulo" id="s0-6">
+      <div class="mhead"><span class="code">05</span><h3>Cohesión de marca entre canales</h3></div>
+      <div class="mbody">
+        <ul class="qs">
+          <li>Implementar un CRM — ManyChat / Metricool.</li>
+          <li>Armar la bóveda de accesos + matriz de propiedad.</li>
+        </ul>
+        <p class="out"><b>Salida:</b> todos los canales del cliente operando bajo el mismo sistema, con accesos centralizados y trazables.</p>
+      </div>
+    </div>
+
+    <div class="modulo" id="s0-7">
+      <div class="mhead"><span class="code">06</span><h3>FODA + Misión / Visión / Valores</h3></div>
+      <div class="mbody">
+        <ul class="qs">
+          <li>Crear cruces estratégicos que tomen en cuenta todos los puntos de vista recogidos y produzcan una mezcla de marketing más sólida.</li>
+        </ul>
+        <p class="out"><b>Salida:</b> FODA + Misión/Visión/Valores del cliente, construidos sobre los hallazgos de los pasos 02 y 03.</p>
+      </div>
+    </div>
+
+    <div class="modulo" id="s0-8">
+      <div class="mhead"><span class="code">07</span><h3>Matriz BCG del portafolio &amp; Buyer Persona + segmentación</h3></div>
+      <div class="mbody">
+        <ul class="qs">
+          <li>Reunión de productos y servicios del cliente.</li>
+        </ul>
+        <p class="out"><b>Salida:</b> matriz BCG del portafolio, buyer persona y segmentación definidos.</p>
+      </div>
+    </div>
+
+    <div class="modulo" id="s0-9">
+      <div class="mhead"><span class="code">08</span><h3>Propuesta Estratégica — roadmap 90 días</h3></div>
+      <div class="mbody">
+        <ul class="qs">
+          <li>Gestión, revisiones y presentación final de la propuesta.</li>
+        </ul>
+        <p class="out"><b>Salida:</b> roadmap de 90 días presentado al cliente. Cierra Etapa 0 y abre la producción mensual.</p>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+</main>
+
+<div class="next">
+  <div class="wrap">
+    <p class="eyebrow">Cómo se reusa</p>
+    <h2 style="max-width:26ch">La secuencia es fija; el contenido de cada paso es del cliente</h2>
+    <p class="col" style="margin-top:14px;color:var(--muted)">Los nueve pasos corren en el mismo orden para todo cliente R3ads. Los pasos 02 y 06 tienen instrumento propio aparte — el resto se documenta directamente en el expediente del cliente abierto en el paso 00.</p>
+  </div>
+</div>
+
+<footer>
+  <div class="wrap">
+    <div class="bar"></div>
+    <div class="row">
+      <span>R3ADS · Metodología</span>
+      <span>Etapa 0 · Workflow de Cliente v1.0</span>
+      <span>Uso interno</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+(function(){
+  var bar=document.getElementById('progress');
+  function upd(){
+    var h=document.documentElement;
+    var max=h.scrollHeight-h.clientHeight;
+    bar.style.width=(max>0?(h.scrollTop/max)*100:0)+'%';
+  }
+  document.addEventListener('scroll',upd,{passive:true});
+  window.addEventListener('resize',upd);
+  upd();
+})();
+</script>
