@@ -1,0 +1,795 @@
+<title>Sesión Cero R3ads</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800&family=Inter:wght@400;500;600&family=Azeret+Mono:wght@400;500;600&display=swap">
+
+<style>
+:root{
+  --naranja:#FD7D20;
+  --grafito:#211F1D;
+  --gris:#A3A2A1;
+
+  --ground:#FFFFFF;
+  --panel:#F5F3F1;
+  --panel-2:#EDE9E5;
+  --line:#E2DEDA;
+  --line-soft:#EFEBE7;
+  --text:#211F1D;
+  --muted:#6B6764;
+  --accent:#FD7D20;
+  --accent-ink:#211F1D;
+  --solid:#211F1D;
+  --solid-ink:#FFFFFF;
+  --hero:#211F1D;
+  --hero-text:#FFFFFF;
+  --hero-muted:#A3A2A1;
+
+  --f-display:"Archivo","Archivo Black",system-ui,sans-serif;
+  --f-body:"Inter","Archivo",system-ui,-apple-system,sans-serif;
+  --f-mono:"Azeret Mono",ui-monospace,"Cascadia Mono",monospace;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --ground:#141211;
+    --panel:#1E1B19;
+    --panel-2:#262220;
+    --line:#332E2B;
+    --line-soft:#241F1D;
+    --text:#F0EDEA;
+    --muted:#A3A2A1;
+    --solid:#F0EDEA;
+    --solid-ink:#211F1D;
+    --hero:#0E0C0B;
+    --hero-muted:#A3A2A1;
+  }
+}
+:root[data-theme="dark"]{
+  --ground:#141211;
+  --panel:#1E1B19;
+  --panel-2:#262220;
+  --line:#332E2B;
+  --line-soft:#241F1D;
+  --text:#F0EDEA;
+  --muted:#A3A2A1;
+  --solid:#F0EDEA;
+  --solid-ink:#211F1D;
+  --hero:#0E0C0B;
+  --hero-muted:#A3A2A1;
+}
+
+*,*::before,*::after{box-sizing:border-box}
+body{
+  margin:0;background:var(--ground);color:var(--text);
+  font-family:var(--f-body);font-size:16.5px;line-height:1.62;
+  -webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;
+}
+::selection{background:var(--naranja);color:#fff}
+a{color:var(--text);text-decoration-color:var(--naranja);text-underline-offset:3px}
+:focus-visible{outline:3px solid var(--naranja);outline-offset:3px;border-radius:2px}
+#progress{position:fixed;top:0;left:0;height:3px;width:0;background:var(--naranja);z-index:50}
+
+.wrap{max-width:1080px;margin:0 auto;padding:0 clamp(20px,5vw,52px)}
+.col{max-width:68ch}
+
+/* ---------- portada ---------- */
+.cover{background:var(--hero);color:var(--hero-text);padding:clamp(52px,8vw,92px) 0 clamp(38px,5vw,58px);position:relative;overflow:hidden}
+.cover::before{
+  content:"";position:absolute;inset:0;pointer-events:none;
+  background-image:radial-gradient(circle at 1px 1px,rgba(253,125,32,.30) 1px,transparent 0);
+  background-size:22px 22px;
+}
+.cover .wrap{position:relative}
+.brandline{display:flex;align-items:center;gap:13px;font-family:var(--f-mono);font-size:.72rem;letter-spacing:.16em;text-transform:uppercase;color:var(--hero-muted)}
+.brandline b{color:var(--naranja);font-weight:600;letter-spacing:.16em}
+.brandline .sq{width:9px;height:9px;background:var(--naranja);flex:none}
+.docnum{font-family:var(--f-mono);font-size:.72rem;letter-spacing:.16em;text-transform:uppercase;color:var(--naranja);margin-top:36px}
+h1{font-family:var(--f-display);font-weight:800;font-size:clamp(2.6rem,8vw,5rem);line-height:.98;letter-spacing:-.035em;margin:.16em 0 0;text-wrap:balance;max-width:13ch}
+h1 em{font-style:normal;color:var(--naranja)}
+.deck{margin:24px 0 0;max-width:58ch;color:#D8D4D1;font-size:clamp(1.02rem,1.6vw,1.16rem)}
+.metagrid{display:grid;gap:1px;background:rgba(163,162,161,.35);grid-template-columns:repeat(auto-fit,minmax(190px,1fr));margin-top:clamp(36px,5vw,54px);border:1px solid rgba(163,162,161,.35)}
+.metagrid div{background:var(--hero);padding:15px 18px}
+.metagrid dt{font-family:var(--f-mono);font-size:.64rem;letter-spacing:.14em;text-transform:uppercase;color:var(--hero-muted);margin:0 0 6px}
+.metagrid dd{margin:0;font-size:.92rem;font-weight:500;color:#fff}
+
+/* ---------- índice ---------- */
+.toc{border-bottom:1px solid var(--line);background:var(--panel)}
+.toc ol{list-style:none;margin:0;padding:24px 0;display:grid;gap:2px;grid-template-columns:repeat(auto-fit,minmax(235px,1fr))}
+.toc a{display:flex;gap:12px;align-items:baseline;padding:8px 10px;text-decoration:none;color:var(--text)}
+.toc a:hover{background:var(--ground)}
+.toc .n{font-family:var(--f-mono);font-size:.74rem;color:var(--naranja);font-weight:600}
+.toc .t{font-family:var(--f-display);font-weight:600;font-size:.94rem}
+
+/* ---------- secciones ---------- */
+section{padding:clamp(46px,7vw,84px) 0;border-bottom:1px solid var(--line-soft)}
+.shead{display:flex;gap:20px;align-items:flex-start;margin-bottom:32px}
+.shead .num{font-family:var(--f-mono);font-weight:600;font-size:.78rem;letter-spacing:.08em;color:var(--naranja);padding-top:.6em;flex:none;border-top:3px solid var(--naranja)}
+h2{font-family:var(--f-display);font-weight:700;font-size:clamp(1.55rem,3.3vw,2.25rem);line-height:1.08;letter-spacing:-.025em;margin:0;text-wrap:balance}
+.shead p{margin:.5em 0 0;color:var(--muted);max-width:62ch}
+h3{font-family:var(--f-display);font-weight:600;font-size:1.15rem;letter-spacing:-.01em;margin:2.1em 0 .55em;text-wrap:balance}
+h4{font-family:var(--f-display);font-weight:600;font-size:.99rem;margin:1.5em 0 .35em}
+p{margin:0 0 1.05em}
+.lead{font-size:1.1rem}
+strong{font-weight:600}
+.eyebrow{font-family:var(--f-mono);font-size:.68rem;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);margin:0 0 11px}
+code,.mono{font-family:var(--f-mono);font-size:.87em}
+
+/* ---------- tablas ---------- */
+.tablewrap{overflow-x:auto;border:1px solid var(--line);margin:0 0 1.5em;background:var(--ground)}
+table{border-collapse:collapse;width:100%;min-width:520px;font-size:.92rem}
+th,td{text-align:left;padding:11px 15px;border-bottom:1px solid var(--line-soft);vertical-align:top}
+thead th{background:var(--panel);font-family:var(--f-mono);font-weight:600;font-size:.66rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--line);white-space:nowrap}
+tbody tr:last-child td{border-bottom:0}
+td.num,th.num{font-family:var(--f-mono);font-variant-numeric:tabular-nums;white-space:nowrap}
+.blank td{height:38px}
+
+/* ---------- bloques ---------- */
+.callout{border-left:3px solid var(--naranja);background:var(--panel);padding:19px 23px;margin:0 0 1.5em}
+.callout p:last-child{margin-bottom:0}
+.callout .eyebrow{color:var(--naranja)}
+.card{border:1px solid var(--line);background:var(--ground);padding:21px 23px}
+.card h4{margin-top:0}
+.card p:last-child{margin-bottom:0}
+.grid2{display:grid;gap:18px;grid-template-columns:repeat(auto-fit,minmax(290px,1fr))}
+.grid3{display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(230px,1fr))}
+
+.statement{background:var(--hero);color:#fff;padding:clamp(32px,5vw,50px);position:relative;overflow:hidden}
+.statement::before{content:"";position:absolute;inset:0;background-image:radial-gradient(circle at 1px 1px,rgba(253,125,32,.28) 1px,transparent 0);background-size:22px 22px}
+.statement > *{position:relative}
+.statement .eyebrow{color:var(--naranja)}
+.statement .big{font-family:var(--f-display);font-weight:800;letter-spacing:-.028em;font-size:clamp(1.45rem,3.6vw,2.35rem);line-height:1.1;margin:0 0 .65em;text-wrap:balance;max-width:24ch}
+.statement .big em{font-style:normal;color:var(--naranja)}
+.statement p{color:#D8D4D1;max-width:60ch}
+.statement p:last-child{margin-bottom:0}
+
+/* ---------- clases de afirmación ---------- */
+.tipo{font-family:var(--f-mono);font-size:.62rem;letter-spacing:.14em;text-transform:uppercase;padding:3px 9px;white-space:nowrap;font-weight:600;display:inline-block}
+.tipo--dato{background:var(--solid);color:var(--solid-ink)}
+.tipo--creencia{background:var(--naranja);color:#211F1D}
+.tipo--ciego{border:1px dashed var(--gris);color:var(--muted);padding:2px 8px}
+
+.classes{display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(250px,1fr))}
+.class{border:1px solid var(--line);background:var(--ground);padding:22px 23px;border-top:4px solid var(--solid)}
+.class--creencia{border-top-color:var(--naranja)}
+.class--ciego{border-top-color:var(--gris);border-top-style:dashed}
+.class h4{margin:14px 0 8px;font-size:1.05rem}
+.class p{font-size:.92rem;color:var(--muted)}
+.class p:last-child{margin-bottom:0}
+.class .ej{font-size:.88rem;border-top:1px dashed var(--line);margin-top:14px;padding-top:12px;color:var(--text)}
+
+/* ---------- ficha de hallazgo ---------- */
+.ficha{border:1px solid var(--line);background:var(--ground);margin-bottom:18px}
+.ficha--creencia{border-left:3px solid var(--naranja)}
+.ficha--dato{border-left:3px solid var(--solid)}
+.ficha--ciego{border-left:3px dashed var(--gris)}
+.fhead{display:flex;flex-wrap:wrap;gap:9px 15px;align-items:center;padding:15px 22px;border-bottom:1px solid var(--line-soft);background:var(--panel)}
+.fhead .code{font-family:var(--f-mono);font-weight:600;font-size:.75rem;color:var(--naranja)}
+.fhead h4{margin:0;font-size:1.02rem;flex:1 1 300px;line-height:1.3}
+.fbody{padding:4px 22px 18px}
+.frow{display:grid;grid-template-columns:minmax(0,110px) minmax(0,1fr);gap:4px 18px;padding:11px 0;border-bottom:1px dashed var(--line)}
+.frow:last-child{border-bottom:0}
+@media (max-width:620px){.frow{grid-template-columns:1fr;gap:2px}}
+.frow dt{font-family:var(--f-mono);font-size:.64rem;letter-spacing:.13em;text-transform:uppercase;color:var(--muted);padding-top:.28em}
+.frow dd{margin:0;font-size:.94rem}
+.frow dd .src{font-family:var(--f-mono);font-size:.82em;color:var(--muted)}
+.feeds{font-family:var(--f-mono);font-size:.78rem;font-weight:600;color:var(--naranja)}
+
+/* ---------- módulos ---------- */
+.modulo{border:1px solid var(--line);background:var(--ground);margin-bottom:18px}
+.mhead{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:baseline;padding:16px 22px;border-bottom:1px solid var(--line-soft);background:var(--panel)}
+.mhead .code{font-family:var(--f-mono);font-weight:600;font-size:.75rem;color:var(--naranja);flex:none}
+.mhead h4{margin:0;font-size:1.05rem;flex:1 1 260px}
+.mhead .dur{font-family:var(--f-mono);font-size:.68rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.mbody{padding:18px 22px 20px}
+.mbody > :last-child{margin-bottom:0}
+.mbody .out{font-size:.9rem;color:var(--muted);border-top:1px dashed var(--line);margin-top:14px;padding-top:12px}
+.mbody .out b{color:var(--text);font-weight:600}
+.qs{list-style:none;counter-reset:q;margin:0;padding:0}
+.qs li{counter-increment:q;padding:9px 0 9px 32px;position:relative;font-size:.95rem;border-bottom:1px dashed var(--line)}
+.qs li:last-child{border-bottom:0}
+.qs li::before{content:counter(q,decimal-leading-zero);position:absolute;left:0;top:.72em;font-family:var(--f-mono);font-size:.68rem;color:var(--naranja);font-weight:600}
+.qs li .why{display:block;color:var(--muted);font-size:.86rem;margin-top:3px}
+
+/* ---------- destilación ---------- */
+.rulecards{display:grid;gap:1px;background:var(--line);border:1px solid var(--line)}
+.rulecard{background:var(--ground);padding:16px 22px;display:grid;gap:6px 20px;grid-template-columns:minmax(0,230px) minmax(0,1fr);align-items:baseline}
+@media (max-width:640px){.rulecard{grid-template-columns:1fr}}
+.rulecard .k{font-family:var(--f-mono);font-size:.74rem;font-weight:600;color:var(--text)}
+.rulecard p{margin:0;font-size:.93rem;color:var(--muted)}
+
+.gates{list-style:none;counter-reset:g;margin:0;padding:0;display:grid;gap:1px;background:var(--line);border:1px solid var(--line);border-left:3px solid var(--naranja)}
+.gates li{background:var(--ground);padding:15px 21px;display:flex;gap:15px;align-items:baseline;counter-increment:g}
+.gates li::before{content:"G" counter(g);font-family:var(--f-mono);font-weight:600;color:var(--naranja);font-size:.74rem;flex:none}
+.gates p{margin:0;font-size:.94rem}
+
+.anti{display:grid;gap:1px;background:var(--line);border:1px solid var(--line)}
+.anti > div{background:var(--ground);padding:17px 22px;display:grid;gap:4px 22px;grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+@media (max-width:680px){.anti > div{grid-template-columns:1fr}}
+.anti .no{color:var(--muted)}
+.anti .no s{text-decoration-color:var(--naranja);text-decoration-thickness:2px}
+.anti .si{font-weight:500}
+
+.next{background:var(--panel);border-top:1px solid var(--line);padding:clamp(42px,6vw,68px) 0}
+footer{padding:32px 0 58px;color:var(--muted);font-size:.83rem}
+footer .row{display:flex;flex-wrap:wrap;gap:9px 24px;align-items:center;font-family:var(--f-mono);letter-spacing:.05em;text-transform:uppercase;font-size:.66rem}
+footer .bar{height:5px;background:var(--naranja);width:70px;margin-bottom:24px}
+
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+html{scroll-behavior:smooth}
+</style>
+
+<div id="progress"></div>
+
+<header class="cover">
+  <div class="wrap">
+    <div class="brandline"><span class="sq"></span><b>R3ADS</b><span>Metodología · instrumento interno</span></div>
+    <div class="docnum">Documento 00 · Antes del Blueprint</div>
+    <h1>Sesión <em>Cero</em></h1>
+    <p class="deck">El protocolo de inmersión que produce los hallazgos sobre los que después se construye el FODA. Si el dueño no se sorprende, la sesión falló — y esta plantilla existe para que eso no pase.</p>
+
+    <dl class="metagrid">
+      <div><dt>Qué es</dt><dd>Instrumento reusable de descubrimiento, idéntico para todo cliente R3ads</dd></div>
+      <div><dt>Cuándo se corre</dt><dd>Antes del Documento 01 (Fundamentos y FODA)</dd></div>
+      <div><dt>Duración</dt><dd>3 h 25 min en sesión + 48 h de insumos previos</dd></div>
+      <div><dt>Salida</dt><dd>Entre 12 y 25 hallazgos codificados y clasificados</dd></div>
+      <div><dt>Piloto</dt><dd>CleanStation · agosto 2026</dd></div>
+      <div><dt>Versión</dt><dd>v1.0</dd></div>
+    </dl>
+  </div>
+</header>
+
+<nav class="toc" aria-label="Índice">
+  <div class="wrap">
+    <ol>
+      <li><a href="#s0"><span class="n">00</span><span class="t">El modo de fallo</span></a></li>
+      <li><a href="#s1"><span class="n">01</span><span class="t">Las tres clases de afirmación</span></a></li>
+      <li><a href="#s2"><span class="n">02</span><span class="t">Anatomía de un hallazgo</span></a></li>
+      <li><a href="#s3"><span class="n">03</span><span class="t">Los ocho módulos</span></a></li>
+      <li><a href="#s4"><span class="n">04</span><span class="t">Instrumentos de captura</span></a></li>
+      <li><a href="#s5"><span class="n">05</span><span class="t">Destilación al FODA</span></a></li>
+      <li><a href="#s6"><span class="n">06</span><span class="t">Controles de calidad</span></a></li>
+      <li><a href="#s7"><span class="n">07</span><span class="t">Anti-patrones</span></a></li>
+      <li><a href="#s8"><span class="n">08</span><span class="t">Piloto CleanStation</span></a></li>
+      <li><a href="#s9"><span class="n">09</span><span class="t">Lo que falta preguntar</span></a></li>
+    </ol>
+  </div>
+</nav>
+
+<main>
+
+<section id="s0">
+  <div class="wrap">
+    <div class="shead"><span class="num">00</span><div><h2>El modo de fallo</h2></div></div>
+
+    <div class="col">
+      <p class="lead">Un FODA entregado a un dueño que lleva tres años en su negocio casi siempre produce la misma reacción: <em>“sí, eso ya lo sabía”</em>. No es que el análisis esté mal. Es que empieza en el lugar equivocado.</p>
+      <p>El FODA es una <strong>síntesis</strong>. Cuando el primer documento que ve el cliente ya viene sintetizado, lo único que puede hacer es compararlo contra lo que él ya tenía en la cabeza — y su cabeza tiene tres años de ventaja. El valor no estaba en la conclusión: estaba en el material que la produjo, y ese material nunca se le mostró.</p>
+    </div>
+
+    <div class="statement" style="margin:32px 0">
+      <p class="eyebrow">La regla que ordena todo el instrumento</p>
+      <p class="big">Nunca se le pregunta al dueño por conclusiones. Se le piden <em>hechos</em>, y la conclusión la produce el estudio.</p>
+      <p>“¿Cuáles son tus fortalezas?” devuelve el FODA que el cliente ya tenía. “Mostrame los últimos veinte trabajos” devuelve un FODA que él no podía escribir solo, porque nunca sumó esa columna.</p>
+    </div>
+
+    <div class="col">
+      <p>La Sesión Cero es la capa que faltaba: convierte tres horas de conversación y un puñado de archivos en <strong>hallazgos codificados</strong>. Cada entrada del FODA queda después amarrada a uno o más de esos códigos, y el cliente puede rastrear cualquier conclusión hasta el hecho que la originó.</p>
+      <p>Ese rastro es, además, lo que hace defendible el precio del Blueprint.</p>
+    </div>
+  </div>
+</section>
+
+<section id="s1">
+  <div class="wrap">
+    <div class="shead">
+      <span class="num">01</span>
+      <div>
+        <h2>Las tres clases de afirmación</h2>
+        <p>Todo lo que se dice de un negocio cae en una de tres clases. Separarlas es el 80% del trabajo de la sesión, y es lo que impide que una creencia entre al FODA disfrazada de fortaleza.</p>
+      </div>
+    </div>
+
+    <div class="classes">
+      <div class="class">
+        <span class="tipo tipo--dato">Dato</span>
+        <h4>Verificable, con fuente y fecha</h4>
+        <p>Existe un documento, un número, una captura o un registro que lo sostiene. Cualquiera que abra la misma fuente llega al mismo resultado.</p>
+        <p class="ej"><strong>Ej.</strong> “El mantenimiento de PS4 se cobra L.500.” — <span class="mono">hoja de servicios, ítem 1</span></p>
+      </div>
+      <div class="class class--creencia">
+        <span class="tipo tipo--creencia">Creencia</span>
+        <h4>Se afirma, se opera, nunca se midió</h4>
+        <p>El negocio funciona como si fuera cierto y probablemente lo sea — pero no hay registro. <strong>Es la clase más valiosa de la sesión:</strong> ahí vive todo lo que el cliente daría por sentado y el estudio puede convertir en ventaja o desactivar.</p>
+        <p class="ej"><strong>Ej.</strong> “Entregamos en 24 a 48 horas.” — nadie ha contado cuántos trabajos cumplieron.</p>
+      </div>
+      <div class="class class--ciego">
+        <span class="tipo tipo--ciego">Punto ciego</span>
+        <h4>Nadie lo ha preguntado</h4>
+        <p>No es que la respuesta sea desconocida: es que la pregunta no existe en el negocio. Se detecta por ausencia, no por contradicción.</p>
+        <p class="ej"><strong>Ej.</strong> Margen por servicio. Hay precio de venta en 27 ítems y ninguna columna de costo.</p>
+      </div>
+    </div>
+
+    <div class="callout col" style="margin-top:30px">
+      <p class="eyebrow">La regla dura</p>
+      <p><strong>El FODA se construye únicamente con DATOS.</strong> Una creencia entra solo después de convertirse en dato, o entra marcada explícitamente como supuesto. Los puntos ciegos no van al FODA: van a la lista de información pendiente, que es lo que se cobra resolver en la siguiente fase.</p>
+    </div>
+  </div>
+</section>
+
+<section id="s2">
+  <div class="wrap">
+    <div class="shead">
+      <span class="num">02</span>
+      <div>
+        <h2>Anatomía de un hallazgo</h2>
+        <p>La unidad atómica del instrumento. Ocho campos, siempre los mismos, siempre en este orden. Si un campo no se puede llenar, el hallazgo todavía no está listo.</p>
+      </div>
+    </div>
+
+    <div class="ficha ficha--dato">
+      <div class="fhead"><span class="code">H-00</span><h4>Título en una línea: el hecho, nunca la opinión</h4><span class="tipo tipo--dato">Dato</span></div>
+      <div class="fbody">
+        <dl>
+          <div class="frow"><dt>Módulo</dt><dd>De qué módulo de la sesión salió — <span class="mono">M1</span> a <span class="mono">M8</span>.</dd></div>
+          <div class="frow"><dt>Fuente</dt><dd>Entrevista · observación directa · documento · plataforma · cliente final. Con nombre de archivo o fecha de la conversación.</dd></div>
+          <div class="frow"><dt>Evidencia</dt><dd>La cita textual, el número o la captura. Sin interpretar. Es lo que permite que otro llegue a la misma conclusión.</dd></div>
+          <div class="frow"><dt>Tensión</dt><dd>Contra qué choca: otra afirmación del dueño, otro dato, o una promesa de marca. <strong>Un hallazgo sin tensión es solo un apunte.</strong></dd></div>
+          <div class="frow"><dt>Implicación</dt><dd>Qué cambia en el negocio si esto es cierto. Una frase, en presente.</dd></div>
+          <div class="frow"><dt>Alimenta</dt><dd><span class="feeds">→ F# / D# / O# / A#</span> — a qué entrada del FODA da origen. Puede ser más de una, o ninguna todavía.</dd></div>
+          <div class="frow"><dt>Verificación</dt><dd>Cómo se comprueba y en cuánto tiempo. Obligatorio en creencias y puntos ciegos.</dd></div>
+        </dl>
+      </div>
+    </div>
+
+    <div class="callout col">
+      <p class="eyebrow">Por qué el campo “Tensión” es obligatorio</p>
+      <p>Es el filtro que separa un hallazgo de un dato de inventario. “Tiene 27 servicios tarifados” es inventario. “Tiene 27 servicios tarifados y el plan declara los precios como pendiente bloqueante” es un hallazgo: hay dos afirmaciones que no pueden ser ciertas a la vez, y resolverlo cambia el orden de trabajo.</p>
+    </div>
+  </div>
+</section>
+
+<section id="s3">
+  <div class="wrap">
+    <div class="shead">
+      <span class="num">03</span>
+      <div>
+        <h2>Los ocho módulos</h2>
+        <p>El guion de la sesión. Se corre en orden: los primeros módulos construyen confianza con preguntas fáciles, y los últimos dos —pérdidas y ambición— solo funcionan cuando ya hay confianza.</p>
+      </div>
+    </div>
+
+    <div class="callout col">
+      <p class="eyebrow">48 horas antes · insumos que se piden por escrito</p>
+      <p>Lista de servicios con precios · últimos 3 meses de métricas de cada plataforma · el chat de WhatsApp sin editar de los últimos 10 clientes · cualquier hoja de cálculo que exista, aunque esté incompleta · fotos del lugar de trabajo. <strong>Lo que llega antes no se pregunta en sesión</strong>: la sesión se gasta en lo que no está escrito.</p>
+    </div>
+
+    <div class="modulo">
+      <div class="mhead"><span class="code">M1</span><h4>Línea de tiempo y decisiones fundacionales</h4><span class="dur">30 min</span></div>
+      <div class="mbody">
+        <ul class="qs">
+          <li>Contame el negocio desde el primer trabajo que cobraste. ¿Qué fue, cuánto y a quién?</li>
+          <li>¿Qué decisión tomaste que hoy no volverías a tomar igual?</li>
+          <li>¿Cuál fue el mejor mes que has tenido y qué pasó ese mes? <span class="why">Busca la causa real del pico, casi nunca es la que el dueño nombra primero.</span></li>
+          <li>¿Qué hacías al principio que dejaste de hacer? ¿Por qué lo dejaste?</li>
+          <li>¿Qué servicio ofreciste que no funcionó y tuviste que quitar?</li>
+        </ul>
+        <p class="out"><b>Salida:</b> el mapa de qué se probó y qué se descartó. Evita que el estudio recomiende algo que el cliente ya intentó en 2023.</p>
+      </div>
+    </div>
+
+    <div class="modulo">
+      <div class="mhead"><span class="code">M2</span><h4>Catálogo y economía unitaria</h4><span class="dur">40 min</span></div>
+      <div class="mbody">
+        <ul class="qs">
+          <li>Recorramos el catálogo ítem por ítem: ¿cuánto cobrás y cuánto te cuesta el repuesto o el insumo?</li>
+          <li>¿Cuál de todos vendés más veces al mes? ¿Y cuál te deja más lempiras limpios? <span class="why">Si no es el mismo ítem, ahí está el hallazgo del módulo.</span></li>
+          <li>¿Hay algún precio que no hayas subido desde que abriste?</li>
+          <li>¿Cuándo fue la última vez que alguien te dijo que estabas caro? ¿Y barato?</li>
+          <li>¿Qué le vendés a un cliente que ya está adentro, además de lo que vino a buscar?</li>
+          <li>¿Hay precios que dependen de algo? Mostrame la regla. <span class="why">Los rangos tipo “500 / 1000” siempre esconden una regla no escrita.</span></li>
+        </ul>
+        <p class="out"><b>Salida:</b> ticket promedio real, mix de ingreso, y la lista de ítems sin costo conocido. Es el módulo que más hallazgos produce.</p>
+      </div>
+    </div>
+
+    <div class="modulo">
+      <div class="mhead"><span class="code">M3</span><h4>Capacidad y cuello de botella</h4><span class="dur">25 min</span></div>
+      <div class="mbody">
+        <ul class="qs">
+          <li>Si mañana entran diez trabajos, ¿cuántos podés entregar esta semana sin cambiar nada?</li>
+          <li>¿Qué parte del proceso solo la podés hacer vos?</li>
+          <li>La última vez que te enfermaste o viajaste, ¿qué pasó con el negocio?</li>
+          <li>¿Cuánto tiempo al día se te va respondiendo mensajes en vez de trabajando?</li>
+          <li>¿Cuál es el paso del proceso que más veces se atrasa? ¿Por qué?</li>
+        </ul>
+        <p class="out"><b>Salida:</b> el techo real de demanda. Define hasta dónde se puede acelerar la captación sin romper la promesa de servicio.</p>
+      </div>
+    </div>
+
+    <div class="modulo">
+      <div class="mhead"><span class="code">M4</span><h4>Los últimos veinte clientes</h4><span class="dur">30 min</span></div>
+      <div class="mbody">
+        <p>Se llena la tabla del <a href="#s4">instrumento I-1</a> en vivo, con el historial de WhatsApp abierto. No se pregunta “¿de dónde te llegan los clientes?”: se cuenta.</p>
+        <ul class="qs">
+          <li>Abrí WhatsApp y vamos hacia atrás: para cada uno, qué servicio, cuánto pagó y cómo te encontró.</li>
+          <li>¿Este había venido antes? ¿Hace cuánto?</li>
+          <li>¿Cuánto tardaste realmente en entregarle?</li>
+        </ul>
+        <p class="out"><b>Salida:</b> ticket promedio, mix real de servicios, canal de origen medido y tasa de recompra. Cuatro números que normalmente aparecen como “sin dato” en toda auditoría de plataformas.</p>
+      </div>
+    </div>
+
+    <div class="modulo">
+      <div class="mhead"><span class="code">M5</span><h4>El recorrido real de una venta</h4><span class="dur">25 min</span></div>
+      <div class="mbody">
+        <ul class="qs">
+          <li>Tomemos el último cliente que cerró. Leeme la conversación desde el primer mensaje.</li>
+          <li>¿En qué mensaje decidió? ¿Qué le dijiste justo antes?</li>
+          <li>¿Cuánto tiempo pasó entre el primer mensaje y el sí?</li>
+          <li>¿Qué preguntó que no está respondido en ningún lado de tus redes? <span class="why">Cada una de esas preguntas es una pieza de contenido con demanda comprobada.</span></li>
+          <li>¿Cuántas veces al día escribís lo mismo?</li>
+        </ul>
+        <p class="out"><b>Salida:</b> el guion de venta que ya funciona, en las palabras del dueño. Es la materia prima del copy y de las respuestas rápidas.</p>
+      </div>
+    </div>
+
+    <div class="modulo">
+      <div class="mhead"><span class="code">M6</span><h4>Las pérdidas</h4><span class="dur">25 min</span></div>
+      <div class="mbody">
+        <ul class="qs">
+          <li>Mostrame tres conversaciones que no cerraron. ¿Dónde se cayeron?</li>
+          <li>¿Cuál es la objeción que más escuchás? ¿Qué contestás?</li>
+          <li>¿Qué te piden que no ofrecés?</li>
+          <li>¿Alguna vez perdiste un cliente después de haberlo atendido? ¿Qué pasó?</li>
+          <li>¿A quién le dirías que no? <span class="why">Define el cliente que no se quiere, que es tan operativo como el que sí.</span></li>
+        </ul>
+        <p class="out"><b>Salida:</b> las objeciones reales, textuales. Sostienen el pilar de contenido de confianza y las piezas de conversión.</p>
+      </div>
+    </div>
+
+    <div class="modulo">
+      <div class="mhead"><span class="code">M7</span><h4>Activos y dependencias</h4><span class="dur">20 min</span></div>
+      <div class="mbody">
+        <ul class="qs">
+          <li>Si mañana perdés la cuenta de Facebook o Instagram, ¿cómo contactás a tus clientes?</li>
+          <li>¿Qué tenés guardado que nunca has publicado? <span class="why">Casi siempre hay un banco de material terminado sin usar.</span></li>
+          <li>¿Quién más tiene acceso a las cuentas? ¿A nombre de quién están?</li>
+          <li>¿De qué proveedor dependés y qué pasa si desaparece?</li>
+          <li>¿Existe algún registro escrito de tus clientes fuera del celular?</li>
+        </ul>
+        <p class="out"><b>Salida:</b> inventario de activos propios vs. alquilados, y el mapa de riesgo de continuidad.</p>
+      </div>
+    </div>
+
+    <div class="modulo">
+      <div class="mhead"><span class="code">M8</span><h4>Ambición y límites del dueño</h4><span class="dur">20 min</span></div>
+      <div class="mbody">
+        <ul class="qs">
+          <li>¿Cuánto querés facturar al mes dentro de un año? ¿Y por qué ese número?</li>
+          <li>¿Cuántas horas estás dispuesto a trabajar para llegar ahí?</li>
+          <li>¿Querés emplear gente o preferís seguir solo?</li>
+          <li>¿Qué parte del trabajo te gusta tanto que no la delegarías aunque pudieras?</li>
+          <li>Si el negocio crece el triple, ¿qué es lo primero que se rompe? <span class="why">El dueño casi siempre lo sabe y nunca lo ha dicho en voz alta.</span></li>
+        </ul>
+        <p class="out"><b>Salida:</b> el techo que el estudio no debe cruzar. Una estrategia que exige más capacidad de la que el dueño quiere dar es una estrategia fallida por diseño.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="s4">
+  <div class="wrap">
+    <div class="shead">
+      <span class="num">04</span>
+      <div>
+        <h2>Instrumentos de captura</h2>
+        <p>Tres tablas que se llenan en vivo. Se entregan al cliente al final de la sesión: son suyas, y son la base del tablero que después se le pide mantener.</p>
+      </div>
+    </div>
+
+    <h3 style="margin-top:0"><span class="mono">I-1</span> · Los últimos veinte clientes</h3>
+    <p class="col">El instrumento de mayor rendimiento del protocolo. Veinte filas producen cuatro indicadores que ninguna plataforma entrega.</p>
+    <div class="tablewrap">
+      <table>
+        <thead><tr><th class="num">#</th><th>Fecha</th><th>Servicio</th><th class="num">Monto</th><th>Cómo me encontró</th><th>¿Repite?</th><th class="num">Días de entrega</th></tr></thead>
+        <tbody>
+          <tr class="blank"><td class="num">01</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+          <tr class="blank"><td class="num">02</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+          <tr class="blank"><td class="num">…</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+          <tr class="blank"><td class="num">20</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="grid2" style="margin-bottom:1.5em">
+      <div class="card"><h4>Lo que sale de las 20 filas</h4><p>Ticket promedio · mix de servicios por ingreso y por frecuencia · canal de origen medido (no declarado) · tasa de recompra · cumplimiento real del tiempo de entrega prometido.</p></div>
+      <div class="card"><h4>Por qué 20 y no 50</h4><p>Veinte caben en media hora con el chat abierto y ya son suficientes para ver el patrón. Cincuenta convierten la sesión en captura de datos y el dueño se desconecta.</p></div>
+    </div>
+
+    <h3><span class="mono">I-2</span> · Catálogo con costo</h3>
+    <p class="col">El precio de venta casi siempre existe. La columna de costo casi nunca. Sin ella no hay decisión de precio posible, solo intuición.</p>
+    <div class="tablewrap">
+      <table>
+        <thead><tr><th>Ítem</th><th class="num">Precio venta</th><th class="num">Costo repuesto</th><th class="num">Minutos de trabajo</th><th class="num">Margen</th><th>Frecuencia</th></tr></thead>
+        <tbody>
+          <tr class="blank"><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+          <tr class="blank"><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3><span class="mono">I-3</span> · Registro de creencias</h3>
+    <p class="col">Se llena en paralelo durante toda la sesión. Cada vez que el dueño afirma algo sin fuente, se anota aquí en vez de discutirlo en el momento.</p>
+    <div class="tablewrap">
+      <table>
+        <thead><tr><th>Lo que se afirma</th><th>Cómo se comprueba</th><th class="num">Tiempo</th><th>Quién</th></tr></thead>
+        <tbody>
+          <tr class="blank"><td></td><td></td><td></td><td></td></tr>
+          <tr class="blank"><td></td><td></td><td></td><td></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<section id="s5">
+  <div class="wrap">
+    <div class="shead">
+      <span class="num">05</span>
+      <div>
+        <h2>Destilación al FODA</h2>
+        <p>Cómo se convierten los hallazgos en las entradas del Documento 01. Es mecánico a propósito: si hace falta criterio para clasificar, el hallazgo está mal escrito.</p>
+      </div>
+    </div>
+
+    <div class="rulecards" style="margin-bottom:1.5em">
+      <div class="rulecard"><span class="k">DATO · interno · favorable</span><p>→ Fortaleza</p></div>
+      <div class="rulecard"><span class="k">DATO · interno · desfavorable</span><p>→ Debilidad</p></div>
+      <div class="rulecard"><span class="k">DATO · externo · favorable</span><p>→ Oportunidad</p></div>
+      <div class="rulecard"><span class="k">DATO · externo · desfavorable</span><p>→ Amenaza</p></div>
+      <div class="rulecard"><span class="k">CREENCIA</span><p>No entra. Se convierte en dato durante la fase de verificación, o entra al FODA marcada como supuesto con su método de comprobación al lado.</p></div>
+      <div class="rulecard"><span class="k">PUNTO CIEGO</span><p>No entra al FODA. Va íntegro a “Información pendiente”, que es la agenda de la siguiente fase — y el argumento de continuidad del contrato.</p></div>
+    </div>
+
+    <div class="callout col">
+      <p class="eyebrow">La prueba de trazabilidad</p>
+      <p>Cada entrada del FODA lleva entre paréntesis los códigos que la sostienen: <span class="mono">D4 (H-01, H-02)</span>. Una entrada sin código es una opinión del estudio y debe borrarse o convertirse en hallazgo.</p>
+    </div>
+  </div>
+</section>
+
+<section id="s6">
+  <div class="wrap">
+    <div class="shead">
+      <span class="num">06</span>
+      <div><h2>Controles de calidad</h2><p>Se corren sobre el set de hallazgos antes de escribir una sola línea del Documento 01.</p></div>
+    </div>
+
+    <ol class="gates">
+      <li><p><strong>Mínimo tres hallazgos que el dueño no pudiera haber escrito solo.</strong> Es el control que define si la sesión sirvió. Si los veinte hallazgos son cosas que él ya sabía, no hubo inmersión: hubo transcripción.</p></li>
+      <li><p><strong>Ningún hallazgo sin campo de Tensión.</strong> Sin tensión es inventario, no hallazgo.</p></li>
+      <li><p><strong>Al menos un hallazgo por módulo.</strong> Un módulo vacío significa que se preguntó por conclusiones, no por hechos — se vuelve a correr ese módulo.</p></li>
+      <li><p><strong>Toda creencia tiene método de verificación y responsable.</strong> Sin eso se queda como creencia para siempre y termina colándose al FODA.</p></li>
+      <li><p><strong>Los números tienen fecha.</strong> Un precio, un ticket o una métrica sin fecha caduca sin avisar y rompe la promesa de exactitud del estudio.</p></li>
+      <li><p><strong>Se revisó lo que el cliente ya tiene guardado antes de proponer producir algo nuevo.</strong> Recomendar crear lo que ya existe es la forma más rápida de perder autoridad.</p></li>
+    </ol>
+  </div>
+</section>
+
+<section id="s7">
+  <div class="wrap">
+    <div class="shead">
+      <span class="num">07</span>
+      <div><h2>Anti-patrones</h2><p>Las seis formas de arruinar una Sesión Cero. Todas producen documentos que suenan bien y no le enseñan nada al dueño.</p></div>
+    </div>
+
+    <div class="anti">
+      <div><p class="no"><s>“¿Cuáles dirías que son tus fortalezas?”</s></p><p class="si">“Mostrame los últimos veinte trabajos y sumemos.”</p></div>
+      <div><p class="no"><s>“¿Quién es tu competencia?”</s></p><p class="si">“¿Con quién te compararon tus clientes? ¿Qué te dijeron exactamente?”</p></div>
+      <div><p class="no"><s>“¿Cómo te llegan los clientes?”</s></p><p class="si">“Abrí WhatsApp. Vamos uno por uno hacia atrás.”</p></div>
+      <div><p class="no"><s>“¿Cuál es tu ticket promedio?”</s></p><p class="si">“¿Cuánto cobraste en estos veinte? Lo dividimos aquí mismo.”</p></div>
+      <div><p class="no"><s>Aceptar un rango como precio</s></p><p class="si">“¿Qué decide si son 500 o 1000? Escribamos la regla.”</p></div>
+      <div><p class="no"><s>Proponer producir contenido nuevo antes de inventariar</s></p><p class="si">“¿Qué tenés hecho y sin publicar?”</p></div>
+    </div>
+  </div>
+</section>
+
+<section id="s8">
+  <div class="wrap">
+    <div class="shead">
+      <span class="num">08</span>
+      <div>
+        <h2>Piloto CleanStation</h2>
+        <p>Diez hallazgos corridos contra el primer cliente. Salieron de documentos y de la hoja de servicios — no de entrevista, que es justamente lo que falta y va en la sección 09.</p>
+      </div>
+    </div>
+
+    <div class="callout col">
+      <p class="eyebrow">Fuentes usadas</p>
+      <p><span class="mono">SERVICIOS CLEANSTATION - Hoja 1.csv</span> (27 servicios + 1 producto, con precio) · <span class="mono">Clean Station Design System/export/servicios-png/</span> (21 piezas exportadas) · Documentos 01, 02 y 05 del portafolio.</p>
+    </div>
+
+    <div class="ficha ficha--dato">
+      <div class="fhead"><span class="code">H-01</span><h4>El catálogo tarifado ya existe; el plan lo declara pendiente y bloqueante</h4><span class="tipo tipo--dato">Dato</span></div>
+      <div class="fbody"><dl>
+        <div class="frow"><dt>Módulo</dt><dd>M2</dd></div>
+        <div class="frow"><dt>Evidencia</dt><dd>27 servicios con precio en <span class="src">SERVICIOS CLEANSTATION - Hoja 1.csv</span>. El Documento 05 §11 lista “Precios por servicio definidos” como <strong>Pendiente — bloqueante</strong>.</dd></div>
+        <div class="frow"><dt>Tensión</dt><dd>Dos afirmaciones incompatibles. El bloqueante no es de definición: es de publicación.</dd></div>
+        <div class="frow"><dt>Implicación</dt><dd>El prerrequisito que frena todo el plan de contenido se resuelve en horas, no en semanas.</dd></div>
+        <div class="frow"><dt>Alimenta</dt><dd><span class="feeds">→ D4</span> se reclasifica: no es “no existen activos de conversión”, es “existen y no están publicados”.</dd></div>
+      </dl></div>
+    </div>
+
+    <div class="ficha ficha--dato">
+      <div class="fhead"><span class="code">H-02</span><h4>21 de los 27 servicios ya tienen pieza gráfica terminada y sin publicar</h4><span class="tipo tipo--dato">Dato</span></div>
+      <div class="fbody"><dl>
+        <div class="frow"><dt>Módulo</dt><dd>M7</dd></div>
+        <div class="frow"><dt>Evidencia</dt><dd>21 PNG numerados en <span class="src">Clean Station Design System/export/servicios-png/</span>.</dd></div>
+        <div class="frow"><dt>Tensión</dt><dd>El Documento 05 planifica producir 9 piezas semanales desde cero mientras existe un banco terminado sin distribuir.</dd></div>
+        <div class="frow"><dt>Implicación</dt><dd>El Mes 1 puede arrancar con inventario en vez de con producción. El cuello de botella no es producir: es publicar.</dd></div>
+        <div class="frow"><dt>Alimenta</dt><dd><span class="feeds">→ H2 de la auditoría</span> — la causa del motor orgánico muerto se corrige antes y más barato de lo planteado.</dd></div>
+      </dl></div>
+    </div>
+
+    <div class="ficha ficha--dato">
+      <div class="fhead"><span class="code">H-03</span><h4>El producto estrella está por debajo de la mediana del catálogo</h4><span class="tipo tipo--dato">Dato</span></div>
+      <div class="fbody"><dl>
+        <div class="frow"><dt>Módulo</dt><dd>M2</dd></div>
+        <div class="frow"><dt>Evidencia</dt><dd>Mantenimiento de consola: <strong>L.500</strong>. Sobre los 25 servicios con precio único: media <strong>L.1,004</strong>, mediana <strong>L.550</strong>. Los ítems de mayor ticket (HDMI PS5 L.3,500 · módulo de video L.1,800 · HDMI PS4 y puerto Switch L.1,600) son los de menor frecuencia declarada.</dd></div>
+        <div class="frow"><dt>Tensión</dt><dd>El motor de volumen es el de menor ingreso unitario, operado por una sola persona con capacidad fija.</dd></div>
+        <div class="frow"><dt>Implicación</dt><dd>El techo de ingreso es aritmético: equipos por semana × L.500. No lo levanta la pauta; lo levanta el mix.</dd></div>
+        <div class="frow"><dt>Alimenta</dt><dd><span class="feeds">→ D1 · D9 · O6</span> — es el preámbulo duro de los tres.</dd></div>
+      </dl></div>
+    </div>
+
+    <div class="ficha ficha--dato">
+      <div class="fhead"><span class="code">H-04</span><h4>Dos servicios están tarifados con precio ambiguo, uno de ellos el de mayor crecimiento</h4><span class="tipo tipo--dato">Dato</span></div>
+      <div class="fbody"><dl>
+        <div class="frow"><dt>Módulo</dt><dd>M2</dd></div>
+        <div class="frow"><dt>Evidencia</dt><dd>Ítem 2, mantenimiento PS5 / Xbox Series X|S: <span class="mono">L.500 / 1000</span>. Ítem 6, módulo de video PS4: <span class="mono">L.1,800 (1,200)</span>. En ningún caso está escrita la regla que decide cuál aplica.</dd></div>
+        <div class="frow"><dt>Tensión</dt><dd>Choca con la regla de marca “impecable en el dato” y con la regla 4 de no negociación del plan de contenido.</dd></div>
+        <div class="frow"><dt>Implicación</dt><dd>El catálogo no se puede publicar tal cual. Es el único bloqueante real, y el ítem 2 cubre justamente el parque PS5 señalado como la ventana de mantenimiento que viene.</dd></div>
+        <div class="frow"><dt>Verificación</dt><dd>Preguntar la regla en M2 y escribirla. 10 minutos.</dd></div>
+      </dl></div>
+    </div>
+
+    <div class="ficha ficha--dato">
+      <div class="fhead"><span class="code">H-05</span><h4>El bundle de disco duro descuenta el mantenimiento a la mitad, y nadie lo llama estrategia</h4><span class="tipo tipo--dato">Dato</span></div>
+      <div class="fbody"><dl>
+        <div class="frow"><dt>Módulo</dt><dd>M2</dd></div>
+        <div class="frow"><dt>Evidencia</dt><dd>Disco 500 GB PS4 solo: L.1,250 · con mantenimiento: L.1,500. El mismo <strong>+L.250</strong> en los cuatro bundles (ítems 24 a 27), contra L.500 del mantenimiento suelto.</dd></div>
+        <div class="frow"><dt>Tensión</dt><dd>Existe una política de venta cruzada al 50% de descuento que no está escrita, ni comunicada, ni nombrada como tal.</dd></div>
+        <div class="frow"><dt>Implicación</dt><dd>El mecanismo para subir el ticket ya está inventado y probado en la hoja. Falta nombrarlo y venderlo.</dd></div>
+        <div class="frow"><dt>Alimenta</dt><dd><span class="feeds">→ O6</span> deja de ser una oportunidad teórica y pasa a ser un producto existente sin comunicar.</dd></div>
+      </dl></div>
+    </div>
+
+    <div class="ficha ficha--dato">
+      <div class="fhead"><span class="code">H-06</span><h4>El catálogo comercial activo vende licencias de Office 365</h4><span class="tipo tipo--dato">Dato</span></div>
+      <div class="fbody"><dl>
+        <div class="frow"><dt>Módulo</dt><dd>M2</dd></div>
+        <div class="frow"><dt>Evidencia</dt><dd>Hoja “Productos”, único ítem: Office 365, L.450.</dd></div>
+        <div class="frow"><dt>Tensión</dt><dd>El Documento 01 (D5) dice que la línea de computadoras “ocupa espacio en el discurso de marca”. El dato es más fuerte: ocupa espacio en el catálogo comercial.</dd></div>
+        <div class="frow"><dt>Implicación</dt><dd>Podar la línea PC no es una decisión de mensaje: es una decisión de catálogo, y por eso nunca se ejecutó.</dd></div>
+        <div class="frow"><dt>Alimenta</dt><dd><span class="feeds">→ D5</span> con evidencia, no con percepción.</dd></div>
+      </dl></div>
+    </div>
+
+    <div class="ficha ficha--ciego">
+      <div class="fhead"><span class="code">H-07</span><h4>El precio está indexado al repuesto y el costo no está registrado en ninguna parte</h4><span class="tipo tipo--ciego">Punto ciego</span></div>
+      <div class="fbody"><dl>
+        <div class="frow"><dt>Módulo</dt><dd>M2</dd></div>
+        <div class="frow"><dt>Evidencia</dt><dd>Puerto HDMI PS5 L.3,500 contra PS4 L.1,600 — <strong>2.2×</strong> por el mismo procedimiento. La diferencia es la pieza, no la mano de obra. No existe columna de costo en ningún documento.</dd></div>
+        <div class="frow"><dt>Tensión</dt><dd>La auditoría trata la volatilidad de repuestos como amenaza externa. Si el precio ya está indexado al repuesto pero el costo no se registra, el margen se erosiona sin ninguna señal.</dd></div>
+        <div class="frow"><dt>Implicación</dt><dd>Ninguna decisión de precio es posible hasta llenar el instrumento I-2.</dd></div>
+        <div class="frow"><dt>Verificación</dt><dd>Recorrer el catálogo con el dueño anotando costo de repuesto. 40 minutos en M2.</dd></div>
+      </dl></div>
+    </div>
+
+    <div class="ficha ficha--creencia">
+      <div class="fhead"><span class="code">H-08</span><h4>“Entregamos en 24 a 48 horas” nunca se ha medido</h4><span class="tipo tipo--creencia">Creencia</span></div>
+      <div class="fbody"><dl>
+        <div class="frow"><dt>Módulo</dt><dd>M3 · M4</dd></div>
+        <div class="frow"><dt>Evidencia</dt><dd>El Documento 01 lo declara diferenciador competitivo (F3). No hay un solo registro de tiempos de entrega en ningún documento del portafolio.</dd></div>
+        <div class="frow"><dt>Tensión</dt><dd>Es la fortaleza más comunicable del negocio y es la única que no está respaldada por un número.</dd></div>
+        <div class="frow"><dt>Implicación</dt><dd>Si se cumple, es el argumento comercial más fuerte disponible y se publica con el porcentaje exacto. Si no, la propia regla de marca obliga a bajarlo del discurso.</dd></div>
+        <div class="frow"><dt>Verificación</dt><dd>De los últimos 20 trabajos, cuántos se entregaron dentro de 48 h. Sale del instrumento I-1 en 20 minutos.</dd></div>
+      </dl></div>
+    </div>
+
+    <div class="ficha ficha--creencia">
+      <div class="fhead"><span class="code">H-09</span><h4>“Reparar es dramáticamente más barato que reemplazar” no tiene fuente</h4><span class="tipo tipo--creencia">Creencia</span></div>
+      <div class="fbody"><dl>
+        <div class="frow"><dt>Módulo</dt><dd>M2</dd></div>
+        <div class="frow"><dt>Evidencia</dt><dd>El Documento 01 (O2) lo llama “el argumento de venta más potente disponible”. El Documento 05 exige, para el pilar de economía, “fuente verificable y fecha” en todo precio comparativo. No existe ninguna.</dd></div>
+        <div class="frow"><dt>Tensión</dt><dd>El mensaje madre de un pilar completo incumple la regla que ese mismo documento impone.</dd></div>
+        <div class="frow"><dt>Implicación</dt><dd>El pilar P4 no puede publicarse sin romper la norma de marca propia.</dd></div>
+        <div class="frow"><dt>Verificación</dt><dd>Tres cotizaciones de PS5 nueva en Honduras, con captura y fecha. 30 minutos.</dd></div>
+      </dl></div>
+    </div>
+
+    <div class="ficha ficha--ciego">
+      <div class="fhead"><span class="code">H-10</span><h4>La recurrencia sostiene el modelo de negocio y nunca se ha contado</h4><span class="tipo tipo--ciego">Punto ciego</span></div>
+      <div class="fbody"><dl>
+        <div class="frow"><dt>Módulo</dt><dd>M4</dd></div>
+        <div class="frow"><dt>Evidencia</dt><dd>El mantenimiento programado cada 12–18 meses (O3) sostiene el argumento de ingreso recurrente. No hay registro de cuántos clientes han vuelto.</dd></div>
+        <div class="frow"><dt>Tensión</dt><dd>Con capacidad fija y ticket bajo (H-03), la recompra es la única palanca de crecimiento que no consume más horas de captación — y es la que no se mide.</dd></div>
+        <div class="frow"><dt>Implicación</dt><dd>Si la recompra es alta, el negocio vale bastante más que su ticket y la estrategia debería girar hacia la base instalada. Si es baja, O3 es una hipótesis y no una oportunidad.</dd></div>
+        <div class="frow"><dt>Verificación</dt><dd>De los últimos 20 clientes, cuántos aparecen dos o más veces. Instrumento I-1.</dd></div>
+      </dl></div>
+    </div>
+
+    <div class="callout col" style="margin-top:26px">
+      <p class="eyebrow">Lectura del piloto</p>
+      <p>Seis de los diez hallazgos son <strong>datos</strong> que ya existían en archivos del propio cliente y que ningún documento del portafolio había abierto. Eso confirma el control <span class="mono">G6</span>: antes de proponer producir, hay que inventariar. Y confirma el diagnóstico general — el problema de CleanStation nunca fue de producción ni de definición, sino de <strong>publicación y de medición</strong>.</p>
+    </div>
+  </div>
+</section>
+
+<section id="s9" style="border-bottom:0">
+  <div class="wrap">
+    <div class="shead">
+      <span class="num">09</span>
+      <div>
+        <h2>Lo que falta preguntar</h2>
+        <p>Los diez hallazgos anteriores salieron de archivos. Estas son las preguntas que solo se responden con el dueño enfrente, ordenadas por lo que desbloquean.</p>
+      </div>
+    </div>
+
+    <div class="tablewrap">
+      <table>
+        <thead><tr><th class="num">Módulo</th><th>Pregunta</th><th>Desbloquea</th></tr></thead>
+        <tbody>
+          <tr><td class="num">M2</td><td>¿Qué decide si el mantenimiento de PS5 son L.500 o L.1,000?</td><td>Publicar el catálogo — <span class="mono">H-04</span></td></tr>
+          <tr><td class="num">M2</td><td>¿Cuánto cuesta el repuesto en los 10 servicios que más vendés?</td><td>Toda decisión de precio — <span class="mono">H-07</span></td></tr>
+          <tr><td class="num">M4</td><td>De los últimos 20 trabajos: servicio, monto, origen, repetición y días de entrega.</td><td>Ticket, mix, canal, recompra y <span class="mono">H-08</span>, <span class="mono">H-10</span></td></tr>
+          <tr><td class="num">M3</td><td>¿Cuántos equipos podés entregar por semana sin cambiar nada?</td><td>El techo de pauta antes de romper la promesa</td></tr>
+          <tr><td class="num">M6</td><td>¿Cuál es la objeción textual que más escuchás y qué contestás?</td><td>El pilar de confianza y las respuestas rápidas</td></tr>
+          <tr><td class="num">M5</td><td>¿Qué te preguntan que no está contestado en ninguna red?</td><td>El banco de contenido con demanda comprobada</td></tr>
+          <tr><td class="num">M7</td><td>¿Qué más tenés hecho y sin publicar, además de las 21 piezas?</td><td>El inventario real antes de producir</td></tr>
+          <tr><td class="num">M8</td><td>¿Querés emplear a alguien o preferís seguir solo?</td><td>Si la estrategia puede o no apoyarse en crecer volumen</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="callout col">
+      <p class="eyebrow">Nota de método</p>
+      <p>Este piloto se corrió al revés: primero los documentos, después la sesión. En el orden correcto la sesión va primero y los archivos se piden 48 horas antes, para no gastar tiempo de entrevista en lo que se puede leer. Se deja anotado porque es la corrección número uno para el próximo cliente.</p>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<div class="next">
+  <div class="wrap">
+    <p class="eyebrow">Cómo se reusa</p>
+    <h2 style="max-width:26ch">Se cambia el cliente, no el instrumento</h2>
+    <p class="col" style="margin-top:14px;color:var(--muted)">Las secciones 01 a 07 son fijas para todo cliente R3ads. Solo se reemplazan la sección 08 (los hallazgos) y la 09 (las preguntas abiertas). El numerador de hallazgos arranca en <span class="mono">H-01</span> con cada cliente y los códigos se citan después dentro del FODA para dejar el rastro visible.</p>
+  </div>
+</div>
+
+<footer>
+  <div class="wrap">
+    <div class="bar"></div>
+    <div class="row">
+      <span>R3ADS · Metodología</span>
+      <span>Documento 00 · Sesión Cero v1.0</span>
+      <span>Piloto: CleanStation · agosto 2026</span>
+      <span>Uso interno</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+(function(){
+  var bar=document.getElementById('progress');
+  function upd(){
+    var h=document.documentElement;
+    var max=h.scrollHeight-h.clientHeight;
+    bar.style.width=(max>0?(h.scrollTop/max)*100:0)+'%';
+  }
+  document.addEventListener('scroll',upd,{passive:true});
+  window.addEventListener('resize',upd);
+  upd();
+})();
+</script>
