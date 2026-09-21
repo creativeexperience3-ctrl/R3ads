@@ -74,18 +74,34 @@ quedan fuera, ver el plan).
   sepa a qué clínica pertenece (ver Fase 5 del plan), con campos de branding
   para documentos impresos (`razonSocial`, `direccion`, `ciudad`, `telefono`,
   `whatsapp`, `correo`, `sitioWeb`).
-- **Las 13 páginas HTML del módulo clínico** (`Auth.html`,
+- **Las 9 páginas HTML del módulo clínico** (`Auth.html`,
   `Admin-Usuarios.html`, `Admin-Precios.html`, `Resultado-EKG.html`,
-  `Constancia-Medica.html`, `Ver-Prueba.html`, `Mis-Cotizaciones.html`,
-  `Examenes-Laboratorio.html`, `Pruebas-Rapidas.html`, `Mi-Historial.html`,
-  `Cotizador.html`, `Cotizacion-Sistema.html`, `Expediente-Doctor.html`)
+  `Constancia-Medica.html`, `Ver-Prueba.html`,
+  `Examenes-Laboratorio.html`, `Pruebas-Rapidas.html`,
+  `Expediente-Doctor.html`)
   ya usan `r3adsAuth`/`r3adsDb`, `r3adsStaff.*(user, clinicId, cb)`, leen su
   branding desde `clinic-config.js`, y escriben/leen `clinicId` en cada
   documento. **Portado completo** — ver "Gaps conocidos" abajo para lo que
   queda pendiente de reconciliar, no de portar.
+- **Autoservicio de paciente removido (2026-09-21)**: `Cotizador.html`,
+  `Cotizacion-Sistema.html`, `Mis-Cotizaciones.html` y `Mi-Historial.html`
+  se borraron por completo — el producto todavía no tiene clínicas de pago
+  y el alcance del SaaS quedó definido como el portal de **staff**
+  (Caja/Pacientes/Buscar/Pendientes dentro de `Expediente-Doctor.html`),
+  no un portal de autoservicio para el paciente final. `Auth.html` ahora
+  redirige por defecto a `Expediente-Doctor.html` en vez de
+  `Mis-Cotizaciones.html`.
+- **`catalogo-servicios.js`** — nuevo: catálogo base de servicios/precios,
+  extraído programáticamente de `Cotizador.html` antes de borrarlo (mismos
+  183 ítems en 8 categorías). Reemplaza el `fetch('Cotizador.html')` +
+  `DOMParser` que usaban `Admin-Precios.html` y `Expediente-Doctor.html`
+  para calcular `servicioKey` — ahora ambas leen directamente
+  `window.R3ADS_CATALOGO` (cargado con `<script src="catalogo-servicios.js">`).
+  Los precios/overrides por clínica siguen viviendo solo en Firestore
+  (`catalogoConfig`), nunca en este archivo.
 - **`Expediente-Doctor.html`** introduce `servicioKey` (mismo slug que
-  `Admin-Precios.html`) al crear consultas de tipo servicio, calculado en
-  vivo parseando `Cotizador.html` — así queda garantizado que coincide con
+  `Admin-Precios.html`) al crear consultas de tipo servicio, calculado a
+  partir de `catalogo-servicios.js` — así queda garantizado que coincide con
   las claves reales de `catalogoConfig`, sin mantener una tabla duplicada.
   El código de paciente usa `CLINIC.prefijoCodigoPaciente`, y los documentos
   impresos (PDF de consulta, Word del expediente) ya muestran los datos de
@@ -95,8 +111,8 @@ quedan fuera, ver el plan).
   catálogo, que alimenta directamente `esServicioEnfermeria()` en
   `firestore.rules`.
 - **Doctor 365 removido** de todas las páginas portadas (no solo
-  rebautizado) — ver notas en `Cotizador.html`/`Cotizacion-Sistema.html`
-  sobre el impacto en el cálculo de precios de tercera/cuarta edad.
+  rebautizado) — impacta el cálculo de precios de tercera/cuarta edad, ver
+  `catalogo-servicios.js` para el catálogo actual sin ese descuento.
 
 - **Desplegado a producción (2026-09-21)**: `firestore.rules`, `storage.rules`,
   índices compuestos, y la Cloud Function `onUsuarioWrite` (activa, Node 22,
@@ -140,7 +156,7 @@ quedan fuera, ver el plan).
   en el cliente (`SERVICIOS_SIN_PRECLINICA`) porque no hay campo de catálogo
   equivalente a `enfermeriaCompletable` para esta distinción todavía.
 - **5 nombres de servicio no coinciden** entre el catálogo interno de
-  `Expediente-Doctor.html` y `Cotizador.html` (`Aplicación de Suero`,
+  `Expediente-Doctor.html` y `catalogo-servicios.js` (`Aplicación de Suero`,
   las dos variantes de `Sueroterapia Glutatión + Vit C`, `Cirugía menor`,
   `Retiro de puntos`, `Curación` — variantes/nombres distintos). El sistema
   falla en modo seguro (exige médico) para esos, pero enfermería nunca podrá
@@ -149,6 +165,13 @@ quedan fuera, ver el plan).
   ("vincular pruebas/exámenes viejos sin código de paciente") ahora llevan
   `.where('clinicId', ...)` — antes no tenían ningún filtro; probar ese
   flujo específico una vez exista una clínica de prueba real.
+- **`firestore.rules` todavía tiene reglas del portal de autoservicio de
+  paciente removido** (colección `/quotations/{id}` completa, y las ramas
+  `ownerUid`/`compartidoCon` en `expedientes` y varias colecciones
+  dependientes que permitían que un paciente autenticado leyera su propio
+  historial). Ya no hay ninguna página que las use, pero no se tocó el
+  archivo de reglas — es deploy a producción y toca ~8 bloques `match`, así
+  que se dejó pendiente de una pasada dedicada en vez de hacerlo de paso.
 
 `HISTORIAL-MEDICO-README.md` se mantiene como referencia del modelo de
 datos original de CMG (útil para portar cada página), pero ya no describe

@@ -302,12 +302,12 @@
     <div class="auth-brand-watermark" id="auth-brand-watermark"></div>
     <!-- Logo por clínica: pendiente (Fase 5). Mientras tanto se muestra el
          nombre de la clínica como texto (ver clinic-config.js). -->
-    <h1 id="auth-brand-title">Tu salud,<br>en <span>un solo lugar</span></h1>
-    <p id="auth-brand-copy">Accede a tu cuenta para guardar y gestionar tus cotizaciones de servicios médicos.</p>
+    <h1 id="auth-brand-title">Tu clínica,<br>en <span>un solo lugar</span></h1>
+    <p id="auth-brand-copy">Accede a tu cuenta para gestionar el portal clínico.</p>
     <div class="auth-benefits">
       <div class="auth-benefit">
         <div class="auth-benefit-dot"></div>
-        Guarda cotizaciones en la nube
+        Expedientes, caja y pacientes en un solo panel
       </div>
       <div class="auth-benefit">
         <div class="auth-benefit-dot"></div>
@@ -315,7 +315,7 @@
       </div>
       <div class="auth-benefit">
         <div class="auth-benefit-dot"></div>
-        Historial completo de precios
+        Roles y permisos por clínica
       </div>
     </div>
   </div>
@@ -417,11 +417,11 @@
   document.getElementById('page-title').textContent = 'Mi Cuenta · ' + clinicName;
   document.getElementById('auth-brand-watermark').textContent = clinicName;
   document.getElementById('auth-brand-copy').textContent =
-    'Accede a tu cuenta para guardar y gestionar tus cotizaciones de servicios médicos de ' + clinicName + '.';
+    'Accede a tu cuenta para gestionar el portal clínico de ' + clinicName + '.';
 
   /* ── Destino tras login ── */
   var params    = new URLSearchParams(window.location.search);
-  var returnTo  = params.get('returnTo') || 'Mis-Cotizaciones.html';
+  var returnTo  = params.get('returnTo') || 'Expediente-Doctor.html';
 
   /* ── Si ya está logueado, redirigir ── */
   r3adsAuth.onAuthStateChanged(function (user) {

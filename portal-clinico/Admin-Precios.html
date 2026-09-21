@@ -141,6 +141,7 @@ body { margin: 0; background: #F4F6FB; font-family: 'Now','Segoe UI',Arial,sans-
 }
 </style>
 <script src="clinic-config.js"></script>
+<script src="catalogo-servicios.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
@@ -151,7 +152,7 @@ body { margin: 0; background: #F4F6FB; font-family: 'Now','Segoe UI',Arial,sans-
 
 <div class="ap-top">
   <div class="ap-top-left">
-    <div class="ap-top-title" id="ap-clinic-name">Gestión de Precios<small>Cotizador</small></div>
+    <div class="ap-top-title" id="ap-clinic-name">Gestión de Precios<small>Catálogo de servicios</small></div>
   </div>
   <div class="ap-top-right">
     <span class="ap-email" id="ap-user-email">—</span>
@@ -163,7 +164,7 @@ body { margin: 0; background: #F4F6FB; font-family: 'Now','Segoe UI',Arial,sans-
 <div class="ap-wrap">
 
   <div class="ap-note">
-    ℹ️ Aquí defines, por cada ítem del catálogo: el <b>precio al público</b> que se muestra en el Cotizador, y si <b>enfermería puede completarlo sin médico</b> (usado por las reglas de seguridad y por Expediente-Doctor.html para decidir el flujo de atención). Los cambios se aplican al Cotizador en tiempo real al guardar.
+    ℹ️ Aquí defines, por cada ítem del catálogo: el <b>precio al público</b>, y si <b>enfermería puede completarlo sin médico</b> (usado por las reglas de seguridad y por Expediente-Doctor.html para decidir el flujo de atención). Los cambios se aplican de inmediato al guardar.
   </div>
 
   <div class="ap-controls">
@@ -195,7 +196,7 @@ body { margin: 0; background: #F4F6FB; font-family: 'Now','Segoe UI',Arial,sans-
   function fmtN(n){ return Number.isInteger(n) ? n.toLocaleString('en-US') : n.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}); }
 
   var clinicName = (window.R3ADS_CLINIC_FALLBACK && window.R3ADS_CLINIC_FALLBACK.nombre) || 'tu clínica';
-  $('ap-clinic-name').innerHTML = 'Gestión de Precios<small>Cotizador · ' + clinicName + '</small>';
+  $('ap-clinic-name').innerHTML = 'Gestión de Precios<small>Catálogo de servicios · ' + clinicName + '</small>';
 
   var toastEl = $('ap-toast'), toastTimer;
   function toast(msg, isErr) {
@@ -220,42 +221,37 @@ body { margin: 0; background: #F4F6FB; font-family: 'Now','Segoe UI',Arial,sans-
     r3adsAuth.signOut().then(function(){ window.location.href = 'Auth.html'; });
   });
 
-  /* ── Cargar catálogo (parseando Cotizador.html) + overrides de ESTA clínica ── */
+  /* ── Cargar catálogo (catalogo-servicios.js) + overrides de ESTA clínica ── */
   function boot() {
-    Promise.all([
-      fetch('Cotizador.html', { cache: 'no-store' }).then(function(r){ return r.text(); }),
-      r3adsDb.collection('clinics').doc(CLINIC_ID).collection('catalogoConfig').get().then(function(snap){
-        var m = {}; snap.forEach(function(d){ m[d.id] = d.data(); }); return m;
-      }).catch(function(err){ console.warn('[Portal Clínico] catalogoConfig read:', err); return {}; })
-    ]).then(function (res) {
-      _cfg = res[1] || {};
-      parseCatalog(res[0]);
+    r3adsDb.collection('clinics').doc(CLINIC_ID).collection('catalogoConfig').get().then(function(snap){
+      var m = {}; snap.forEach(function(d){ m[d.id] = d.data(); }); return m;
+    }).catch(function(err){ console.warn('[Portal Clínico] catalogoConfig read:', err); return {}; })
+    .then(function (cfg) {
+      _cfg = cfg || {};
+      parseCatalog();
       render();
     }).catch(function (err) {
-      $('ap-list').innerHTML = '<div class="ap-msg" style="color:#B91C1C">No se pudo cargar el catálogo del Cotizador.<br>' + esc(err.message) + '</div>';
+      $('ap-list').innerHTML = '<div class="ap-msg" style="color:#B91C1C">No se pudo cargar el catálogo de servicios.<br>' + esc(err.message) + '</div>';
     });
   }
 
-  function parseCatalog(html) {
-    var doc = new DOMParser().parseFromString(html, 'text/html');
+  function parseCatalog() {
     _cats = [];
-    doc.querySelectorAll('.coti-cat').forEach(function (catEl) {
-      var cat = catEl.dataset.cat || 'otros';
-      var titleEl = catEl.querySelector('.coti-cat-title .lang-es') || catEl.querySelector('.coti-cat-title');
-      var catTitle = titleEl ? titleEl.textContent.trim() : cat;
+    (window.R3ADS_CATALOGO || []).forEach(function (catDef) {
+      var cat = catDef.cat || 'otros';
       var items = [], seen = {};
-      catEl.querySelectorAll('.coti-item').forEach(function (it) {
-        var nameEs = (it.dataset.nameEs || '').trim();
+      catDef.items.forEach(function (it) {
+        var nameEs = (it.nameEs || '').trim();
         var base = cat + '__' + slug(nameEs);
         seen[base] = (seen[base] || 0) + 1;
         var key = seen[base] > 1 ? base + '--' + seen[base] : base;
         items.push({
           key: key, cat: cat, nameEs: nameEs,
-          nameEn: (it.dataset.nameEn || '').trim(),
-          defPrice: parseFloat(it.dataset.price) || 0
+          nameEn: (it.nameEn || '').trim(),
+          defPrice: it.price || 0
         });
       });
-      if (items.length) _cats.push({ cat: cat, catTitle: catTitle, items: items });
+      if (items.length) _cats.push({ cat: cat, catTitle: catDef.catTitle || cat, items: items });
     });
   }
 
@@ -386,7 +382,7 @@ body { margin: 0; background: #F4F6FB; font-family: 'Now','Segoe UI',Arial,sans-
       $('ap-list').querySelectorAll('.ap-row.is-dirty').forEach(function(r){ r.classList.remove('is-dirty'); });
       btn.innerHTML = '💾 Guardar cambios <span class="ap-badge" id="ap-save-count" style="display:none">0</span>';
       updateSaveBtn();
-      toast('✅ Cambios guardados. Ya se reflejan en el Cotizador.');
+      toast('✅ Cambios guardados.');
     }).catch(function (err) {
       btn.disabled = false;
       btn.innerHTML = '💾 Guardar cambios <span class="ap-badge" id="ap-save-count">' + Object.keys(_dirty).length + '</span>';

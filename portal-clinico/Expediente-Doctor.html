@@ -857,14 +857,13 @@ summary.ed-meds-cat { list-style: revert; }
 </head>
 <body data-lang="es">
 
-<!-- Header simplificado (ver nota equivalente en Mis-Cotizaciones.html):
-     se quita el chrome de marketing de CMG (promo strip, nav a Inicio/
-     Sobre-nosotros), fuera del alcance del módulo clínico. -->
+<!-- Header simplificado: se quita el chrome de marketing de CMG (promo
+     strip, nav a Inicio/Sobre-nosotros) y el autoservicio de paciente
+     (Cotizador, Mi Historial), fuera del alcance del módulo clínico. -->
 <header class="site-header">
   <div class="container header-row">
     <div class="brand-lockup" id="ed-brand-name" style="color:#fff;font-weight:900;font-size:18px">—</div>
     <nav class="site-nav" aria-label="Principal">
-      <a href="Cotizador.html">Cotizador</a>
       <a href="Pruebas-Rapidas.html">Pruebas Rápidas</a>
       <a href="Examenes-Laboratorio.html">Laboratorio</a>
     </nav>
@@ -1301,6 +1300,7 @@ summary.ed-meds-cat { list-style: revert; }
 
 <!-- Firebase compat SDK -->
 <script src="clinic-config.js"></script>
+<script src="catalogo-servicios.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
@@ -1401,11 +1401,11 @@ summary.ed-meds-cat { list-style: revert; }
      el mismo dato que usa esServicioEnfermeria() en firestore.rules.
      servicioKey NO es el nombre del servicio: es el slug
      `{categoria}__{nombre-slugificado}` que calcula Admin-Precios.html a
-     partir de Cotizador.html (atributos data-cat + data-name-es de cada
-     .coti-item). Por eso esta página, igual que Admin-Precios.html, también
-     fetch()ea y parsea Cotizador.html con DOMParser para calcular la MISMA
-     clave con la MISMA función slug() — así el ID que se busca en Firestore
-     coincide exactamente con el que Admin-Precios.html ya escribió.
+     partir de catalogo-servicios.js (el catálogo base de servicios/precios,
+     ver ese archivo). Por eso esta página, igual que Admin-Precios.html,
+     también recorre window.R3ADS_CATALOGO con la MISMA función slug() —
+     así el ID que se busca en Firestore coincide exactamente con el que
+     Admin-Precios.html ya escribió.
      Todo se resuelve UNA SOLA VEZ al validar sesión (cargarCatalogoEnfermeria,
      llamada desde el AUTH GUARD) y se cachea en _servicioKeyPorNombre /
      _catalogoConfigCache, para que puedeEnfermeriaCompletarServicio() se siga
@@ -1413,12 +1413,12 @@ summary.ed-meds-cat { list-style: revert; }
      _isAdminUnifCache / _isMedicoTratanteCache más abajo.
      Fail-closed: si el catálogo aún no cargó, o si un nombre de
      CATALOGO_SERVICIOS no tiene coincidencia EXACTA de nombre en
-     Cotizador.html, no hay servicioKey y el servicio requiere médico
+     catalogo-servicios.js, no hay servicioKey y el servicio requiere médico
      tratante por defecto (igual que en firestore.rules). CONFIRMADO al portar
      este archivo: 'Aplicación de Suero', 'Sueroterapia Glutatión + Vit C
      (media dosis)' y '... (completo)' no existen como ítems en
-     Cotizador.html; y 'Cirugía menor', 'Curación' y 'Retiro de puntos' sólo
-     existen ahí con variantes por tamaño en el nombre ("Cirugía menor ·
+     catalogo-servicios.js; y 'Cirugía menor', 'Curación' y 'Retiro de puntos'
+     sólo existen ahí con variantes por tamaño en el nombre ("Cirugía menor ·
      pequeña/media/grande", "Curación pequeña/mediana/grande", "Retiro de
      puntos (cada uno)") — para esos nombres computeServicioKey() no
      encontrará coincidencia (null), lo cual es seguro pero significa que
@@ -1430,7 +1430,7 @@ summary.ed-meds-cat { list-style: revert; }
       .replace(/á/g, 'a').replace(/é/g, 'e').replace(/í/g, 'i').replace(/ó/g, 'o').replace(/ú/g, 'u').replace(/ü/g, 'u').replace(/ñ/g, 'n')
       .replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
   }
-  var _servicioKeyPorNombre = {};   // nombreEs (exacto) -> servicioKey, calculado desde Cotizador.html
+  var _servicioKeyPorNombre = {};   // nombreEs (exacto) -> servicioKey, calculado desde catalogo-servicios.js
   var _catalogoConfigCache = {};    // servicioKey -> { enfermeriaCompletable, ... } de ESTA clínica
   function computeServicioKey(servicioNombre) {
     return _servicioKeyPorNombre[servicioNombre] || null;
@@ -1443,20 +1443,17 @@ summary.ed-meds-cat { list-style: revert; }
      tener sesión, la lectura de catalogoConfig no aplica ninguna regla
      especial —es lectura pública—, pero no tiene sentido intentarlo antes). */
   function cargarCatalogoEnfermeria() {
-    Promise.all([
-      fetch('Cotizador.html', { cache: 'no-store' }).then(function (r) { return r.text(); }),
-      r3adsDb.collection('clinics').doc(CLINIC_ID).collection('catalogoConfig').get()
-        .then(function (snap) { var m = {}; snap.forEach(function (d) { m[d.id] = d.data(); }); return m; })
-        .catch(function (err) { console.warn('[Portal Clínico] catalogoConfig read:', err); return {}; })
-    ]).then(function (res) {
-      _catalogoConfigCache = res[1] || {};
-      var doc = new DOMParser().parseFromString(res[0], 'text/html');
+    r3adsDb.collection('clinics').doc(CLINIC_ID).collection('catalogoConfig').get()
+      .then(function (snap) { var m = {}; snap.forEach(function (d) { m[d.id] = d.data(); }); return m; })
+      .catch(function (err) { console.warn('[Portal Clínico] catalogoConfig read:', err); return {}; })
+    .then(function (cfg) {
+      _catalogoConfigCache = cfg || {};
       var byName = {};
-      doc.querySelectorAll('.coti-cat').forEach(function (catEl) {
-        var cat = catEl.dataset.cat || 'otros';
+      (window.R3ADS_CATALOGO || []).forEach(function (catDef) {
+        var cat = catDef.cat || 'otros';
         var seen = {};
-        catEl.querySelectorAll('.coti-item').forEach(function (it) {
-          var nameEs = (it.dataset.nameEs || '').trim();
+        catDef.items.forEach(function (it) {
+          var nameEs = (it.nameEs || '').trim();
           if (!nameEs) return;
           var base = cat + '__' + slug(nameEs);
           seen[base] = (seen[base] || 0) + 1;
@@ -1509,7 +1506,7 @@ summary.ed-meds-cat { list-style: revert; }
     return base;
   }
 
-  /* Catálogo ESTRICTO de exámenes de laboratorio, 144 ítems agrupados, sincronizado con Cotizador.html */
+  /* Catálogo ESTRICTO de exámenes de laboratorio, 143 ítems agrupados, sincronizado con catalogo-servicios.js */
   var CATALOGO_LABORATORIO = [
     { label: 'Pruebas comunes', items: [
       'Prueba de embarazo (rápida)', 'Prueba de dengue (rápida)', 'Prueba DUO (VIH 4ª gen.)',
