@@ -1,0 +1,492 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Resultado</title>
+<!-- Favicon: pendiente por clínica (Fase 5 del plan). -->
+<link rel="stylesheet" href="assets/cmg-tokens.css">
+<style>
+*, *::before, *::after { box-sizing: border-box; }
+body { margin: 0; background: #F4F6FB; font-family: 'Segoe UI', Arial, sans-serif; min-height: 100vh; }
+
+/* ── Toolbar ── */
+.vp-toolbar {
+  max-width: 800px;
+  margin: 28px auto 16px;
+  padding: 0 28px;
+  display: flex;
+  gap: 10px;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.vp-back {
+  color: #213C7D;
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.vp-back:hover { text-decoration: underline; }
+.vp-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+.vp-btn {
+  border: none;
+  border-radius: 8px;
+  padding: 10px 18px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+  transition: opacity .15s, transform .1s;
+}
+.vp-btn:hover { opacity: .9; }
+.vp-btn:active { transform: scale(.98); }
+.vp-btn-print { background: #059669; color: #fff; }
+.vp-btn-pdf { background: #213C7D; color: #fff; }
+
+/* ── Loading / Error ── */
+.vp-message {
+  max-width: 800px;
+  margin: 60px auto;
+  padding: 40px;
+  background: #fff;
+  border-radius: 12px;
+  text-align: center;
+  color: #4B5563;
+}
+.vp-spinner {
+  width: 28px; height: 28px;
+  border: 3px solid #E5E7EB;
+  border-top-color: #213C7D;
+  border-radius: 50%;
+  animation: spin .7s linear infinite;
+  margin: 0 auto 16px;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ═══ RESULT SHEET (copiado de Pruebas-Rapidas.html, sin contenteditable) ═══ */
+.rs-container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 0 28px 40px;
+}
+.result-sheet {
+  background: #fff;
+  border: 1px solid #ddd;
+  padding: 0;
+  font-family: 'Segoe UI', Arial, sans-serif;
+  font-size: 12px;
+  color: #1a1a1a;
+  line-height: 1.4;
+  position: relative;
+  overflow: hidden;
+}
+.rs-header {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 20px 32px 16px;
+  border-bottom: 3px solid #4BACC6;
+  background: linear-gradient(135deg, #f0f8ff 0%, #e8f4f8 50%, #fff 100%);
+  position: relative;
+}
+.rs-header::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 0; right: 0; bottom: 0;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 80'%3E%3Cpath d='M0 40 L60 40 L80 15 L100 65 L120 25 L140 55 L160 40 L400 40' fill='none' stroke='%234BACC6' stroke-width='1.5' opacity='0.15'/%3E%3C/svg%3E") no-repeat center;
+  background-size: cover;
+  pointer-events: none;
+}
+.rs-logo { width: 70px; height: auto; position: relative; z-index: 1; }
+.rs-header-text { position: relative; z-index: 1; }
+.rs-header-text h1 { font-size: 18px; font-weight: 800; color: #213C7D; margin: 0; }
+.rs-header-text h2 { font-size: 14px; font-weight: 600; color: #4BACC6; margin: 2px 0 0; }
+.rs-arsa-badge {
+  position: absolute; right: 24px; top: 12px; z-index: 1;
+  font-size: 9px; color: #666; text-align: center;
+  border: 1px solid #999; border-radius: 4px; padding: 4px 8px;
+  background: rgba(255,255,255,.8);
+}
+.rs-watermark {
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  opacity: .06;
+  pointer-events: none;
+  z-index: 0;
+  width: 300px;
+}
+.rs-body { padding: 20px 32px 16px; position: relative; z-index: 1; }
+.rs-title {
+  text-align: center;
+  font-size: 15px;
+  font-weight: 800;
+  color: #1a1a1a;
+  margin: 0 0 4px;
+  text-decoration: underline;
+}
+.rs-correlativo {
+  text-align: center;
+  font-size: 11px;
+  color: #555;
+  margin: 0 0 16px;
+}
+.rs-section-title {
+  font-size: 11px;
+  font-weight: 800;
+  color: #1a1a1a;
+  margin: 16px 0 6px;
+  text-transform: uppercase;
+}
+.rs-table { width: 100%; border-collapse: collapse; margin-bottom: 8px; }
+.rs-table td {
+  border: 1px solid #bbb;
+  padding: 5px 10px;
+  font-size: 12px;
+}
+.rs-table td:first-child {
+  font-weight: 700;
+  color: #333;
+  width: 160px;
+  background: #f0f8ff;
+}
+.rs-table td:nth-child(2) { color: #1a1a1a; }
+.rs-table-2col td:first-child { width: 100px; }
+.rs-table-2col td:nth-child(3) { width: 100px; font-weight: 700; background: #f0f8ff; }
+.rs-results-table td:first-child { width: auto; font-weight: 700; }
+.rs-results-table td:last-child {
+  font-weight: 800;
+  font-size: 13px;
+  text-align: right;
+  width: 140px;
+}
+.rs-sensitivity {
+  text-align: center;
+  font-size: 10px;
+  color: #DC2626;
+  margin: 8px 0;
+}
+.rs-nota { margin-top: 20px; padding-top: 12px; border-top: 1px solid #ddd; }
+.rs-nota strong { font-size: 11px; color: #333; }
+.rs-nota p { font-size: 9px; color: #666; margin: 2px 0; line-height: 1.3; }
+.rs-stamp { margin-top: 16px; display: flex; align-items: flex-end; gap: 20px; }
+.rs-stamp-img { width: 80px; height: 80px; object-fit: contain; opacity: .85; }
+.rs-stamp-text { font-size: 10px; font-weight: 800; color: #213C7D; line-height: 1.3; }
+.rs-stamp-right { margin-left: auto; text-align: center; }
+.rs-qr { width: 90px; height: 90px; }
+.rs-qr-label { font-size: 8px; color: #999; font-style: italic; margin-top: 2px; }
+.rs-footer {
+  margin-top: 16px;
+  padding-top: 10px;
+  border-top: 2px solid #4BACC6;
+  font-size: 10px;
+  color: #555;
+  line-height: 1.4;
+}
+.rs-footer a { color: #213C7D; }
+
+/* ═══ PRINT ═══ */
+@media print {
+  body * { visibility: hidden; }
+  .result-sheet, .result-sheet * { visibility: visible; }
+  .result-sheet {
+    position: fixed;
+    left: 0; top: 0;
+    width: 100%;
+    border: none;
+    box-shadow: none;
+    margin: 0; padding: 0;
+  }
+  .vp-toolbar { display: none !important; }
+  @page { size: letter; margin: 12mm 10mm; }
+}
+</style>
+<!-- Analytics por clínica: pendiente (ver nota en Auth.html). -->
+</head>
+<body>
+
+<!-- Toolbar -->
+<div class="vp-toolbar">
+  <a class="vp-back" href="javascript:history.back()">← Volver</a>
+  <div class="vp-actions">
+    <button class="vp-btn vp-btn-print" id="btn-print">🖨️ Imprimir</button>
+    <button class="vp-btn vp-btn-pdf" id="btn-pdf">📄 Descargar PDF</button>
+  </div>
+</div>
+
+<!-- Estados -->
+<div id="vp-loading" class="vp-message">
+  <div class="vp-spinner"></div>
+  Cargando resultado...
+</div>
+<div id="vp-error" class="vp-message" style="display:none;color:#991B1B">
+  <p id="vp-error-msg">No se pudo cargar el resultado.</p>
+</div>
+
+<!-- Result Sheet -->
+<div class="rs-container" id="rs-container" style="display:none">
+  <div class="result-sheet" id="result-sheet">
+    <!-- Watermark/logo por clínica: pendiente (Fase 5). -->
+    <div class="rs-header">
+      <div class="rs-header-text">
+        <h1 id="rs-h-name">—</h1>
+        <h2 id="rs-h-sub">—</h2>
+      </div>
+      <div class="rs-arsa-badge" id="rs-arsa" style="display:none">
+        Certificado de<br>Prueba (ARSA)
+      </div>
+    </div>
+    <div class="rs-body">
+      <h3 class="rs-title">INFORME DE RESULTADOS</h3>
+      <div class="rs-correlativo" id="rs-correlativo" style="display:none"></div>
+
+      <div class="rs-section-title">I.- INFORMACIÓN DEL PACIENTE</div>
+      <table class="rs-table" id="rs-paciente-table"></table>
+
+      <div class="rs-section-title">II.- INFORMACIÓN DE TOMA DE MUESTRA</div>
+      <table class="rs-table" id="rs-muestra-table"></table>
+
+      <div class="rs-section-title" id="rs-exam-title">III.- EXÁMENES REALIZADOS</div>
+      <table class="rs-table rs-results-table" id="rs-results-table"></table>
+
+      <div class="rs-sensitivity" id="rs-sensitivity" style="display:none">
+        Sensibilidad: 97.1% | Especificidad: 99.5%<br>
+        Porcentajes según especificaciones del fabricante
+      </div>
+
+      <div class="rs-nota">
+        <strong>Nota:</strong>
+        <p>Los resultados del Laboratorio clínico, no son datos concluyentes de patologías.</p>
+        <p>Es responsabilidad del paciente el manejo de resultados de exámenes no ordenados por un médico.</p>
+        <p>La apreciación médica es indispensable.</p>
+        <p style="margin-top:6px;font-weight:700;color:#b91c1c;">Empresa receptora: solicitar verificación primero.</p>
+      </div>
+
+      <div class="rs-stamp">
+        <div>
+          <div class="rs-stamp-text" id="rs-stamp-text">
+            TOMA Y RECEPCIÓN DE MUESTRAS
+          </div>
+        </div>
+        <div class="rs-stamp-right" id="rs-qr-container" style="display:none">
+          <canvas id="rs-qr-canvas" class="rs-qr"></canvas>
+          <div class="rs-qr-label">¡Escanea para verificar tus resultados!</div>
+        </div>
+      </div>
+
+      <div class="rs-footer" id="rs-footer">—</div>
+    </div>
+  </div>
+</div>
+
+<!-- Firebase -->
+<script src="clinic-config.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="firebase-init.js"></script>
+
+<script>
+(function () {
+  var CLINIC_ID = window.R3ADS_CLINIC_ID;
+  var CLINIC = window.R3ADS_CLINIC_FALLBACK || {};
+  function $id(id) { return document.getElementById(id); }
+
+  $id('rs-h-name').textContent = (CLINIC.razonSocial || CLINIC.nombre || '—').toUpperCase();
+  $id('rs-h-sub').textContent = CLINIC.nombre || '';
+  $id('rs-stamp-text').innerHTML = 'TOMA Y RECEPCIÓN DE MUESTRAS<br>' + (CLINIC.nombre || '').toUpperCase();
+  $id('rs-footer').innerHTML =
+    esc(CLINIC.direccion || '') + '<br>' +
+    'Correo-e: <a href="mailto:' + esc(CLINIC.correo || '') + '">' + esc(CLINIC.correo || '') + '</a><br>' +
+    'Teléfonos: ' + esc(CLINIC.telefono || '');
+  function esc(s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  }
+  function formatDateLong(dateStr) {
+    if (!dateStr) return '—';
+    var d = new Date(dateStr + 'T00:00:00');
+    if (isNaN(d.getTime())) return dateStr;
+    var meses = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+    return d.getDate() + ' de ' + meses[d.getMonth()] + ' del ' + d.getFullYear();
+  }
+  function formatTime12(t) {
+    if (!t) return '—';
+    var parts = t.split(':');
+    var h = parseInt(parts[0], 10);
+    var m = parts[1] || '00';
+    var ampm = h >= 12 ? 'PM' : 'AM';
+    var h12 = h % 12 || 12;
+    return (h12 < 10 ? '0' + h12 : h12) + ':' + m + ' ' + ampm;
+  }
+  function showError(msg) {
+    $id('vp-loading').style.display = 'none';
+    $id('vp-error').style.display = '';
+    $id('vp-error-msg').textContent = msg;
+  }
+
+  /* ── Leer ID de URL ── */
+  var params = new URLSearchParams(window.location.search);
+  var pruebaId = params.get('id');
+  var autoPrint = params.get('print') === '1';
+
+  if (!pruebaId) {
+    showError('No se especificó el ID del resultado.');
+    return;
+  }
+
+  /* ── Auth guard ── */
+  r3adsAuth.onAuthStateChanged(function (user) {
+    if (!user) {
+      window.location.href = 'Auth.html?returnTo=' + encodeURIComponent(window.location.pathname + window.location.search);
+      return;
+    }
+    loadResultado();
+  });
+
+  /* ── Botones imprimir / PDF ── */
+  $id('btn-print').addEventListener('click', function () { window.print(); });
+  $id('btn-pdf').addEventListener('click', function () { window.print(); });
+  /* Nota: ambos llaman a window.print(). Desde el diálogo el usuario
+     puede elegir "Guardar como PDF" como destino. */
+
+  /* ── Cargar resultado ── */
+  function loadResultado() {
+    r3adsDb.collection('resultadosPruebas').doc(pruebaId).get()
+      .then(function (snap) {
+        if (!snap.exists) {
+          showError('Resultado no encontrado.');
+          return;
+        }
+        var data = Object.assign({ _id: snap.id }, snap.data());
+        if (data.clinicId && data.clinicId !== CLINIC_ID) {
+          showError('Este resultado no pertenece a esta clínica.');
+          return;
+        }
+        $id('vp-loading').style.display = 'none';
+        $id('rs-container').style.display = '';
+        renderResultSheet(data);
+        if (autoPrint) setTimeout(function () { window.print(); }, 500);
+      })
+      .catch(function (err) {
+        console.error('[Portal Clínico] Error cargando resultado:', err);
+        showError('No tienes permiso para ver este resultado o hubo un error.');
+      });
+  }
+
+  /* ── Render del sheet (solo lectura, sin contenteditable) ── */
+  function renderResultSheet(data) {
+    var isAntigeno = data.tipo === 'antigeno';
+    var edad = data.edadTxt || (data.edad !== '' && data.edad !== null ? data.edad + ' AÑOS' : '');
+
+    $id('rs-arsa').style.display = isAntigeno ? '' : 'none';
+
+    if (isAntigeno && data.correlativo) {
+      $id('rs-correlativo').style.display = '';
+      $id('rs-correlativo').textContent = data.correlativo;
+    } else {
+      $id('rs-correlativo').style.display = 'none';
+    }
+
+    /* Paciente */
+    var pacienteHTML = '';
+    if (isAntigeno) {
+      pacienteHTML =
+        '<tr><td>Paciente</td><td>' + esc(data.nombre) + '</td><td>Fecha de Nac</td><td>' + esc(data.fechaNacimientoTxt || formatDateLong(data.fechaNacimiento)) + '</td></tr>' +
+        '<tr><td>Pasaporte</td><td>' + esc(data.pasaporte || '—') + '</td><td>Edad</td><td>' + esc(edad) + '</td></tr>' +
+        '<tr><td>Identidad</td><td>' + esc(data.dni || '—') + '</td><td>Sexo</td><td>' + esc(data.sexo || '—') + '</td></tr>';
+      $id('rs-paciente-table').classList.add('rs-table-2col');
+    } else {
+      pacienteHTML =
+        '<tr><td>Nombre</td><td>' + esc(data.nombre) + '</td></tr>' +
+        '<tr><td>Fecha de Nacimiento</td><td>' + esc(data.fechaNacimientoTxt || formatDateLong(data.fechaNacimiento)) + '</td></tr>';
+      if (data.tipo !== 'embarazo') {
+        pacienteHTML += '<tr><td>Edad</td><td>' + esc(edad) + '</td></tr>';
+      }
+      pacienteHTML += '<tr><td>DNI</td><td>' + esc(data.dni || '—') + '</td></tr>';
+    }
+    $id('rs-paciente-table').innerHTML = pacienteHTML;
+
+    /* Muestra */
+    $id('rs-muestra-table').innerHTML =
+      '<tr><td>Fecha</td><td>' + esc(data.fechaTxt || formatDateLong(data.fecha)) + '</td></tr>' +
+      '<tr><td>Hora de Toma</td><td>' + esc(data.horaTomaTxt || formatTime12(data.horaToma)) + '</td></tr>' +
+      '<tr><td>Hora de Impresión</td><td>' + esc(data.horaImpresionTxt || formatTime12(data.horaImpresion)) + '</td></tr>';
+
+    /* Resultados */
+    var res = data.resultados || {};
+    var resultsHTML = '';
+    if (data.tipo === 'embarazo') {
+      $id('rs-exam-title').textContent = 'III.- EXÁMENES REALIZADOS';
+      resultsHTML = '<tr><td>PRUEBA DE EMBARAZO:</td><td>' + esc(res['res-embarazo']) + '</td></tr>';
+    } else if (data.tipo === 'dengue') {
+      $id('rs-exam-title').textContent = 'III.- EXÁMENES REALIZADO';
+      resultsHTML =
+        '<tr><td colspan="2" style="font-weight:800;background:#f0f8ff">PRUEBA DE DENGUE</td></tr>' +
+        '<tr><td>ANTICUERPO IgG:</td><td>' + esc(res['res-igg']) + '</td></tr>' +
+        '<tr><td>ANTICUERPO IgM:</td><td>' + esc(res['res-igm']) + '</td></tr>' +
+        '<tr><td>NS1:</td><td>' + esc(res['res-ns1']) + '</td></tr>';
+    } else if (data.tipo === 'duo') {
+      $id('rs-exam-title').textContent = 'III.- EXÁMENES REALIZADO';
+      resultsHTML =
+        '<tr><td>SARS-COV-2:<br>COVID-19</td><td>' + esc(res['res-sarcov2']) + '</td></tr>' +
+        '<tr><td>INFLUENZA H1N1 A:</td><td>' + esc(res['res-tipoa']) + '</td></tr>' +
+        '<tr><td>INFLUENZA H1N1 B:</td><td>' + esc(res['res-tipob']) + '</td></tr>';
+    } else if (data.tipo === 'antigeno') {
+      $id('rs-exam-title').textContent = 'III.-INMUNOLOGÍA';
+      resultsHTML =
+        '<tr><td colspan="2" style="font-weight:800;background:#f0f8ff;border-bottom:none">DETECCIÓN DE:<br>COVID-19 | ANTÍGENO</td></tr>' +
+        '<tr><td>ANTÍGENO SARS COV-2</td><td>: ' + esc(res['res-antigeno']) + '</td></tr>' +
+        '<tr><td colspan="2" style="font-size:11px;color:#555;border-top:none">TIPO DE MUESTRA:<br>HISOPADO NASOFARÍNGEO</td></tr>';
+    }
+    $id('rs-results-table').innerHTML = resultsHTML;
+
+    $id('rs-sensitivity').style.display = isAntigeno ? '' : 'none';
+
+    /* QR para antigeno */
+    if (isAntigeno && data._id) {
+      $id('rs-qr-container').style.display = '';
+      generateQR(data._id);
+    } else {
+      $id('rs-qr-container').style.display = 'none';
+    }
+  }
+
+  /* QR simple (placeholder visual) */
+  function generateQR(id) {
+    var canvas = $id('rs-qr-canvas');
+    if (!canvas || !canvas.getContext) return;
+    var ctx = canvas.getContext('2d');
+    canvas.width = 90; canvas.height = 90;
+    ctx.fillStyle = '#fff';
+    ctx.fillRect(0, 0, 90, 90);
+    ctx.fillStyle = '#000';
+    for (var i = 0; i < 81; i++) {
+      var x = (i % 9) * 10;
+      var y = Math.floor(i / 9) * 10;
+      var hash = 0;
+      for (var j = 0; j < id.length; j++) hash = ((hash << 5) - hash + id.charCodeAt(j) + i) & 0xff;
+      if (hash > 127) ctx.fillRect(x, y, 10, 10);
+    }
+    /* Finder patterns esquinas */
+    [[0,0],[60,0],[0,60]].forEach(function (p) {
+      ctx.fillStyle = '#fff';
+      ctx.fillRect(p[0], p[1], 30, 30);
+      ctx.fillStyle = '#000';
+      ctx.fillRect(p[0], p[1], 30, 30);
+      ctx.fillStyle = '#fff';
+      ctx.fillRect(p[0]+5, p[1]+5, 20, 20);
+      ctx.fillStyle = '#000';
+      ctx.fillRect(p[0]+10, p[1]+10, 10, 10);
+    });
+  }
+})();
+</script>
+
+</body>
+</html>

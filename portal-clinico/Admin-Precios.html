@@ -1,0 +1,416 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Gestión de Precios · Portal Clínico</title>
+<!-- Favicon: pendiente por clínica (Fase 5 del plan). -->
+<link rel="stylesheet" href="assets/cmg-tokens.css">
+<style>
+*, *::before, *::after { box-sizing: border-box; }
+body { margin: 0; background: #F4F6FB; font-family: 'Now','Segoe UI',Arial,sans-serif; color: #1F2937; }
+
+/* ── Topbar ── */
+.ap-top {
+  background: #213C7D; color: #fff;
+  padding: 14px 24px;
+  display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap;
+  position: sticky; top: 0; z-index: 20;
+}
+.ap-top-left { display: flex; align-items: center; gap: 12px; }
+.ap-top-left img { width: 34px; }
+.ap-top-title { font-size: 16px; font-weight: 900; letter-spacing: .3px; }
+.ap-top-title small { display: block; font-size: 11px; font-weight: 600; color: rgba(255,255,255,.6); letter-spacing: .5px; }
+.ap-top-right { display: flex; align-items: center; gap: 12px; font-size: 13px; flex-wrap: wrap; }
+.ap-top-right .ap-email { color: rgba(255,255,255,.75); }
+.ap-link {
+  color: #213C7D; background: #FDD22C; text-decoration: none;
+  padding: 7px 14px; border-radius: 8px; font-weight: 800; font-size: 13px;
+}
+.ap-link.ghost { background: transparent; color: #fff; border: 1px solid rgba(255,255,255,.3); }
+.ap-link:hover { filter: brightness(.95); }
+
+/* ── Wrap ── */
+.ap-wrap { max-width: 1040px; margin: 0 auto; padding: 24px; }
+
+.ap-note {
+  background: #EFF6FF; border: 1px solid #BFDBFE; color: #1E40AF;
+  border-radius: 10px; padding: 12px 16px; font-size: 13px; line-height: 1.6;
+  margin-bottom: 18px;
+}
+.ap-note b { color: #1E3A8A; }
+
+/* ── Controls bar ── */
+.ap-controls {
+  display: flex; gap: 12px; align-items: center; flex-wrap: wrap;
+  margin-bottom: 18px; position: sticky; top: 64px; z-index: 15;
+  background: #F4F6FB; padding: 10px 0;
+}
+.ap-search {
+  flex: 1; min-width: 220px; height: 44px;
+  border: 1.5px solid #E5E7EB; border-radius: 10px; padding: 0 14px;
+  font-family: inherit; font-size: 14px; outline: none; background: #fff;
+}
+.ap-search:focus { border-color: #213C7D; }
+.ap-save {
+  height: 44px; padding: 0 22px; border: none; border-radius: 10px;
+  background: #213C7D; color: #fff; font-family: inherit; font-size: 14px; font-weight: 800;
+  cursor: pointer; display: flex; align-items: center; gap: 8px; white-space: nowrap;
+  transition: opacity .15s, transform .1s;
+}
+.ap-save:hover { opacity: .92; }
+.ap-save:active { transform: scale(.98); }
+.ap-save:disabled { opacity: .45; cursor: not-allowed; }
+.ap-save .ap-badge {
+  background: #FDD22C; color: #213C7D; border-radius: 20px;
+  font-size: 12px; font-weight: 900; padding: 1px 9px;
+}
+
+/* ── Category group ── */
+.ap-cat { background: #fff; border-radius: 14px; box-shadow: 0 2px 12px rgba(33,60,125,.07); margin-bottom: 16px; overflow: hidden; }
+.ap-cat-h {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 20px; cursor: pointer; background: #FAFBFF; border-bottom: 1px solid #EEF1F8;
+}
+.ap-cat-h h3 { margin: 0; font-size: 15px; font-weight: 900; color: #213C7D; text-transform: none; }
+.ap-cat-h .ap-cat-count { font-size: 12px; color: #9CA3AF; font-weight: 700; }
+.ap-cat-body { padding: 6px 0; }
+.ap-cat.is-collapsed .ap-cat-body { display: none; }
+
+/* ── Row ── */
+.ap-row {
+  display: grid;
+  grid-template-columns: 1fr 150px 180px;
+  gap: 14px; align-items: center;
+  padding: 12px 20px; border-bottom: 1px solid #F3F4F6;
+}
+.ap-row:last-child { border-bottom: none; }
+.ap-row.is-hidden { display: none; }
+.ap-row.is-dirty { background: #FFFDF4; }
+
+.ap-row-name b { font-size: 14px; color: #1F2937; display: block; }
+.ap-row-name small { font-size: 11.5px; color: #9CA3AF; }
+.ap-row-def { font-size: 11px; color: #9CA3AF; margin-top: 2px; }
+
+.ap-field-label { font-size: 10px; font-weight: 700; color: #6B7280; text-transform: uppercase; letter-spacing: .4px; display: block; margin-bottom: 3px; }
+.ap-input {
+  width: 100%; height: 38px; border: 1.5px solid #E5E7EB; border-radius: 8px;
+  padding: 0 10px; font-family: inherit; font-size: 14px; outline: none; background: #fff;
+}
+.ap-input:focus { border-color: #213C7D; }
+.ap-input:disabled { background: #F3F4F6; color: #9CA3AF; }
+.ap-input-wrap { position: relative; }
+.ap-input-wrap .ap-prefix { position: absolute; left: 10px; top: 27px; font-size: 13px; color: #9CA3AF; pointer-events: none; }
+.ap-input-wrap.has-prefix .ap-input { padding-left: 22px; }
+.ap-input-wrap .ap-suffix { position: absolute; right: 10px; top: 27px; font-size: 13px; color: #9CA3AF; pointer-events: none; }
+.ap-input-wrap.has-suffix .ap-input { padding-right: 22px; }
+
+.ap-excl { display: flex; flex-direction: column; align-items: flex-start; }
+.ap-excl-switch { display: inline-flex; align-items: center; gap: 8px; cursor: pointer; font-size: 12.5px; color: #374151; font-weight: 600; }
+.ap-excl-switch input { display: none; }
+.ap-excl-track { width: 40px; height: 22px; background: #D1D5DB; border-radius: 12px; position: relative; transition: background .15s; flex-shrink: 0; }
+.ap-excl-thumb { position: absolute; top: 3px; left: 3px; width: 16px; height: 16px; background: #fff; border-radius: 50%; transition: left .15s; box-shadow: 0 1px 3px rgba(0,0,0,.25); }
+.ap-excl-switch input:checked + .ap-excl-track { background: #F20F10; }
+.ap-excl-switch input:checked + .ap-excl-track .ap-excl-thumb { left: 21px; }
+
+.ap-tag { display: inline-block; font-size: 11px; font-weight: 700; padding: 3px 9px; border-radius: 20px; }
+.ap-tag--free { background: #DCFCE7; color: #166534; }
+.ap-tag--aes  { background: #FEF3C7; color: #92400E; }
+
+.ap-reset { background: none; border: none; color: #9CA3AF; font-size: 11px; cursor: pointer; text-decoration: underline; padding: 4px 0 0; font-family: inherit; }
+.ap-reset:hover { color: #213C7D; }
+
+/* ── Message states ── */
+.ap-msg { text-align: center; padding: 50px 20px; color: #6B7280; }
+.ap-spinner { width: 30px; height: 30px; border: 3px solid #E5E7EB; border-top-color: #213C7D; border-radius: 50%; animation: apspin .7s linear infinite; margin: 0 auto 14px; }
+@keyframes apspin { to { transform: rotate(360deg); } }
+
+/* ── Toast ── */
+.ap-toast {
+  position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(20px);
+  background: #213C7D; color: #fff; padding: 12px 22px; border-radius: 10px;
+  font-size: 14px; font-weight: 600; box-shadow: 0 6px 24px rgba(0,0,0,.25);
+  opacity: 0; pointer-events: none; transition: opacity .2s, transform .2s; z-index: 50;
+}
+.ap-toast.is-visible { opacity: 1; transform: translateX(-50%) translateY(0); }
+.ap-toast.is-error { background: #C70B0C; }
+
+@media (max-width: 720px) {
+  .ap-row { grid-template-columns: 1fr 1fr; }
+  .ap-row-name { grid-column: 1 / -1; }
+}
+</style>
+<script src="clinic-config.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="firebase-init.js"></script>
+<script src="r3ads-staff.js"></script>
+</head>
+<body>
+
+<div class="ap-top">
+  <div class="ap-top-left">
+    <div class="ap-top-title" id="ap-clinic-name">Gestión de Precios<small>Cotizador</small></div>
+  </div>
+  <div class="ap-top-right">
+    <span class="ap-email" id="ap-user-email">—</span>
+    <a class="ap-link ghost" href="Admin-Usuarios.html">Usuarios</a>
+    <a class="ap-link ghost" href="#" id="ap-logout">Salir</a>
+  </div>
+</div>
+
+<div class="ap-wrap">
+
+  <div class="ap-note">
+    ℹ️ Aquí defines, por cada ítem del catálogo: el <b>precio al público</b> que se muestra en el Cotizador, y si <b>enfermería puede completarlo sin médico</b> (usado por las reglas de seguridad y por Expediente-Doctor.html para decidir el flujo de atención). Los cambios se aplican al Cotizador en tiempo real al guardar.
+  </div>
+
+  <div class="ap-controls">
+    <input type="search" class="ap-search" id="ap-search" placeholder="Buscar ítem por nombre…">
+    <button class="ap-save" id="ap-save" disabled>
+      💾 Guardar cambios <span class="ap-badge" id="ap-save-count" style="display:none">0</span>
+    </button>
+  </div>
+
+  <div id="ap-list">
+    <div class="ap-msg"><div class="ap-spinner"></div>Cargando catálogo…</div>
+  </div>
+
+</div>
+
+<div class="ap-toast" id="ap-toast">—</div>
+
+<script>
+(function () {
+  var CLINIC_ID = window.R3ADS_CLINIC_ID;
+  var _cats  = [];           /* [{cat, catTitle, items:[...]}] */
+  var _cfg   = {};           /* overrides por key */
+  var _dirty = {};           /* key -> true */
+
+  /* ── Helpers ── */
+  function $(id) { return document.getElementById(id); }
+  function esc(s) { return String(s||'').replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];}); }
+  function slug(s){ return String(s||'').toLowerCase().replace(/á/g,'a').replace(/é/g,'e').replace(/í/g,'i').replace(/ó/g,'o').replace(/ú/g,'u').replace(/ü/g,'u').replace(/ñ/g,'n').replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,''); }
+  function fmtN(n){ return Number.isInteger(n) ? n.toLocaleString('en-US') : n.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}); }
+
+  var clinicName = (window.R3ADS_CLINIC_FALLBACK && window.R3ADS_CLINIC_FALLBACK.nombre) || 'tu clínica';
+  $('ap-clinic-name').innerHTML = 'Gestión de Precios<small>Cotizador · ' + clinicName + '</small>';
+
+  var toastEl = $('ap-toast'), toastTimer;
+  function toast(msg, isErr) {
+    toastEl.textContent = msg;
+    toastEl.classList.toggle('is-error', !!isErr);
+    toastEl.classList.add('is-visible');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function(){ toastEl.classList.remove('is-visible'); }, 3200);
+  }
+
+  /* ── Auth ── */
+  r3adsAuth.onAuthStateChanged(function (user) {
+    if (!user) { window.location.href = 'Auth.html?returnTo=Admin-Precios.html'; return; }
+    r3adsStaff.checkAdmin(user, CLINIC_ID, function (ok) {
+      if (!ok) { window.location.href = 'Auth.html'; return; }
+      $('ap-user-email').textContent = user.email;
+      boot();
+    });
+  });
+  $('ap-logout').addEventListener('click', function (e) {
+    e.preventDefault();
+    r3adsAuth.signOut().then(function(){ window.location.href = 'Auth.html'; });
+  });
+
+  /* ── Cargar catálogo (parseando Cotizador.html) + overrides de ESTA clínica ── */
+  function boot() {
+    Promise.all([
+      fetch('Cotizador.html', { cache: 'no-store' }).then(function(r){ return r.text(); }),
+      r3adsDb.collection('clinics').doc(CLINIC_ID).collection('catalogoConfig').get().then(function(snap){
+        var m = {}; snap.forEach(function(d){ m[d.id] = d.data(); }); return m;
+      }).catch(function(err){ console.warn('[Portal Clínico] catalogoConfig read:', err); return {}; })
+    ]).then(function (res) {
+      _cfg = res[1] || {};
+      parseCatalog(res[0]);
+      render();
+    }).catch(function (err) {
+      $('ap-list').innerHTML = '<div class="ap-msg" style="color:#B91C1C">No se pudo cargar el catálogo del Cotizador.<br>' + esc(err.message) + '</div>';
+    });
+  }
+
+  function parseCatalog(html) {
+    var doc = new DOMParser().parseFromString(html, 'text/html');
+    _cats = [];
+    doc.querySelectorAll('.coti-cat').forEach(function (catEl) {
+      var cat = catEl.dataset.cat || 'otros';
+      var titleEl = catEl.querySelector('.coti-cat-title .lang-es') || catEl.querySelector('.coti-cat-title');
+      var catTitle = titleEl ? titleEl.textContent.trim() : cat;
+      var items = [], seen = {};
+      catEl.querySelectorAll('.coti-item').forEach(function (it) {
+        var nameEs = (it.dataset.nameEs || '').trim();
+        var base = cat + '__' + slug(nameEs);
+        seen[base] = (seen[base] || 0) + 1;
+        var key = seen[base] > 1 ? base + '--' + seen[base] : base;
+        items.push({
+          key: key, cat: cat, nameEs: nameEs,
+          nameEn: (it.dataset.nameEn || '').trim(),
+          defPrice: parseFloat(it.dataset.price) || 0
+        });
+      });
+      if (items.length) _cats.push({ cat: cat, catTitle: catTitle, items: items });
+    });
+  }
+
+  /* ── Render ── */
+  function render() {
+    var html = _cats.map(function (c) {
+      var rows = c.items.map(function (it) { return rowHtml(it); }).join('');
+      return '<div class="ap-cat" data-cat="' + esc(c.cat) + '">' +
+        '<div class="ap-cat-h"><h3>' + esc(c.catTitle) + '</h3><span class="ap-cat-count">' + c.items.length + ' ítems</span></div>' +
+        '<div class="ap-cat-body">' + rows + '</div>' +
+      '</div>';
+    }).join('');
+    $('ap-list').innerHTML = html;
+    bindRows();
+    updateSaveBtn();
+  }
+
+  function rowHtml(it) {
+    var cfg = _cfg[it.key] || {};
+    var price = (cfg.precio !== undefined && cfg.precio !== null) ? cfg.precio : it.defPrice;
+    var priceInput =
+      '<div class="ap-field"><span class="ap-field-label">Precio público</span>' +
+        '<div class="ap-input-wrap has-prefix"><span class="ap-prefix">L</span>' +
+          '<input type="number" min="0" step="0.01" class="ap-input" data-key="' + esc(it.key) + '" data-field="precio" value="' + esc(price) + '">' +
+        '</div>' +
+        '<div class="ap-row-def">Catálogo: L' + fmtN(it.defPrice) + '</div>' +
+      '</div>';
+
+    // Enfermería-completable: usado por firestore.rules (esServicioEnfermeria)
+    // y por Expediente-Doctor.html para decidir si un servicio puede pasar
+    // por enfermería sin médico. Por defecto NO (fail-closed, requiere médico).
+    var enf = !!cfg.enfermeriaCompletable;
+    var enfCol = '<div class="ap-field ap-excl">' +
+      '<label class="ap-excl-switch"><input type="checkbox" data-key="' + esc(it.key) + '" data-field="enfermeriaCompletable"' + (enf ? ' checked' : '') + '>' +
+        '<span class="ap-excl-track"><span class="ap-excl-thumb"></span></span> Enfermería puede completarlo</label>' +
+      '<button type="button" class="ap-reset" data-key="' + esc(it.key) + '">Restablecer</button>' +
+    '</div>';
+
+    return '<div class="ap-row" data-key="' + esc(it.key) + '" data-name="' + esc((it.nameEs + ' ' + it.nameEn).toLowerCase()) + '">' +
+      '<div class="ap-row-name"><b>' + esc(it.nameEs) + '</b><small>' + esc(it.nameEn) + '</small></div>' +
+      priceInput + enfCol +
+    '</div>';
+  }
+
+  function findItem(key) {
+    for (var i = 0; i < _cats.length; i++) {
+      for (var j = 0; j < _cats[i].items.length; j++) {
+        if (_cats[i].items[j].key === key) return _cats[i].items[j];
+      }
+    }
+    return null;
+  }
+
+  function bindRows() {
+    /* Inputs (precio / descuento) */
+    $('ap-list').querySelectorAll('.ap-input').forEach(function (inp) {
+      inp.addEventListener('input', function () { markDirty(inp.dataset.key); });
+    });
+    /* Toggle enfermería */
+    $('ap-list').querySelectorAll('input[data-field="enfermeriaCompletable"]').forEach(function (chk) {
+      chk.addEventListener('change', function () { markDirty(chk.dataset.key); });
+    });
+    /* Restablecer */
+    $('ap-list').querySelectorAll('.ap-reset').forEach(function (btn) {
+      btn.addEventListener('click', function () { resetRow(btn.dataset.key); });
+    });
+    /* Acordeón categorías */
+    $('ap-list').querySelectorAll('.ap-cat-h').forEach(function (h) {
+      h.addEventListener('click', function () { h.parentElement.classList.toggle('is-collapsed'); });
+    });
+  }
+
+  function cssEsc(s){ return String(s).replace(/["\\]/g, '\\$&'); }
+
+  function rowEl(key) { return $('ap-list').querySelector('.ap-row[data-key="' + cssEsc(key) + '"]'); }
+
+  function markDirty(key) {
+    _dirty[key] = true;
+    var r = rowEl(key); if (r) r.classList.add('is-dirty');
+    updateSaveBtn();
+  }
+
+  function resetRow(key) {
+    var it = findItem(key); if (!it) return;
+    var r = rowEl(key); if (!r) return;
+    var priceInp = r.querySelector('input[data-field="precio"]');
+    var enfChk   = r.querySelector('input[data-field="enfermeriaCompletable"]');
+    if (priceInp) priceInp.value = it.defPrice;
+    if (enfChk)   enfChk.checked = false;
+    markDirty(key);
+  }
+
+  function updateSaveBtn() {
+    var n = Object.keys(_dirty).length;
+    var badge = $('ap-save-count');
+    badge.textContent = n;
+    badge.style.display = n ? '' : 'none';
+    $('ap-save').disabled = n === 0;
+  }
+
+  /* ── Guardar ── */
+  $('ap-save').addEventListener('click', function () {
+    var keys = Object.keys(_dirty);
+    if (!keys.length) return;
+    var btn = $('ap-save'); btn.disabled = true; btn.textContent = '⏳ Guardando…';
+
+    var catalogoRef = r3adsDb.collection('clinics').doc(CLINIC_ID).collection('catalogoConfig');
+    var batch = r3adsDb.batch();
+    keys.forEach(function (key) {
+      var it = findItem(key); if (!it) return;
+      var r = rowEl(key); if (!r) return;
+      var priceInp = r.querySelector('input[data-field="precio"]');
+      var enfChk   = r.querySelector('input[data-field="enfermeriaCompletable"]');
+
+      var payload = {
+        cat      : it.cat,
+        nombreEs : it.nameEs,
+        precio   : priceInp ? (parseFloat(priceInp.value) || 0) : it.defPrice,
+        enfermeriaCompletable: enfChk ? !!enfChk.checked : false,
+        actualizado: firebase.firestore.FieldValue.serverTimestamp()
+      };
+      batch.set(catalogoRef.doc(key), payload, { merge: true });
+      _cfg[key] = Object.assign({}, _cfg[key], payload);
+    });
+
+    batch.commit().then(function () {
+      _dirty = {};
+      $('ap-list').querySelectorAll('.ap-row.is-dirty').forEach(function(r){ r.classList.remove('is-dirty'); });
+      btn.innerHTML = '💾 Guardar cambios <span class="ap-badge" id="ap-save-count" style="display:none">0</span>';
+      updateSaveBtn();
+      toast('✅ Cambios guardados. Ya se reflejan en el Cotizador.');
+    }).catch(function (err) {
+      btn.disabled = false;
+      btn.innerHTML = '💾 Guardar cambios <span class="ap-badge" id="ap-save-count">' + Object.keys(_dirty).length + '</span>';
+      toast('Error al guardar: ' + err.message, true);
+    });
+  });
+
+  /* ── Buscar ── */
+  $('ap-search').addEventListener('input', function () {
+    var term = this.value.trim().toLowerCase();
+    $('ap-list').querySelectorAll('.ap-cat').forEach(function (catEl) {
+      var anyVisible = false;
+      catEl.querySelectorAll('.ap-row').forEach(function (r) {
+        var match = !term || (r.dataset.name || '').indexOf(term) !== -1;
+        r.classList.toggle('is-hidden', !match);
+        if (match) anyVisible = true;
+      });
+      catEl.style.display = anyVisible ? '' : 'none';
+      if (term) catEl.classList.remove('is-collapsed');
+    });
+  });
+
+})();
+</script>
+
+</body>
+</html>

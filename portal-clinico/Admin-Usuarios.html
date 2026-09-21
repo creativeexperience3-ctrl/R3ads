@@ -1,0 +1,550 @@
+﻿<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Gestión de Usuarios · Portal Clínico</title>
+<!-- Favicon: pendiente por clínica (Fase 5 del plan). -->
+<link rel="stylesheet" href="assets/cmg-tokens.css">
+<style>
+*, *::before, *::after { box-sizing: border-box; }
+body { margin: 0; background: #F4F6FB; font-family: 'Now','Segoe UI',Arial,sans-serif; color: #1F2937; }
+
+/* ── Topbar ── */
+.au-top {
+  background: #213C7D; color: #fff;
+  padding: 14px 24px;
+  display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap;
+  position: sticky; top: 0; z-index: 20;
+}
+.au-top-left { display: flex; align-items: center; gap: 12px; }
+.au-top-left img { width: 34px; }
+.au-top-title { font-size: 16px; font-weight: 900; letter-spacing: .3px; }
+.au-top-title small { display: block; font-size: 11px; font-weight: 600; color: rgba(255,255,255,.6); letter-spacing: .5px; }
+.au-top-right { display: flex; align-items: center; gap: 10px; font-size: 13px; flex-wrap: wrap; }
+.au-email { color: rgba(255,255,255,.7); font-size: 13px; }
+.au-nav-link {
+  color: #fff; text-decoration: none; font-size: 13px; font-weight: 600;
+  padding: 6px 12px; border-radius: 7px; border: 1px solid rgba(255,255,255,.25);
+  transition: background .15s;
+}
+.au-nav-link:hover { background: rgba(255,255,255,.1); }
+.au-nav-link.active { background: rgba(255,255,255,.15); border-color: rgba(255,255,255,.4); }
+.au-logout {
+  background: transparent; border: 1px solid rgba(255,255,255,.25); color: rgba(255,255,255,.8);
+  padding: 6px 14px; border-radius: 7px; font-size: 13px; font-weight: 600;
+  cursor: pointer; font-family: inherit; transition: background .15s;
+}
+.au-logout:hover { background: rgba(255,255,255,.1); color: #fff; }
+
+/* ── Wrap ── */
+.au-wrap { max-width: 1040px; margin: 0 auto; padding: 24px; }
+
+/* ── Alert banner ── */
+.au-alert {
+  display: flex; gap: 10px; align-items: flex-start;
+  background: #FFF7ED; border: 1px solid #FED7AA; color: #9A3412;
+  border-radius: 10px; padding: 12px 16px; font-size: 13px; line-height: 1.6; margin-bottom: 20px;
+}
+.au-alert b { color: #7C2D12; }
+
+/* ── Stats ── */
+.au-stats { display: flex; gap: 12px; margin-bottom: 20px; flex-wrap: wrap; }
+.au-stat {
+  background: #fff; border-radius: 12px; padding: 16px 20px; flex: 1; min-width: 110px;
+  box-shadow: 0 2px 10px rgba(33,60,125,.07);
+}
+.au-stat-num { font-size: 28px; font-weight: 900; color: #213C7D; line-height: 1; }
+.au-stat-lbl { font-size: 12px; color: #6B7280; margin-top: 2px; }
+.au-stat.stat-activo .au-stat-num { color: #15803D; }
+.au-stat.stat-inact  .au-stat-num { color: #9CA3AF; }
+
+/* ── Toolbar ── */
+.au-toolbar {
+  display: flex; gap: 12px; align-items: center; flex-wrap: wrap; margin-bottom: 16px;
+  position: sticky; top: 58px; z-index: 15; background: #F4F6FB; padding: 8px 0;
+}
+.au-search {
+  flex: 1; min-width: 200px; height: 44px;
+  border: 1.5px solid #E5E7EB; border-radius: 10px; padding: 0 14px 0 40px;
+  font-family: inherit; font-size: 14px; outline: none; background: #fff;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%239CA3AF' stroke-width='2' stroke-linecap='round'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cline x1='21' y1='21' x2='16.65' y2='16.65'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: 12px center;
+}
+.au-search:focus { border-color: #213C7D; }
+.au-filter {
+  height: 44px; border: 1.5px solid #E5E7EB; border-radius: 10px; padding: 0 12px;
+  font-family: inherit; font-size: 14px; outline: none; background: #fff; color: #374151; cursor: pointer;
+}
+.au-filter:focus { border-color: #213C7D; }
+.au-btn {
+  height: 44px; padding: 0 18px; border: none; border-radius: 10px;
+  font-family: inherit; font-size: 14px; font-weight: 800;
+  cursor: pointer; display: flex; align-items: center; gap: 7px; white-space: nowrap;
+  transition: opacity .15s, transform .1s;
+}
+.au-btn:active { transform: scale(.98); }
+.au-btn--primary { background: #213C7D; color: #fff; }
+.au-btn--primary:hover { opacity: .9; }
+.au-btn--outline { background: #fff; color: #213C7D; border: 1.5px solid #E5E7EB; }
+.au-btn--outline:hover { border-color: #213C7D; }
+
+/* ── Create form panel ── */
+.au-create-panel {
+  background: #fff; border: 2px solid #213C7D; border-radius: 14px;
+  margin-bottom: 20px; overflow: hidden;
+  max-height: 0; transition: max-height .35s ease;
+}
+.au-create-panel.is-open { max-height: 520px; }
+.au-create-inner { padding: 24px; }
+.au-create-heading {
+  font-size: 15px; font-weight: 900; color: #213C7D; margin: 0 0 20px;
+  display: flex; align-items: center; gap: 8px;
+}
+.au-form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.au-field { display: flex; flex-direction: column; gap: 5px; }
+.au-field label { font-size: 11px; font-weight: 700; color: #6B7280; text-transform: uppercase; letter-spacing: .4px; }
+.au-input, .au-select {
+  height: 42px; border: 1.5px solid #E5E7EB; border-radius: 8px;
+  padding: 0 12px; font-family: inherit; font-size: 14px; outline: none; color: #1F2937;
+  transition: border-color .15s;
+}
+.au-input:focus, .au-select:focus { border-color: #213C7D; }
+.au-form-footer {
+  display: flex; gap: 10px; margin-top: 20px; padding-top: 16px;
+  border-top: 1px solid #F3F4F6; flex-wrap: wrap;
+}
+.au-form-info { font-size: 12px; color: #9CA3AF; display: flex; align-items: center; gap: 5px; flex: 1; }
+
+/* ── Table card ── */
+.au-card { background: #fff; border-radius: 14px; box-shadow: 0 2px 12px rgba(33,60,125,.07); overflow: hidden; }
+.au-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+.au-table th {
+  font-size: 10px; font-weight: 700; letter-spacing: .4px; text-transform: uppercase;
+  color: #6B7280; padding: 10px 16px; text-align: left;
+  background: #FAFBFF; border-bottom: 1px solid #EEF1F8;
+}
+.au-table td { padding: 13px 16px; border-bottom: 1px solid #F3F4F6; vertical-align: middle; }
+.au-table tbody tr:last-child td { border-bottom: none; }
+.au-table tbody tr:hover td { background: #FAFBFF; }
+.au-table tr.is-hidden { display: none; }
+
+.au-user-cell { display: flex; align-items: center; gap: 12px; }
+.au-avatar {
+  width: 36px; height: 36px; border-radius: 50%;
+  background: #EEF2FF; color: #213C7D;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px; font-weight: 900; flex-shrink: 0;
+  text-transform: uppercase;
+}
+.au-user-name { font-weight: 700; color: #1F2937; }
+.au-user-email { font-size: 12px; color: #9CA3AF; }
+
+/* Role chips */
+.au-role {
+  display: inline-block; font-size: 11.5px; font-weight: 700;
+  padding: 4px 11px; border-radius: 20px; white-space: nowrap;
+}
+.au-role--caja   { background: rgba(253,210,44,.18); color: #7A5800; }
+.au-role--enf    { background: rgba(89,159,178,.16); color: #1E5F70; }
+.au-role--medico { background: rgba(224,112,112,.16); color: #903030; }
+.au-role--admin  { background: rgba(33,60,125,.12);  color: #213C7D; }
+
+/* Status badge */
+.au-status {
+  display: inline-flex; align-items: center; gap: 5px;
+  font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 20px;
+}
+.au-status--activo   { background: #DCFCE7; color: #166534; }
+.au-status--inactivo { background: #F3F4F6; color: #6B7280; }
+.au-status::before { content: ''; width: 6px; height: 6px; border-radius: 50%; }
+.au-status--activo::before   { background: #16A34A; }
+.au-status--inactivo::before { background: #9CA3AF; }
+
+/* Row actions */
+.au-row-actions { display: flex; gap: 7px; flex-wrap: wrap; }
+.au-act {
+  font-size: 12px; font-weight: 700; padding: 5px 11px; border-radius: 6px;
+  border: none; cursor: pointer; font-family: inherit; transition: background .12s;
+}
+.au-act--reset      { background: #EEF2FF; color: #213C7D; }
+.au-act--reset:hover{ background: #E0E7FF; }
+.au-act--off        { background: #FEF3C7; color: #92400E; }
+.au-act--off:hover  { background: #FDE68A; }
+.au-act--on         { background: #DCFCE7; color: #166534; }
+.au-act--on:hover   { background: #BBF7D0; }
+.au-act--del        { background: #FEE2E2; color: #991B1B; }
+.au-act--del:hover  { background: #FECACA; }
+
+/* ── Empty / loading ── */
+.au-msg { text-align: center; padding: 50px 20px; color: #6B7280; }
+.au-spinner {
+  width: 30px; height: 30px; border: 3px solid #E5E7EB;
+  border-top-color: #213C7D; border-radius: 50%;
+  animation: auspin .7s linear infinite; margin: 0 auto 14px;
+}
+@keyframes auspin { to { transform: rotate(360deg); } }
+
+/* ── Toast ── */
+.au-toast {
+  position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(20px);
+  background: #213C7D; color: #fff; padding: 12px 22px; border-radius: 10px;
+  font-size: 14px; font-weight: 600; box-shadow: 0 6px 24px rgba(0,0,0,.25);
+  opacity: 0; pointer-events: none; transition: opacity .2s, transform .2s; z-index: 50;
+}
+.au-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+.au-toast.err  { background: #C70B0C; }
+.au-toast.ok   { background: #15803D; }
+
+@media (max-width: 680px) {
+  .au-form-grid { grid-template-columns: 1fr; }
+  .au-table td:nth-child(4), .au-table th:nth-child(4) { display: none; }
+}
+</style>
+<script src="clinic-config.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="firebase-init.js"></script>
+<script src="r3ads-staff.js"></script>
+</head>
+<body>
+
+<div class="au-top">
+  <div class="au-top-left">
+    <div class="au-top-title" id="au-clinic-name">Gestión de Usuarios<small>Panel Administrativo</small></div>
+  </div>
+  <div class="au-top-right">
+    <span class="au-email" id="au-email">—</span>
+    <a class="au-nav-link" href="Admin-Precios.html">Precios</a>
+    <a class="au-nav-link active" href="Admin-Usuarios.html">Usuarios</a>
+    <button class="au-logout" id="au-logout">Salir</button>
+  </div>
+</div>
+
+<div class="au-wrap">
+
+  <div class="au-alert">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0;margin-top:2px"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+    <span><b>Cada usuario es responsable de lo que hace con su cuenta.</b> Solo crea cuentas para personal activo de tu clínica y desactívalas el mismo día que alguien deje de trabajar ahí.</span>
+  </div>
+
+  <div class="au-stats">
+    <div class="au-stat"><div class="au-stat-num" id="stat-total">—</div><div class="au-stat-lbl">Usuarios totales</div></div>
+    <div class="au-stat stat-activo"><div class="au-stat-num" id="stat-activos">—</div><div class="au-stat-lbl">Activos</div></div>
+    <div class="au-stat stat-inact"><div class="au-stat-num" id="stat-inactivos">—</div><div class="au-stat-lbl">Inactivos</div></div>
+  </div>
+
+  <!-- Create user form (slide-down) -->
+  <div class="au-create-panel" id="au-create-panel">
+    <div class="au-create-inner">
+      <div class="au-create-heading">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#213C7D" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Nuevo usuario
+      </div>
+      <div class="au-form-grid">
+        <div class="au-field">
+          <label>Nombre completo</label>
+          <input class="au-input" id="f-nombre" type="text" placeholder="María Alejandra López" autocomplete="off">
+        </div>
+        <div class="au-field">
+          <label>Correo electrónico</label>
+          <input class="au-input" id="f-email" type="email" placeholder="m.lopez@correo.com" autocomplete="off">
+        </div>
+        <div class="au-field">
+          <label>Rol</label>
+          <select class="au-select" id="f-rol">
+            <option value="">Seleccionar rol…</option>
+            <option value="caja">Caja — Registro y cobros</option>
+            <option value="enf">Caja · Enfermería — Pre clínica y exámenes</option>
+            <option value="medico">Médico — Expediente clínico</option>
+            <option value="admin">Administrador — Acceso completo</option>
+          </select>
+        </div>
+        <div class="au-field">
+          <label>Estado inicial</label>
+          <select class="au-select" id="f-estado">
+            <option value="activo">Activo</option>
+            <option value="inactivo">Inactivo</option>
+          </select>
+        </div>
+      </div>
+      <div class="au-form-footer">
+        <span class="au-form-info">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          Se enviará un correo con enlace para que el usuario establezca su contraseña.
+        </span>
+        <button class="au-btn au-btn--outline" id="btn-cancel">Cancelar</button>
+        <button class="au-btn au-btn--primary" id="btn-save-user">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20,6 9,17 4,12"/></svg>
+          Crear usuario
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toolbar -->
+  <div class="au-toolbar">
+    <input type="search" class="au-search" id="au-search" placeholder="Buscar por nombre o correo…">
+    <select class="au-filter" id="au-filter-rol">
+      <option value="">Todos los roles</option>
+      <option value="caja">Caja</option>
+      <option value="enf">Caja · Enfermería</option>
+      <option value="medico">Médico</option>
+      <option value="admin">Administrador</option>
+    </select>
+    <select class="au-filter" id="au-filter-estado">
+      <option value="">Todos los estados</option>
+      <option value="activo">Activos</option>
+      <option value="inactivo">Inactivos</option>
+    </select>
+    <button class="au-btn au-btn--primary" id="btn-new-user">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      Nuevo usuario
+    </button>
+  </div>
+
+  <!-- Users table -->
+  <div class="au-card">
+    <div id="au-list">
+      <div class="au-msg"><div class="au-spinner"></div>Cargando usuarios…</div>
+    </div>
+  </div>
+
+</div>
+
+<div class="au-toast" id="au-toast"></div>
+
+<script>
+(function () {
+  // clinicId de esta instancia (ver clinic-config.js, Fase 5). Toda lectura/
+  // escritura de /usuarios queda acotada a esta clínica — sin esto, un admin
+  // vería el personal de TODAS las clínicas del proyecto Firebase.
+  var CLINIC_ID = window.R3ADS_CLINIC_ID;
+
+  var ROL_LABELS = { caja: 'Caja', enf: 'Caja · Enfermería', medico: 'Médico', admin: 'Administrador' };
+  var _users = [];
+
+  function $(id) { return document.getElementById(id); }
+
+  var clinicName = (window.R3ADS_CLINIC_FALLBACK && window.R3ADS_CLINIC_FALLBACK.nombre) || 'tu clínica';
+  $('au-clinic-name').innerHTML = 'Gestión de Usuarios<small>Panel Administrativo · ' + clinicName + '</small>';
+
+  /* ── Toast ── */
+  var toastEl = $('au-toast'), toastT;
+  function toast(msg, type) {
+    toastEl.textContent = msg;
+    toastEl.className = 'au-toast show' + (type ? ' ' + type : '');
+    clearTimeout(toastT);
+    toastT = setTimeout(function () { toastEl.className = 'au-toast'; }, 3500);
+  }
+
+  /* ── Auth guard ── */
+  r3adsAuth.onAuthStateChanged(function (user) {
+    if (!user) { window.location.href = 'Auth.html?returnTo=Admin-Usuarios.html'; return; }
+    r3adsStaff.checkAdmin(user, CLINIC_ID, function (ok) {
+      if (!ok) { window.location.href = 'Auth.html'; return; }
+      $('au-email').textContent = user.email;
+      load();
+    });
+  });
+  $('au-logout').onclick = function () {
+    r3adsAuth.signOut().then(function () { window.location.href = 'Auth.html'; });
+  };
+
+  /* ── Load users from Firestore (solo los de ESTA clínica) ── */
+  function load() {
+    // NOTA: este where + orderBy pide un índice compuesto en Firestore
+    // (clinicId ASC, creadoEn DESC) — la consola de Firebase da un enlace
+    // para crearlo la primera vez que corra esta query y falle.
+    r3adsDb.collection('usuarios')
+      .where('clinicId', '==', CLINIC_ID)
+      .orderBy('creadoEn', 'desc').get().then(function (snap) {
+      _users = [];
+      snap.forEach(function (d) { _users.push(Object.assign({ id: d.id }, d.data())); });
+      renderTable();
+      updateStats();
+    }).catch(function (err) {
+      $('au-list').innerHTML = '<div class="au-msg" style="color:#B91C1C">Error al cargar usuarios: ' + esc(err.message) + '</div>';
+    });
+  }
+
+  /* ── Render ── */
+  function initials(name) {
+    return (name || '').trim().split(/\s+/).slice(0, 2).map(function (w) { return w[0]; }).join('').toUpperCase();
+  }
+
+  function renderTable() {
+    if (!_users.length) {
+      $('au-list').innerHTML = '<div class="au-msg">No hay usuarios registrados aún.<br>Crea el primero con el botón <strong>Nuevo usuario</strong>.</div>';
+      return;
+    }
+    var rows = _users.map(function (u) {
+      var rolKey = u.rol || 'caja';
+      var estado = u.estado || 'activo';
+      return '<tr data-id="' + esc(u.id) + '" data-search="' + esc((u.nombre + ' ' + u.email).toLowerCase()) + '" data-rol="' + esc(rolKey) + '" data-estado="' + esc(estado) + '">' +
+        '<td><div class="au-user-cell"><div class="au-avatar">' + esc(initials(u.nombre)) + '</div>' +
+          '<div><div class="au-user-name">' + esc(u.nombre || '—') + '</div>' +
+          '<div class="au-user-email">' + esc(u.email || '') + '</div></div></div></td>' +
+        '<td><span class="au-role au-role--' + esc(rolKey) + '">' + esc(ROL_LABELS[rolKey] || rolKey) + '</span></td>' +
+        '<td><span class="au-status au-status--' + esc(estado) + '">' + (estado === 'activo' ? 'Activo' : 'Inactivo') + '</span></td>' +
+        '<td><div class="au-row-actions">' +
+          '<button class="au-act au-act--reset" onclick="resetPwd(\'' + esc(u.id) + '\',\'' + esc(u.email) + '\')">Restablecer contraseña</button>' +
+          (estado === 'activo'
+            ? '<button class="au-act au-act--off" onclick="toggleStatus(\'' + esc(u.id) + '\',\'inactivo\')">Desactivar</button>'
+            : '<button class="au-act au-act--on"  onclick="toggleStatus(\'' + esc(u.id) + '\',\'activo\')">Activar</button>') +
+          '<button class="au-act au-act--del" onclick="deleteUser(\'' + esc(u.id) + '\',\'' + esc(u.nombre) + '\')">Eliminar</button>' +
+        '</div></td>' +
+      '</tr>';
+    }).join('');
+    $('au-list').innerHTML =
+      '<table class="au-table"><thead><tr>' +
+        '<th>Usuario</th><th>Rol</th><th>Estado</th><th>Acciones</th>' +
+      '</tr></thead><tbody>' + rows + '</tbody></table>';
+    applyFilters();
+  }
+
+  function updateStats() {
+    $('stat-total').textContent = _users.length;
+    $('stat-activos').textContent = _users.filter(function (u) { return u.estado === 'activo'; }).length;
+    $('stat-inactivos').textContent = _users.filter(function (u) { return u.estado !== 'activo'; }).length;
+  }
+
+  /* ── Filters ── */
+  function applyFilters() {
+    var q   = ($('au-search').value || '').toLowerCase().trim();
+    var rol = $('au-filter-rol').value;
+    var est = $('au-filter-estado').value;
+    var rows = document.querySelectorAll('#au-list tbody tr');
+    rows.forEach(function (tr) {
+      var match = (!q   || (tr.dataset.search || '').indexOf(q) !== -1) &&
+                  (!rol || tr.dataset.rol === rol) &&
+                  (!est || tr.dataset.estado === est);
+      tr.classList.toggle('is-hidden', !match);
+    });
+  }
+  $('au-search').oninput = applyFilters;
+  $('au-filter-rol').onchange = applyFilters;
+  $('au-filter-estado').onchange = applyFilters;
+
+  /* ── Create user panel toggle ── */
+  var panelOpen = false;
+  $('btn-new-user').onclick = function () {
+    panelOpen = !panelOpen;
+    $('au-create-panel').classList.toggle('is-open', panelOpen);
+    if (panelOpen) { $('f-nombre').focus(); window.scrollTo({ top: 0, behavior: 'smooth' }); }
+  };
+  $('btn-cancel').onclick = function () {
+    panelOpen = false;
+    $('au-create-panel').classList.remove('is-open');
+    clearForm();
+  };
+
+  function clearForm() {
+    ['f-nombre', 'f-email'].forEach(function (id) { $(id).value = ''; });
+    $('f-rol').value = '';
+    $('f-estado').value = 'activo';
+  }
+
+  /* ── Create user ── */
+  $('btn-save-user').onclick = function () {
+    var nombre = $('f-nombre').value.trim();
+    var email  = $('f-email').value.trim().toLowerCase();
+    var rol    = $('f-rol').value;
+    var estado = $('f-estado').value;
+
+    if (!nombre) { toast('Ingresa el nombre completo.', 'err'); $('f-nombre').focus(); return; }
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { toast('Ingresa un correo válido.', 'err'); $('f-email').focus(); return; }
+    if (!rol) { toast('Selecciona un rol.', 'err'); $('f-rol').focus(); return; }
+
+    var btn = $('btn-save-user');
+    btn.disabled = true;
+    btn.textContent = 'Creando…';
+
+    /* Crear usuario en Firebase Auth via instancia secundaria (misma config
+       que ya inicializó firebase-init.js, expuesta en window.r3adsFirebaseConfig) */
+    var secondaryName = 'secondary-' + Date.now();
+    var secondaryApp = firebase.initializeApp(window.r3adsFirebaseConfig, secondaryName);
+    var secondaryAuth = secondaryApp.auth();
+
+    /* Contraseña temporal (nunca se muestra al admin) */
+    var tempPwd = 'Rtemp!' + Math.random().toString(36).slice(2, 10);
+
+    secondaryAuth.createUserWithEmailAndPassword(email, tempPwd)
+      .then(function (cred) {
+        var uid = cred.user.uid;
+        /* Guardar metadata en Firestore, siempre con el clinicId de esta
+           instancia — sin esto, las Security Rules nunca le asignarían rol. */
+        return r3adsDb.collection('usuarios').doc(uid).set({
+          nombre: nombre, email: email, rol: rol, estado: estado,
+          clinicId: CLINIC_ID,
+          uid: uid, creadoEn: firebase.firestore.FieldValue.serverTimestamp()
+        });
+      })
+      .then(function () {
+        /* Enviar reset para que el empleado establezca su propia contraseña */
+        return r3adsAuth.sendPasswordResetEmail(email);
+      })
+      .then(function () {
+        secondaryAuth.signOut().catch(function () {});
+        toast('✅ Usuario creado. Se envió un correo a ' + email + ' para establecer contraseña.', 'ok');
+        panelOpen = false;
+        $('au-create-panel').classList.remove('is-open');
+        clearForm();
+        load();
+      })
+      .catch(function (err) {
+        secondaryAuth.signOut().catch(function () {});
+        var msg = 'Error al crear usuario.';
+        if (err.code === 'auth/email-already-in-use') msg = 'Ese correo ya tiene una cuenta registrada.';
+        if (err.code === 'auth/invalid-email') msg = 'El correo no es válido.';
+        if (err.code === 'auth/weak-password') msg = 'Contraseña temporal demasiado débil (error interno).';
+        toast(msg, 'err');
+      })
+      .finally(function () {
+        btn.disabled = false;
+        btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20,6 9,17 4,12"/></svg> Crear usuario';
+      });
+  };
+
+  /* ── Reset password (exposed globally for inline onclick) ── */
+  window.resetPwd = function (id, email) {
+    if (!confirm('¿Enviar correo de restablecimiento de contraseña a ' + email + '?')) return;
+    r3adsAuth.sendPasswordResetEmail(email)
+      .then(function () { toast('✅ Correo de restablecimiento enviado a ' + email, 'ok'); })
+      .catch(function (err) { toast('Error: ' + err.message, 'err'); });
+  };
+
+  /* ── Toggle active/inactive ── */
+  window.toggleStatus = function (id, nuevoEstado) {
+    var label = nuevoEstado === 'activo' ? 'activar' : 'desactivar';
+    var u = _users.find(function (x) { return x.id === id; });
+    if (!confirm('¿Seguro que deseas ' + label + ' la cuenta de ' + (u ? u.nombre : id) + '?')) return;
+    r3adsDb.collection('usuarios').doc(id).update({ estado: nuevoEstado })
+      .then(function () {
+        toast(nuevoEstado === 'activo' ? '✅ Cuenta activada.' : '⚠️ Cuenta desactivada.', 'ok');
+        load();
+      })
+      .catch(function (err) { toast('Error: ' + err.message, 'err'); });
+  };
+
+  /* ── Eliminar usuario (solo registro Firestore) ── */
+  window.deleteUser = function (id, nombre) {
+    if (!confirm('¿Eliminar a ' + nombre + ' del sistema?\n\nEsto borra el registro de Firestore. La cuenta de Firebase Auth queda inactiva pero debe eliminarse manualmente desde Firebase Console si es necesario.')) return;
+    r3adsDb.collection('usuarios').doc(id).delete()
+      .then(function () {
+        toast('✅ Usuario eliminado.', 'ok');
+        load();
+      })
+      .catch(function (err) { toast('Error al eliminar: ' + err.message, 'err'); });
+  };
+
+  function esc(s) {
+    return String(s || '').replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  }
+})();
+</script>
+</body>
+</html>

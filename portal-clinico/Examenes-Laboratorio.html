@@ -1,0 +1,877 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Exámenes de Laboratorio</title>
+<!-- Favicon: pendiente por clínica (Fase 5 del plan). -->
+<link rel="stylesheet" href="assets/cmg-tokens.css">
+<link rel="stylesheet" href="styles.css">
+<style>
+*, *::before, *::after { box-sizing: border-box; }
+body { margin: 0; background: #F4F6FB; font-family: 'Segoe UI', Arial, sans-serif; min-height: 100vh; }
+
+/* ── Header ── */
+.el-header {
+  background: #213C7D;
+  color: #fff;
+  padding: 16px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.el-header-left { display: flex; align-items: center; gap: 14px; }
+.el-header-logo { height: 36px; }
+.el-header-title { font-size: 16px; font-weight: 800; }
+.el-header-subtitle { font-size: 12px; opacity: .75; }
+.el-user-chip { display: flex; align-items: center; gap: 10px; font-size: 13px; }
+.el-avatar {
+  width: 32px; height: 32px;
+  background: #FDD22C;
+  color: #213C7D;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 800;
+}
+.el-logout {
+  background: rgba(255,255,255,.15); border: none; color: #fff;
+  padding: 6px 12px; border-radius: 6px; font-size: 12px; cursor: pointer;
+  font-family: inherit;
+}
+.el-logout:hover { background: rgba(255,255,255,.25); }
+
+/* ── Page ── */
+.el-page { max-width: 980px; margin: 24px auto; padding: 0 20px; }
+.el-card {
+  background: #fff;
+  border-radius: 14px;
+  box-shadow: 0 4px 18px rgba(33,60,125,.08);
+  padding: 24px;
+  margin-bottom: 20px;
+}
+.el-card-title {
+  font-size: 17px; font-weight: 800; color: #213C7D;
+  margin: 0 0 4px;
+}
+.el-card-subtitle { font-size: 13px; color: #6B7280; margin: 0 0 16px; }
+
+/* ── Form ── */
+.el-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.el-grid .full { grid-column: 1 / -1; }
+@media (max-width: 680px) { .el-grid { grid-template-columns: 1fr; } }
+.el-fgroup { display: flex; flex-direction: column; gap: 6px; }
+.el-label { font-size: 12px; font-weight: 700; color: #374151; }
+.el-input, .el-select, .el-textarea {
+  border: 1.5px solid #E5E7EB;
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-family: inherit;
+  font-size: 14px;
+  color: #1F2937;
+  outline: none;
+  width: 100%;
+  background: #fff;
+  transition: border-color .15s;
+}
+.el-input:focus, .el-select:focus, .el-textarea:focus { border-color: #213C7D; }
+.el-textarea { resize: vertical; min-height: 70px; }
+
+/* File input */
+.el-file-drop {
+  border: 2px dashed #C7D2FE;
+  border-radius: 10px;
+  padding: 22px;
+  text-align: center;
+  background: #F4F6FB;
+  cursor: pointer;
+  transition: border-color .15s, background .15s;
+}
+.el-file-drop:hover { border-color: #213C7D; background: #EEF2FF; }
+.el-file-drop.has-file { border-color: #059669; background: #ECFDF5; }
+.el-file-drop input { display: none; }
+.el-file-icon { font-size: 32px; margin-bottom: 6px; }
+.el-file-text { font-size: 13px; color: #4B5563; }
+.el-file-name { font-size: 13px; font-weight: 700; color: #065F46; margin-top: 4px; }
+
+/* Buttons */
+.el-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px; flex-wrap: wrap; }
+.el-btn {
+  border: none; border-radius: 8px;
+  padding: 11px 22px; font-size: 14px; font-weight: 700;
+  cursor: pointer; font-family: inherit;
+  transition: opacity .15s, transform .1s;
+  display: inline-flex; align-items: center; gap: 6px;
+}
+.el-btn:disabled { opacity: .5; cursor: not-allowed; }
+.el-btn:hover:not(:disabled) { opacity: .9; }
+.el-btn-primary { background: #213C7D; color: #fff; }
+.el-btn-ghost { background: #F4F6FB; color: #4B5563; border: 1.5px solid #E5E7EB; }
+
+/* History */
+.el-history-item {
+  background: #F9FAFB;
+  border-left: 4px solid #213C7D;
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.el-history-info { flex: 1; min-width: 0; }
+.el-history-title { font-size: 14px; font-weight: 700; color: #213C7D; margin: 0 0 2px; }
+.el-history-meta { font-size: 12px; color: #6B7280; margin: 0; }
+.el-history-pill {
+  background: #FDD22C; color: #213C7D;
+  padding: 2px 8px; border-radius: 100px;
+  font-size: 11px; font-weight: 700; margin-left: 6px;
+}
+.el-history-pending {
+  background: #FEE2E2; color: #991B1B;
+  padding: 2px 8px; border-radius: 100px;
+  font-size: 11px; font-weight: 700; margin-left: 6px;
+}
+.el-history-btn {
+  background: #213C7D; color: #fff; text-decoration: none;
+  padding: 7px 14px; border-radius: 6px; font-size: 12px; font-weight: 700;
+}
+.el-history-btn:hover { opacity: .9; }
+
+/* Match info */
+.el-match-info {
+  margin-top: 10px;
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-size: 13px;
+}
+.el-match-ok { background: #D1FAE5; color: #065F46; border: 1px solid #6EE7B7; }
+.el-match-fail { background: #FEF3C7; color: #92400E; border: 1px solid #FDE68A; }
+.el-match-loading { background: #E0E7FF; color: #3730A3; border: 1px solid #C7D2FE; }
+
+/* Modal */
+.el-modal {
+  position: fixed; inset: 0;
+  background: rgba(33,60,125,.45);
+  display: none;
+  align-items: center; justify-content: center;
+  z-index: 1000; padding: 20px;
+}
+.el-modal.is-open { display: flex; }
+.el-modal-box {
+  background: #fff; border-radius: 14px;
+  padding: 24px; max-width: 460px; width: 100%;
+  box-shadow: 0 12px 50px rgba(0,0,0,.18);
+}
+.el-modal-title { font-size: 16px; font-weight: 800; color: #213C7D; margin: 0 0 6px; }
+.el-modal-text { font-size: 13px; color: #6B7280; margin: 0 0 16px; }
+
+/* Toast */
+.el-toast {
+  position: fixed;
+  bottom: 24px; left: 50%; transform: translateX(-50%) translateY(20px);
+  background: #213C7D; color: #fff;
+  padding: 12px 22px; border-radius: 10px;
+  font-size: 14px; font-weight: 600;
+  opacity: 0; transition: opacity .2s, transform .2s;
+  z-index: 2000; pointer-events: none;
+  max-width: 90vw; text-align: center;
+}
+.el-toast.is-visible { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+.el-empty {
+  text-align: center; padding: 30px 20px;
+  color: #9CA3AF; font-size: 13px;
+}
+
+/* Loading overlay */
+.el-overlay {
+  position: fixed; inset: 0;
+  background: rgba(255,255,255,.85);
+  display: none;
+  align-items: center; justify-content: center;
+  z-index: 3000;
+}
+.el-overlay.is-open { display: flex; }
+.el-overlay-box {
+  background: #fff; border-radius: 12px;
+  padding: 24px 32px;
+  box-shadow: 0 8px 30px rgba(0,0,0,.12);
+  text-align: center;
+}
+.el-spinner {
+  width: 36px; height: 36px;
+  border: 4px solid #E5E7EB;
+  border-top-color: #213C7D;
+  border-radius: 50%;
+  animation: el-spin .7s linear infinite;
+  margin: 0 auto 10px;
+}
+@keyframes el-spin { to { transform: rotate(360deg); } }
+.el-overlay-text { font-size: 13px; color: #4B5563; }
+</style>
+<!-- Analytics por clínica: pendiente (ver nota en Auth.html). -->
+</head>
+<body>
+
+<!-- Header -->
+<div class="el-header">
+  <div class="el-header-left">
+    <div>
+      <div class="el-header-title">🔬 Exámenes de Laboratorio</div>
+      <div class="el-header-subtitle">Subir y vincular resultados externos al expediente</div>
+    </div>
+  </div>
+  <div class="el-user-chip" id="el-user-chip" style="visibility:hidden">
+    <div class="el-avatar" id="el-avatar">U</div>
+    <span id="el-user-name">—</span>
+    <button class="el-logout" id="el-logout">Cerrar sesión</button>
+  </div>
+</div>
+
+<div class="el-page">
+
+  <!-- Upload card -->
+  <div class="el-card">
+    <h2 class="el-card-title">📤 Subir nuevo examen</h2>
+    <p class="el-card-subtitle">Sube el PDF que recibiste del laboratorio. Se vinculará automáticamente al expediente del paciente por número de identidad.</p>
+
+    <div class="el-grid">
+      <div class="el-fgroup">
+        <label class="el-label">Número de identidad del paciente *</label>
+        <input type="text" class="el-input" id="f-dni" placeholder="0801-1990-12345" autocomplete="off">
+        <div id="el-match-info" style="display:none"></div>
+      </div>
+      <div class="el-fgroup">
+        <label class="el-label">Nombre del paciente *</label>
+        <input type="text" class="el-input" id="f-nombre" placeholder="Juan Pérez González">
+      </div>
+      <div class="el-fgroup">
+        <label class="el-label">Tipo de examen * <small style="color:#6B7280;font-weight:400">(mantén Ctrl/Cmd para seleccionar varios)</small></label>
+        <select class="el-select" id="f-tipo" multiple size="10">
+          <optgroup label="Pruebas comunes (19)">
+            <option value="Prueba de embarazo (rápida)">Prueba de embarazo (rápida)</option>
+            <option value="Prueba de dengue (rápida)">Prueba de dengue (rápida)</option>
+            <option value="Prueba DUO (VIH 4ª gen.)">Prueba DUO (VIH 4ª gen.)</option>
+            <option value="Prueba de sensibilidad">Prueba de sensibilidad</option>
+            <option value="Anticuerpos VIH 1/2">Anticuerpos VIH 1/2</option>
+            <option value="Colesterol Total">Colesterol Total</option>
+            <option value="Examen De Orina">Examen De Orina</option>
+            <option value="General De Heces">General De Heces</option>
+            <option value="Glucosa Ayuno en sangre">Glucosa Ayuno en sangre</option>
+            <option value="Grupo Sanguineo">Grupo Sanguineo</option>
+            <option value="Hemoglobina Glicosilada">Hemoglobina Glicosilada</option>
+            <option value="Hemograma Completo">Hemograma Completo</option>
+            <option value="Proteina C Reactiva">Proteina C Reactiva</option>
+            <option value="Prueba Coombs Directo">Prueba Coombs Directo</option>
+            <option value="Prueba Indirecta De Coombs">Prueba Indirecta De Coombs</option>
+            <option value="RPR / VDRL">RPR / VDRL</option>
+            <option value="Sangre oculta en heces">Sangre oculta en heces</option>
+            <option value="Tiempo De Protrombina (TP)">Tiempo De Protrombina (TP)</option>
+            <option value="TSH (Hormona Estimulante de Tiroides)">TSH (Hormona Estimulante de Tiroides)</option>
+          </optgroup>
+          <optgroup label="Hematología y coagulación (7)">
+            <option value="Dimero D">Dimero D</option>
+            <option value="Eritrosedimentacion (VES)">Eritrosedimentacion (VES)</option>
+            <option value="Fibrinógeno">Fibrinógeno</option>
+            <option value="Frotis de Sangre Periferica (FSP)">Frotis de Sangre Periferica (FSP)</option>
+            <option value="Hematozoario">Hematozoario</option>
+            <option value="Tiempo De Trombina (TT)">Tiempo De Trombina (TT)</option>
+            <option value="Tiempo de Tromboplastina Parcial (TPT)">Tiempo de Tromboplastina Parcial (TPT)</option>
+          </optgroup>
+          <optgroup label="Química sanguínea (38)">
+            <option value="Ácido Fólico">Ácido Fólico</option>
+            <option value="Ácido Úrico serico">Ácido Úrico serico</option>
+            <option value="Albúmina">Albúmina</option>
+            <option value="Amilasa en suero">Amilasa en suero</option>
+            <option value="Amonio en sangre">Amonio en sangre</option>
+            <option value="Bilirrubinas">Bilirrubinas</option>
+            <option value="Calcio en sangre">Calcio en sangre</option>
+            <option value="Cloruro (Cl-) en sangre">Cloruro (Cl-) en sangre</option>
+            <option value="Colesterol Hdl">Colesterol Hdl</option>
+            <option value="Colesterol Ldl">Colesterol Ldl</option>
+            <option value="Colesterol VLDL">Colesterol VLDL</option>
+            <option value="Colinesterasa">Colinesterasa</option>
+            <option value="Creatina Quinasa Mb (Mb-Cpk)">Creatina Quinasa Mb (Mb-Cpk)</option>
+            <option value="Creatina Quinasa Total (CPK)">Creatina Quinasa Total (CPK)</option>
+            <option value="Creatinina en sangre">Creatinina en sangre</option>
+            <option value="Deshidrogenasa Acido Lactica (Ldh)">Deshidrogenasa Acido Lactica (Ldh)</option>
+            <option value="Fosfatasa Acida Total">Fosfatasa Acida Total</option>
+            <option value="Fosfatasa Alcalina">Fosfatasa Alcalina</option>
+            <option value="Fosforo (P+) en suero">Fosforo (P+) en suero</option>
+            <option value="Gamma Glutamil Traspeptidasa">Gamma Glutamil Traspeptidasa</option>
+            <option value="Glucosa 2HPP - 2 horas postprandial">Glucosa 2HPP - 2 horas postprandial</option>
+            <option value="Glucosa Tolerancia Oral (2h)">Glucosa Tolerancia Oral (2h)</option>
+            <option value="Glucosa Tolerancia Oral (3h)">Glucosa Tolerancia Oral (3h)</option>
+            <option value="Hierro">Hierro</option>
+            <option value="Lipasa">Lipasa</option>
+            <option value="Lipidos Totales">Lipidos Totales</option>
+            <option value="Magnesio en sangre">Magnesio en sangre</option>
+            <option value="Nitrógeno Ureico en la sangre (Bun)">Nitrógeno Ureico en la sangre (Bun)</option>
+            <option value="Potasio en sangre">Potasio en sangre</option>
+            <option value="Pro BNP">Pro BNP</option>
+            <option value="Procalcitonina">Procalcitonina</option>
+            <option value="Proteínas Totales & Relación A/G">Proteínas Totales & Relación A/G</option>
+            <option value="Sodio (NA+) en Suero">Sodio (NA+) en Suero</option>
+            <option value="Transaminasa Oxalacetica (TsGO)">Transaminasa Oxalacetica (TsGO)</option>
+            <option value="Transaminasa Piruvica (TsGP)">Transaminasa Piruvica (TsGP)</option>
+            <option value="Transferrina">Transferrina</option>
+            <option value="Trigliceridos">Trigliceridos</option>
+            <option value="Troponina I">Troponina I</option>
+          </optgroup>
+          <optgroup label="Inmunología y anticuerpos (35)">
+            <option value="ACTH">ACTH</option>
+            <option value="Anticuerpo Chikungunya IgM">Anticuerpo Chikungunya IgM</option>
+            <option value="Anticuerpos Anti Cardiolipina(Igg)">Anticuerpos Anti Cardiolipina(Igg)</option>
+            <option value="Anticuerpos Anticardiolipinas IgM">Anticuerpos Anticardiolipinas IgM</option>
+            <option value="Anticuerpos Antiglobulina: Ig (Ra Test) - Factor Reumatoideo">Anticuerpos Antiglobulina: Ig (Ra Test) - Factor Reumatoideo</option>
+            <option value="Anticuerpos Antinucleares (ANA)">Anticuerpos Antinucleares (ANA)</option>
+            <option value="Anticuerpos Citomegalovirus IgG">Anticuerpos Citomegalovirus IgG</option>
+            <option value="Anticuerpos Citomegalovirus IgM">Anticuerpos Citomegalovirus IgM</option>
+            <option value="Anticuerpos Estreptolisina O (ASO)">Anticuerpos Estreptolisina O (ASO)</option>
+            <option value="Anticuerpos H-Pylori (sangre)">Anticuerpos H-Pylori (sangre)</option>
+            <option value="Anticuerpos Hepatitis A">Anticuerpos Hepatitis A</option>
+            <option value="Anticuerpos Hepatitis B (Anti-Hbc)">Anticuerpos Hepatitis B (Anti-Hbc)</option>
+            <option value="Anticuerpos Hepatitis B (Anti-HBs)">Anticuerpos Hepatitis B (Anti-HBs)</option>
+            <option value="Anticuerpos Hepatitis C">Anticuerpos Hepatitis C</option>
+            <option value="Anticuerpos Herpes simple Tipo 1 IgG">Anticuerpos Herpes simple Tipo 1 IgG</option>
+            <option value="Anticuerpos Herpes simple Tipo 1 IgM">Anticuerpos Herpes simple Tipo 1 IgM</option>
+            <option value="Anticuerpos Herpes simple Tipo 2 IgG">Anticuerpos Herpes simple Tipo 2 IgG</option>
+            <option value="Anticuerpos Herpes simple Tipo 2 IgM">Anticuerpos Herpes simple Tipo 2 IgM</option>
+            <option value="Anticuerpos Mononucleosis (Monotest)">Anticuerpos Mononucleosis (Monotest)</option>
+            <option value="Anticuerpos Rubeola IgG">Anticuerpos Rubeola IgG</option>
+            <option value="Anticuerpos Rubeola IgM">Anticuerpos Rubeola IgM</option>
+            <option value="Anticuerpos Toxoplasma IgG">Anticuerpos Toxoplasma IgG</option>
+            <option value="Anticuerpos Toxoplasma IgM">Anticuerpos Toxoplasma IgM</option>
+            <option value="Anticuerpos Trypanosoma cruzi (Chagas)">Anticuerpos Trypanosoma cruzi (Chagas)</option>
+            <option value="Antigeno H. Pylori-Heces">Antigeno H. Pylori-Heces</option>
+            <option value="Antigeno Hepatitis B (Hbsag)">Antigeno Hepatitis B (Hbsag)</option>
+            <option value="Antigenos Febriles (Anticuerpos Salmonella)">Antigenos Febriles (Anticuerpos Salmonella)</option>
+            <option value="Complemento Sérico C3">Complemento Sérico C3</option>
+            <option value="Complemento Sérico C4">Complemento Sérico C4</option>
+            <option value="Inmunoglobulina A">Inmunoglobulina A</option>
+            <option value="Inmunoglobulina E (IgE)">Inmunoglobulina E (IgE)</option>
+            <option value="Inmunoglobulina G">Inmunoglobulina G</option>
+            <option value="Inmunoglobulina M">Inmunoglobulina M</option>
+            <option value="Panel Alimentos">Panel Alimentos</option>
+            <option value="Panel Inhalantes">Panel Inhalantes</option>
+          </optgroup>
+          <optgroup label="Hormonas (24)">
+            <option value="Anticuerpos Anti-peroxidasa (TPO)">Anticuerpos Anti-peroxidasa (TPO)</option>
+            <option value="Cortisol A.M.">Cortisol A.M.</option>
+            <option value="Cortisol P.M.">Cortisol P.M.</option>
+            <option value="Curva Tolerancia a la Insulina">Curva Tolerancia a la Insulina</option>
+            <option value="Estradiol">Estradiol</option>
+            <option value="Ferritina">Ferritina</option>
+            <option value="Fsh (Hormona Foliculo Estimulante)">Fsh (Hormona Foliculo Estimulante)</option>
+            <option value="Gonadotropina Coriónica Humana">Gonadotropina Coriónica Humana</option>
+            <option value="Hormona Gonadotropina Coriónica (Beta-HCG)">Hormona Gonadotropina Coriónica (Beta-HCG)</option>
+            <option value="Insulina">Insulina</option>
+            <option value="Insulina Post">Insulina Post</option>
+            <option value="Lh">Lh</option>
+            <option value="Paratohormona (Pth)">Paratohormona (Pth)</option>
+            <option value="Progesterona">Progesterona</option>
+            <option value="Prolactina">Prolactina</option>
+            <option value="T3 (Triyodotironina)">T3 (Triyodotironina)</option>
+            <option value="T3 Libre">T3 Libre</option>
+            <option value="T4 (Tiroxina)">T4 (Tiroxina)</option>
+            <option value="T4 Libre">T4 Libre</option>
+            <option value="Testosterona Libre">Testosterona Libre</option>
+            <option value="Testosterona Total">Testosterona Total</option>
+            <option value="Tiroglobulina">Tiroglobulina</option>
+            <option value="Vitamina B-12">Vitamina B-12</option>
+            <option value="Vitamina D">Vitamina D</option>
+          </optgroup>
+          <optgroup label="Marcadores tumorales (7)">
+            <option value="Alfa Fetoproteína (AFP)">Alfa Fetoproteína (AFP)</option>
+            <option value="Antígeno Prostático Especifico Total (PSA Total)">Antígeno Prostático Especifico Total (PSA Total)</option>
+            <option value="Antígeno Prostático Libre (PSA Libre)">Antígeno Prostático Libre (PSA Libre)</option>
+            <option value="Marcador Tumoral Ca 19-9">Marcador Tumoral Ca 19-9</option>
+            <option value="Marcador Tumoral Ca-125">Marcador Tumoral Ca-125</option>
+            <option value="Marcador Tumoral Ca-15-3">Marcador Tumoral Ca-15-3</option>
+            <option value="Marcador Tumoral Carcinoembrionario (Cea)">Marcador Tumoral Carcinoembrionario (Cea)</option>
+          </optgroup>
+          <optgroup label="Orina, heces y microbiología (12)">
+            <option value="Cocaina en orina COC">Cocaina en orina COC</option>
+            <option value="Coloración De Ziehl-Neelsen">Coloración De Ziehl-Neelsen</option>
+            <option value="Coloración Wright">Coloración Wright</option>
+            <option value="Coprocultivo">Coprocultivo</option>
+            <option value="Cultivo Por Bacterias">Cultivo Por Bacterias</option>
+            <option value="Hemocultivo">Hemocultivo</option>
+            <option value="Marihuana: tetrahidrocannabinol (THC)">Marihuana: tetrahidrocannabinol (THC)</option>
+            <option value="Microalbumina">Microalbumina</option>
+            <option value="Perfil Fehling & Ph En Heces">Perfil Fehling & Ph En Heces</option>
+            <option value="Proteínas Totales en Orina 24 horas">Proteínas Totales en Orina 24 horas</option>
+            <option value="Cociente/Relación Albúmina-Creatinina en Orina">Cociente/Relación Albúmina-Creatinina en Orina</option>
+            <option value="Urocultivo">Urocultivo</option>
+          </optgroup>
+          <optgroup label="Citología (2)">
+            <option value="Citología Convencional">Citología Convencional</option>
+            <option value="Citología Base Líquida">Citología Base Líquida</option>
+          </optgroup>
+          <optgroup label="Biopsia (1)">
+            <option value="Biopsia">Biopsia</option>
+          </optgroup>
+        </select>
+      </div>
+      <div class="el-fgroup" id="f-tipo-otro-wrapper" style="display:none">
+        <label class="el-label">Nombre personalizado del examen *</label>
+        <input type="text" class="el-input" id="f-tipo-otro">
+      </div>
+      <div class="el-fgroup full" id="f-tipo-resumen-wrapper" style="display:none">
+        <label class="el-label">Nombre del examen (auto)</label>
+        <input type="text" class="el-input" id="f-tipo-resumen" readonly style="background:#F3F4F6">
+      </div>
+      <div class="el-fgroup">
+        <label class="el-label">Fecha del examen *</label>
+        <input type="date" class="el-input" id="f-fecha">
+      </div>
+      <div class="el-fgroup">
+        <label class="el-label">Proveedor (laboratorio)</label>
+        <input type="text" class="el-input" id="f-proveedor">
+      </div>
+      <div class="el-fgroup full">
+        <label class="el-label">Notas (opcional)</label>
+        <textarea class="el-textarea" id="f-notas" placeholder="Observaciones, hallazgos importantes, etc."></textarea>
+      </div>
+      <div class="el-fgroup full">
+        <label class="el-label">Archivo PDF *</label>
+        <label class="el-file-drop" id="el-file-drop">
+          <input type="file" id="f-pdf" accept="application/pdf">
+          <div class="el-file-icon">📄</div>
+          <div class="el-file-text">Haz click para seleccionar el PDF del examen</div>
+          <div class="el-file-name" id="el-file-name" style="display:none"></div>
+        </label>
+      </div>
+    </div>
+
+    <div class="el-actions">
+      <button class="el-btn el-btn-ghost" id="btn-limpiar">Limpiar</button>
+      <button class="el-btn el-btn-primary" id="btn-subir" disabled>📤 Subir examen</button>
+    </div>
+  </div>
+
+  <!-- History -->
+  <div class="el-card">
+    <h2 class="el-card-title">📋 Exámenes subidos recientemente</h2>
+    <p class="el-card-subtitle">Últimos 20 exámenes cargados al sistema.</p>
+    <div id="el-history-list">
+      <div class="el-empty">Cargando...</div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Modal: crear expediente rápido -->
+<div class="el-modal" id="modal-expediente">
+  <div class="el-modal-box">
+    <h3 class="el-modal-title">⚠️ No existe expediente para este DNI</h3>
+    <p class="el-modal-text">El paciente no está en el sistema. Crea un expediente rápido para vincular el examen.</p>
+    <div class="el-grid">
+      <div class="el-fgroup full">
+        <label class="el-label">Nombre completo *</label>
+        <input type="text" class="el-input" id="m-nombre">
+      </div>
+      <div class="el-fgroup">
+        <label class="el-label">DNI</label>
+        <input type="text" class="el-input" id="m-dni" readonly>
+      </div>
+      <div class="el-fgroup">
+        <label class="el-label">Fecha de nacimiento</label>
+        <input type="date" class="el-input" id="m-fecnac">
+      </div>
+      <div class="el-fgroup">
+        <label class="el-label">Sexo</label>
+        <select class="el-select" id="m-sexo">
+          <option value="">—</option>
+          <option value="M">Masculino</option>
+          <option value="F">Femenino</option>
+          <option value="O">Otro</option>
+        </select>
+      </div>
+      <div class="el-fgroup">
+        <label class="el-label">Teléfono</label>
+        <input type="tel" class="el-input" id="m-telefono">
+      </div>
+    </div>
+    <div class="el-actions">
+      <button class="el-btn el-btn-ghost" id="m-saltar">Subir sin vincular</button>
+      <button class="el-btn el-btn-primary" id="m-crear">✓ Crear expediente y subir</button>
+    </div>
+  </div>
+</div>
+
+<!-- Overlay -->
+<div class="el-overlay" id="el-overlay">
+  <div class="el-overlay-box">
+    <div class="el-spinner"></div>
+    <div class="el-overlay-text" id="el-overlay-text">Procesando...</div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="el-toast" id="el-toast">—</div>
+
+<!-- Firebase -->
+<script src="clinic-config.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
+<script src="firebase-init.js"></script>
+
+<script>
+(function () {
+  var CLINIC_ID = window.R3ADS_CLINIC_ID;
+  var CLINIC = window.R3ADS_CLINIC_FALLBACK || {};
+  function $id(id) { return document.getElementById(id); }
+  function esc(s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  }
+  /* Formatea una fecha cruda "YYYY-MM-DD" (de <input type="date">) a día/mes/año */
+  function fmtFechaCorta(fechaStr) {
+    if (!fechaStr) return '';
+    var d = new Date(fechaStr + 'T00:00:00');
+    if (isNaN(d.getTime())) return fechaStr;
+    return d.toLocaleDateString('es-HN', { day: '2-digit', month: '2-digit', year: 'numeric' });
+  }
+  function toast(msg) {
+    var t = $id('el-toast');
+    t.textContent = msg;
+    t.classList.add('is-visible');
+    setTimeout(function () { t.classList.remove('is-visible'); }, 2800);
+  }
+  function showOverlay(msg) { $id('el-overlay-text').textContent = msg; $id('el-overlay').classList.add('is-open'); }
+  function hideOverlay() { $id('el-overlay').classList.remove('is-open'); }
+  function normDNI(v) { return (v || '').replace(/\D/g, ''); }
+  function todayStr() { return new Date().toISOString().slice(0, 10); }
+  function generarCodigo() {
+    var letras = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+    var s = '';
+    for (var i = 0; i < 6; i++) s += letras.charAt(Math.floor(Math.random() * letras.length));
+    return (CLINIC.prefijoCodigoPaciente || 'CLI') + '-' + s;
+  }
+
+  var currentUser = null;
+  var selectedPdf = null;
+  var matchedExpediente = null; /* { codigoPaciente, nombre, dni } o null */
+
+  var TIPOS_LABELS = {
+    hematologia: 'Hematología completa', quimica: 'Química sanguínea', glucosa: 'Glucosa',
+    lipidograma: 'Perfil lipídico', hepatico: 'Perfil hepático', renal: 'Perfil renal',
+    tiroideas: 'Pruebas tiroideas', hba1c: 'Hemoglobina glicosilada', electrolitos: 'Electrolitos',
+    coagulacion: 'Coagulación', orina: 'Orina (general)', heces: 'Heces (general)',
+    cultivo: 'Cultivo', hierro: 'Hierro / Ferritina', vitb12: 'Vitamina B12',
+    vitd: 'Vitamina D', vih: 'VIH', vdrl: 'VDRL', hepatitis: 'Hepatitis B/C',
+    'embarazo-sangre': 'Embarazo (sangre)', marcadores: 'Marcadores tumorales', otro: 'Otro'
+  };
+
+  /* ── Auth ── */
+  r3adsAuth.onAuthStateChanged(function (user) {
+    if (!user) { window.location.href = 'Auth.html?returnTo=Examenes-Laboratorio.html'; return; }
+    currentUser = user;
+    var name = user.displayName || user.email.split('@')[0];
+    $id('el-user-chip').style.visibility = '';
+    $id('el-avatar').textContent = name.charAt(0).toUpperCase();
+    $id('el-user-name').textContent = name;
+    $id('f-fecha').value = todayStr();
+    loadHistory();
+
+    /* Auto-rellenar DNI si viene en URL */
+    var params = new URLSearchParams(window.location.search);
+    var dniParam = params.get('dni');
+    var nombreParam = params.get('nombre');
+    if (dniParam) { $id('f-dni').value = dniParam; checkDniMatch(); }
+    if (nombreParam) $id('f-nombre').value = nombreParam;
+  });
+
+  $id('el-logout').addEventListener('click', function () {
+    r3adsAuth.signOut().then(function () { window.location.href = 'Auth.html'; });
+  });
+
+  /* ── Tipo otro toggle ── */
+  $id('f-tipo').addEventListener('change', function () {
+    /* DRM Fun-7: multi-select. Mostrar campo 'otro' si está marcado, y resumen si hay >1 */
+    var selected = Array.from(this.selectedOptions).map(function(o){ return o.value; });
+    var labels   = Array.from(this.selectedOptions).map(function(o){ return o.textContent.trim(); });
+    $id('f-tipo-otro-wrapper').style.display = selected.indexOf('otro') >= 0 ? '' : 'none';
+    var resumenWrap = $id('f-tipo-resumen-wrapper');
+    var resumen     = $id('f-tipo-resumen');
+    if (selected.length > 1) {
+      resumenWrap.style.display = '';
+      resumen.value = 'Conjunto: ' + labels.join(', ');
+    } else {
+      resumenWrap.style.display = 'none';
+      resumen.value = '';
+    }
+    updateSubmitBtn();
+  });
+  $id('f-tipo-otro').addEventListener('input', updateSubmitBtn);
+  $id('f-nombre').addEventListener('input', updateSubmitBtn);
+  $id('f-fecha').addEventListener('input', updateSubmitBtn);
+
+  /* ── DNI match check ── */
+  var dniCheckTimer = null;
+  $id('f-dni').addEventListener('input', function () {
+    matchedExpediente = null;
+    updateSubmitBtn();
+    var info = $id('el-match-info');
+    var dni = this.value.trim();
+    if (!dni) { info.style.display = 'none'; return; }
+    info.style.display = '';
+    info.className = 'el-match-info el-match-loading';
+    info.textContent = 'Buscando expediente...';
+    clearTimeout(dniCheckTimer);
+    dniCheckTimer = setTimeout(checkDniMatch, 400);
+  });
+
+  function checkDniMatch() {
+    var dni = $id('f-dni').value.trim();
+    var dniNorm = normDNI(dni);
+    var info = $id('el-match-info');
+    if (!dniNorm) { info.style.display = 'none'; matchedExpediente = null; return; }
+
+    // Acotado a esta clínica: sin este where, un escaneo completo de
+    // /expedientes filtraría (y expondría al cliente) los datos de pacientes
+    // de TODAS las clínicas del proyecto Firebase.
+    r3adsDb.collection('expedientes').where('clinicId', '==', CLINIC_ID).get().then(function (snap) {
+      var found = null;
+      snap.forEach(function (doc) {
+        if (found) return;
+        var dg = (doc.data() || {}).datosGenerales || {};
+        if (normDNI(dg.numeroIdentidad) === dniNorm) {
+          found = { codigoPaciente: doc.id, nombre: dg.nombreCompleto || '', dni: dg.numeroIdentidad };
+        }
+      });
+      if (found) {
+        matchedExpediente = found;
+        info.className = 'el-match-info el-match-ok';
+        info.innerHTML = '✓ Expediente encontrado: <strong>' + esc(found.codigoPaciente) + '</strong> · ' + esc(found.nombre);
+        /* Auto-llenar nombre si está vacío */
+        if (!$id('f-nombre').value && found.nombre) $id('f-nombre').value = found.nombre;
+      } else {
+        matchedExpediente = null;
+        info.className = 'el-match-info el-match-fail';
+        info.textContent = '⚠ No existe expediente con este DNI. Al subir se ofrecerá crear uno rápido.';
+      }
+      updateSubmitBtn();
+    }).catch(function (err) {
+      info.className = 'el-match-info el-match-fail';
+      info.textContent = 'Error al buscar: ' + err.message;
+    });
+  }
+
+  /* ── File picker ── */
+  $id('f-pdf').addEventListener('change', function (e) {
+    var file = e.target.files[0];
+    if (!file) return;
+    if (file.type !== 'application/pdf' && !file.name.toLowerCase().endsWith('.pdf')) {
+      toast('Solo se aceptan archivos PDF');
+      e.target.value = '';
+      return;
+    }
+    if (file.size > 15 * 1024 * 1024) {
+      toast('El archivo excede 15 MB');
+      e.target.value = '';
+      return;
+    }
+    selectedPdf = file;
+    $id('el-file-name').style.display = '';
+    $id('el-file-name').textContent = '✓ ' + file.name + ' (' + (file.size / 1024 / 1024).toFixed(2) + ' MB)';
+    $id('el-file-drop').classList.add('has-file');
+    updateSubmitBtn();
+  });
+
+  function updateSubmitBtn() {
+    var dni = $id('f-dni').value.trim();
+    var nombre = $id('f-nombre').value.trim();
+    /* DRM Fun-7: validar multi-select */
+    var sel = $id('f-tipo');
+    var values = Array.from(sel.selectedOptions).map(function(o){ return o.value; });
+    var fecha = $id('f-fecha').value;
+    var tipoOtro = $id('f-tipo-otro').value.trim();
+    var validTipo = values.length > 0 && (values.indexOf('otro') < 0 || tipoOtro);
+    $id('btn-subir').disabled = !(dni && nombre && validTipo && fecha && selectedPdf);
+  }
+
+  $id('btn-limpiar').addEventListener('click', function () {
+    $id('f-dni').value = '';
+    $id('f-nombre').value = '';
+    $id('f-tipo').value = '';
+    $id('f-tipo-otro').value = '';
+    $id('f-tipo-otro-wrapper').style.display = 'none';
+    $id('f-fecha').value = todayStr();
+    $id('f-proveedor').value = '';
+    $id('f-notas').value = '';
+    $id('f-pdf').value = '';
+    selectedPdf = null;
+    matchedExpediente = null;
+    $id('el-file-name').style.display = 'none';
+    $id('el-file-drop').classList.remove('has-file');
+    $id('el-match-info').style.display = 'none';
+    updateSubmitBtn();
+  });
+
+  /* ── Subir ── */
+  $id('btn-subir').addEventListener('click', function () {
+    if ($id('btn-subir').disabled) return;
+    /* Si no hay match, abrir modal */
+    if (!matchedExpediente) {
+      $id('m-nombre').value = $id('f-nombre').value;
+      $id('m-dni').value = $id('f-dni').value;
+      $id('modal-expediente').classList.add('is-open');
+      return;
+    }
+    procederSubida(matchedExpediente);
+  });
+
+  /* ── Modal: crear expediente rápido ── */
+  $id('m-saltar').addEventListener('click', function () {
+    $id('modal-expediente').classList.remove('is-open');
+    procederSubida(null); /* Subir sin codigoPaciente */
+  });
+  $id('m-crear').addEventListener('click', function () {
+    var nombre = $id('m-nombre').value.trim();
+    if (!nombre) { toast('Nombre es requerido'); return; }
+    var dni = $id('m-dni').value.trim();
+    var codigo = generarCodigo();
+    var expedienteData = {
+      codigoPaciente: codigo,
+      clinicId: CLINIC_ID,
+      datosGenerales: {
+        nombreCompleto: nombre,
+        numeroIdentidad: dni,
+        fechaNacimiento: $id('m-fecnac').value,
+        sexo: $id('m-sexo').value,
+        telefono: $id('m-telefono').value
+      },
+      ownerUid: null,
+      compartidoCon: [],
+      solicitudesAcceso: [],
+      createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+      createdBy: currentUser.email
+    };
+    showOverlay('Creando expediente...');
+    r3adsDb.collection('expedientes').doc(codigo).set(expedienteData)
+      .then(function () {
+        $id('modal-expediente').classList.remove('is-open');
+        hideOverlay();
+        procederSubida({ codigoPaciente: codigo, nombre: nombre, dni: dni });
+      })
+      .catch(function (err) {
+        hideOverlay();
+        toast('Error: ' + err.message);
+      });
+  });
+
+  /* ── Proceder con subida del PDF + Firestore ── */
+  function procederSubida(expediente) {
+    /* DRM Fun-7: soporta multi-select. Si >1 seleccionado → 'Conjunto: A, B, C' */
+    /* DRM v3.3: values son ahora los nombres completos (catálogo de 141), sin "otro" */
+    var sel = $id('f-tipo');
+    var values = Array.from(sel.selectedOptions).map(function(o){ return o.value; });
+    var labels = values.slice();  /* value === label */
+    var tipoVal    = values.length === 1 ? values[0] : 'conjunto';
+    var tipoNombre = labels.length > 1 ? ('Conjunto: ' + labels.join(', ')) : (labels[0] || '');
+    var fechaExamen = $id('f-fecha').value;
+    var dni = $id('f-dni').value.trim();
+    var nombre = $id('f-nombre').value.trim();
+    var codigo = expediente ? expediente.codigoPaciente : null;
+
+    showOverlay('Subiendo PDF...');
+
+    /* Path acotado por clínica (ver storage.rules):
+       clinics/{clinicId}/examenes-laboratorio/{codigo|sinExpediente}/{ts}-{tipo}.pdf */
+    var ts = new Date().toISOString().replace(/[:.]/g, '-');
+    var safeNombreTipo = (tipoNombre || 'examen').replace(/[^a-zA-Z0-9-]/g, '_').slice(0, 30);
+    var folder = codigo || 'sin-expediente';
+    var storagePath = 'clinics/' + CLINIC_ID + '/examenes-laboratorio/' + folder + '/' + ts + '-' + safeNombreTipo + '.pdf';
+    var ref = firebase.storage().ref(storagePath);
+
+    ref.put(selectedPdf)
+      .then(function (snap) { return snap.ref.getDownloadURL(); })
+      .then(function (url) {
+        var docData = {
+          tipo: tipoVal,
+          tipoNombre: tipoNombre,
+          clinicId: CLINIC_ID,
+          pacienteNombre: nombre,
+          dni: dni,
+          dniNormalizado: normDNI(dni),
+          fechaExamen: fechaExamen,
+          proveedor: $id('f-proveedor').value.trim(),
+          notas: $id('f-notas').value.trim(),
+          pdfUrl: url,
+          storagePath: storagePath,
+          codigoPaciente: codigo,
+          fileName: selectedPdf.name,
+          fileSize: selectedPdf.size,
+          subidoPor: currentUser.email,
+          subidoPorNombre: currentUser.displayName || currentUser.email.split('@')[0],
+          createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        };
+        return r3adsDb.collection('examenesLaboratorio').add(docData);
+      })
+      .then(function () {
+        hideOverlay();
+        if (codigo) {
+          toast('✓ Examen subido y vinculado a ' + codigo);
+        } else {
+          toast('✓ Examen subido (sin vincular a expediente)');
+        }
+        $id('btn-limpiar').click();
+        loadHistory();
+      })
+      .catch(function (err) {
+        hideOverlay();
+        console.error('[Portal Clínico] Error subiendo examen:', err);
+        toast('Error: ' + err.message);
+      });
+  }
+
+  /* ── History ── */
+  function loadHistory() {
+    var cont = $id('el-history-list');
+    cont.innerHTML = '<div class="el-empty">Cargando...</div>';
+    // NOTA: where + orderBy pide índice compuesto (clinicId ASC, createdAt
+    // DESC) — la consola de Firebase da el enlace para crearlo si falla.
+    r3adsDb.collection('examenesLaboratorio')
+      .where('clinicId', '==', CLINIC_ID)
+      .orderBy('createdAt', 'desc')
+      .limit(20)
+      .get()
+      .then(function (snap) {
+        if (snap.empty) {
+          cont.innerHTML = '<div class="el-empty">Aún no hay exámenes subidos.</div>';
+          return;
+        }
+        var html = '';
+        snap.forEach(function (doc) {
+          var d = doc.data();
+          var fecha = fmtFechaCorta(d.fechaExamen) || (d.createdAt && d.createdAt.toDate ? d.createdAt.toDate().toLocaleDateString('es-HN') : '—');
+          var vinculado = d.codigoPaciente
+            ? '<span class="el-history-pill">' + esc(d.codigoPaciente) + '</span>'
+            : '<span class="el-history-pending">Sin vincular</span>';
+          html += '<div class="el-history-item">' +
+            '<div class="el-history-info">' +
+              '<p class="el-history-title">🔬 ' + esc(d.tipoNombre || d.tipo) + vinculado + '</p>' +
+              '<p class="el-history-meta">' + esc(d.pacienteNombre || '—') + ' · DNI ' + esc(d.dni || '—') + ' · 📅 ' + esc(fecha) + '</p>' +
+            '</div>' +
+            '<a class="el-history-btn" href="' + esc(d.pdfUrl) + '" target="_blank" rel="noopener">📄 Ver PDF</a>' +
+          '</div>';
+        });
+        cont.innerHTML = html;
+      })
+      .catch(function (err) {
+        cont.innerHTML = '<div class="el-empty" style="color:#DC2626">Error cargando: ' + esc(err.message) + '</div>';
+      });
+  }
+})();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,15 @@
+# Dependencias (se reinstalan con npm install)
+node_modules/
+
+# Firebase CLI
+.firebase/
+firebase-debug.log
+firebase-debug.*.log
+ui-debug.log
+
+# Nunca commitear llaves de service account
+*firebase-adminsdk*.json
+serviceAccountKey*.json
+
+# Config real por clínica (Fase 5) — no debe vivir en el repo compartido
+clinic-config.js

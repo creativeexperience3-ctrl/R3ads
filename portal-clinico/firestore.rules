@@ -1,0 +1,403 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ═══════════════════════════════════════════════════════════════
+    // R3ads Portal Clínico — Reglas multi-tenant
+    //
+    // Origen: portado de CMG-Website/firestore.rules (sistema de una sola
+    // clínica). Cambio central: en el original, el rol de cada usuario se
+    // resolvía por LISTAS DE CORREOS hardcodeadas dentro de estas mismas
+    // reglas (isDoctor/isCaja/isAdmin/isMedicoTratante). Eso es exactamente
+    // lo que NO puede existir en una plataforma multi-clínica: cada clínica
+    // tiene su propio staff, y ningún correo puede estar "quemado" aquí.
+    //
+    // Aquí el rol y la clínica del usuario vienen SOLO de custom claims de
+    // Firebase Auth (`rol`, `clinicId`), fijados por una Cloud Function al
+    // escribir /usuarios/{uid} (ver Fase 3 del plan — pendiente de crear esa
+    // función en este repo). Cada documento clínico lleva su propio
+    // `clinicId`, y toda regla de rol exige ADEMÁS que el clinicId del token
+    // coincida con el clinicId del documento. Sin esa coincidencia, no hay
+    // rol que valga — así es imposible que el staff de una clínica lea o
+    // escriba datos de otra, incluso si el rol coincide.
+    // ═══════════════════════════════════════════════════════════════
+
+    // ── Identidad básica ──────────────────────────────────────────
+    function isAuth() {
+      return request.auth != null;
+    }
+    function myClinic() {
+      return request.auth.token.clinicId;
+    }
+    function myRole() {
+      return request.auth.token.rol;
+    }
+    // Cuentas internas de R3ads (soporte/operación de la plataforma), NO de
+    // ninguna clínica. Se otorga a mano una sola vez por Firebase Admin SDK
+    // al crear la cuenta del equipo de R3ads — nunca por una lista de correos
+    // en este archivo. Alcance limitado a administrar /clinics y bootstrap de
+    // /usuarios; NO da acceso a expedientes/consultas de ninguna clínica.
+    function isSuperAdmin() {
+      return isAuth() && request.auth.token.superadmin == true;
+    }
+
+    // Clínica con la suscripción vigente. Si una clínica se suspende por falta
+    // de pago (Fase 6 del plan), esto corta el acceso de todo su staff a la
+    // vez, sin tener que tocar ninguna otra regla.
+    function clinicActiva(clinicId) {
+      return exists(/databases/$(database)/documents/clinics/$(clinicId))
+        && get(/databases/$(database)/documents/clinics/$(clinicId)).data.estado == 'activa';
+    }
+    // El usuario pertenece a esa clínica Y esa clínica está activa.
+    function sameClinic(clinicId) {
+      return isAuth() && myClinic() == clinicId && clinicActiva(clinicId);
+    }
+
+    // ── Roles (idéntica jerarquía al sistema original de CMG) ───────
+    // isCaja: recepción/cobros. Rol Firestore: caja | enf | admin.
+    function isCaja(clinicId) {
+      return sameClinic(clinicId) && myRole() in ['caja', 'enf', 'admin'];
+    }
+    // isDoctor: acceso clínico completo. Rol Firestore: medico | enf | admin.
+    function isDoctor(clinicId) {
+      return sameClinic(clinicId) && myRole() in ['medico', 'enf', 'admin'];
+    }
+    // isAdmin: acceso total a portales y configuración de SU clínica.
+    function isAdmin(clinicId) {
+      return sameClinic(clinicId) && myRole() == 'admin';
+    }
+    // isEnfermeria: personal de enfermería. Rol Firestore: enf | admin.
+    function isEnfermeria(clinicId) {
+      return sameClinic(clinicId) && myRole() in ['enf', 'admin'];
+    }
+    // isMedicoTratante: SOLO médico (rol medico | admin). A diferencia de
+    // isDoctor(), NO incluye enfermería — se usa para la finalización de la
+    // Consulta médica (diagnóstico/tratamiento), reservada al médico tratante.
+    function isMedicoTratante(clinicId) {
+      return sameClinic(clinicId) && myRole() in ['medico', 'admin'];
+    }
+
+    // esServicioEnfermeria: en el original esto era una lista de nombres de
+    // servicios hardcodeada aquí mismo (catálogo específico de CMG, ej.
+    // "Sueroterapia Glutatión"). En multi-tenant cada clínica tiene su propio
+    // catálogo (clinics/{clinicId}/catalogoConfig — ver más abajo), así que
+    // la marca "¿enfermería puede completar este servicio sola?" tiene que
+    // vivir ahí, no en este archivo.
+    //
+    // CONFIRMADO al portar Admin-Precios.html: la clave real de cada ítem en
+    // catalogoConfig NO es el nombre del servicio, es un slug
+    // `{categoria}__{nombre-slugificado}` (ver slug() en Admin-Precios.html).
+    // Por eso este helper recibe `servicioKey` (no el nombre) — Expediente-
+    // Doctor.html debe guardar ese mismo `servicioKey` en cada `consulta` al
+    // crearla (pendiente al portar ese archivo), calculado con la misma
+    // función slug() para que coincida exactamente con el ID en Firestore.
+    // Mientras el ítem no tenga ese doc o ese campo, esta función devuelve
+    // false (fail-closed): el servicio requiere médico tratante por defecto.
+    function esServicioEnfermeria(clinicId, servicioKey) {
+      return exists(/databases/$(database)/documents/clinics/$(clinicId)/catalogoConfig/$(servicioKey))
+        && get(/databases/$(database)/documents/clinics/$(clinicId)/catalogoConfig/$(servicioKey)).data.enfermeriaCompletable == true;
+    }
+
+    // ═══ /clinics/{clinicId} ═══════════════════════════════════════
+    // Ficha de la clínica: nombre, logo, colores, prefijo de código de
+    // paciente, estado de suscripción ('activa' | 'suspendida').
+    // Solo R3ads (superadmin) puede crear/editar clínicas o cambiar su
+    // estado de suscripción — esto NO lo hace la propia clínica.
+    match /clinics/{clinicId} {
+      allow read: if isSuperAdmin() || (isAuth() && myClinic() == clinicId);
+      allow write: if isSuperAdmin();
+
+      // ═══ /clinics/{clinicId}/catalogoConfig/{itemKey} ═════════════
+      // Catálogo de servicios/precios propio de la clínica (reemplaza el
+      // catalogoConfig global del sistema de una sola clínica).
+      // Lectura PÚBLICA: el Cotizador lo usan visitantes anónimos sin login.
+      // Escritura: solo admin de esa clínica o superadmin.
+      match /catalogoConfig/{itemKey} {
+        allow read: if true;
+        allow write: if isAdmin(clinicId) || isSuperAdmin();
+      }
+
+      // ═══ /clinics/{clinicId}/siteConfig/{docId} ═══════════════════
+      // Configuración pública del micrositio de esa clínica (horario,
+      // anuncio, contacto). Lectura pública, escritura solo admin/superadmin.
+      match /siteConfig/{docId} {
+        allow read: if true;
+        allow write: if isAdmin(clinicId) || isSuperAdmin();
+      }
+    }
+
+    // ═══ /_claimsRefresh/{uid} ═══════════════════════════════════════
+    // Escrita SOLO por la Cloud Function onUsuarioWrite (Admin SDK, que
+    // ignora estas reglas) cada vez que cambian los custom claims de un
+    // usuario. El propio usuario la escucha (onSnapshot) para saber cuándo
+    // debe forzar un refresh de su ID token — ver r3ads-staff.js. Nadie
+    // escribe aquí desde el cliente.
+    match /_claimsRefresh/{uid} {
+      allow read: if isAuth() && request.auth.uid == uid;
+      allow write: if false;
+    }
+
+    // ═══ /users/{uid} ══════════════════════════════════════════════
+    // Perfil del PACIENTE (códigos de expediente vinculados/compartidos).
+    // A propósito NO lleva clinicId: la cuenta es de la persona, no de una
+    // clínica — el mismo paciente puede vincular códigos emitidos por
+    // distintas clínicas si las visita a todas. El aislamiento entre
+    // clínicas ya lo dan los propios códigos y las reglas de /expedientes.
+    match /users/{userId} {
+      allow read: if (isAuth() && request.auth.uid == userId) || isSuperAdmin();
+      allow create, update: if isAuth() && request.auth.uid == userId;
+      allow delete: if isSuperAdmin();
+    }
+
+    // ═══ /usuarios/{uid} ═══════════════════════════════════════════
+    // Cuentas de STAFF (personal clínico/caja/admin), gestionadas desde
+    // Admin-Usuarios.html. Cada doc lleva clinicId. Solo el admin de esa
+    // misma clínica administra a su propio personal; superadmin solo se usa
+    // para el alta manual del primer admin de una clínica nueva (Fase 4).
+    match /usuarios/{userId} {
+      allow read: if (isAuth() && request.auth.uid == userId)
+        || isAdmin(resource.data.clinicId)
+        || isSuperAdmin();
+      allow create: if isSuperAdmin() || isAdmin(request.resource.data.clinicId);
+      // No se permite mover un usuario de una clínica a otra vía update.
+      allow update: if isSuperAdmin()
+        || (
+          isAdmin(resource.data.clinicId)
+          && request.resource.data.clinicId == resource.data.clinicId
+        );
+      allow delete: if isAdmin(resource.data.clinicId) || isSuperAdmin();
+    }
+
+    // ═══ /expedientes/{codigo} ═════════════════════════════════════
+    // Document ID = código del paciente, con prefijo de la clínica
+    // (ej. {prefijo}-A7K9M2, ver Fase 2 del plan).
+    match /expedientes/{codigo} {
+      // Doctor/Caja de la MISMA clínica, o cualquier autenticado que conozca
+      // el código (el código sigue actuando como control de acceso para el
+      // paciente/familiar) — pero siempre dentro de la misma clínica activa.
+      allow read: if isDoctor(resource.data.clinicId)
+        || isCaja(resource.data.clinicId)
+        || sameClinic(resource.data.clinicId);
+
+      // Solo el doctor de esa clínica crea expedientes, y el documento debe
+      // nacer con el clinicId de quien lo crea (nunca "en blanco" ni de otra
+      // clínica).
+      allow create: if isDoctor(request.resource.data.clinicId)
+        && request.resource.data.clinicId == myClinic();
+
+      // Update — igual que el original, pero SIEMPRE dentro de la misma
+      // clínica y sin permitir cambiar el clinicId del documento:
+      //   - Doctor: siempre.
+      //   - Paciente sin owner asignado: puede reclamar (set ownerUid).
+      //   - Paciente con owner: solo agregarse a sí mismo a compartidoCon.
+      allow update: if request.resource.data.clinicId == resource.data.clinicId
+        && (
+          isDoctor(resource.data.clinicId)
+          || (
+            isAuth()
+            && resource.data.ownerUid == null
+            && request.resource.data.ownerUid == request.auth.uid
+          )
+          || (
+            isAuth()
+            && resource.data.ownerUid == request.auth.uid
+            && request.resource.data.diff(resource.data).affectedKeys()
+                .hasOnly(['compartidoCon', 'solicitudesAcceso', 'updatedAt'])
+          )
+          || (
+            isAuth()
+            && request.resource.data.diff(resource.data).affectedKeys()
+                .hasOnly(['solicitudesAcceso', 'updatedAt'])
+          )
+        );
+
+      allow delete: if isDoctor(resource.data.clinicId);
+    }
+
+    // ═══ /consultas/{id} ═══════════════════════════════════════════
+    // Mismo flujo de estados que el original (listo_enfermeria → preclinica/
+    // servicio → pendiente_caja/servicio-completo → completa), con clinicId.
+    match /consultas/{consultaId} {
+      allow read: if isDoctor(resource.data.clinicId) || isCaja(resource.data.clinicId)
+        || (
+          isAuth()
+          && exists(/databases/$(database)/documents/expedientes/$(resource.data.codigoPaciente))
+          && get(/databases/$(database)/documents/expedientes/$(resource.data.codigoPaciente)).data.clinicId == resource.data.clinicId
+          && (
+            get(/databases/$(database)/documents/expedientes/$(resource.data.codigoPaciente)).data.ownerUid == request.auth.uid
+            || (
+              get(/databases/$(database)/documents/expedientes/$(resource.data.codigoPaciente)).data.compartidoCon is list
+              && request.auth.uid in get(/databases/$(database)/documents/expedientes/$(resource.data.codigoPaciente)).data.compartidoCon
+            )
+          )
+        );
+
+      allow create: if request.resource.data.clinicId == myClinic()
+        && (
+          isDoctor(request.resource.data.clinicId)
+          || (isCaja(request.resource.data.clinicId)
+              && request.resource.data.status == 'pendiente_caja'
+              && request.resource.data.tipoRegistro in ['lab-standalone', 'prueba-standalone'])
+          || (isCaja(request.resource.data.clinicId) && request.resource.data.status == 'listo_enfermeria')
+          || (isCaja(request.resource.data.clinicId)
+              && request.resource.data.status == 'servicio'
+              && request.resource.data.tipo == 'servicio')
+              // NOTA: el original tenía aquí una lista fija de servicios que
+              // Caja registra directo sin preclínica ("Extracción de uña",
+              // "Cirugía menor", etc. — servicios del catálogo que NO son
+              // enfermeria-completable). Esa distinción también depende del
+              // catálogo por clínica; falta el campo equivalente
+              // (ej. `cajaRegistraDirecto`) al portar Admin-Precios.html.
+              // Por ahora este create de Caja queda más permisivo que el
+              // original hasta wirear ese campo — REVISAR antes de vender la
+              // primera suscripción real.
+        );
+
+      allow delete: if isAdmin(resource.data.clinicId)
+        || (
+          isDoctor(resource.data.clinicId)
+          && resource.data.status in ['listo_enfermeria', 'preclinica', 'servicio']
+        );
+
+      allow update: if request.resource.data.clinicId == resource.data.clinicId
+        && (
+          isMedicoTratante(resource.data.clinicId)
+          || (
+            isEnfermeria(resource.data.clinicId)
+            && resource.data.status == 'listo_enfermeria'
+            && request.resource.data.status in ['preclinica', 'servicio']
+          )
+          || (
+            (isCaja(resource.data.clinicId) || isEnfermeria(resource.data.clinicId))
+            && resource.data.status == 'servicio'
+            && esServicioEnfermeria(resource.data.clinicId, resource.data.servicioKey)
+            && request.resource.data.status in ['servicio', 'servicio-completo', 'pendiente_caja']
+          )
+          || (isCaja(resource.data.clinicId)
+              && resource.data.status in ['pendiente_caja', 'servicio-completo']
+              && request.resource.data.status in ['pendiente_caja', 'servicio-completo', 'completa'])
+        );
+    }
+
+    // ═══ /quotations/{id} ══════════════════════════════════════════
+    // Cotizaciones guardadas: cada usuario lee/escribe solo las suyas.
+    // clinicId identifica de qué instancia/clínica salió la cotización.
+    match /quotations/{quotationId} {
+      allow read: if (isAuth() && resource.data.userId == request.auth.uid) || isSuperAdmin();
+      allow create: if isAuth() && request.resource.data.userId == request.auth.uid;
+      allow update: if isAuth() && resource.data.userId == request.auth.uid
+        && request.resource.data.clinicId == resource.data.clinicId;
+      allow delete: if isSuperAdmin() || (isAuth() && resource.data.userId == request.auth.uid);
+    }
+
+    // ═══ /resultadosPruebas/{id} ═══════════════════════════════════
+    match /resultadosPruebas/{resultadoId} {
+      allow read: if isDoctor(resource.data.clinicId) || isCaja(resource.data.clinicId)
+        || (
+          isAuth()
+          && resource.data.codigoPaciente != null
+          && exists(/databases/$(database)/documents/expedientes/$(resource.data.codigoPaciente))
+          && get(/databases/$(database)/documents/expedientes/$(resource.data.codigoPaciente)).data.clinicId == resource.data.clinicId
+          && (
+            get(/databases/$(database)/documents/expedientes/$(resource.data.codigoPaciente)).data.ownerUid == request.auth.uid
+            || (
+              get(/databases/$(database)/documents/expedientes/$(resource.data.codigoPaciente)).data.compartidoCon is list
+              && request.auth.uid in get(/databases/$(database)/documents/expedientes/$(resource.data.codigoPaciente)).data.compartidoCon
+            )
+          )
+        );
+      allow create, update: if isDoctor(request.resource.data.clinicId) || isCaja(request.resource.data.clinicId);
+      allow delete: if isDoctor(resource.data.clinicId);
+    }
+
+    // ═══ /examenesLaboratorio/{id} ═════════════════════════════════
+    match /examenesLaboratorio/{examenId} {
+      allow read: if isDoctor(resource.data.clinicId) || isCaja(resource.data.clinicId)
+        || (
+          isAuth()
+          && resource.data.codigoPaciente != null
+          && exists(/databases/$(database)/documents/expedientes/$(resource.data.codigoPaciente))
+          && get(/databases/$(database)/documents/expedientes/$(resource.data.codigoPaciente)).data.clinicId == resource.data.clinicId
+          && (
+            get(/databases/$(database)/documents/expedientes/$(resource.data.codigoPaciente)).data.ownerUid == request.auth.uid
+            || (
+              get(/databases/$(database)/documents/expedientes/$(resource.data.codigoPaciente)).data.compartidoCon is list
+              && request.auth.uid in get(/databases/$(database)/documents/expedientes/$(resource.data.codigoPaciente)).data.compartidoCon
+            )
+          )
+        );
+      allow create: if isDoctor(request.resource.data.clinicId) || isCaja(request.resource.data.clinicId)
+        || (
+          isAuth()
+          && request.resource.data.codigoPaciente != null
+          && request.resource.data.subidoPorPaciente == true
+          && exists(/databases/$(database)/documents/expedientes/$(request.resource.data.codigoPaciente))
+          && get(/databases/$(database)/documents/expedientes/$(request.resource.data.codigoPaciente)).data.clinicId == request.resource.data.clinicId
+          && get(/databases/$(database)/documents/expedientes/$(request.resource.data.codigoPaciente)).data.ownerUid == request.auth.uid
+        );
+      allow update: if isDoctor(resource.data.clinicId) || isCaja(resource.data.clinicId);
+      allow delete: if isDoctor(resource.data.clinicId);
+    }
+
+    // ═══ /solicitudesUnificacion/{id} ══════════════════════════════
+    match /solicitudesUnificacion/{solId} {
+      allow read: if isDoctor(resource.data.clinicId);
+      allow create: if isDoctor(request.resource.data.clinicId)
+        && request.resource.data.solicitadoPor == request.auth.token.email
+        && request.resource.data.estado == 'pendiente';
+      allow update: if isAdmin(resource.data.clinicId);
+      allow delete: if isAdmin(resource.data.clinicId);
+    }
+
+    // ═══ /constancias/{id} ═════════════════════════════════════════
+    match /constancias/{constanciaId} {
+      allow read: if isDoctor(resource.data.clinicId) || isCaja(resource.data.clinicId)
+        || (
+          isAuth()
+          && resource.data.codigoPaciente != null
+          && exists(/databases/$(database)/documents/expedientes/$(resource.data.codigoPaciente))
+          && get(/databases/$(database)/documents/expedientes/$(resource.data.codigoPaciente)).data.clinicId == resource.data.clinicId
+          && (
+            get(/databases/$(database)/documents/expedientes/$(resource.data.codigoPaciente)).data.ownerUid == request.auth.uid
+            || (
+              get(/databases/$(database)/documents/expedientes/$(resource.data.codigoPaciente)).data.compartidoCon is list
+              && request.auth.uid in get(/databases/$(database)/documents/expedientes/$(resource.data.codigoPaciente)).data.compartidoCon
+            )
+          )
+        );
+      allow create, update: if isDoctor(request.resource.data.clinicId);
+      allow delete: if isAdmin(resource.data.clinicId);
+    }
+
+    // ═══ /electrocardiogramas/{id} ═════════════════════════════════
+    match /electrocardiogramas/{ekgId} {
+      allow read: if isDoctor(resource.data.clinicId) || isCaja(resource.data.clinicId)
+        || (
+          isAuth()
+          && resource.data.codigoPaciente != null
+          && exists(/databases/$(database)/documents/expedientes/$(resource.data.codigoPaciente))
+          && get(/databases/$(database)/documents/expedientes/$(resource.data.codigoPaciente)).data.clinicId == resource.data.clinicId
+          && (
+            get(/databases/$(database)/documents/expedientes/$(resource.data.codigoPaciente)).data.ownerUid == request.auth.uid
+            || (
+              get(/databases/$(database)/documents/expedientes/$(resource.data.codigoPaciente)).data.compartidoCon is list
+              && request.auth.uid in get(/databases/$(database)/documents/expedientes/$(resource.data.codigoPaciente)).data.compartidoCon
+            )
+          )
+        );
+      allow create, update, delete: if isDoctor(request.resource.data.clinicId);
+    }
+
+    // ═══ /estadisticas/{id} ════════════════════════════════════════
+    // Contadores agregados por clínica (ej. total de expedientes creados).
+    match /estadisticas/{id} {
+      allow read: if isDoctor(resource.data.clinicId) || isCaja(resource.data.clinicId);
+      allow write: if isDoctor(request.resource.data.clinicId) || isAdmin(request.resource.data.clinicId);
+    }
+
+    // ═══ Bloqueo por defecto ═══════════════════════════════════════
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

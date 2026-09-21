@@ -1,0 +1,2097 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cotizador · Portal Clínico</title>
+<!-- Favicon: pendiente por clínica (Fase 5 del plan). -->
+<link rel="stylesheet" href="assets/cmg-tokens.css">
+<link rel="stylesheet" href="styles.css">
+<style>
+  /* ── Cotizador page-specific styles ────────────────────────── */
+  .coti-page { background: var(--neutral-100); min-height: 100vh; padding-bottom: 80px; }
+
+  .coti-hero {
+    background: var(--cmg-navy); color: #fff;
+    padding: 64px 0 80px; position: relative; overflow: hidden;
+  }
+  .coti-hero::before {
+    content: 'L'; position: absolute; right: -80px; top: -120px;
+    font-family: var(--font-display); font-weight: 900;
+    font-size: 560px; line-height: .85; color: rgba(255,255,255,.04);
+    letter-spacing: -.06em; pointer-events: none;
+  }
+  .coti-hero-eyebrow {
+    font-size: 13px; font-weight: 700; letter-spacing: .18em;
+    text-transform: uppercase; color: var(--cmg-yellow); margin-bottom: 16px;
+  }
+  .coti-hero h1 {
+    font-family: var(--font-display); font-weight: 900;
+    font-size: clamp(48px, 6vw, 88px); line-height: .9;
+    letter-spacing: -.025em; text-transform: uppercase;
+    color: #fff; margin: 0;
+  }
+  .coti-hero h1 .y { color: var(--cmg-yellow); }
+  .coti-hero .script {
+    font-family: var(--font-script); color: var(--cmg-red);
+    font-size: clamp(32px, 4vw, 52px); line-height: 1;
+    margin: 4px 0 0 80px; transform: rotate(-3deg);
+  }
+  .coti-hero p {
+    font-size: 18px; line-height: 1.55; color: rgba(255,255,255,.85);
+    max-width: 640px; margin: 28px 0 0;
+  }
+
+  /* ── Main layout: services + sticky cart ─── */
+  .coti-layout {
+    display: grid; grid-template-columns: 1fr 380px; gap: 32px;
+    max-width: 1280px; margin: -48px auto 0;
+    padding: 0 32px; position: relative; z-index: 2;
+    align-items: start;
+  }
+
+  /* ── Service categories ─── */
+  .coti-categories {
+    background: #fff; border-radius: var(--r-xl);
+    box-shadow: 0 24px 60px rgba(33,60,125,.12);
+    overflow: clip;
+  }
+  .coti-search {
+    padding: 24px 28px; border-bottom: 1px solid var(--neutral-200);
+    background: #fff;
+    display: flex; gap: 12px; align-items: center;
+  }
+  .coti-search input {
+    flex: 1; border: 0; outline: 0; background: var(--neutral-100);
+    padding: 12px 18px; border-radius: var(--r-pill);
+    font-family: var(--font-body); font-size: 15px; color: var(--cmg-navy);
+  }
+  .coti-search input::placeholder { color: var(--neutral-400); }
+  .coti-count {
+    font-family: var(--font-display); font-weight: 900;
+    font-size: 13px; letter-spacing: .14em; text-transform: uppercase;
+    color: var(--cmg-red); padding: 8px 14px;
+    background: #FCEAEA; border-radius: var(--r-pill); white-space: nowrap;
+  }
+
+  .coti-cat {
+    border-bottom: 1px solid var(--neutral-200);
+  }
+  .coti-cat:last-child { border-bottom: 0; }
+  .coti-cat-h {
+    display: flex; align-items: center; gap: 16px;
+    padding: 22px 28px; cursor: pointer;
+    background: #fff;
+    transition: background var(--dur-fast);
+    user-select: none;
+  }
+  .coti-cat-h:hover { background: var(--neutral-100); }
+  .coti-cat-icon {
+    width: 44px; height: 44px; border-radius: 12px;
+    background: var(--cmg-navy); color: var(--cmg-yellow);
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .coti-cat-icon svg { width: 22px; height: 22px; }
+  .coti-cat-title {
+    flex: 1;
+    font-family: var(--font-display); font-weight: 900;
+    font-size: 22px; text-transform: uppercase; letter-spacing: -.005em;
+    color: var(--cmg-navy);
+  }
+  .coti-cat-meta {
+    font-size: 13px; color: var(--neutral-500); font-weight: 600;
+  }
+  .coti-cat-chev {
+    color: var(--neutral-400);
+    transition: transform var(--dur-base) var(--easing-snap);
+  }
+  .coti-cat.is-open .coti-cat-chev { transform: rotate(180deg); }
+  .coti-cat-items {
+    max-height: 0; overflow: hidden;
+    transition: max-height var(--dur-base) var(--easing-snap);
+  }
+  .coti-cat.is-open .coti-cat-items { max-height: 20000px; }
+
+  /* Sub-categories (used in Laboratorio) */
+  .coti-subcat { border-top: 1px solid var(--neutral-100); }
+  .coti-subcat-h {
+    display: flex; align-items: center; gap: 12px;
+    padding: 14px 28px 14px 88px;
+    cursor: pointer; user-select: none;
+    transition: background var(--dur-fast);
+    background: #FAFBFE;
+  }
+  .coti-subcat-h:hover { background: var(--neutral-100); }
+  .coti-subcat-title {
+    flex: 1;
+    font-family: var(--font-display); font-weight: 900;
+    font-size: 15px; text-transform: uppercase; letter-spacing: .04em;
+    color: var(--cmg-navy);
+  }
+  .coti-subcat-count {
+    font-family: var(--font-body); font-weight: 700;
+    font-size: 11px; color: var(--cmg-red);
+    background: #FCEAEA; padding: 3px 9px; border-radius: var(--r-pill);
+  }
+  .coti-subcat-chev {
+    color: var(--neutral-400);
+    transition: transform var(--dur-base) var(--easing-snap);
+  }
+  .coti-subcat.is-open .coti-subcat-chev { transform: rotate(180deg); }
+  .coti-subcat-items {
+    max-height: 0; overflow: hidden;
+    transition: max-height var(--dur-base) var(--easing-snap);
+  }
+  .coti-subcat.is-open .coti-subcat-items { max-height: 8000px; }
+  .coti-subcat-items .coti-item { padding-left: 100px; }
+
+  .coti-item {
+    display: grid; grid-template-columns: 1fr auto auto;
+    gap: 16px; align-items: center;
+    padding: 14px 28px 14px 88px;
+    border-top: 1px solid var(--neutral-100);
+    transition: background var(--dur-fast);
+  }
+  .coti-item.is-hidden { display: none; }
+  .coti-item:hover { background: var(--neutral-100); }
+  .coti-item-name {
+    font-size: 15px; color: var(--cmg-navy); line-height: 1.4;
+    font-weight: 500;
+  }
+  .coti-item-name b {
+    display: block; font-weight: 600;
+  }
+  .coti-item-name small {
+    display: block; font-size: 12px; color: var(--neutral-500);
+    font-weight: 500; margin-top: 2px;
+  }
+  .coti-item-price {
+    font-family: var(--font-display); font-weight: 900;
+    font-size: 22px; color: var(--cmg-navy); letter-spacing: -.01em;
+    min-width: 80px; text-align: right;
+  }
+  .coti-item-price .price-currency { font-size: .6em; }
+
+  /* qty stepper */
+  .coti-qty {
+    display: inline-flex; align-items: center;
+    background: var(--neutral-100); border-radius: var(--r-pill);
+    padding: 3px;
+  }
+  .coti-qty button {
+    width: 32px; height: 32px; border-radius: 50%;
+    border: 0; background: transparent; cursor: pointer;
+    font-size: 18px; font-weight: 700; color: var(--cmg-navy);
+    display: flex; align-items: center; justify-content: center;
+    transition: all var(--dur-fast);
+  }
+  .coti-qty button:hover { background: #fff; }
+  .coti-qty button:disabled { color: var(--neutral-300); cursor: not-allowed; }
+  .coti-qty input {
+    width: 36px; border: 0; background: transparent;
+    text-align: center; font-family: var(--font-display);
+    font-weight: 900; font-size: 16px; color: var(--cmg-navy);
+    outline: 0;
+    -moz-appearance: textfield;
+  }
+  .coti-qty input::-webkit-outer-spin-button,
+  .coti-qty input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+  .coti-qty.is-active {
+    background: var(--cmg-yellow);
+  }
+  .coti-qty.is-active input { color: var(--cmg-navy); }
+
+  /* ── Sticky cart ─── */
+  .coti-cart {
+    background: var(--cmg-navy); color: #fff;
+    border-radius: var(--r-xl); padding: 28px;
+    position: sticky; top: 90px;
+    overflow: hidden;
+  }
+  .coti-cart::before {
+    content: ''; position: absolute; top: -40px; right: -40px;
+    width: 140px; height: 140px; border-radius: 50%;
+    background: var(--cmg-yellow); opacity: .08;
+  }
+  .coti-cart-eyebrow {
+    font-size: 12px; font-weight: 700; letter-spacing: .18em;
+    text-transform: uppercase; color: var(--cmg-yellow);
+    margin-bottom: 8px;
+  }
+  .coti-cart-title {
+    font-family: var(--font-display); font-weight: 900;
+    font-size: 26px; text-transform: uppercase; letter-spacing: -.01em;
+    margin: 0 0 20px; color: #fff;
+  }
+  .coti-cart-empty {
+    padding: 32px 0; text-align: center;
+    color: rgba(255,255,255,.5); font-size: 14px;
+    line-height: 1.5; font-style: italic;
+  }
+  .coti-cart-items {
+    display: flex; flex-direction: column; gap: 10px;
+    max-height: 280px; overflow-y: auto;
+    margin: 0 -28px; padding: 0 28px;
+  }
+  .coti-cart-item {
+    display: grid; grid-template-columns: 1fr auto auto;
+    gap: 10px; align-items: center;
+    font-size: 13px; padding: 8px 0;
+    border-bottom: 1px solid rgba(255,255,255,.08);
+  }
+  .coti-cart-item-name {
+    color: rgba(255,255,255,.85); line-height: 1.3;
+  }
+  .coti-cart-item-name small {
+    display: block; font-size: 11px; color: var(--cmg-yellow);
+    margin-top: 2px; font-weight: 600; font-style: italic;
+    letter-spacing: 0;
+  }
+  .coti-cart-item.is-aesthetic .coti-cart-item-name small {
+    color: rgba(253,210,44,.7);
+  }
+  .coti-cart-item-qty {
+    font-family: var(--font-display); font-weight: 900;
+    color: var(--cmg-yellow); font-size: 13px;
+    background: rgba(253,210,44,.12); padding: 2px 8px;
+    border-radius: var(--r-pill);
+  }
+  .coti-cart-item-price {
+    font-family: var(--font-display); font-weight: 900;
+    color: #fff; font-size: 15px; letter-spacing: -.005em;
+    min-width: 56px; text-align: right;
+  }
+  .coti-cart-remove {
+    background: transparent; border: 0; color: rgba(255,255,255,.4);
+    cursor: pointer; padding: 2px 4px; font-size: 16px;
+  }
+  .coti-cart-remove:hover { color: var(--cmg-red); }
+
+  /* .coti-cart-d365 (banner de membresía Doctor 365) quitado: ese programa
+     está fuera de alcance de este producto (ver plan, punto 7). Estas
+     reglas ya no tenían un elemento HTML correspondiente. */
+
+  .coti-cart-total {
+    display: flex; flex-direction: column; gap: 6px;
+    padding: 18px 0 6px; margin-top: 14px;
+    border-top: 2px solid rgba(255,255,255,.15);
+  }
+  .coti-cart-line {
+    display: flex; justify-content: space-between; align-items: baseline;
+    font-size: 13px; color: rgba(255,255,255,.65);
+  }
+  .coti-cart-line.discount { color: var(--cmg-yellow); }
+  .coti-cart-line b { color: #fff; font-weight: 700; }
+  .coti-cart-line.discount b { color: var(--cmg-yellow); }
+  .coti-cart-grand {
+    display: flex; justify-content: space-between; align-items: baseline;
+    margin-top: 10px; padding-top: 12px;
+    border-top: 1px solid rgba(255,255,255,.15);
+  }
+  .coti-cart-grand-l {
+    font-family: var(--font-display); font-weight: 900;
+    font-size: 13px; letter-spacing: .14em; text-transform: uppercase;
+    color: rgba(255,255,255,.7);
+  }
+  .coti-cart-grand-amt {
+    font-family: var(--font-display); font-weight: 900;
+    font-size: 44px; color: var(--cmg-yellow); letter-spacing: -.02em;
+    line-height: 1;
+  }
+  .coti-cart-grand-amt .price-currency { font-size: .55em; }
+
+  .coti-cart-cta {
+    width: 100%; margin-top: 18px; justify-content: center;
+  }
+  .coti-cart-fine {
+    margin-top: 12px; font-size: 11px; line-height: 1.45;
+    color: rgba(255,255,255,.5); text-align: center; font-style: italic;
+  }
+
+  /* ── Discount picker (3 options, mutually exclusive) ── */
+  .coti-discounts {
+    margin: 18px 0 0;
+    display: flex; flex-direction: column; gap: 8px;
+  }
+  .coti-discounts-label {
+    font-family: var(--font-body); font-weight: 700;
+    font-size: 11px; letter-spacing: .18em; text-transform: uppercase;
+    color: rgba(255,255,255,.55); margin-bottom: 4px;
+  }
+  .coti-disc-opt {
+    display: grid; grid-template-columns: 22px 1fr auto;
+    gap: 12px; align-items: center;
+    padding: 12px 14px; border-radius: var(--r-lg);
+    background: rgba(255,255,255,.05);
+    border: 1.5px solid rgba(255,255,255,.1);
+    cursor: pointer;
+    transition: all var(--dur-fast);
+  }
+  .coti-disc-opt:hover { background: rgba(255,255,255,.08); border-color: rgba(255,255,255,.2); }
+  .coti-disc-opt input {
+    appearance: none; width: 18px; height: 18px; border-radius: 50%;
+    border: 2px solid rgba(255,255,255,.4);
+    cursor: pointer; position: relative;
+    transition: all var(--dur-fast);
+  }
+  .coti-disc-opt input:checked { border-color: var(--cmg-yellow); }
+  .coti-disc-opt input:checked::after {
+    content: ''; position: absolute; inset: 2.5px;
+    border-radius: 50%; background: var(--cmg-yellow);
+  }
+  .coti-disc-opt.is-active {
+    background: rgba(253,210,44,.12);
+    border-color: var(--cmg-yellow);
+  }
+  .coti-disc-body {
+    display: flex; flex-direction: column; gap: 2px;
+    font-size: 12px; line-height: 1.35; color: rgba(255,255,255,.7);
+    min-width: 0;
+  }
+  .coti-disc-body b {
+    font-family: var(--font-display); font-weight: 900;
+    font-size: 13px; letter-spacing: .04em; text-transform: uppercase;
+    color: #fff;
+  }
+  .coti-disc-opt.is-active .coti-disc-body b { color: var(--cmg-yellow); }
+  .coti-disc-pct {
+    font-family: var(--font-display); font-weight: 900;
+    font-size: 18px; letter-spacing: -.01em; color: var(--cmg-yellow);
+  }
+  .coti-disc-opt[data-disc="none"] .coti-disc-body b { font-size: 12px; }
+
+  .coti-disc-warning {
+    margin-top: 4px;
+    padding: 12px 14px;
+    background: rgba(242,15,16,.12);
+    border: 1.5px solid rgba(242,15,16,.5);
+    border-radius: var(--r-lg);
+    display: flex; gap: 10px; align-items: flex-start;
+    color: #FFD2D2;
+    font-size: 12px; line-height: 1.45;
+  }
+  .coti-disc-warning[hidden] { display: none; }
+  .coti-disc-warning svg { color: var(--cmg-red); flex-shrink: 0; margin-top: 2px; }
+  .coti-disc-warning b { color: var(--cmg-yellow); font-weight: 800; }
+
+  @media (max-width: 960px) {
+    .coti-layout { grid-template-columns: 1fr; padding: 0 20px; }
+    .coti-cart { position: static; }
+    .coti-item { padding: 14px 20px 14px 20px; grid-template-columns: 1fr auto; }
+    .coti-item-price { grid-column: 2; }
+    .coti-qty { grid-column: 1 / -1; justify-self: end; }
+    .coti-search { padding: 16px 20px; top: 64px; }
+    .coti-cat-h { padding: 18px 20px; }
+    /* Sub-category header: remove the 88px desktop indent so it fits on mobile */
+    .coti-subcat-h { padding: 12px 20px; }
+    /* Sub-category items: specificity override (.coti-subcat-items .coti-item
+       beats .coti-item alone), so we need the same 2-class selector here      */
+    .coti-subcat-items .coti-item { padding-left: 20px; }
+  }
+  @media (max-width: 600px) {
+    .coti-layout { padding: 0 16px; }
+    .coti-cat-title { font-size: 18px; }
+    .coti-categories, .coti-cart { border-radius: 16px; }
+    /* Script decorator: same margin-left fix applied to Inicio/.hero-script etc. */
+    .coti-hero .script { margin-left: 0; }
+    /* overflow:clip (used at desktop) is not supported in older Android Chrome;
+       override to hidden on mobile so the categories box reliably clips its children */
+    .coti-categories { overflow: hidden; }
+    /* Reduce cart padding on narrow screens to give content more breathing room */
+    .coti-cart { padding: 20px 16px; }
+    /* Adjust the negative-margin scroll track to match the new cart padding     */
+    .coti-cart-items { margin: 0 -16px; padding: 0 16px; }
+    .coti-cart-grand-amt { font-size: 36px; }
+    /* Scale item price down so it doesn't squeeze the name column on 375 px */
+    .coti-item-price { font-size: 18px; min-width: 68px; }
+    /* Reduce category header gap to give the title more horizontal room      */
+    .coti-cat-h { gap: 12px; }
+  }
+</style>
+<!-- Analytics por clínica: pendiente (ver nota en Auth.html). -->
+</head>
+<body data-screen-label="Cotizador" data-lang="es">
+
+<!-- Top promo strip: horario genérico + WhatsApp de la clínica (CLINIC.*).
+     El mensaje rotativo de Doctor 365 se quitó: ese programa es exclusivo
+     de CMG y está fuera de alcance de este producto (ver plan, punto 7). -->
+<div class="promo-strip">
+  <div class="container promo-row">
+    <span class="dot"></span>
+    <span class="promo-msgs">
+      <span class="promo-msg is-active" data-msg="hours">
+        <span class="lang lang-es"><b>ABIERTO</b> <span id="promo-hours-es">6:00 AM – 10:00 PM</span> <span id="promo-day-es"></span> <span id="promo-address-es"></span></span>
+        <span class="lang lang-en"><b>OPEN</b> <span id="promo-hours-en">6:00 AM – 10:00 PM</span> <span id="promo-day-en"></span> <span id="promo-address-en"></span></span>
+      </span>
+    </span>
+    <a href="#" id="promo-wa-link" class="promo-wa">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M.057 24l1.687-6.163a11.867 11.867 0 0 1-1.587-5.946C.16 5.335 5.495 0 12.05 0a11.817 11.817 0 0 1 8.413 3.488 11.824 11.824 0 0 1 3.48 8.414c-.003 6.557-5.338 11.892-11.893 11.892a11.9 11.9 0 0 1-5.688-1.448L.057 24z"/></svg>
+      <span id="promo-phone-text">—</span>
+    </a>
+  </div>
+</div>
+
+<!-- Sticky header: logo CMG (cmg-logo-white.png) reemplazado por el nombre
+     de la clínica (CLINIC.nombre, vía JS). Nav a Inicio.html/Sobre-nosotros.html
+     y CTA a Doctor-365.html quitados: esas páginas son del sitio de marketing
+     de CMG / el programa Doctor 365, fuera de alcance de este producto. -->
+<header class="site-header">
+  <div class="container header-row">
+    <a class="brand-lockup" href="Cotizador.html" id="coti-brand-name" style="color:#fff;font-weight:900;font-size:18px;text-decoration:none">—</a>
+    <nav class="site-nav">
+      <a href="Cotizador.html" class="is-active"><span class="lang lang-es">Cotizador</span><span class="lang lang-en">Quote builder</span></a>
+    </nav>
+    <div class="header-actions">
+      <div class="lang-toggle">
+        <button data-set-lang="es" class="is-on" type="button">ES</button>
+        <button data-set-lang="en" type="button">EN</button>
+      </div>
+      <a id="cmg-nav-account" href="Mis-Cotizaciones.html" class="cmg-nav-pill">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+        <span id="cmg-nav-name">Mi Cuenta</span>
+      </a>
+      <button class="nav-toggle" type="button" aria-label="Menú">
+        <svg class="icon-open" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+        <svg class="icon-close" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+  </div>
+</header>
+
+<main class="coti-page">
+
+<!-- Cotizador hero -->
+<section class="coti-hero">
+  <div class="container">
+    <div class="coti-hero-eyebrow">
+      <span class="lang lang-es">Cotizador online</span>
+      <span class="lang lang-en">Online quote builder</span>
+    </div>
+    <h1>
+      <span class="lang lang-es"><span class="y">ARMA</span> tu cotización</span>
+      <span class="lang lang-en"><span class="y">BUILD</span> your quote</span>
+    </h1>
+    <div class="script">
+      <span class="lang lang-es">Sin compromiso</span>
+      <span class="lang lang-en">No commitment</span>
+    </div>
+    <p>
+      <!-- "City Mall Tegucigalpa" (dirección propia de CMG) reemplazado por
+           CLINIC.direccion, poblado vía JS más abajo. -->
+      <span class="lang lang-es">Selecciona los servicios, procedimientos y exámenes que necesitas. Calculamos el total al instante en Lempiras. Envíanos tu cotización por WhatsApp y resérvala, sin citas<span id="coti-hero-addr-es"></span>.</span>
+      <span class="lang lang-en">Pick the services, procedures and tests you need. We calculate the total in Lempiras instantly. Send us your quote by WhatsApp and reserve, walk-in<span id="coti-hero-addr-en"></span>.</span>
+    </p>
+  </div>
+</section>
+
+<!-- Main layout -->
+<div class="coti-layout">
+
+  <!-- ─── Service categories ─── -->
+  <section class="coti-categories" id="cotizador">
+    <div class="coti-search">
+      <input id="coti-q" type="text" placeholder="Buscar servicio…" aria-label="Buscar">
+      <span class="coti-count"><span id="coti-count">0</span> <span class="lang lang-es">items</span><span class="lang lang-en">items</span></span>
+    </div>
+
+    <!-- Categoría 1 · Consultas médicas -->
+    <!-- Categoría 1 · Servicios generales -->
+    <div class="coti-cat" data-cat="general">
+      <div class="coti-cat-h">
+        <div class="coti-cat-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+        </div>
+        <div class="coti-cat-title">
+          <span class="lang lang-es">Servicios generales</span>
+          <span class="lang lang-en">General services</span>
+        </div>
+        <div class="coti-cat-meta">9</div>
+        <svg class="coti-cat-chev" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+      </div>
+      <div class="coti-cat-items">
+        <label class="coti-item" data-price="300" data-d365-free="1" data-name-es="Consulta médica general" data-name-en="General medical consult">
+          <span class="coti-item-name"><b><span class="lang lang-es">Consulta médica general</span><span class="lang lang-en">General medical consult</span></b><small><span class="lang lang-es">Atención médica sin citas</span><span class="lang lang-en">Walk-in medical attention</span></small></span>
+          <span class="coti-item-price"><span class="price-currency">L</span>300</span>
+          <span class="coti-qty"><button type="button" data-step="-1">−</button><input type="number" min="0" value="0" readonly><button type="button" data-step="1">+</button></span>
+        </label>
+        <label class="coti-item" data-price="500" data-name-es="Evaluación de salud (certificado laboral)" data-name-en="Health certificate (employment)">
+          <span class="coti-item-name"><b><span class="lang lang-es">Evaluación de salud</span><span class="lang lang-en">Health evaluation certificate</span></b><small><span class="lang lang-es">Informe de salud que solicitan las empresas al contratar</span><span class="lang lang-en">Health report requested by employers when hiring</span></small></span>
+          <span class="coti-item-price"><span class="price-currency">L</span>500</span>
+          <span class="coti-qty"><button type="button" data-step="-1">−</button><input type="number" min="0" value="0" readonly><button type="button" data-step="1">+</button></span>
+        </label>
+        <label class="coti-item" data-price="60" data-name-es="Toma de presión" data-name-en="Blood pressure">
+          <span class="coti-item-name"><b><span class="lang lang-es">Toma de presión</span><span class="lang lang-en">Blood pressure</span></b></span>
+          <span class="coti-item-price"><span class="price-currency">L</span>60</span>
+          <span class="coti-qty"><button type="button" data-step="-1">−</button><input type="number" min="0" value="0" readonly><button type="button" data-step="1">+</button></span>
+        </label>
+        <label class="coti-item" data-price="80" data-name-es="Glucometría" data-name-en="Glucose test">
+          <span class="coti-item-name"><b><span class="lang lang-es">Glucometría</span><span class="lang lang-en">Glucose test</span></b></span>
+          <span class="coti-item-price"><span class="price-currency">L</span>80</span>
+          <span class="coti-qty"><button type="button" data-step="-1">−</button><input type="number" min="0" value="0" readonly><button type="button" data-step="1">+</button></span>
+        </label>
+        <label class="coti-item" data-price="30" data-name-es="Control de peso" data-name-en="Weight check">
+          <span class="coti-item-name"><b><span class="lang lang-es">Control de peso</span><span class="lang lang-en">Weight check</span></b></span>
+          <span class="coti-item-price"><span class="price-currency">L</span>30</span>
+          <span class="coti-qty"><button type="button" data-step="-1">−</button><input type="number" min="0" value="0" readonly><button type="button" data-step="1">+</button></span>
+        </label>
+        <label class="coti-item" data-price="500" data-name-es="Electrocardiograma" data-name-en="Electrocardiogram">
+          <span class="coti-item-name"><b><span class="lang lang-es">Electrocardiograma</span><span class="lang lang-en">Electrocardiogram</span></b></span>
+          <span class="coti-item-price"><span class="price-currency">L</span>500</span>
+          <span class="coti-qty"><button type="button" data-step="-1">−</button><input type="number" min="0" value="0" readonly><button type="button" data-step="1">+</button></span>
+        </label>
+        <label class="coti-item" data-price="150" data-name-es="Nebulización (ciclo)" data-name-en="Nebulization (cycle)">
+          <span class="coti-item-name"><b><span class="lang lang-es">Nebulización (ciclo)</span><span class="lang lang-en">Nebulization (cycle)</span></b></span>
+          <span class="coti-item-price"><span class="price-currency">L</span>150</span>
+          <span class="coti-qty"><button type="button" data-step="-1">−</button><input type="number" min="0" value="0" readonly><button type="button" data-step="1">+</button></span>
+        </label>
+        <label class="coti-item" data-price="80" data-name-es="Inyección intramuscular (IM)" data-name-en="Intramuscular injection (IM)">
+          <span class="coti-item-name"><b><span class="lang lang-es">Inyección intramuscular (IM)</span><span class="lang lang-en">Intramuscular injection (IM)</span></b></span>
+          <span class="coti-item-price"><span class="price-currency">L</span>80</span>
+          <span class="coti-qty"><button type="button" data-step="-1">−</button><input type="number" min="0" value="0" readonly><button type="button" data-step="1">+</button></span>
+        </label>
+        <label class="coti-item" data-price="180" data-name-es="Inyección intravenosa (IV)" data-name-en="Intravenous injection (IV)">
+          <span class="coti-item-name"><b><span class="lang lang-es">Inyección intravenosa (IV)</span><span class="lang lang-en">Intravenous injection (IV)</span></b></span>
+          <span class="coti-item-price"><span class="price-currency">L</span>180</span>
+          <span class="coti-qty"><button type="button" data-step="-1">−</button><input type="number" min="0" value="0" readonly><button type="button" data-step="1">+</button></span>
+        </label>
+      </div>
+    </div>
+
+    <!-- Categoría 2 · Sueroterapia -->
+    <div class="coti-cat" data-cat="suero">
+      <div class="coti-cat-h">
+        <div class="coti-cat-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v6"/><path d="M9 8h6"/><rect x="9" y="8" width="6" height="10" rx="1"/><path d="M12 18v4"/></svg>
+        </div>
+        <div class="coti-cat-title">
+          <span class="lang lang-es">Sueroterapia IV</span>
+          <span class="lang lang-en">IV vitamin therapy</span>
+        </div>
+        <div class="coti-cat-meta">8</div>
+        <svg class="coti-cat-chev" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+      </div>
+      <div class="coti-cat-items">
+        <label class="coti-item" data-price="750" data-name-es="Sueroterapia Complejo B" data-name-en="Complex B IV therapy">
+          <span class="coti-item-name"><b><span class="lang lang-es">Sueroterapia Complejo B</span><span class="lang lang-en">Complex B IV therapy</span></b><small><span class="lang lang-es">Apoya la producción de energía y el sistema nervioso</span><span class="lang lang-en">Supports energy and nervous system</span></small></span>
+          <span class="coti-item-price"><span class="price-currency">L</span>750</span>
+          <span class="coti-qty"><button type="button" data-step="-1">−</button><input type="number" min="0" value="0" readonly><button type="button" data-step="1">+</button></span>
+        </label>
+        <label class="coti-item" data-price="600" data-name-es="Sueroterapia Oxigenador Cerebral" data-name-en="Brain Oxygenator IV therapy">
+          <span class="coti-item-name"><b><span class="lang lang-es">Sueroterapia Oxigenador Cerebral</span><span class="lang lang-en">Brain Oxygenator IV therapy</span></b><small><span class="lang lang-es">Ideal para fatiga mental, estrés o agotamiento</span><span class="lang lang-en">Ideal for mental fatigue, stress or exhaustion</span></small></span>
+          <span class="coti-item-price"><span class="price-currency">L</span>600</span>
+          <span class="coti-qty"><button type="button" data-step="-1">−</button><input type="number" min="0" value="0" readonly><button type="button" data-step="1">+</button></span>
+        </label>
+        <label class="coti-item" data-price="900" data-name-es="Sueroterapia Vitamina C" data-name-en="Vitamin C IV therapy">
+          <span class="coti-item-name"><b><span class="lang lang-es">Sueroterapia Vitamina C</span><span class="lang lang-en">Vitamin C IV therapy</span></b><small><span class="lang lang-es">Vitamina C de alta concentración para defensas y antioxidante</span><span class="lang lang-en">High-dose Vitamin C for immunity and antioxidant support</span></small></span>
+          <span class="coti-item-price"><span class="price-currency">L</span>900</span>
+          <span class="coti-qty"><button type="button" data-step="-1">−</button><input type="number" min="0" value="0" readonly><button type="button" data-step="1">+</button></span>
+        </label>
+        <label class="coti-item" data-price="1350" data-name-es="Sueroterapia Vitamina D" data-name-en="Vitamin D IV therapy">
+          <span class="coti-item-name"><b><span class="lang lang-es">Sueroterapia Vitamina D</span><span class="lang lang-en">Vitamin D IV therapy</span></b><small><span class="lang lang-es">Apoya la salud ósea y el sistema inmune</span><span class="lang lang-en">Supports bone health and immunity</span></small></span>
+          <span class="coti-item-price"><span class="price-currency">L</span>1,350</span>
+          <span class="coti-qty"><button type="button" data-step="-1">−</button><input type="number" min="0" value="0" readonly><button type="button" data-step="1">+</button></span>
+        </label>
+        <label class="coti-item" data-price="900" data-name-es="Sueroterapia Hígado Detox" data-name-en="Liver Detox IV therapy">
+          <span class="coti-item-name"><b><span class="lang lang-es">Sueroterapia Hígado Detox</span><span class="lang lang-en">Liver Detox IV therapy</span></b><small><span class="lang lang-es">Apoya la función hepática y la desintoxicación</span><span class="lang lang-en">Supports liver function and detoxification</span></small></span>
+          <span class="coti-item-price"><span class="price-currency">L</span>900</span>
+          <span class="coti-qty"><button type="button" data-step="-1">−</button><input type="number" min="0" value="0" readonly><button type="button" data-step="1">+</button></span>
+        </label>
+        <label class="coti-item" data-price="1350" data-name-es="Sueroterapia Boost (Complejo B + Oxigenador)" data-name-en="Suero Boost (Complex B + Brain Oxygenator)">
+          <span class="coti-item-name"><b><span class="lang lang-es">Sueroterapia Boost</span><span class="lang lang-en">Suero Boost</span></b><small><span class="lang lang-es">Combina Complejo B + Oxigenador Cerebral para máxima energía</span><span class="lang lang-en">Complex B + Brain Oxygenator combo for maximum energy</span></small></span>
+          <span class="coti-item-price"><span class="price-currency">L</span>1,350</span>
+          <span class="coti-qty"><button type="button" data-step="-1">−</button><input type="number" min="0" value="0" readonly><button type="button" data-step="1">+</button></span>
+        </label>
+        <label class="coti-item" data-aesthetic="1" data-price="1500" data-name-es="Sueroterapia Colágeno" data-name-en="Collagen IV therapy">
+          <span class="coti-item-name"><b><span class="lang lang-es">Sueroterapia Colágeno</span><span class="lang lang-en">Collagen IV therapy</span></b><small><span class="lang lang-es">Apoya la salud de la piel, articulaciones y cabello</span><span class="lang lang-en">Supports skin, joint and hair health</span></small></span>
+          <span class="coti-item-price"><span class="price-currency">L</span>1,500</span>
+          <span class="coti-qty"><button type="button" data-step="-1">−</button><input type="number" min="0" value="0" readonly><button type="button" data-step="1">+</button></span>
+        </label>
+        <label class="coti-item" data-aesthetic="1" data-price="1500" data-name-es="Sueroterapia Glutatión" data-name-en="Glutathione IV therapy">
+          <span class="coti-item-name"><b><span class="lang lang-es">Sueroterapia Glutatión</span><span class="lang lang-en">Glutathione IV therapy</span></b><small><span class="lang lang-es">Potente antioxidante para piel y desintoxicación celular</span><span class="lang lang-en">Powerful antioxidant for skin and cellular detox</span></small></span>
+          <span class="coti-item-price"><span class="price-currency">L</span>1,500</span>
+          <span class="coti-qty"><button type="button" data-step="-1">−</button><input type="number" min="0" value="0" readonly><button type="button" data-step="1">+</button></span>
+        </label>
+        <label class="coti-item" data-price="100" data-name-es="Sueroterapia Ácido Ascórbico (Vit C)" data-name-en="Ascorbic Acid (Vit C) IV therapy">
+          <span class="coti-item-name"><b><span class="lang lang-es">Sueroterapia Ácido Ascórbico (Vit C)</span><span class="lang lang-en">Ascorbic Acid (Vit C) IV therapy</span></b></span>
+          <span class="coti-item-price"><span class="price-currency">L</span>100</span>
+          <span class="coti-qty"><button type="button" data-step="-1">−</button><input type="number" min="0" value="0" readonly><button type="button" data-step="1">+</button></span>
+        </label>
+      </div>
+    </div>
+
+    <!-- Categoría 3 · Laboratorio (con sub-categorías) -->
+    <div class="coti-cat" data-cat="lab">
+      <div class="coti-cat-h">
+        <div class="coti-cat-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 2v7.527a2 2 0 0 1-.211.896L4.72 20.55a1 1 0 0 0 .9 1.45h12.76a1 1 0 0 0 .9-1.45l-5.069-10.127A2 2 0 0 1 14 9.527V2"/><path d="M8.5 2h7"/><path d="M7 16h10"/></svg>
+        </div>
+        <div class="coti-cat-title">
+          <span class="lang lang-es">Laboratorio</span>
+          <span class="lang lang-en">Laboratory</span>
+        </div>
+        <div class="coti-cat-meta">143</div>
+        <svg class="coti-cat-chev" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+      </div>
+      <div class="coti-cat-items">
+        <div class="coti-subcat" data-sub="common">
+          <div class="coti-subcat-h">
+            <span class="coti-subcat-title"><span class="lang lang-es">Pruebas comunes</span><span class="lang lang-en">Common tests</span></span>
+            <span class="coti-subcat-count">19</span>
+            <svg class="coti-subcat-chev" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="coti-subcat-items">
+          <label class="coti-item" data-price="250" data-name-es="Prueba de embarazo (rápida)" data-name-en="Pregnancy test (rapid)">
+            <span class="coti-item-name"><b><span class="lang lang-es">Prueba de embarazo (rápida)</span><span class="lang lang-en">Pregnancy test (rapid)</span></b></span>
+            <span class="coti-item-price"><span class="price-currency">L</span>250</span>
+            <span class="coti-qty"><button type="button" data-step="-1">−</button><input type="number" min="0" value="0" readonly><button type="button" data-step="1">+</button></span>
+          </label>
+          <label class="coti-item" data-price="500" data-name-es="Prueba de dengue (rápida)" data-name-en="Dengue test (rapid)">
+            <span class="coti-item-name"><b><span class="lang lang-es">Prueba de dengue (rápida)</span><span class="lang lang-en">Dengue test (rapid)</span></b></span>
+            <span class="coti-item-price"><span class="price-currency">L</span>500</span>
+            <span class="coti-qty"><button type="button" data-step="-1">−</button><input type="number" min="0" value="0" readonly><button type="button" data-step="1">+</button></span>
+          </label>
+          <label class="coti-item" data-price="700" data-name-es="Prueba DUO (VIH 4ª gen.)" data-name-en="DUO test (HIV 4th gen)">
+            <span class="coti-item-name"><b><span class="lang lang-es">Prueba DUO (VIH 4ª gen.)</span><span class="lang lang-en">DUO test (HIV 4th gen)</span></b></span>
+            <span class="coti-item-price"><span class="price-currency">L</span>700</span>
+            <span class="coti-qty"><button type="button" data-step="-1">−</button><input type="number" min="0" value="0" readonly><button type="button" data-step="1">+</button></span>
+          </label>
+          <label class="coti-item" data-price="40" data-name-es="Prueba de sensibilidad" data-name-en="Sensitivity test">
+            <span class="coti-item-name"><b><span class="lang lang-es">Prueba de sensibilidad</span><span class="lang lang-en">Sensitivity test</span></b></span>
+            <span class="coti-item-price"><span class="price-currency">L</span>40</span>
+            <span class="coti-qty"><button type="button" data-step="-1">−</button><input type="number" min="0" value="0" readonly><button type="button" data-step="1">+</button></span>
+          </label>
+          <label class="coti-item" data-price="350" data-name-es="Anticuerpos VIH 1/2" data-name-en="Anticuerpos VIH 1/2">
+            <span class="coti-item-name"><b><span class="lang lang-es">Anticuerpos VIH 1/2</span><span class="lang lang-en">Anticuerpos VIH 1/2</span></b></span>
+            <span class="coti-item-price"><span class="price-currency">L</span>350</span>
+            <span class="coti-qty"><button type="button" data-step="-1">−</button><input type="number" min="0" value="0" readonly><button type="button" data-step="1">+</button></span>
+          </label>
+          <label class="coti-item" data-price="150" data-name-es="Colesterol Total" data-name-en="Colesterol Total">
+            <span class="coti-item-name"><b><span class="lang lang-es">Colesterol Total</span><span class="lang lang-en">Colesterol Total</span></b></span>
+            <span class="coti-item-price"><span class="price-currency">L</span>150</span>
+            <span class="coti-qty"><button type="button" data-step="-1">−</button><input type="number" min="0" value="0" readonly><button type="button" data-step="1">+</button></span>
+          </label>
+          <label class="coti-item" data-price="120" data-name-es="Examen De Orina" data-name-en="Examen De Orina">
+            <span class="coti-item-name"><b><span class="lang lang-es">Examen De Orina</span><span class="lang lang-en">Examen De Orina</span></b></span>
+            <span class="coti-item-price"><span class="price-currency">L</span>120</span>
+            <span class="coti-qty"><button type="button" data-step="-1">−</button><input type="number" min="0" value="0" readonly><button type="button" data-step="1">+</button></span>
+          </label>
+          <label class="coti-item" data-price="120" data-name-es="General De Heces" data-name-en="General De Heces">
+            <span class="coti-item-name"><b><span class="lang lang-es">General De Heces</span><span class="lang lang-en">General De Heces</span></b></span>
+            <span class="coti-item-price"><span class="price-currency">L</span>120</span>
+            <span class="coti-qty"><button type="button" data-step="-1">−</button><input type="number" min="0" value="0" readonly><button type="button" data-step="1">+</button></span>
+          </label>
+          <label class="coti-item" data-price="120" data-name-es="Glucosa Ayuno en sangre" data-name-en="Glucosa Ayuno en sangre">
+            <span class="coti-item-name"><b><span class="lang lang-es">Glucosa Ayuno en sangre</span><span class="lang lang-en">Glucosa Ayuno en sangre</span></b></span>
+            <span class="coti-item-price"><span class="price-currency">L</span>120</span>
+            <span class="coti-qty"><button type="button" data-step="-1">−</button><input type="number" min="0" value="0" readonly><button type="button" data-step="1">+</button></span>
+          </label>
+          <label class="coti-item" data-price="230" data-name-es="Grupo Sanguineo" data-name-en="Grupo Sanguineo">
+            <span class="coti-item-name"><b><span class="lang lang-es">Grupo Sanguineo</span><span class="lang lang-en">Grupo Sanguineo</span></b></span>
+            <span class="coti-item-price"><span class="price-currency">L</span>230</span>
+            <span class="coti-qty"><button type="button" data-step="-1">−</button><input type="number" min="0" value="0" readonly><button type="button" data-step="1">+</button></span>
+          </label>
+          <label class="coti-item" data-price="450" data-name-es="Hemoglobina Glicosilada" data-name-en="Hemoglobina Glicosilada">
+            <span class="coti-item-name"><b><span class="lang lang-es">Hemoglobina Glicosilada</span><span class="lang lang-en">Hemoglobina Glicosilada</span></b></span>
+            <span class="coti-item-price"><span class="price-currency">L</span>450</span>
+            <span class="coti-qty"><button type="button" data-step="-1">−</button><input type="number" min="0" value="0" readonly><button type="button" data-step="1">+</button></span>
+          </label>
+          <label class="coti-item" data-price="230" data-name-es="Hemograma Completo" data-name-en="Hemograma Completo">
+            <span class="coti-item-name"><b><span class="lang lang-es">Hemograma Completo</span><span class="lang lang-en">Hemograma Completo</span></b></span>
+            <span class="coti-item-price"><span class="price-currency">L</span>230</span>
+            <span class="coti-qty"><button type="button" data-step="-1">−</button><input type="number" min="0" value="0" readonly><button type="button" data-step="1">+</button></span>
+          </label>
+          <label class="coti-item" data-price="280" data-name-es="Proteina C Reactiva" data-name-en="Proteina C Reactiva">
+            <span class="coti-item-name"><b><span class="lang lang-es">Proteina C Reactiva</span><span class="lang lang-en">Proteina C Reactiva</span></b></span>
+            <span class="coti-item-price"><span class="price-currency">L</span>280</span>
+            <span class="coti-qty"><button type="button" data-step="-1">−</button><input type="number" min="0" value="0" readonly><button type="button" data-step="1">+</button></span>
+          </label>
+          <label class="coti-item" data-price="310" data-name-es="Prueba Coombs Directo" data-name-en="Prueba Coombs Directo">
+            <span class="coti-item-name"><b><span class="lang lang-es">Prueba Coombs Directo</span><span class="lang lang-en">Prueba Coombs Directo</span></b></span>
+            <span class="coti-item-price"><span class="price-currency">L</span>310</span>
+            <span class="coti-qty"><button type="button" data-step="-1">−</button><input type="number" min="0" value="0" readonly><button type="button" data-step="1">+</button></span>
+          </label>
+          <label class="coti-item" data-price="310" data-name-es="Prueba Indirecta De Coombs" data-name-en="Prueba Indirecta De Coombs">
+            <span class="coti-item-name"><b><span class="lang lang-es">Prueba Indirecta De Coombs</span><span class="lang lang-en">Prueba Indirecta De Coombs</span></b></span>
+            <span class="coti-item-price"><span class="price-currency">L</span>310</span>
+            <span class="coti-qty"><button type="button" data-step="-1">−</button><input type="number" min="0" value="0" readonly><button type="button" data-step="1">+</button></span>
+          </label>
+          <label class="coti-item" data-price="120" data-name-es="RPR / VDRL" data-name-en="RPR / VDRL">
+            <span class="coti-item-name"><b><span class="lang lang-es">RPR / VDRL</span><span class="lang lang-en">RPR / VDRL</span></b></span>
+            <span class="coti-item-price"><span class="price-currency">L</span>120</span>
+            <span class="coti-qty"><button type="button" data-step="-1">−</button><input type="number" min="0" value="0" readonly><button type="button" data-step="1">+</button></span>
+          </label>
+          <label class="coti-item" data-price="145" data-name-es="Sangre oculta en heces" data-name-en="Sangre oculta en heces">
+            <span class="coti-item-name"><b><span class="lang lang-es">Sangre oculta en heces</span><span class="lang lang-en">Sangre oculta en heces</span></b></span>
+            <span class="coti-item-price"><span class="price-currency">L</span>145</span>
+            <span class="coti-qty"><button type="button" data-step="-1">−</button><input type="number" min="0" value="0" readonly><button type="button" data-step="1">+</button></span>
+          </label>
+          <label class="coti-item" data-price="260" data-name-es="Tiempo De Protrombina (TP)" data-name-en="Tiempo De Protrombina (TP)">
+            <span class="coti-item-name"><b><span class="lang lang-es">Tiempo De Protrombina (TP)</span><span class="lang lang-en">Tiempo De Protrombina (TP)</span></b></span>
+            <span class="coti-item-price"><span class="price-currency">L</span>260</span>
+            <span class="coti-qty"><button type="button" data-step="-1">−</button><input type="number" min="0" value="0" readonly><button type="button" data-step="1">+</button></span>
+          </label>
+          <label class="coti-item" data-price="580" data-name-es="TSH (Hormona Estimulante de Tiroides)" data-name-en="TSH (Hormona Estimulante de Tiroides)">
+            <span class="coti-item-name"><b><span class="lang lang-es">TSH (Hormona Estimulante de Tiroides)</span><span class="lang lang-en">TSH (Hormona Estimulante de Tiroides)</span></b></span>
+            <span class="coti-item-price"><span class="price-currency">L</span>580</span>
+            <span class="coti-qty"><button type="button" data-step="-1">−</button><input type="number" min="0" value="0" readonly><button type="button" data-step="1">+</button></span>
+          </label>
+          </div>
+        </div>
+        <div class="coti-subcat" data-sub="hema">
+          <div class="coti-subcat-h">
+            <span class="coti-subcat-title"><span class="lang lang-es">Hematología y coagulación</span><span class="lang lang-en">Hematology & coagulation</span></span>
+            <span class="coti-subcat-count">7</span>
+            <svg class="coti-subcat-chev" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="coti-subcat-items">
+          <label class="coti-item" data-price="900" data-name-es="Dimero D" data-name-en="Dimero D">
+            <span class="coti-item-name"><b><span class="lang lang-es">Dimero D</span><span class="lang lang-en">Dimero D</span></b></span>
+            <span class="coti-item-price"><span class="price-currency">L</span>900</span>
+            <span class="coti-qty"><button type="button" data-step="-1">−</button><input type="number" min="0" value="0" readonly><button type="button" data-step="1">+</button></span>
+          </label>
+          <label class="coti-item" data-price="125" data-name-es="Eritrosedimentacion (VES)" data-name-en="Eritrosedimentacion (VES)">
+            <span class="coti-item-name"><b><span class="lang lang-es">Eritrosedimentacion (VES)</span><span class="lang lang-en">Eritrosedimentacion (VES)</span></b></span>
+            <span class="coti-item-price"><span class="price-currency">L</span>125</span>
+            <span class="coti-qty"><button type="button" data-step="-1">−</button><input type="number" min="0" value="0" readonly><button type="button" data-step="1">+</button></span>
+          </label>
+          <label class="coti-item" data-price="1278" data-name-es="Fibrinógeno" data-name-en="Fibrinógeno">
+            <span class="coti-item-name"><b><span class="lang lang-es">Fibrinógeno</span><span class="lang lang-en">Fibrinógeno</span></b></span>
+            <span class="coti-item-price"><span class="price-currency">L</span>1,278</span>
+            <span class="coti-qty"><button type="button" data-step="-1">−</button><input type="number" min="0" value="0" readonly><button type="button" data-step="1">+</button></span>
+          </label>
+          <label class="coti-item" data-price="230" data-name-es="Frotis de Sangre Periferica (FSP)" data-name-en="Frotis de Sangre Periferica (FSP)">
+            <span class="coti-item-name"><b><span class="lang lang-es">Frotis de Sangre Periferica (FSP)</span><span class="lang lang-en">Frotis de Sangre Periferica (FSP)</span></b></span>
+            <span class="coti-item-price"><span class="price-currency">L</span>230</span>
+            <span class="coti-qty"><button type="button" data-step="-1">−</button><input type="number" min="0" value="0" readonly><button type="button" data-step="1">+</button></span>
+          </label>
+          <label class="coti-item" data-price="150" data-name-es="Hematozoario" data-name-en="Hematozoario">
+            <span class="coti-item-name"><b><span class="lang lang-es">Hematozoario</span><span class="lang lang-en">Hematozoario</span></b></span>
+            <span class="coti-item-price"><span class="price-currency">L</span>150</span>
+            <span class="coti-qty"><button type="button" data-step="-1">−</button><input type="number" min="0" value="0" readonly><button type="button" data-step="1">+</button></span>
+          </label>
+          <label class="coti-item" data-price="542" data-name-es="Tiempo De Trombina (TT)" data-name-en="Tiempo De Trombina (TT)">
+            <span class="coti-item-name"><b><span class="lang lang-es">Tiempo De Trombina (TT)</span><span class="lang lang-en">Tiempo De Trombina (TT)</span></b></span>
+            <span class="coti-item-price"><span class="price-currency">L</span>542</span>
+            <span class="coti-qty"><button type="button" data-step="-1">−</button><input type="number" min="0" value="0" readonly><button type="button" data-step="1">+</button></span>
+          </label>
+          <label class="coti-item" data-price="260" data-name-es="Tiempo de Tromboplastina Parcial (TPT)" data-name-en="Tiempo de Tromboplastina Parcial (TPT)">
+            <span class="coti-item-name"><b><span class="lang lang-es">Tiempo de Tromboplastina Parcial (TPT)</span><span class="lang lang-en">Tiempo de Tromboplastina Parcial (TPT)</span></b></span>
+            <span class="coti-item-price"><span class="price-currency">L</span>260</span>
+            <span class="coti-qty"><button type="button" data-step="-1">−</button><input type="number" min="0" value="0" readonly><button type="button" data-step="1">+</button></span>
+          </label>
+          </div>
+        </div>
+        <div class="coti-subcat" data-sub="quim">
+          <div class="coti-subcat-h">
+            <span class="coti-subcat-title"><span class="lang lang-es">Química sanguínea</span><span class="lang lang-en">Blood chemistry</span></span>
+            <span class="coti-subcat-count">38</span>
+            <svg class="coti-subcat-chev" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="coti-subcat-items">
+          <label class="coti-item" data-price="2514" data-name-es="Ácido Fólico" data-name-en="Ácido Fólico">
+            <span class="coti-item-name"><b><span class="lang lang-es">Ácido Fólico</span><span class="lang lang-en">Ácido Fólico</span></b></span>
+            <span class="coti-item-price"><span class="price-currency">L</span>2,514</span>
+            <span class="coti-qty"><button type="button" data-step="-1">−</button><input type="number" min="0" value="0" readonly><button type="button" data-step="1">+</button></span>
+          </label>
+          <label class="coti-item" data-price="145" data-name-es="Ácido Úrico serico" data-name-en="Ácido Úrico serico">
+            <span class="coti-item-name"><b><span class="lang lang-es">Ácido Úrico serico</span><span class="lang lang-en">Ácido Úrico serico</span></b></span>
+            <span class="coti-item-price"><span class="price-currency">L</span>145</span>
+            <span class="coti-qty"><button type="button" data-step="-1">−</button><input type="number" min="0" value="0" readonly><button type="button" data-step="1">+</button></span>
+          </label>
+          <label class="coti-item" data-price="152" data-name-es="Albúmina" data-name-en="Albúmina">
+            <span class="coti-item-name"><b><span class="lang lang-es">Albúmina</span><span class="lang lang-en">Albúmina</span></b></span>
+            <span class="coti-item-price"><span class="price-currency">L</span>152</span>
+            <span class="coti-qty"><button type="button" data-step="-1">−</button><input type="number" min="0" value="0" readonly><button type="button" data-step="1">+</button></span>
+          </label>
+          <label class="coti-item" data-price="284" data-name-es="Amilasa en suero" data-name-en="Amilasa en suero">
+            <span class="coti-item-name"><b><span class="lang lang-es">Amilasa en suero</span><span class="lang lang-en">Amilasa en suero</span></b></span>
+            <span class="coti-item-price"><span class="price-currency">L</span>284</span>
+            <span class="coti-qty"><button type="button" data-step="-1">−</button><input type="number" min="0" value="0" readonly><button type="button" data-step="1">+</button></span>
+          </label>
+          <label class="coti-item" data-price="500" data-name-es="Amonio en sangre" data-name-en="Amonio en sangre">
+            <span class="coti-item-name"><b><span class="lang lang-es">Amonio en sangre</span><span class="lang lang-en">Amonio en sangre</span></b></span>
+            <span class="coti-item-price"><span class="price-currency">L</span>500</span>
+            <span class="coti-qty"><button type="button" data-step="-1">−</button><input type="number" min="0" value="0" readonly><button type="button" data-step="1">+</button></span>
+          </label>
+          <label class="coti-item" data-price="212" data-name-es="Bilirrubinas" data-name-en="Bilirrubinas">
+            <span class="coti-item-name"><b><span class="lang lang-es">Bilirrubinas</span><span class="lang lang-en">Bilirrubinas</span></b></span>
+            <span class="coti-item-price"><span class="price-currency">L</span>212</span>
+            <span class="coti-qty"><button type="button" data-step="-1">−</button><input type="number" min="0" value="0" readonly><button type="button" data-step="1">+</button></span>
+          </label>
+          <label class="coti-item" data-price="200" data-name-es="Calcio en sangre" data-name-en="Calcio en sangre">
+            <span class="coti-item-name"><b><span class="lang lang-es">Calcio en sangre</span><span class="lang lang-en">Calcio en sangre</span></b></span>
+            <span class="coti-item-price"><span class="price-currency">L</span>200</span>
+            <span class="coti-qty"><button type="button" data-step="-1">−</button><input type="number" min="0" value="0" readonly><button type="button" data-step="1">+</button></span>
+          </label>
+          <label class="coti-item" data-price="200" data-name-es="Cloruro (Cl-) en sangre" data-name-en="Cloruro (Cl-) en sangre">
+            <span class="coti-item-name"><b><span class="lang lang-es">Cloruro (Cl-) en sangre</span><span class="lang lang-en">Cloruro (Cl-) en sangre</span></b></span>
+            <span class="coti-item-price"><span class="price-currency">L</span>200</span>
+            <span class="coti-qty"><button type="button" data-step="-1">−</button><input type="number" min="0" value="0" readonly><button type="button" data-step="1">+</button></span>
+          </label>
+          <label class="coti-item" data-price="155" data-name-es="Colesterol Hdl" data-name-en="Colesterol Hdl">
+            <span class="coti-item-name"><b><span class="lang lang-es">Colesterol Hdl</span><span class="lang lang-en">Colesterol Hdl</span></b></span>
+            <span class="coti-item-price"><span class="price-currency">L</span>155</span>
+            <span class="coti-qty"><button type="button" data-step="-1">−</button><input type="number" min="0" value="0" readonly><button type="button" data-step="1">+</button></span>
+          </label>
+          <label class="coti-item" data-price="160" data-name-es="Colesterol Ldl" data-name-en="Colesterol Ldl">
+            <span class="coti-item-name"><b><span class="lang lang-es">Colesterol Ldl</span><span class="lang lang-en">Colesterol Ldl</span></b></span>
+            <span class="coti-item-price"><span class="price-currency">L</span>160</span>
+            <span class="coti-qty"><button type="button" data-step="-1">−</button><input type="number" min="0" value="0" readonly><button type="button" data-step="1">+</button></span>
+          </label>
+          <label class="coti-item" data-price="140" data-name-es="Colesterol VLDL" data-name-en="Colesterol VLDL">
+            <span class="coti-item-name"><b><span class="lang lang-es">Colesterol VLDL</span><span class="lang lang-en">Colesterol VLDL</span></b></span>
+            <span class="coti-item-price"><span class="price-currency">L</span>140</span>
+            <span class="coti-qty"><button type="button" data-step="-1">−</button><input type="number" min="0" value="0" readonly><button type="button" data-step="1">+</button></span>
+          </label>
+          <label class="coti-item" data-price="400" data-name-es="Colinesterasa" data-name-en="Colinesterasa">
+            <span class="coti-item-name"><b><span class="lang lang-es">Colinesterasa</span><span class="lang lang-en">Colinesterasa</span></b></span>
+            <span class="coti-item-price"><span class="price-currency">L</span>400</span>
+            <span class="coti-qty"><button type="button" data-step="-1">−</button><input type="number" min="0" value="0" readonly><button type="button" data-step="1">+</button></span>
+          </label>
+          <label class="coti-item" data-price="320" data-name-es="Creatina Quinasa Mb (Mb-Cpk)" data-name-en="Creatina Quinasa Mb (Mb-Cpk)">
+            <span class="coti-item-name"><b><span class="lang lang-es">Creatina Quinasa Mb (Mb-Cpk)</span><span class="lang lang-en">Creatina Quinasa Mb (Mb-Cpk)</span></b></span>
+            <span class="coti-item-price"><span class="price-currency">L</span>320</span>
+            <span class="coti-qty"><button type="button" data-step="-1">−</button><input type="number" min="0" value="0" readonly><button type="button" data-step="1">+</button></span>
+          </label>
+          <label class="coti-item" data-price="250" data-name-es="Creatina Quinasa Total (CPK)" data-name-en="Creatina Quinasa Total (CPK)">
+            <span class="coti-item-name"><b><span class="lang lang-es">Creatina Quinasa Total (CPK)</span><span class="lang lang-en">Creatina Quinasa Total (CPK)</span></b></span>
+            <span class="coti-item-price"><span class="price-currency">L</span>250</span>
+            <span class="coti-qty"><button type="button" data-step="-1">−</button><input type="number" min="0" value="0" readonly><button type="button" data-step="1">+</button></span>
+          </label>
+          <label class="coti-item" data-price="145" data-name-es="Creatinina en sangre" data-name-en="Creatinina en sangre">
+            <span class="coti-item-name"><b><span class="lang lang-es">Creatinina en sangre</span><span class="lang lang-en">Creatinina en sangre</span></b></span>
+            <span class="coti-item-price"><span class="price-currency">L</span>145</span>
+            <span class="coti-qty"><button type="button" data-step="-1">−</button><input type="number" min="0" value="0" readonly><button type="button" data-step="1">+</button></span>
+          </label>
+          <label class="coti-item" data-price="270" data-name-es="Deshidrogenasa Acido Lactica (Ldh)" data-name-en="Deshidrogenasa Acido Lactica (Ldh)">
+            <span class="coti-item-name"><b><span class="lang lang-es">Deshidrogenasa Acido Lactica (Ldh)</span><span class="lang lang-en">Deshidrogenasa Acido Lactica (Ldh)</span></b></span>
+            <span class="coti-item-price"><span class="price-currency">L</span>270</span>
+            <span class="coti-qty"><button type="button" data-step="-1">−</button><input type="number" min="0" value="0" readonly><button type="button" data-step="1">+</button></span>
+          </label>
+          <label class="coti-item" data-price="542" data-name-es="Fosfatasa Acida Total" data-name-en="Fosfatasa Acida Total">
+            <span class="coti-item-name"><b><span class="lang lang-es">Fosfatasa Acida Total</span><span class="lang lang-en">Fosfatasa Acida Total</span></b></span>
+            <span class="coti-item-price"><span class="price-currency">L</span>542</span>
+            <span class="coti-qty"><button type="button" data-step="-1">−</button><input type="number" min="0" value="0" readonly><button type="button" data-step="1">+</button></span>
+          </label>
+          <label class="coti-item" data-price="175" data-name-es="Fosfatasa Alcalina" data-name-en="Fosfatasa Alcalina">
+            <span class="coti-item-name"><b><span class="lang lang-es">Fosfatasa Alcalina</span><span class="lang lang-en">Fosfatasa Alcalina</span></b></span>
+            <span class="coti-item-price"><span class="price-currency">L</span>175</span>
+            <span class="coti-qty"><button type="button" data-step="-1">−</button><input type="number" min="0" value="0" readonly><button type="button" data-step="1">+</button></span>
+          </label>
+          <label class="coti-item" data-price="250" data-name-es="Fosforo (P+) en suero" data-name-en="Fosforo (P+) en suero">
+            <span class="coti-item-name"><b><span class="lang lang-es">Fosforo (P+) en suero</span><span class="lang lang-en">Fosforo (P+) en suero</span></b></span>
+            <span class="coti-item-price"><span class="price-currency">L</span>250</span>
+            <span class="coti-qty"><button type="button" data-step="-1">−</button><input type="number" min="0" value="0" readonly><button type="button" data-step="1">+</button></span>
+          </label>
+          <label class="coti-item" data-price="280" data-name-es="Gamma Glutamil Traspeptidasa" data-name-en="Gamma Glutamil Traspeptidasa">
+            <span class="coti-item-name"><b><span class="lang lang-es">Gamma Glutamil Traspeptidasa</span><span class="lang lang-en">Gamma Glutamil Traspeptidasa</span></b></span>
+            <span class="coti-item-price"><span class="price-currency">L</span>280</span>
+            <span class="coti-qty"><button type="button" data-step="-1">−</button><input type="number" min="0" value="0" readonly><button type="button" data-step="1">+</button></span>
+          </label>
+          <label class="coti-item" data-price="120" data-name-es="Glucosa 2HPP - 2 horas postprandial" data-name-en="Glucosa 2HPP - 2 horas postprandial">
+            <span class="coti-item-name"><b><span class="lang lang-es">Glucosa 2HPP - 2 horas postprandial</span><span class="lang lang-en">Glucosa 2HPP - 2 horas postprandial</span></b></span>
+            <span class="coti-item-price"><span class="price-currency">L</span>120</span>
+            <span class="coti-qty"><button type="button" data-step="-1">−</button><input type="number" min="0" value="0" readonly><button type="button" data-step="1">+</button></span>
+          </label>
+          <label class="coti-item" data-price="480" data-name-es="Glucosa Tolerancia Oral (2h)" data-name-en="Glucosa Tolerancia Oral (2h)">
+            <span class="coti-item-name"><b><span class="lang lang-es">Glucosa Tolerancia Oral (2h)</span><span class="lang lang-en">Glucosa Tolerancia Oral (2h)</span></b></span>
+            <span class="coti-item-price"><span class="price-currency">L</span>480</span>
+            <span class="coti-qty"><button type="button" data-step="-1">−</button><input type="number" min="0" value="0" readonly><button type="button" data-step="1">+</button></span>
+          </label>
+          <label class="coti-item" data-price="550" data-name-es="Glucosa Tolerancia Oral (3h)" data-name-en="Glucosa Tolerancia Oral (3h)">
+            <span class="coti-item-name"><b><span class="lang lang-es">Glucosa Tolerancia Oral (3h)</span><span class="lang lang-en">Glucosa Tolerancia Oral (3h)</span></b></span>
+            <span class="coti-item-price"><span class="price-currency">L</span>550</span>
+            <span class="coti-qty"><button type="button" data-step="-1">−</button><input type="number" min="0" value="0" readonly><button type="button" data-step="1">+</button></span>
+          </label>
+          <label class="coti-item" data-price="453" data-name-es="Hierro" data-name-en="Hierro">
+            <span class="coti-item-name"><b><span class="lang lang-es">Hierro</span><span class="lang lang-en">Hierro</span></b></span>
+            <span class="coti-item-price"><span class="price-currency">L</span>453</span>
+            <span class="coti-qty"><button type="button" data-step="-1">−</button><input type="number" min="0" value="0" readonly><button type="button" data-step="1">+</button></span>
+          </label>
+          <label class="coti-item" data-price="550" data-name-es="Lipasa" data-name-en="Lipasa">
+            <span class="coti-item-name"><b><span class="lang lang-es">Lipasa</span><span class="lang lang-en">Lipasa</span></b></span>
+            <span class="coti-item-price"><span class="price-currency">L</span>550</span>
+            <span class="coti-qty"><button type="button" data-step="-1">−</button><input type="number" min="0" value="0" readonly><button type="button" data-step="1">+</button></span>
+          </label>
+          <label class="coti-item" data-price="470" data-name-es="Lipidos Totales" data-name-en="Lipidos Totales">
+            <span class="coti-item-name"><b><span class="lang lang-es">Lipidos Totales</span><span class="lang lang-en">Lipidos Totales</span></b></span>
+            <span class="coti-item-price"><span class="price-currency">L</span>470</span>
+            <span class="coti-qty"><button type="button" data-step="-1">−</button><input type="number" min="0" value="0" readonly><button type="button" data-step="1">+</button></span>
+          </label>
+          <label class="coti-item" data-price="230" data-name-es="Magnesio en sangre" data-name-en="Magnesio en sangre">
+            <span class="coti-item-name"><b><span class="lang lang-es">Magnesio en sangre</span><span class="lang lang-en">Magnesio en sangre</span></b></span>
+            <span class="coti-item-price"><span class="price-currency">L</span>230</span>
+            <span class="coti-qty"><button type="button" data-step="-1">−</button><input type="number" min="0" value="0" readonly><button type="button" data-step="1">+</button></span>
+          </label>
+          <label class="coti-item" data-price="150" data-name-es="Nitrógeno Ureico en la sangre (Bun)" data-name-en="Nitrógeno Ureico en la sangre (Bun)">
+            <span class="coti-item-name"><b><span class="lang lang-es">Nitrógeno Ureico en la sangre (Bun)</span><span class="lang lang-en">Nitrógeno Ureico en la sangre (Bun)</span></b></span>
+            <span class="coti-item-price"><span class="price-currency">L</span>150</span>
+            <span class="coti-qty"><button type="button" data-step="-1">−</button><input type="number" min="0" value="0" readonly><button type="button" data-step="1">+</button></span>
+          </label>
+          <label class="coti-item" data-price="232" data-name-es="Potasio en sangre" data-name-en="Potasio en sangre">
+            <span class="coti-item-name"><b><span class="lang lang-es">Potasio en sangre</span><span class="lang lang-en">Potasio en sangre</span></b></span>
+            <span class="coti-item-price"><span class="price-currency">L</span>232</span>
+            <span class="coti-qty"><button type="button" data-step="-1">−</button><input type="number" min="0" value="0" readonly><button type="button" data-step="1">+</button></span>
+          </label>
+          <label class="coti-item" data-price="1600" data-name-es="Pro BNP" data-name-en="Pro BNP">
+            <span class="coti-item-name"><b><span class="lang lang-es">Pro BNP</span><span class="lang lang-en">Pro BNP</span></b></span>
+            <span class="coti-item-price"><span class="price-currency">L</span>1,600</span>
+            <span class="coti-qty"><button type="button" data-step="-1">−</button><input type="number" min="0" value="0" readonly><button type="button" data-step="1">+</button></span>
+          </label>
+          <label class="coti-item" data-price="1900" data-name-es="Procalcitonina" data-name-en="Procalcitonina">
+            <span class="coti-item-name"><b><span class="lang lang-es">Procalcitonina</span><span class="lang lang-en">Procalcitonina</span></b></span>
+            <span class="coti-item-price"><span class="price-currency">L</span>1,900</span>
+            <span class="coti-qty"><button type="button" data-step="-1">−</button><input type="number" min="0" value="0" readonly><button type="button" data-step="1">+</button></span>
+          </label>
+          <label class="coti-item" data-price="240" data-name-es="Proteínas Totales & Relación A/G" data-name-en="Proteínas Totales & Relación A/G">
+            <span class="coti-item-name"><b><span class="lang lang-es">Proteínas Totales & Relación A/G</span><span class="lang lang-en">Proteínas Totales & Relación A/G</span></b></span>
+            <span class="coti-item-price"><span class="price-currency">L</span>240</span>
+            <span class="coti-qty"><button type="button" data-step="-1">−</button><input type="number" min="0" value="0" readonly><button type="button" data-step="1">+</button></span>
+          </label>
+          <label class="coti-item" data-price="232" data-name-es="Sodio (NA+) en Suero" data-name-en="Sodio (NA+) en Suero">
+            <span class="coti-item-name"><b><span class="lang lang-es">Sodio (NA+) en Suero</span><span class="lang lang-en">Sodio (NA+) en Suero</span></b></span>
+            <span class="coti-item-price"><span class="price-currency">L</span>232</span>
+            <span class="coti-qty"><button type="button" data-step="-1">−</button><input type="number" min="0" value="0" readonly><button type="button" data-step="1">+</button></span>
+          </label>
+          <label class="coti-item" data-price="167" data-name-es="Transaminasa Oxalacetica (TsGO)" data-name-en="Transaminasa Oxalacetica (TsGO)">
+            <span class="coti-item-name"><b><span class="lang lang-es">Transaminasa Oxalacetica (TsGO)</span><span class="lang lang-en">Transaminasa Oxalacetica (TsGO)</span></b></span>
+            <span class="coti-item-price"><span class="price-currency">L</span>167</span>
+            <span class="coti-qty"><button type="button" data-step="-1">−</button><input type="number" min="0" value="0" readonly><button type="button" data-step="1">+</button></span>
+          </label>
+          <label class="coti-item" data-price="167" data-name-es="Transaminasa Piruvica (TsGP)" data-name-en="Transaminasa Piruvica (TsGP)">
+            <span class="coti-item-name"><b><span class="lang lang-es">Transaminasa Piruvica (TsGP)</span><span class="lang lang-en">Transaminasa Piruvica (TsGP)</span></b></span>
+            <span class="coti-item-price"><span class="price-currency">L</span>167</span>
+            <span class="coti-qty"><button type="button" data-step="-1">−</button><input type="number" min="0" value="0" readonly><button type="button" data-step="1">+</button></span>
+          </label>
+          <label class="coti-item" data-price="650" data-name-es="Transferrina" data-name-en="Transferrina">
+            <span class="coti-item-name"><b><span class="lang lang-es">Transferrina</span><span class="lang lang-en">Transferrina</span></b></span>
+            <span class="coti-item-price"><span class="price-currency">L</span>650</span>
+            <span class="coti-qty"><button type="button" data-step="-1">−</button><input type="number" min="0" value="0" readonly><button type="button" data-step="1">+</button></span>
+          </label>
+          <label class="coti-item" data-price="170" data-name-es="Trigliceridos" data-name-en="Trigliceridos">
+            <span class="coti-item-name"><b><span class="lang lang-es">Trigliceridos</span><span class="lang lang-en">Trigliceridos</span></b></span>
+            <span class="coti-item-price"><span class="price-currency">L</span>170</span>
+            <span class="coti-qty"><button type="button" data-step="-1">−</button><input type="number" min="0" value="0" readonly><button type="button" data-step="1">+</button></span>
+          </label>
+          <label class="coti-item" data-price="750" data-name-es="Troponina I" data-name-en="Troponina I">
+            <span class="coti-item-name"><b><span class="lang lang-es">Troponina I</span><span class="lang lang-en">Troponina I</span></b></span>
+            <span class="coti-item-price"><span class="price-currency">L</span>750</span>
+            <span class="coti-qty"><button type="button" data-step="-1">−</button><input type="number" min="0" value="0" readonly><button type="button" data-step="1">+</button></span>
+          </label>
+          </div>
+        </div>
+        <div class="coti-subcat" data-sub="inmu">
+          <div class="coti-subcat-h">
+            <span class="coti-subcat-title"><span class="lang lang-es">Inmunología y anticuerpos</span><span class="lang lang-en">Immunology & antibodies</span></span>
+            <span class="coti-subcat-count">35</span>
+            <svg class="coti-subcat-chev" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="coti-subcat-items">
+          <label class="coti-item" data-price="2990" data-name-es="ACTH" data-name-en="ACTH">
+            <span class="coti-item-name"><b><span class="lang lang-es">ACTH</span><span class="lang lang-en">ACTH</span></b></span>
+            <span class="coti-item-price"><span class="price-currency">L</span>2,990</span>
+            <span class="coti-qty"><button type="button" data-step="-1">−</button><input type="number" min="0" value="0" readonly><button type="button" data-step="1">+</button></span>
+          </label>
+          <label class="coti-item" data-price="1400" data-name-es="Anticuerpo Chikungunya IgM" data-name-en="Anticuerpo Chikungunya IgM">
+            <span class="coti-item-name"><b><span class="lang lang-es">Anticuerpo Chikungunya IgM</span><span class="lang lang-en">Anticuerpo Chikungunya IgM</span></b></span>
+            <span class="coti-item-price"><span class="price-currency">L</span>1,400</span>
+            <span class="coti-qty"><button type="button" data-step="-1">−</button><input type="number" min="0" value="0" readonly><button type="button" data-step="1">+</button></span>
+          </label>
+          <label class="coti-item" data-price="700" data-name-es="Anticuerpos Anti Cardiolipina(Igg)" data-name-en="Anticuerpos Anti Cardiolipina(Igg)">
+            <span class="coti-item-name"><b><span class="lang lang-es">Anticuerpos Anti Cardiolipina(Igg)</span><span class="lang lang-en">Anticuerpos Anti Cardiolipina(Igg)</span></b></span>
+            <span class="coti-item-price"><span class="price-currency">L</span>700</span>
+            <span class="coti-qty"><button type="button" data-step="-1">−</button><input type="number" min="0" value="0" readonly><button type="button" data-step="1">+</button></span>
+          </label>
+          <label class="coti-item" data-price="700" data-name-es="Anticuerpos Anticardiolipinas IgM" data-name-en="Anticuerpos Anticardiolipinas IgM">
+            <span class="coti-item-name"><b><span class="lang lang-es">Anticuerpos Anticardiolipinas IgM</span><span class="lang lang-en">Anticuerpos Anticardiolipinas IgM</span></b></span>
+            <span class="coti-item-price"><span class="price-currency">L</span>700</span>
+            <span class="coti-qty"><button type="button" data-step="-1">−</button><input type="number" min="0" value="0" readonly><button type="button" data-step="1">+</button></span>
+          </label>
+          <label class="coti-item" data-price="210" data-name-es="Anticuerpos Antiglobulina: Ig (Ra Test) - Factor Reumatoideo" data-name-en="Anticuerpos Antiglobulina: Ig (Ra Test) - Factor Reumatoideo">
+            <span class="coti-item-name"><b><span class="lang lang-es">Anticuerpos Antiglobulina: Ig (Ra Test) - Factor Reumatoideo</span><span class="lang lang-en">Anticuerpos Antiglobulina: Ig (Ra Test) - Factor Reumatoideo</span></b></span>
+            <span class="coti-item-price"><span class="price-currency">L</span>210</span>
+            <span class="coti-qty"><button type="button" data-step="-1">−</button><input type="number" min="0" value="0" readonly><button type="button" data-step="1">+</button></span>
+          </label>
+          <label class="coti-item" data-price="650" data-name-es="Anticuerpos Antinucleares (ANA)" data-name-en="Anticuerpos Antinucleares (ANA)">
+            <span class="coti-item-name"><b><span class="lang lang-es">Anticuerpos Antinucleares (ANA)</span><span class="lang lang-en">Anticuerpos Antinucleares (ANA)</span></b></span>
+            <span class="coti-item-price"><span class="price-currency">L</span>650</span>
+            <span class="coti-qty"><button type="button" data-step="-1">−</button><input type="number" min="0" value="0" readonly><button type="button" data-step="1">+</button></span>
+          </label>
+          <label class="coti-item" data-price="680" data-name-es="Anticuerpos Citomegalovirus IgG" data-name-en="Anticuerpos Citomegalovirus IgG">
+            <span class="coti-item-name"><b><span class="lang lang-es">Anticuerpos Citomegalovirus IgG</span><span class="lang lang-en">Anticuerpos Citomegalovirus IgG</span></b></span>
+            <span class="coti-item-price"><span class="price-currency">L</span>680</span>
+            <span class="coti-qty"><button type="button" data-step="-1">−</button><input type="number" min="0" value="0" readonly><button type="button" data-step="1">+</button></span>
+          </label>
+          <label class="coti-item" data-price="780" data-name-es="Anticuerpos Citomegalovirus IgM" data-name-en="Anticuerpos Citomegalovirus IgM">
+            <span class="coti-item-name"><b><span class="lang lang-es">Anticuerpos Citomegalovirus IgM</span><span class="lang lang-en">Anticuerpos Citomegalovirus IgM</span></b></span>
+            <span class="coti-item-price"><span class="price-currency">L</span>780</span>
+            <span class="coti-qty"><button type="button" data-step="-1">−</button><input type="number" min="0" value="0" readonly><button type="button" data-step="1">+</button></span>
+          </label>
+          <label class="coti-item" data-price="200" data-name-es="Anticuerpos Estreptolisina O (ASO)" data-name-en="Anticuerpos Estreptolisina O (ASO)">
+            <span class="coti-item-name"><b><span class="lang lang-es">Anticuerpos Estreptolisina O (ASO)</span><span class="lang lang-en">Anticuerpos Estreptolisina O (ASO)</span></b></span>
+            <span class="coti-item-price"><span class="price-currency">L</span>200</span>
+            <span class="coti-qty"><button type="button" data-step="-1">−</button><input type="number" min="0" value="0" readonly><button type="button" data-step="1">+</button></span>
+          </label>
+          <label class="coti-item" data-price="490" data-name-es="Anticuerpos H-Pylori (sangre)" data-name-en="Anticuerpos H-Pylori (sangre)">
+            <span class="coti-item-name"><b><span class="lang lang-es">Anticuerpos H-Pylori (sangre)</span><span class="lang lang-en">Anticuerpos H-Pylori (sangre)</span></b></span>
+            <span class="coti-item-price"><span class="price-currency">L</span>490</span>
+            <span class="coti-qty"><button type="button" data-step="-1">−</button><input type="number" min="0" value="0" readonly><button type="button" data-step="1">+</button></span>
+          </label>
+          <label class="coti-item" data-price="580" data-name-es="Anticuerpos Hepatitis A" data-name-en="Anticuerpos Hepatitis A">
+            <span class="coti-item-name"><b><span class="lang lang-es">Anticuerpos Hepatitis A</span><span class="lang lang-en">Anticuerpos Hepatitis A</span></b></span>
+            <span class="coti-item-price"><span class="price-currency">L</span>580</span>
+            <span class="coti-qty"><button type="button" data-step="-1">−</button><input type="number" min="0" value="0" readonly><button type="button" data-step="1">+</button></span>
+          </label>
+          <label class="coti-item" data-price="1300" data-name-es="Anticuerpos Hepatitis B (Anti-Hbc)" data-name-en="Anticuerpos Hepatitis B (Anti-Hbc)">
+            <span class="coti-item-name"><b><span class="lang lang-es">Anticuerpos Hepatitis B (Anti-Hbc)</span><span class="lang lang-en">Anticuerpos Hepatitis B (Anti-Hbc)</span></b></span>
+            <span class="coti-item-price"><span class="price-currency">L</span>1,300</span>
+            <span class="coti-qty"><button type="button" data-step="-1">−</button><input type="number" min="0" value="0" readonly><button type="button" data-step="1">+</button></span>
+          </label>
+          <label class="coti-item" data-price="500" data-name-es="Anticuerpos Hepatitis B (Anti-HBs)" data-name-en="Anticuerpos Hepatitis B (Anti-HBs)">
+            <span class="coti-item-name"><b><span class="lang lang-es">Anticuerpos Hepatitis B (Anti-HBs)</span><span class="lang lang-en">Anticuerpos Hepatitis B (Anti-HBs)</span></b></span>
+            <span class="coti-item-price"><span class="price-currency">L</span>500</span>
+            <span class="coti-qty"><button type="button" data-step="-1">−</button><input type="number" min="0" value="0" readonly><button type="button" data-step="1">+</button></span>
+          </label>
+          <label class="coti-item" data-price="650" data-name-es="Anticuerpos Hepatitis C" data-name-en="Anticuerpos Hepatitis C">
+            <span class="coti-item-name"><b><span class="lang lang-es">Anticuerpos Hepatitis C</span><span class="lang lang-en">Anticuerpos Hepatitis C</span></b></span>
+            <span class="coti-item-price"><span class="price-currency">L</span>650</span>
+            <span class="coti-qty"><button type="button" data-step="-1">−</button><input type="number" min="0" value="0" readonly><button type="button" data-step="1">+</button></span>
+          </label>
+          <label class="coti-item" data-price="1485" data-name-es="Anticuerpos Herpes simple Tipo 1 IgG" data-name-en="Anticuerpos Herpes simple Tipo 1 IgG">
+            <span class="coti-item-name"><b><span class="lang lang-es">Anticuerpos Herpes simple Tipo 1 IgG</span><span class="lang lang-en">Anticuerpos Herpes simple Tipo 1 IgG</span></b></span>
+            <span class="coti-item-price"><span class="price-currency">L</span>1,485</span>
+            <span class="coti-qty"><button type="button" data-step="-1">−</button><input type="number" min="0" value="0" readonly><button type="button" data-step="1">+</button></span>
+          </label>
+          <label class="coti-item" data-price="1485" data-name-es="Anticuerpos Herpes simple Tipo 1 IgM" data-name-en="Anticuerpos Herpes simple Tipo 1 IgM">
+            <span class="coti-item-name"><b><span class="lang lang-es">Anticuerpos Herpes simple Tipo 1 IgM</span><span class="lang lang-en">Anticuerpos Herpes simple Tipo 1 IgM</span></b></span>
+            <span class="coti-item-price"><span class="price-currency">L</span>1,485</span>
+            <span class="coti-qty"><button type="button" data-step="-1">−</button><input type="number" min="0" value="0" readonly><button type="button" data-step="1">+</button></span>
+          </label>
+          <label class="coti-item" data-price="1485" data-name-es="Anticuerpos Herpes simple Tipo 2 IgG" data-name-en="Anticuerpos Herpes simple Tipo 2 IgG">
+            <span class="coti-item-name"><b><span class="lang lang-es">Anticuerpos Herpes simple Tipo 2 IgG</span><span class="lang lang-en">Anticuerpos Herpes simple Tipo 2 IgG</span></b></span>
+            <span class="coti-item-price"><span class="price-currency">L</span>1,485</span>
+            <span class="coti-qty"><button type="button" data-step="-1">−</button><input type="number" min="0" value="0" readonly><button type="button" data-step="1">+</button></span>
+          </label>
+          <label class="coti-item" data-price="1485" data-name-es="Anticuerpos Herpes simple Tipo 2 IgM" data-name-en="Anticuerpos Herpes simple Tipo 2 IgM">
+            <span class="coti-item-name"><b><span class="lang lang-es">Anticuerpos Herpes simple Tipo 2 IgM</span><span class="lang lang-en">Anticuerpos Herpes simple Tipo 2 IgM</span></b></span>
+            <span class="coti-item-price"><span class="price-currency">L</span>1,485</span>
+            <span class="coti-qty"><button type="button" data-step="-1">−</button><input type="number" min="0" value="0" readonly><button type="button" data-step="1">+</button></span>
+          </label>
+          <label class="coti-item" data-price="180" data-name-es="Anticuerpos Mononucleosis (Monotest)" data-name-en="Anticuerpos Mononucleosis (Monotest)">
+            <span class="coti-item-name"><b><span class="lang lang-es">Anticuerpos Mononucleosis (Monotest)</span><span class="lang lang-en">Anticuerpos Mononucleosis (Monotest)</span></b></span>
+            <span class="coti-item-price"><span class="price-currency">L</span>180</span>
+            <span class="coti-qty"><button type="button" data-step="-1">−</button><input type="number" min="0" value="0" readonly><button type="button" data-step="1">+</button></span>
+          </label>
+          <label class="coti-item" data-price="1500" data-name-es="Anticuerpos Rubeola IgG" data-name-en="Anticuerpos Rubeola IgG">
+            <span class="coti-item-name"><b><span class="lang lang-es">Anticuerpos Rubeola IgG</span><span class="lang lang-en">Anticuerpos Rubeola IgG</span></b></span>
+            <span class="coti-item-price"><span class="price-currency">L</span>1,500</span>
+            <span class="coti-qty"><button type="button" data-step="-1">−</button><input type="number" min="0" value="0" readonly><button type="button" data-step="1">+</button></span>
+          </label>
+          <label class="coti-item" data-price="1500" data-name-es="Anticuerpos Rubeola IgM" data-name-en="Anticuerpos Rubeola IgM">
+            <span class="coti-item-name"><b><span class="lang lang-es">Anticuerpos Rubeola IgM</span><span class="lang lang-en">Anticuerpos Rubeola IgM</span></b></span>
+            <span class="coti-item-price"><span class="price-currency">L</span>1,500</span>
+            <span class="coti-qty"><button type="button" data-step="-1">−</button><input type="number" min="0" value="0" readonly><button type="button" data-step="1">+</button></span>
+          </label>
+          <label class="coti-item" data-price="689" data-name-es="Anticuerpos Toxoplasma IgG" data-name-en="Anticuerpos Toxoplasma IgG">
+            <span class="coti-item-name"><b><span class="lang lang-es">Anticuerpos Toxoplasma IgG</span><span class="lang lang-en">Anticuerpos Toxoplasma IgG</span></b></span>
+            <span class="coti-item-price"><span class="price-currency">L</span>689</span>
+            <span class="coti-qty"><button type="button" data-step="-1">−</button><input type="number" min="0" value="0" readonly><button type="button" data-step="1">+</button></span>
+          </label>
+          <label class="coti-item" data-price="689" data-name-es="Anticuerpos Toxoplasma IgM" data-name-en="Anticuerpos Toxoplasma IgM">
+            <span class="coti-item-name"><b><span class="lang lang-es">Anticuerpos Toxoplasma IgM</span><span class="lang lang-en">Anticuerpos Toxoplasma IgM</span></b></span>
+            <span class="coti-item-price"><span class="price-currency">L</span>689</span>
+            <span class="coti-qty"><button type="button" data-step="-1">−</button><input type="number" min="0" value="0" readonly><button type="button" data-step="1">+</button></span>
+          </label>
+          <label class="coti-item" data-price="375" data-name-es="Anticuerpos Trypanosoma cruzi (Chagas)" data-name-en="Anticuerpos Trypanosoma cruzi (Chagas)">
+            <span class="coti-item-name"><b><span class="lang lang-es">Anticuerpos Trypanosoma cruzi (Chagas)</span><span class="lang lang-en">Anticuerpos Trypanosoma cruzi (Chagas)</span></b></span>
+            <span class="coti-item-price"><span class="price-currency">L</span>375</span>
+            <span class="coti-qty"><button type="button" data-step="-1">−</button><input type="number" min="0" value="0" readonly><button type="button" data-step="1">+</button></span>
+          </label>
+          <label class="coti-item" data-price="767" data-name-es="Antigeno H. Pylori-Heces" data-name-en="Antigeno H. Pylori-Heces">
+            <span class="coti-item-name"><b><span class="lang lang-es">Antigeno H. Pylori-Heces</span><span class="lang lang-en">Antigeno H. Pylori-Heces</span></b></span>
+            <span class="coti-item-price"><span class="price-currency">L</span>767</span>
+            <span class="coti-qty"><button type="button" data-step="-1">−</button><input type="number" min="0" value="0" readonly><button type="button" data-step="1">+</button></span>
+          </label>
+          <label class="coti-item" data-price="800" data-name-es="Antigeno Hepatitis B (Hbsag)" data-name-en="Antigeno Hepatitis B (Hbsag)">
+            <span class="coti-item-name"><b><span class="lang lang-es">Antigeno Hepatitis B (Hbsag)</span><span class="lang lang-en">Antigeno Hepatitis B (Hbsag)</span></b></span>
+            <span class="coti-item-price"><span class="price-currency">L</span>800</span>
+            <span class="coti-qty"><button type="button" data-step="-1">−</button><input type="number" min="0" value="0" readonly><button type="button" data-step="1">+</button></span>
+          </label>
+          <label class="coti-item" data-price="250" data-name-es="Antigenos Febriles (Anticuerpos Salmonella)" data-name-en="Antigenos Febriles (Anticuerpos Salmonella)">
+            <span class="coti-item-name"><b><span class="lang lang-es">Antigenos Febriles (Anticuerpos Salmonella)</span><span class="lang lang-en">Antigenos Febriles (Anticuerpos Salmonella)</span></b></span>
+            <span class="coti-item-price"><span class="price-currency">L</span>250</span>
+            <span class="coti-qty"><button type="button" data-step="-1">−</button><input type="number" min="0" value="0" readonly><button type="button" data-step="1">+</button></span>
+          </label>
+          <label class="coti-item" data-price="500" data-name-es="Complemento Sérico C3" data-name-en="Complemento Sérico C3">
+            <span class="coti-item-name"><b><span class="lang lang-es">Complemento Sérico C3</span><span class="lang lang-en">Complemento Sérico C3</span></b></span>
+            <span class="coti-item-price"><span class="price-currency">L</span>500</span>
+            <span class="coti-qty"><button type="button" data-step="-1">−</button><input type="number" min="0" value="0" readonly><button type="button" data-step="1">+</button></span>
+          </label>
+          <label class="coti-item" data-price="500" data-name-es="Complemento Sérico C4" data-name-en="Complemento Sérico C4">
+            <span class="coti-item-name"><b><span class="lang lang-es">Complemento Sérico C4</span><span class="lang lang-en">Complemento Sérico C4</span></b></span>
+            <span class="coti-item-price"><span class="price-currency">L</span>500</span>
+            <span class="coti-qty"><button type="button" data-step="-1">−</button><input type="number" min="0" value="0" readonly><button type="button" data-step="1">+</button></span>
+          </label>
+          <label class="coti-item" data-price="450" data-name-es="Inmunoglobulina A" data-name-en="Inmunoglobulina A">
+            <span class="coti-item-name"><b><span class="lang lang-es">Inmunoglobulina A</span><span class="lang lang-en">Inmunoglobulina A</span></b></span>
+            <span class="coti-item-price"><span class="price-currency">L</span>450</span>
+            <span class="coti-qty"><button type="button" data-step="-1">−</button><input type="number" min="0" value="0" readonly><button type="button" data-step="1">+</button></span>
+          </label>
+          <label class="coti-item" data-price="495" data-name-es="Inmunoglobulina E (IgE)" data-name-en="Inmunoglobulina E (IgE)">
+            <span class="coti-item-name"><b><span class="lang lang-es">Inmunoglobulina E (IgE)</span><span class="lang lang-en">Inmunoglobulina E (IgE)</span></b></span>
+            <span class="coti-item-price"><span class="price-currency">L</span>495</span>
+            <span class="coti-qty"><button type="button" data-step="-1">−</button><input type="number" min="0" value="0" readonly><button type="button" data-step="1">+</button></span>
+          </label>
+          <label class="coti-item" data-price="450" data-name-es="Inmunoglobulina G" data-name-en="Inmunoglobulina G">
+            <span class="coti-item-name"><b><span class="lang lang-es">Inmunoglobulina G</span><span class="lang lang-en">Inmunoglobulina G</span></b></span>
+            <span class="coti-item-price"><span class="price-currency">L</span>450</span>
+            <span class="coti-qty"><button type="button" data-step="-1">−</button><input type="number" min="0" value="0" readonly><button type="button" data-step="1">+</button></span>
+          </label>
+          <label class="coti-item" data-price="400" data-name-es="Inmunoglobulina M" data-name-en="Inmunoglobulina M">
+            <span class="coti-item-name"><b><span class="lang lang-es">Inmunoglobulina M</span><span class="lang lang-en">Inmunoglobulina M</span></b></span>
+            <span class="coti-item-price"><span class="price-currency">L</span>400</span>
+            <span class="coti-qty"><button type="button" data-step="-1">−</button><input type="number" min="0" value="0" readonly><button type="button" data-step="1">+</button></span>
+          </label>
+          <label class="coti-item" data-price="2925" data-name-es="Panel Alimentos" data-name-en="Panel Alimentos">
+            <span class="coti-item-name"><b><span class="lang lang-es">Panel Alimentos</span><span class="lang lang-en">Panel Alimentos</span></b></span>
+            <span class="coti-item-price"><span class="price-currency">L</span>2,925</span>
+            <span class="coti-qty"><button type="button" data-step="-1">−</button><input type="number" min="0" value="0" readonly><button type="button" data-step="1">+</button></span>
+          </label>
+          <label class="coti-item" data-price="2925" data-name-es="Panel Inhalantes" data-name-en="Panel Inhalantes">
+            <span class="coti-item-name"><b><span class="lang lang-es">Panel Inhalantes</span><span class="lang lang-en">Panel Inhalantes</span></b></span>
+            <span class="coti-item-price"><span class="price-currency">L</span>2,925</span>
+            <span class="coti-qty"><button type="button" data-step="-1">−</button><input type="number" min="0" value="0" readonly><button type="button" data-step="1">+</button></span>
+          </label>
+          </div>
+        </div>
+        <div class="coti-subcat" data-sub="hor">
+          <div class="coti-subcat-h">
+            <span class="coti-subcat-title"><span class="lang lang-es">Hormonas</span><span class="lang lang-en">Hormones</span></span>
+            <span class="coti-subcat-count">24</span>
+            <svg class="coti-subcat-chev" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="coti-subcat-items">
+          <label class="coti-item" data-price="712" data-name-es="Anticuerpos Anti-peroxidasa (TPO)" data-name-en="Anticuerpos Anti-peroxidasa (TPO)">
+            <span class="coti-item-name"><b><span class="lang lang-es">Anticuerpos Anti-peroxidasa (TPO)</span><span class="lang lang-en">Anticuerpos Anti-peroxidasa (TPO)</span></b></span>
+            <span class="coti-item-price"><span class="price-currency">L</span>712</span>
+            <span class="coti-qty"><button type="button" data-step="-1">−</button><input type="number" min="0" value="0" readonly><button type="button" data-step="1">+</button></span>
+          </label>
+          <label class="coti-item" data-price="840" data-name-es="Cortisol A.M." data-name-en="Cortisol A.M.">
+            <span class="coti-item-name"><b><span class="lang lang-es">Cortisol A.M.</span><span class="lang lang-en">Cortisol A.M.</span></b></span>
+            <span class="coti-item-price"><span class="price-currency">L</span>840</span>
+            <span class="coti-qty"><button type="button" data-step="-1">−</button><input type="number" min="0" value="0" readonly><button type="button" data-step="1">+</button></span>
+          </label>
+          <label class="coti-item" data-price="840" data-name-es="Cortisol P.M." data-name-en="Cortisol P.M.">
+            <span class="coti-item-name"><b><span class="lang lang-es">Cortisol P.M.</span><span class="lang lang-en">Cortisol P.M.</span></b></span>
+            <span class="coti-item-price"><span class="price-currency">L</span>840</span>
+            <span class="coti-qty"><button type="button" data-step="-1">−</button><input type="number" min="0" value="0" readonly><button type="button" data-step="1">+</button></span>
+          </label>
+          <label class="coti-item" data-price="3900" data-name-es="Curva Tolerancia a la Insulina" data-name-en="Curva Tolerancia a la Insulina">
+            <span class="coti-item-name"><b><span class="lang lang-es">Curva Tolerancia a la Insulina</span><span class="lang lang-en">Curva Tolerancia a la Insulina</span></b></span>
+            <span class="coti-item-price"><span class="price-currency">L</span>3,900</span>
+            <span class="coti-qty"><button type="button" data-step="-1">−</button><input type="number" min="0" value="0" readonly><button type="button" data-step="1">+</button></span>
+          </label>
+          <label class="coti-item" data-price="903" data-name-es="Estradiol" data-name-en="Estradiol">
+            <span class="coti-item-name"><b><span class="lang lang-es">Estradiol</span><span class="lang lang-en">Estradiol</span></b></span>
+            <span class="coti-item-price"><span class="price-currency">L</span>903</span>
+            <span class="coti-qty"><button type="button" data-step="-1">−</button><input type="number" min="0" value="0" readonly><button type="button" data-step="1">+</button></span>
+          </label>
+          <label class="coti-item" data-price="1041" data-name-es="Ferritina" data-name-en="Ferritina">
+            <span class="coti-item-name"><b><span class="lang lang-es">Ferritina</span><span class="lang lang-en">Ferritina</span></b></span>
+            <span class="coti-item-price"><span class="price-currency">L</span>1,041</span>
+            <span class="coti-qty"><button type="button" data-step="-1">−</button><input type="number" min="0" value="0" readonly><button type="button" data-step="1">+</button></span>
+          </label>
+          <label class="coti-item" data-price="850" data-name-es="Fsh (Hormona Foliculo Estimulante)" data-name-en="Fsh (Hormona Foliculo Estimulante)">
+            <span class="coti-item-name"><b><span class="lang lang-es">Fsh (Hormona Foliculo Estimulante)</span><span class="lang lang-en">Fsh (Hormona Foliculo Estimulante)</span></b></span>
+            <span class="coti-item-price"><span class="price-currency">L</span>850</span>
+            <span class="coti-qty"><button type="button" data-step="-1">−</button><input type="number" min="0" value="0" readonly><button type="button" data-step="1">+</button></span>
+          </label>
+          <label class="coti-item" data-price="850" data-name-es="Gonadotropina Coriónica Humana" data-name-en="Gonadotropina Coriónica Humana">
+            <span class="coti-item-name"><b><span class="lang lang-es">Gonadotropina Coriónica Humana</span><span class="lang lang-en">Gonadotropina Coriónica Humana</span></b></span>
+            <span class="coti-item-price"><span class="price-currency">L</span>850</span>
+            <span class="coti-qty"><button type="button" data-step="-1">−</button><input type="number" min="0" value="0" readonly><button type="button" data-step="1">+</button></span>
+          </label>
+          <label class="coti-item" data-price="750" data-name-es="Hormona Gonadotropina Coriónica (Beta-HCG)" data-name-en="Hormona Gonadotropina Coriónica (Beta-HCG)">
+            <span class="coti-item-name"><b><span class="lang lang-es">Hormona Gonadotropina Coriónica (Beta-HCG)</span><span class="lang lang-en">Hormona Gonadotropina Coriónica (Beta-HCG)</span></b></span>
+            <span class="coti-item-price"><span class="price-currency">L</span>750</span>
+            <span class="coti-qty"><button type="button" data-step="-1">−</button><input type="number" min="0" value="0" readonly><button type="button" data-step="1">+</button></span>
+          </label>
+          <label class="coti-item" data-price="905" data-name-es="Insulina" data-name-en="Insulina">
+            <span class="coti-item-name"><b><span class="lang lang-es">Insulina</span><span class="lang lang-en">Insulina</span></b></span>
+            <span class="coti-item-price"><span class="price-currency">L</span>905</span>
+            <span class="coti-qty"><button type="button" data-step="-1">−</button><input type="number" min="0" value="0" readonly><button type="button" data-step="1">+</button></span>
+          </label>
+          <label class="coti-item" data-price="905" data-name-es="Insulina Post" data-name-en="Insulina Post">
+            <span class="coti-item-name"><b><span class="lang lang-es">Insulina Post</span><span class="lang lang-en">Insulina Post</span></b></span>
+            <span class="coti-item-price"><span class="price-currency">L</span>905</span>
+            <span class="coti-qty"><button type="button" data-step="-1">−</button><input type="number" min="0" value="0" readonly><button type="button" data-step="1">+</button></span>
+          </label>
+          <label class="coti-item" data-price="700" data-name-es="Lh" data-name-en="Lh">
+            <span class="coti-item-name"><b><span class="lang lang-es">Lh</span><span class="lang lang-en">Lh</span></b></span>
+            <span class="coti-item-price"><span class="price-currency">L</span>700</span>
+            <span class="coti-qty"><button type="button" data-step="-1">−</button><input type="number" min="0" value="0" readonly><button type="button" data-step="1">+</button></span>
+          </label>
+          <label class="coti-item" data-price="3632" data-name-es="Paratohormona (Pth)" data-name-en="Paratohormona (Pth)">
+            <span class="coti-item-name"><b><span class="lang lang-es">Paratohormona (Pth)</span><span class="lang lang-en">Paratohormona (Pth)</span></b></span>
+            <span class="coti-item-price"><span class="price-currency">L</span>3,632</span>
+            <span class="coti-qty"><button type="button" data-step="-1">−</button><input type="number" min="0" value="0" readonly><button type="button" data-step="1">+</button></span>
+          </label>
+          <label class="coti-item" data-price="850" data-name-es="Progesterona" data-name-en="Progesterona">
+            <span class="coti-item-name"><b><span class="lang lang-es">Progesterona</span><span class="lang lang-en">Progesterona</span></b></span>
+            <span class="coti-item-price"><span class="price-currency">L</span>850</span>
+            <span class="coti-qty"><button type="button" data-step="-1">−</button><input type="number" min="0" value="0" readonly><button type="button" data-step="1">+</button></span>
+          </label>
+          <label class="coti-item" data-price="690" data-name-es="Prolactina" data-name-en="Prolactina">
+            <span class="coti-item-name"><b><span class="lang lang-es">Prolactina</span><span class="lang lang-en">Prolactina</span></b></span>
+            <span class="coti-item-price"><span class="price-currency">L</span>690</span>
+            <span class="coti-qty"><button type="button" data-step="-1">−</button><input type="number" min="0" value="0" readonly><button type="button" data-step="1">+</button></span>
+          </label>
+          <label class="coti-item" data-price="500" data-name-es="T3 (Triyodotironina)" data-name-en="T3 (Triyodotironina)">
+            <span class="coti-item-name"><b><span class="lang lang-es">T3 (Triyodotironina)</span><span class="lang lang-en">T3 (Triyodotironina)</span></b></span>
+            <span class="coti-item-price"><span class="price-currency">L</span>500</span>
+            <span class="coti-qty"><button type="button" data-step="-1">−</button><input type="number" min="0" value="0" readonly><button type="button" data-step="1">+</button></span>
+          </label>
+          <label class="coti-item" data-price="700" data-name-es="T3 Libre" data-name-en="T3 Libre">
+            <span class="coti-item-name"><b><span class="lang lang-es">T3 Libre</span><span class="lang lang-en">T3 Libre</span></b></span>
+            <span class="coti-item-price"><span class="price-currency">L</span>700</span>
+            <span class="coti-qty"><button type="button" data-step="-1">−</button><input type="number" min="0" value="0" readonly><button type="button" data-step="1">+</button></span>
+          </label>
+          <label class="coti-item" data-price="500" data-name-es="T4 (Tiroxina)" data-name-en="T4 (Tiroxina)">
+            <span class="coti-item-name"><b><span class="lang lang-es">T4 (Tiroxina)</span><span class="lang lang-en">T4 (Tiroxina)</span></b></span>
+            <span class="coti-item-price"><span class="price-currency">L</span>500</span>
+            <span class="coti-qty"><button type="button" data-step="-1">−</button><input type="number" min="0" value="0" readonly><button type="button" data-step="1">+</button></span>
+          </label>
+          <label class="coti-item" data-price="605" data-name-es="T4 Libre" data-name-en="T4 Libre">
+            <span class="coti-item-name"><b><span class="lang lang-es">T4 Libre</span><span class="lang lang-en">T4 Libre</span></b></span>
+            <span class="coti-item-price"><span class="price-currency">L</span>605</span>
+            <span class="coti-qty"><button type="button" data-step="-1">−</button><input type="number" min="0" value="0" readonly><button type="button" data-step="1">+</button></span>
+          </label>
+          <label class="coti-item" data-price="1366" data-name-es="Testosterona Libre" data-name-en="Testosterona Libre">
+            <span class="coti-item-name"><b><span class="lang lang-es">Testosterona Libre</span><span class="lang lang-en">Testosterona Libre</span></b></span>
+            <span class="coti-item-price"><span class="price-currency">L</span>1,366</span>
+            <span class="coti-qty"><button type="button" data-step="-1">−</button><input type="number" min="0" value="0" readonly><button type="button" data-step="1">+</button></span>
+          </label>
+          <label class="coti-item" data-price="800" data-name-es="Testosterona Total" data-name-en="Testosterona Total">
+            <span class="coti-item-name"><b><span class="lang lang-es">Testosterona Total</span><span class="lang lang-en">Testosterona Total</span></b></span>
+            <span class="coti-item-price"><span class="price-currency">L</span>800</span>
+            <span class="coti-qty"><button type="button" data-step="-1">−</button><input type="number" min="0" value="0" readonly><button type="button" data-step="1">+</button></span>
+          </label>
+          <label class="coti-item" data-price="1220" data-name-es="Tiroglobulina" data-name-en="Tiroglobulina">
+            <span class="coti-item-name"><b><span class="lang lang-es">Tiroglobulina</span><span class="lang lang-en">Tiroglobulina</span></b></span>
+            <span class="coti-item-price"><span class="price-currency">L</span>1,220</span>
+            <span class="coti-qty"><button type="button" data-step="-1">−</button><input type="number" min="0" value="0" readonly><button type="button" data-step="1">+</button></span>
+          </label>
+          <label class="coti-item" data-price="1200" data-name-es="Vitamina B-12" data-name-en="Vitamina B-12">
+            <span class="coti-item-name"><b><span class="lang lang-es">Vitamina B-12</span><span class="lang lang-en">Vitamina B-12</span></b></span>
+            <span class="coti-item-price"><span class="price-currency">L</span>1,200</span>
+            <span class="coti-qty"><button type="button" data-step="-1">−</button><input type="number" min="0" value="0" readonly><button type="button" data-step="1">+</button></span>
+          </label>
+          <label class="coti-item" data-price="1425" data-name-es="Vitamina D" data-name-en="Vitamina D">
+            <span class="coti-item-name"><b><span class="lang lang-es">Vitamina D</span><span class="lang lang-en">Vitamina D</span></b></span>
+            <span class="coti-item-price"><span class="price-currency">L</span>1,425</span>
+            <span class="coti-qty"><button type="button" data-step="-1">−</button><input type="number" min="0" value="0" readonly><button type="button" data-step="1">+</button></span>
+          </label>
+          </div>
+        </div>
+        <div class="coti-subcat" data-sub="marc">
+          <div class="coti-subcat-h">
+            <span class="coti-subcat-title"><span class="lang lang-es">Marcadores tumorales</span><span class="lang lang-en">Tumor markers</span></span>
+            <span class="coti-subcat-count">7</span>
+            <svg class="coti-subcat-chev" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="coti-subcat-items">
+          <label class="coti-item" data-price="600" data-name-es="Alfa Fetoproteína (AFP)" data-name-en="Alfa Fetoproteína (AFP)">
+            <span class="coti-item-name"><b><span class="lang lang-es">Alfa Fetoproteína (AFP)</span><span class="lang lang-en">Alfa Fetoproteína (AFP)</span></b></span>
+            <span class="coti-item-price"><span class="price-currency">L</span>600</span>
+            <span class="coti-qty"><button type="button" data-step="-1">−</button><input type="number" min="0" value="0" readonly><button type="button" data-step="1">+</button></span>
+          </label>
+          <label class="coti-item" data-price="585" data-name-es="Antígeno Prostático Especifico Total (PSA Total)" data-name-en="Antígeno Prostático Especifico Total (PSA Total)">
+            <span class="coti-item-name"><b><span class="lang lang-es">Antígeno Prostático Especifico Total (PSA Total)</span><span class="lang lang-en">Antígeno Prostático Especifico Total (PSA Total)</span></b></span>
+            <span class="coti-item-price"><span class="price-currency">L</span>585</span>
+            <span class="coti-qty"><button type="button" data-step="-1">−</button><input type="number" min="0" value="0" readonly><button type="button" data-step="1">+</button></span>
+          </label>
+          <label class="coti-item" data-price="720" data-name-es="Antígeno Prostático Libre (PSA Libre)" data-name-en="Antígeno Prostático Libre (PSA Libre)">
+            <span class="coti-item-name"><b><span class="lang lang-es">Antígeno Prostático Libre (PSA Libre)</span><span class="lang lang-en">Antígeno Prostático Libre (PSA Libre)</span></b></span>
+            <span class="coti-item-price"><span class="price-currency">L</span>720</span>
+            <span class="coti-qty"><button type="button" data-step="-1">−</button><input type="number" min="0" value="0" readonly><button type="button" data-step="1">+</button></span>
+          </label>
+          <label class="coti-item" data-price="780" data-name-es="Marcador Tumoral Ca 19-9" data-name-en="Marcador Tumoral Ca 19-9">
+            <span class="coti-item-name"><b><span class="lang lang-es">Marcador Tumoral Ca 19-9</span><span class="lang lang-en">Marcador Tumoral Ca 19-9</span></b></span>
+            <span class="coti-item-price"><span class="price-currency">L</span>780</span>
+            <span class="coti-qty"><button type="button" data-step="-1">−</button><input type="number" min="0" value="0" readonly><button type="button" data-step="1">+</button></span>
+          </label>
+          <label class="coti-item" data-price="780" data-name-es="Marcador Tumoral Ca-125" data-name-en="Marcador Tumoral Ca-125">
+            <span class="coti-item-name"><b><span class="lang lang-es">Marcador Tumoral Ca-125</span><span class="lang lang-en">Marcador Tumoral Ca-125</span></b></span>
+            <span class="coti-item-price"><span class="price-currency">L</span>780</span>
+            <span class="coti-qty"><button type="button" data-step="-1">−</button><input type="number" min="0" value="0" readonly><button type="button" data-step="1">+</button></span>
+          </label>
+          <label class="coti-item" data-price="780" data-name-es="Marcador Tumoral Ca-15-3" data-name-en="Marcador Tumoral Ca-15-3">
+            <span class="coti-item-name"><b><span class="lang lang-es">Marcador Tumoral Ca-15-3</span><span class="lang lang-en">Marcador Tumoral Ca-15-3</span></b></span>
+            <span class="coti-item-price"><span class="price-currency">L</span>780</span>
+            <span class="coti-qty"><button type="button" data-step="-1">−</button><input type="number" min="0" value="0" readonly><button type="button" data-step="1">+</button></span>
+          </label>
+          <label class="coti-item" data-price="800" data-name-es="Marcador Tumoral Carcinoembrionario (Cea)" data-name-en="Marcador Tumoral Carcinoembrionario (Cea)">
+            <span class="coti-item-name"><b><span class="lang lang-es">Marcador Tumoral Carcinoembrionario (Cea)</span><span class="lang lang-en">Marcador Tumoral Carcinoembrionario (Cea)</span></b></span>
+            <span class="coti-item-price"><span class="price-currency">L</span>800</span>
+            <span class="coti-qty"><button type="button" data-step="-1">−</button><input type="number" min="0" value="0" readonly><button type="button" data-step="1">+</button></span>
+          </label>
+          </div>
+        </div>
+        <div class="coti-subcat" data-sub="micro">
+          <div class="coti-subcat-h">
+            <span class="coti-subcat-title"><span class="lang lang-es">Orina, heces y microbiología</span><span class="lang lang-en">Urine, stool & microbiology</span></span>
+            <span class="coti-subcat-count">12</span>
+            <svg class="coti-subcat-chev" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="coti-subcat-items">
+          <label class="coti-item" data-price="400" data-name-es="Cocaina en orina COC" data-name-en="Cocaina en orina COC">
+            <span class="coti-item-name"><b><span class="lang lang-es">Cocaina en orina COC</span><span class="lang lang-en">Cocaina en orina COC</span></b></span>
+            <span class="coti-item-price"><span class="price-currency">L</span>400</span>
+            <span class="coti-qty"><button type="button" data-step="-1">−</button><input type="number" min="0" value="0" readonly><button type="button" data-step="1">+</button></span>
+          </label>
+          <label class="coti-item" data-price="160" data-name-es="Coloración De Ziehl-Neelsen" data-name-en="Coloración De Ziehl-Neelsen">
+            <span class="coti-item-name"><b><span class="lang lang-es">Coloración De Ziehl-Neelsen</span><span class="lang lang-en">Coloración De Ziehl-Neelsen</span></b></span>
+            <span class="coti-item-price"><span class="price-currency">L</span>160</span>
+            <span class="coti-qty"><button type="button" data-step="-1">−</button><input type="number" min="0" value="0" readonly><button type="button" data-step="1">+</button></span>
+          </label>
+          <label class="coti-item" data-price="120" data-name-es="Coloración Wright" data-name-en="Coloración Wright">
+            <span class="coti-item-name"><b><span class="lang lang-es">Coloración Wright</span><span class="lang lang-en">Coloración Wright</span></b></span>
+            <span class="coti-item-price"><span class="price-currency">L</span>120</span>
+            <span class="coti-qty"><button type="button" data-step="-1">−</button><input type="number" min="0" value="0" readonly><button type="button" data-step="1">+</button></span>
+          </label>
+          <label class="coti-item" data-price="680" data-name-es="Coprocultivo" data-name-en="Coprocultivo">
+            <span class="coti-item-name"><b><span class="lang lang-es">Coprocultivo</span><span class="lang lang-en">Coprocultivo</span></b></span>
+            <span class="coti-item-price"><span class="price-currency">L</span>680</span>
+            <span class="coti-qty"><button type="button" data-step="-1">−</button><input type="number" min="0" value="0" readonly><button type="button" data-step="1">+</button></span>
+          </label>
+          <label class="coti-item" data-price="550" data-name-es="Cultivo Por Bacterias" data-name-en="Cultivo Por Bacterias">
+            <span class="coti-item-name"><b><span class="lang lang-es">Cultivo Por Bacterias</span><span class="lang lang-en">Cultivo Por Bacterias</span></b></span>
+            <span class="coti-item-price"><span class="price-currency">L</span>550</span>
+            <span class="coti-qty"><button type="button" data-step="-1">−</button><input type="number" min="0" value="0" readonly><button type="button" data-step="1">+</button></span>
+          </label>
+          <label class="coti-item" data-price="680" data-name-es="Hemocultivo" data-name-en="Hemocultivo">
+            <span class="coti-item-name"><b><span class="lang lang-es">Hemocultivo</span><span class="lang lang-en">Hemocultivo</span></b></span>
+            <span class="coti-item-price"><span class="price-currency">L</span>680</span>
+            <span class="coti-qty"><button type="button" data-step="-1">−</button><input type="number" min="0" value="0" readonly><button type="button" data-step="1">+</button></span>
+          </label>
+          <label class="coti-item" data-price="550" data-name-es="Marihuana: tetrahidrocannabinol (THC)" data-name-en="Marihuana: tetrahidrocannabinol (THC)">
+            <span class="coti-item-name"><b><span class="lang lang-es">Marihuana: tetrahidrocannabinol (THC)</span><span class="lang lang-en">Marihuana: tetrahidrocannabinol (THC)</span></b></span>
+            <span class="coti-item-price"><span class="price-currency">L</span>550</span>
+            <span class="coti-qty"><button type="button" data-step="-1">−</button><input type="number" min="0" value="0" readonly><button type="button" data-step="1">+</button></span>
+          </label>
+          <label class="coti-item" data-price="260" data-name-es="Microalbumina" data-name-en="Microalbumina">
+            <span class="coti-item-name"><b><span class="lang lang-es">Microalbumina</span><span class="lang lang-en">Microalbumina</span></b></span>
+            <span class="coti-item-price"><span class="price-currency">L</span>260</span>
+            <span class="coti-qty"><button type="button" data-step="-1">−</button><input type="number" min="0" value="0" readonly><button type="button" data-step="1">+</button></span>
+          </label>
+          <label class="coti-item" data-price="180" data-name-es="Perfil Fehling & Ph En Heces" data-name-en="Perfil Fehling & Ph En Heces">
+            <span class="coti-item-name"><b><span class="lang lang-es">Perfil Fehling & Ph En Heces</span><span class="lang lang-en">Perfil Fehling & Ph En Heces</span></b></span>
+            <span class="coti-item-price"><span class="price-currency">L</span>180</span>
+            <span class="coti-qty"><button type="button" data-step="-1">−</button><input type="number" min="0" value="0" readonly><button type="button" data-step="1">+</button></span>
+          </label>
+          <label class="coti-item" data-price="300" data-name-es="Proteínas Totales en Orina 24 horas" data-name-en="Proteínas Totales en Orina 24 horas">
+            <span class="coti-item-name"><b><span class="lang lang-es">Proteínas Totales en Orina 24 horas</span><span class="lang lang-en">Proteínas Totales en Orina 24 horas</span></b></span>
+            <span class="coti-item-price"><span class="price-currency">L</span>300</span>
+            <span class="coti-qty"><button type="button" data-step="-1">−</button><input type="number" min="0" value="0" readonly><button type="button" data-step="1">+</button></span>
+          </label>
+          <label class="coti-item" data-price="550" data-name-es="Cociente/Relación Albúmina-Creatinina en Orina" data-name-en="Cociente/Relación Albúmina-Creatinina en Orina">
+            <span class="coti-item-name"><b><span class="lang lang-es">Cociente/Relación Albúmina-Creatinina en Orina</span><span class="lang lang-en">Cociente/Relación Albúmina-Creatinina en Orina</span></b></span>
+            <span class="coti-item-price"><span class="price-currency">L</span>550</span>
+            <span class="coti-qty"><button type="button" data-step="-1">−</button><input type="number" min="0" value="0" readonly><button type="button" data-step="1">+</button></span>
+          </label>
+          <label class="coti-item" data-price="580" data-name-es="Urocultivo" data-name-en="Urocultivo">
+            <span class="coti-item-name"><b><span class="lang lang-es">Urocultivo</span><span class="lang lang-en">Urocultivo</span></b></span>
+            <span class="coti-item-price"><span class="price-currency">L</span>580</span>
+            <span class="coti-qty"><button type="button" data-step="-1">−</button><input type="number" min="0" value="0" readonly><button type="button" data-step="1">+</button></span>
+          </label>
+          </div>
+        </div>
+        <div class="coti-subcat" data-sub="biopsia">
+          <div class="coti-subcat-h">
+            <span class="coti-subcat-title"><span class="lang lang-es">Biopsia</span><span class="lang lang-en">Biopsy</span></span>
+            <span class="coti-subcat-count">1</span>
+            <svg class="coti-subcat-chev" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="coti-subcat-items">
+          <label class="coti-item" data-price="1500" data-name-es="Biopsia" data-name-en="Biopsy">
+            <span class="coti-item-name"><b><span class="lang lang-es">Biopsia</span><span class="lang lang-en">Biopsy</span></b></span>
+            <span class="coti-item-price"><span class="price-currency">L</span>1500</span>
+            <span class="coti-qty"><button type="button" data-step="-1">−</button><input type="number" min="0" value="0" readonly><button type="button" data-step="1">+</button></span>
+          </label>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Categoría 4 · Oído y ocular -->
+    <div class="coti-cat" data-cat="oido">
+      <div class="coti-cat-h">
+        <div class="coti-cat-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8.5a6.5 6.5 0 1 1 13 0c0 6-6 6-6 10a3.5 3.5 0 1 1-7 0"/><path d="M15 8.5a2.5 2.5 0 0 0-5 0v1a2 2 0 1 1 0 4"/></svg>
+        </div>
+        <div class="coti-cat-title">
+          <span class="lang lang-es">Oído y ocular</span>
+          <span class="lang lang-en">Ear & eye</span>
+        </div>
+        <div class="coti-cat-meta">2</div>
+        <svg class="coti-cat-chev" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+      </div>
+      <div class="coti-cat-items">
+<label class="coti-item" data-price="400" data-name-es="Lavado de oído" data-name-en="Ear cleaning">
+          <span class="coti-item-name"><b><span class="lang lang-es">Lavado de oído</span><span class="lang lang-en">Ear cleaning</span></b><small><span class="lang lang-es">Por oído · selecciona 2 para ambos</span><span class="lang lang-en">Per ear · select 2 for both ears</span></small></span>
+          <span class="coti-item-price"><span class="price-currency">L</span>400</span>
+          <span class="coti-qty"><button type="button" data-step="-1">−</button><input type="number" min="0" value="0" readonly><button type="button" data-step="1">+</button></span>
+        </label>
+        <label class="coti-item" data-price="400" data-name-es="Lavado ocular" data-name-en="Eye wash">
+          <span class="coti-item-name"><b><span class="lang lang-es">Lavado ocular</span><span class="lang lang-en">Eye wash</span></b></span>
+          <span class="coti-item-price"><span class="price-currency">L</span>400</span>
+          <span class="coti-qty"><button type="button" data-step="-1">−</button><input type="number" min="0" value="0" readonly><button type="button" data-step="1">+</button></span>
+        </label>
+      </div>
+    </div>
+
+    <!-- Categoría 5 · Dermatología -->
+    <div class="coti-cat" data-cat="derma">
+      <div class="coti-cat-h">
+        <div class="coti-cat-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="9" cy="10" r="1.5" fill="currentColor"/><circle cx="15" cy="14" r="1.5" fill="currentColor"/><circle cx="13" cy="8" r="1" fill="currentColor"/></svg>
+        </div>
+        <div class="coti-cat-title">
+          <span class="lang lang-es">Cuidado de la piel</span>
+          <span class="lang lang-en">Skin care</span>
+        </div>
+        <div class="coti-cat-meta">3</div>
+        <svg class="coti-cat-chev" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+      </div>
+      <div class="coti-cat-items">
+        <label class="coti-item" data-aesthetic="1" data-price="200" data-name-es="Cauterización lunar/verruga" data-name-en="Mole/wart cauterization">
+          <span class="coti-item-name"><b><span class="lang lang-es">Cauterización lunar / verruga</span><span class="lang lang-en">Mole / wart cauterization</span></b></span>
+          <span class="coti-item-price"><span class="price-currency">L</span>200</span>
+          <span class="coti-qty"><button type="button" data-step="-1">−</button><input type="number" min="0" value="0" readonly><button type="button" data-step="1">+</button></span>
+        </label>
+        <label class="coti-item" data-aesthetic="1" data-price="750" data-name-es="Cauterización de lesión grande" data-name-en="Large lesion cauterization">
+          <span class="coti-item-name"><b><span class="lang lang-es">Cauterización de lesión grande</span><span class="lang lang-en">Large lesion cauterization</span></b></span>
+          <span class="coti-item-price"><span class="price-currency">L</span>750</span>
+          <span class="coti-qty"><button type="button" data-step="-1">−</button><input type="number" min="0" value="0" readonly><button type="button" data-step="1">+</button></span>
+        </label>
+        <label class="coti-item" data-aesthetic="1" data-price="300" data-name-es="Cauterización en párpado" data-name-en="Eyelid cauterization">
+          <span class="coti-item-name"><b><span class="lang lang-es">Cauterización en párpado</span><span class="lang lang-en">Eyelid cauterization</span></b></span>
+          <span class="coti-item-price"><span class="price-currency">L</span>300</span>
+          <span class="coti-qty"><button type="button" data-step="-1">−</button><input type="number" min="0" value="0" readonly><button type="button" data-step="1">+</button></span>
+        </label>
+      </div>
+    </div>
+
+    <!-- Categoría 6 · Cirugía menor y curaciones -->
+    <div class="coti-cat" data-cat="cirugia">
+      <div class="coti-cat-h">
+        <div class="coti-cat-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m14.5 12.5-8 8a2.119 2.119 0 1 1-3-3l8-8"/><path d="m16 16 6-6"/><path d="m8 8 1.5-1.5"/><path d="M14.5 4.5 12 7l3 3 2.5-2.5z"/></svg>
+        </div>
+        <div class="coti-cat-title">
+          <span class="lang lang-es">Cirugía menor y curaciones</span>
+          <span class="lang lang-en">Minor surgery & wound care</span>
+        </div>
+        <div class="coti-cat-meta">8</div>
+        <svg class="coti-cat-chev" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+      </div>
+      <div class="coti-cat-items">
+        <label class="coti-item" data-price="500" data-name-es="Cirugía menor · pequeña" data-name-en="Minor surgery · small">
+          <span class="coti-item-name"><b><span class="lang lang-es">Cirugía menor · pequeña</span><span class="lang lang-en">Minor surgery · small</span></b></span>
+          <span class="coti-item-price"><span class="price-currency">L</span>500</span>
+          <span class="coti-qty"><button type="button" data-step="-1">−</button><input type="number" min="0" value="0" readonly><button type="button" data-step="1">+</button></span>
+        </label>
+        <label class="coti-item" data-price="750" data-name-es="Cirugía menor · media" data-name-en="Minor surgery · medium">
+          <span class="coti-item-name"><b><span class="lang lang-es">Cirugía menor · media</span><span class="lang lang-en">Minor surgery · medium</span></b></span>
+          <span class="coti-item-price"><span class="price-currency">L</span>750</span>
+          <span class="coti-qty"><button type="button" data-step="-1">−</button><input type="number" min="0" value="0" readonly><button type="button" data-step="1">+</button></span>
+        </label>
+        <label class="coti-item" data-price="1100" data-name-es="Cirugía menor · grande" data-name-en="Minor surgery · large">
+          <span class="coti-item-name"><b><span class="lang lang-es">Cirugía menor · grande</span><span class="lang lang-en">Minor surgery · large</span></b></span>
+          <span class="coti-item-price"><span class="price-currency">L</span>1,100</span>
+          <span class="coti-qty"><button type="button" data-step="-1">−</button><input type="number" min="0" value="0" readonly><button type="button" data-step="1">+</button></span>
+        </label>
+        <label class="coti-item" data-price="350" data-name-es="Curación pequeña" data-name-en="Wound care · small">
+          <span class="coti-item-name"><b><span class="lang lang-es">Curación pequeña</span><span class="lang lang-en">Wound care · small</span></b></span>
+          <span class="coti-item-price"><span class="price-currency">L</span>350</span>
+          <span class="coti-qty"><button type="button" data-step="-1">−</button><input type="number" min="0" value="0" readonly><button type="button" data-step="1">+</button></span>
+        </label>
+        <label class="coti-item" data-price="500" data-name-es="Curación mediana" data-name-en="Wound care · medium">
+          <span class="coti-item-name"><b><span class="lang lang-es">Curación mediana</span><span class="lang lang-en">Wound care · medium</span></b></span>
+          <span class="coti-item-price"><span class="price-currency">L</span>500</span>
+          <span class="coti-qty"><button type="button" data-step="-1">−</button><input type="number" min="0" value="0" readonly><button type="button" data-step="1">+</button></span>
+        </label>
+        <label class="coti-item" data-price="600" data-name-es="Curación grande" data-name-en="Wound care · large">
+          <span class="coti-item-name"><b><span class="lang lang-es">Curación grande</span><span class="lang lang-en">Wound care · large</span></b></span>
+          <span class="coti-item-price"><span class="price-currency">L</span>600</span>
+          <span class="coti-qty"><button type="button" data-step="-1">−</button><input type="number" min="0" value="0" readonly><button type="button" data-step="1">+</button></span>
+        </label>
+        <label class="coti-item" data-price="50" data-name-es="Retiro de puntos (cada uno)" data-name-en="Stitches removal (each)">
+          <span class="coti-item-name"><b><span class="lang lang-es">Retiro de puntos <small>(cada uno)</small></span><span class="lang lang-en">Stitches removal <small>(each)</small></span></b></span>
+          <span class="coti-item-price"><span class="price-currency">L</span>50</span>
+          <span class="coti-qty"><button type="button" data-step="-1">−</button><input type="number" min="0" value="0" readonly><button type="button" data-step="1">+</button></span>
+        </label>
+        <label class="coti-item" data-price="400" data-name-es="Extracción de uña" data-name-en="Nail extraction">
+          <span class="coti-item-name"><b><span class="lang lang-es">Extracción de uña</span><span class="lang lang-en">Nail extraction</span></b></span>
+          <span class="coti-item-price"><span class="price-currency">L</span>400</span>
+          <span class="coti-qty"><button type="button" data-step="-1">−</button><input type="number" min="0" value="0" readonly><button type="button" data-step="1">+</button></span>
+        </label>
+      </div>
+    </div>
+
+    <!-- Categoría 7 · Ginecología -->
+    <div class="coti-cat" data-cat="gineco">
+      <div class="coti-cat-h">
+        <div class="coti-cat-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="9" r="6"/><path d="M12 15v7"/><path d="M9 19h6"/></svg>
+        </div>
+        <div class="coti-cat-title">
+          <span class="lang lang-es">Cuidado de la mujer</span>
+          <span class="lang lang-en">Women's care</span>
+        </div>
+        <div class="coti-cat-meta">6</div>
+        <svg class="coti-cat-chev" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+      </div>
+      <div class="coti-cat-items">
+        <label class="coti-item" data-price="1000" data-name-es="Colocación de DIU" data-name-en="IUD insertion">
+          <span class="coti-item-name"><b><span class="lang lang-es">Colocación de DIU</span><span class="lang lang-en">IUD insertion</span></b></span>
+          <span class="coti-item-price"><span class="price-currency">L</span>1,000</span>
+          <span class="coti-qty"><button type="button" data-step="-1">−</button><input type="number" min="0" value="0" readonly><button type="button" data-step="1">+</button></span>
+        </label>
+        <label class="coti-item" data-price="700" data-name-es="Retiro de DIU" data-name-en="IUD removal">
+          <span class="coti-item-name"><b><span class="lang lang-es">Retiro de DIU</span><span class="lang lang-en">IUD removal</span></b></span>
+          <span class="coti-item-price"><span class="price-currency">L</span>700</span>
+          <span class="coti-qty"><button type="button" data-step="-1">−</button><input type="number" min="0" value="0" readonly><button type="button" data-step="1">+</button></span>
+        </label>
+        <label class="coti-item" data-price="500" data-name-es="Colocación de implanon" data-name-en="Implanon insertion">
+          <span class="coti-item-name"><b><span class="lang lang-es">Colocación de implanon</span><span class="lang lang-en">Implanon insertion</span></b></span>
+          <span class="coti-item-price"><span class="price-currency">L</span>500</span>
+          <span class="coti-qty"><button type="button" data-step="-1">−</button><input type="number" min="0" value="0" readonly><button type="button" data-step="1">+</button></span>
+        </label>
+        <label class="coti-item" data-price="500" data-name-es="Extracción de implanon" data-name-en="Implanon removal">
+          <span class="coti-item-name"><b><span class="lang lang-es">Extracción de implanon</span><span class="lang lang-en">Implanon removal</span></b></span>
+          <span class="coti-item-price"><span class="price-currency">L</span>500</span>
+          <span class="coti-qty"><button type="button" data-step="-1">−</button><input type="number" min="0" value="0" readonly><button type="button" data-step="1">+</button></span>
+        </label>
+        <label class="coti-item" data-price="300" data-name-es="Citología Convencional" data-name-en="Conventional Cytology">
+          <span class="coti-item-name"><b><span class="lang lang-es">Citología Convencional</span><span class="lang lang-en">Conventional Cytology</span></b></span>
+          <span class="coti-item-price"><span class="price-currency">L</span>300</span>
+          <span class="coti-qty"><button type="button" data-step="-1">−</button><input type="number" min="0" value="0" readonly><button type="button" data-step="1">+</button></span>
+        </label>
+        <label class="coti-item" data-price="500" data-name-es="Citología Base Líquida" data-name-en="Liquid-Based Cytology">
+          <span class="coti-item-name"><b><span class="lang lang-es">Citología Base Líquida</span><span class="lang lang-en">Liquid-Based Cytology</span></b></span>
+          <span class="coti-item-price"><span class="price-currency">L</span>500</span>
+          <span class="coti-qty"><button type="button" data-step="-1">−</button><input type="number" min="0" value="0" readonly><button type="button" data-step="1">+</button></span>
+        </label>
+      </div>
+    </div>
+
+    <!-- Categoría 8 · Sonda vesical -->
+    <div class="coti-cat" data-cat="sonda">
+      <div class="coti-cat-h">
+        <div class="coti-cat-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v10"/><path d="M8 12h8"/><circle cx="12" cy="17" r="5"/></svg>
+        </div>
+        <div class="coti-cat-title">
+          <span class="lang lang-es">Cuidado de las vías urinarias</span>
+          <span class="lang lang-en">Urinary tract care</span>
+        </div>
+        <div class="coti-cat-meta">3</div>
+        <svg class="coti-cat-chev" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+      </div>
+      <div class="coti-cat-items">
+        <label class="coti-item" data-price="500" data-name-es="Colocación de sonda vesical" data-name-en="Catheter insertion">
+          <span class="coti-item-name"><b><span class="lang lang-es">Colocación de sonda vesical</span><span class="lang lang-en">Catheter insertion</span></b></span>
+          <span class="coti-item-price"><span class="price-currency">L</span>500</span>
+          <span class="coti-qty"><button type="button" data-step="-1">−</button><input type="number" min="0" value="0" readonly><button type="button" data-step="1">+</button></span>
+        </label>
+        <label class="coti-item" data-price="1500" data-name-es="Colocación de sonda + insumos" data-name-en="Catheter + supplies">
+          <span class="coti-item-name"><b><span class="lang lang-es">Colocación de sonda + insumos</span><span class="lang lang-en">Catheter insertion + supplies</span></b></span>
+          <span class="coti-item-price"><span class="price-currency">L</span>1,500</span>
+          <span class="coti-qty"><button type="button" data-step="-1">−</button><input type="number" min="0" value="0" readonly><button type="button" data-step="1">+</button></span>
+        </label>
+        <label class="coti-item" data-price="500" data-name-es="Retiro de sonda vesical" data-name-en="Catheter removal">
+          <span class="coti-item-name"><b><span class="lang lang-es">Retiro de sonda vesical</span><span class="lang lang-en">Catheter removal</span></b></span>
+          <span class="coti-item-price"><span class="price-currency">L</span>500</span>
+          <span class="coti-qty"><button type="button" data-step="-1">−</button><input type="number" min="0" value="0" readonly><button type="button" data-step="1">+</button></span>
+        </label>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── Sticky cart ─── -->
+  <aside class="coti-cart" id="coti-cart">
+    <div class="coti-cart-eyebrow">
+      <span class="lang lang-es">Tu cotización</span>
+      <span class="lang lang-en">Your quote</span>
+    </div>
+    <h2 class="coti-cart-title">
+      <span class="lang lang-es">Resumen</span>
+      <span class="lang lang-en">Summary</span>
+    </h2>
+
+    <div id="coti-cart-list">
+      <div class="coti-cart-empty">
+        <span class="lang lang-es">Aún no has agregado servicios. Selecciona uno para empezar.</span>
+        <span class="lang lang-en">No services yet. Pick one to start.</span>
+      </div>
+    </div>
+
+    <div class="coti-discounts">
+      <div class="coti-discounts-label">
+        <span class="lang lang-es">¿Tienes descuento?</span>
+        <span class="lang lang-en">Eligible for a discount?</span>
+      </div>
+      <!-- Opción "Soy Doctor 365" quitada: ese programa de membresía es
+           exclusivo de CMG y está fuera de alcance de este producto
+           (ver plan, punto 7). El cotizador ahora solo ofrece los
+           descuentos de tercera/cuarta edad, calculados desde el catálogo. -->
+      <label class="coti-disc-opt" data-disc="tercera">
+        <input type="radio" name="coti-disc" value="tercera">
+        <div class="coti-disc-body">
+          <b><span class="lang lang-es">Tercera edad</span><span class="lang lang-en">Senior (3rd age)</span></b>
+          <span class="lang lang-es">25% en todos los servicios</span>
+          <span class="lang lang-en">25% off all services</span>
+        </div>
+        <div class="coti-disc-pct">25%</div>
+      </label>
+      <label class="coti-disc-opt" data-disc="cuarta">
+        <input type="radio" name="coti-disc" value="cuarta">
+        <div class="coti-disc-body">
+          <b><span class="lang lang-es">Cuarta edad</span><span class="lang lang-en">Senior (4th age)</span></b>
+          <span class="lang lang-es">30% en todos los servicios</span>
+          <span class="lang lang-en">30% off all services</span>
+        </div>
+        <div class="coti-disc-pct">30%</div>
+      </label>
+      <label class="coti-disc-opt" data-disc="none">
+        <input type="radio" name="coti-disc" value="none" checked>
+        <div class="coti-disc-body">
+          <b><span class="lang lang-es">Ninguno</span><span class="lang lang-en">None</span></b>
+        </div>
+      </label>
+      <!-- Aviso de "Doctor 365 + tercera/cuarta edad" quitado junto con la
+           opción Doctor 365 (ver plan, punto 7): ya no aplica sin ese programa. -->
+    </div>
+
+    <div class="coti-cart-total">
+      <div class="coti-cart-line">
+        <span><span class="lang lang-es">Subtotal</span><span class="lang lang-en">Subtotal</span></span>
+        <b id="coti-subtotal">L0</b>
+      </div>
+      <div class="coti-cart-line discount" id="coti-discount-row" style="display:none">
+        <span id="coti-discount-label"><span class="lang lang-es">Descuento</span><span class="lang lang-en">Discount</span></span>
+        <b id="coti-discount">−L0</b>
+      </div>
+      <div class="coti-cart-grand">
+        <span class="coti-cart-grand-l"><span class="lang lang-es">Total</span><span class="lang lang-en">Total</span></span>
+        <span class="coti-cart-grand-amt" id="coti-grand"><span class="price-currency">L</span>0</span>
+      </div>
+    </div>
+
+    <button onclick="exportToSistema('whatsapp')" class="cta-pill cta-pill--yellow cta-pill--lg coti-cart-cta"
+      style="border:none;cursor:pointer;width:100%;display:flex;align-items:center;justify-content:center;gap:8px;">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M.057 24l1.687-6.163a11.867 11.867 0 0 1-1.587-5.946C.16 5.335 5.495 0 12.05 0a11.817 11.817 0 0 1 8.413 3.488 11.824 11.824 0 0 1 3.48 8.414c-.003 6.557-5.338 11.892-11.893 11.892a11.9 11.9 0 0 1-5.688-1.448L.057 24z"/></svg>
+      <span class="lang lang-es">ENVIAR POR WHATSAPP</span>
+      <span class="lang lang-en">SEND VIA WHATSAPP</span>
+    </button>
+    <button onclick="exportToSistema('pdf')" class="cta-pill cta-pill--lg coti-cart-cta"
+      style="background:#213C7D;color:#fff;border:none;cursor:pointer;width:100%;margin-top:8px;display:flex;align-items:center;justify-content:center;gap:8px;">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+      <span class="lang lang-es">GENERAR PDF</span>
+      <span class="lang lang-en">GENERATE PDF</span>
+    </button>
+    <p class="coti-cart-fine">
+      <span class="lang lang-es">Cotización referencial. Confirma el total en clínica antes del pago.</span>
+      <span class="lang lang-en">Reference quote. Confirm final total at the clinic before paying.</span>
+    </p>
+  </aside>
+
+</div>
+</main>
+
+<!-- Footer: logo CMG y datos de contacto/redes propios de CMG reemplazados
+     por los campos de CLINIC.* (poblados vía JS más abajo). Enlace a
+     Doctor-365.html y redes sociales de CMG quitados: fuera de alcance. -->
+<footer class="site-footer">
+  <div class="container footer-grid">
+    <div class="footer-brand">
+      <div class="footer-lockup" id="coti-footer-name" style="color:#fff;font-weight:900;font-size:18px">—</div>
+      <p class="footer-script">
+        <span class="lang lang-es">Cuidamos de tu salud</span>
+        <span class="lang lang-en">We care for your health</span>
+      </p>
+      <p class="footer-strap">
+        <span class="lang lang-es">Atención médica accesible y profesional · sin citas · todos los días del año.</span>
+        <span class="lang lang-en">Accessible, professional medical care · walk-in · every day of the year.</span>
+      </p>
+    </div>
+    <div class="footer-col">
+      <h5><span class="lang lang-es">Sitio</span><span class="lang lang-en">Site</span></h5>
+      <a href="Cotizador.html"><span class="lang lang-es">Cotizador</span><span class="lang lang-en">Quote builder</span></a>
+      <a href="Mis-Cotizaciones.html"><span class="lang lang-es">Mis cotizaciones</span><span class="lang lang-en">My quotes</span></a>
+    </div>
+    <div class="footer-col">
+      <h5><span class="lang lang-es">Servicios</span><span class="lang lang-en">Services</span></h5>
+      <a href="Cotizador.html">Sueroterapias</a>
+      <a href="Cotizador.html"><span class="lang lang-es">Laboratorio</span><span class="lang lang-en">Lab</span></a>
+      <a href="Cotizador.html"><span class="lang lang-es">Consulta</span><span class="lang lang-en">Consults</span></a>
+    </div>
+    <div class="footer-col footer-contact">
+      <h5><span class="lang lang-es">Contacto</span><span class="lang lang-en">Contact</span></h5>
+      <p id="coti-footer-direccion">—</p>
+      <p id="coti-footer-telefono">—</p>
+    </div>
+  </div>
+  <div class="footer-base">
+    <div class="container footer-base-row">
+      <span id="coti-footer-copy-es" class="lang lang-es">—</span>
+      <span id="coti-footer-copy-en" class="lang lang-en">—</span>
+      <span class="footer-promise">Rápido · Profesional · Accesible</span>
+    </div>
+  </div>
+</footer>
+
+<a class="float-wa" href="#" id="coti-float-wa" aria-label="WhatsApp">
+  <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><path d="M.057 24l1.687-6.163a11.867 11.867 0 0 1-1.587-5.946C.16 5.335 5.495 0 12.05 0a11.817 11.817 0 0 1 8.413 3.488 11.824 11.824 0 0 1 3.48 8.414c-.003 6.557-5.338 11.892-11.893 11.892a11.9 11.9 0 0 1-5.688-1.448L.057 24z"/></svg>
+</a>
+
+<!-- Firebase (overrides de precios/descuentos desde Admin-Precios) -->
+<script src="clinic-config.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="firebase-init.js"></script>
+
+<script>
+(function () {
+  var CLINIC_ID = window.R3ADS_CLINIC_ID;
+  var CLINIC = window.R3ADS_CLINIC_FALLBACK || {};
+
+  // ── Branding de la clínica (header/footer/promo strip) ──────────
+  var brandEl = document.getElementById('coti-brand-name');
+  if (brandEl) brandEl.textContent = CLINIC.nombre || '—';
+  var footerNameEl = document.getElementById('coti-footer-name');
+  if (footerNameEl) footerNameEl.textContent = CLINIC.nombre || '—';
+  var footerDirEl = document.getElementById('coti-footer-direccion');
+  if (footerDirEl) footerDirEl.textContent = CLINIC.direccion || '';
+  var footerTelEl = document.getElementById('coti-footer-telefono');
+  if (footerTelEl) footerTelEl.textContent = [CLINIC.telefono, CLINIC.sitioWeb].filter(Boolean).join(' · ');
+  var footerCopyEs = document.getElementById('coti-footer-copy-es');
+  var footerCopyEn = document.getElementById('coti-footer-copy-en');
+  var copyTxt = '© ' + new Date().getFullYear() + ' ' + (CLINIC.razonSocial || CLINIC.nombre || '') + (CLINIC.ciudad ? ' · ' + CLINIC.ciudad : '');
+  if (footerCopyEs) footerCopyEs.textContent = copyTxt;
+  if (footerCopyEn) footerCopyEn.textContent = copyTxt;
+  var floatWa = document.getElementById('coti-float-wa');
+  if (floatWa) floatWa.href = 'https://wa.me/' + (CLINIC.whatsapp || '');
+  var promoWaLink = document.getElementById('promo-wa-link');
+  if (promoWaLink) promoWaLink.href = 'https://wa.me/' + (CLINIC.whatsapp || '');
+  var promoPhoneText = document.getElementById('promo-phone-text');
+  if (promoPhoneText) promoPhoneText.textContent = CLINIC.telefono || '';
+  var promoAddrEs = document.getElementById('promo-address-es');
+  var promoAddrEn = document.getElementById('promo-address-en');
+  var promoAddr = CLINIC.direccion ? ('· ' + CLINIC.direccion) : '';
+  if (promoAddrEs) promoAddrEs.textContent = promoAddr;
+  if (promoAddrEn) promoAddrEn.textContent = promoAddr;
+  var heroAddr = CLINIC.direccion ? (', en ' + CLINIC.direccion) : '';
+  var heroAddrEn = CLINIC.direccion ? (', at ' + CLINIC.direccion) : '';
+  var heroAddrEsEl = document.getElementById('coti-hero-addr-es');
+  var heroAddrEnEl = document.getElementById('coti-hero-addr-en');
+  if (heroAddrEsEl) heroAddrEsEl.textContent = heroAddr;
+  if (heroAddrEnEl) heroAddrEnEl.textContent = heroAddrEn;
+
+  // ── Promo strip: dynamic hours by current day ──────────────────
+  const DAYS_ES = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+  const DAYS_EN = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  const d = new Date().getDay();
+  const hoursStr = d === 0 ? '8:00 AM – 7:00 PM' : '6:00 AM – 10:00 PM';
+  const hEs = document.getElementById('promo-hours-es');
+  const hEn = document.getElementById('promo-hours-en');
+  const dEs = document.getElementById('promo-day-es');
+  const dEn = document.getElementById('promo-day-en');
+  if (hEs) hEs.textContent = hoursStr;
+  if (hEn) hEn.textContent = hoursStr;
+  if (dEs) dEs.textContent = '(' + DAYS_ES[d] + ')';
+  if (dEn) dEn.textContent = '(' + DAYS_EN[d] + ')';
+
+  // Nota: el rotador de mensajes del promo strip se quitó junto con el
+  // mensaje "d365" (ver plan, punto 7) — ahora solo queda el de horario,
+  // así que ya no hace falta rotar nada.
+
+  // ── Language toggle (shared) ────────────────────────────
+  const KEY = 'cmg-lang';
+  const root = document.body;
+  const stored = localStorage.getItem(KEY);
+  if (stored === 'en' || stored === 'es') root.dataset.lang = stored;
+  document.querySelectorAll('[data-set-lang]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const lang = btn.dataset.setLang;
+      root.dataset.lang = lang;
+      localStorage.setItem(KEY, lang);
+      document.querySelectorAll('[data-set-lang]').forEach(b => {
+        b.classList.toggle('is-on', b.dataset.setLang === lang);
+      });
+      render();
+    });
+  });
+  document.querySelectorAll('[data-set-lang]').forEach(b => {
+    b.classList.toggle('is-on', b.dataset.setLang === root.dataset.lang);
+  });
+
+  // ── Header shadow ────────────────────────────────────────
+  const header = document.querySelector('.site-header');
+  window.addEventListener('scroll', () => {
+    header.classList.toggle('is-scrolled', window.scrollY > 8);
+  }, { passive: true });
+
+  // ── Mobile nav toggle ──────────────────────────────────
+  const navBtn = document.querySelector('.nav-toggle');
+  if (navBtn) {
+    navBtn.addEventListener('click', () => document.body.classList.toggle('nav-open'));
+    document.querySelectorAll('.site-nav a').forEach(a => {
+      a.addEventListener('click', () => document.body.classList.remove('nav-open'));
+    });
+  }
+
+  // ── Accordion ──────────────────────────────────────────
+  document.querySelectorAll('.coti-cat-h').forEach(h => {
+    h.addEventListener('click', e => {
+      // Don't toggle if clicking on items inside (shouldn't happen, but safety)
+      if (e.target.closest('.coti-cat-items')) return;
+      h.parentElement.classList.toggle('is-open');
+    });
+  });
+  document.querySelectorAll('.coti-subcat-h').forEach(h => {
+    h.addEventListener('click', e => {
+      e.stopPropagation();
+      if (e.target.closest('.coti-subcat-items')) return;
+      h.parentElement.classList.toggle('is-open');
+    });
+  });
+
+  // ── Search filter ──────────────────────────────────────
+  const q = document.getElementById('coti-q');
+  q.addEventListener('input', () => {
+    const term = q.value.trim().toLowerCase();
+    document.querySelectorAll('.coti-cat').forEach(cat => {
+      let anyVisible = false;
+      cat.querySelectorAll('.coti-item').forEach(it => {
+        const es = (it.dataset.nameEs || '').toLowerCase();
+        const en = (it.dataset.nameEn || '').toLowerCase();
+        const match = !term || es.includes(term) || en.includes(term);
+        it.classList.toggle('is-hidden', !match);
+        if (match) anyVisible = true;
+      });
+      if (term && anyVisible) cat.classList.add('is-open');
+      cat.querySelectorAll('.coti-subcat').forEach(sc => {
+        const hasMatch = sc.querySelector('.coti-item:not(.is-hidden)');
+        if (term && hasMatch) sc.classList.add('is-open');
+      });
+    });
+  });
+
+  // ── Quantity steppers ──────────────────────────────────
+  document.querySelectorAll('.coti-qty').forEach(qty => {
+    const input = qty.querySelector('input');
+    qty.querySelectorAll('button').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        const step = parseInt(btn.dataset.step, 10);
+        const next = Math.max(0, (parseInt(input.value, 10) || 0) + step);
+        input.value = next;
+        qty.classList.toggle('is-active', next > 0);
+        render();
+      });
+    });
+  });
+
+  // ── Discount radios ────────────────────────────────────
+  document.querySelectorAll('input[name="coti-disc"]').forEach(r => {
+    r.addEventListener('change', () => {
+      document.querySelectorAll('.coti-disc-opt').forEach(o => {
+        o.classList.toggle('is-active', o.querySelector('input').checked);
+      });
+      render();
+    });
+  });
+  // Initial active highlight
+  document.querySelectorAll('.coti-disc-opt').forEach(o => {
+    o.classList.toggle('is-active', o.querySelector('input').checked);
+  });
+
+  // ── Render cart ─────────────────────────────────────────
+  function fmt(n) {
+    // Whole number → no decimals; else 2 decimals (for L62.5)
+    return 'L' + (Number.isInteger(n) ? n.toLocaleString('en-US') : n.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}));
+  }
+
+  // Nota: el descuento "Doctor 365" (consulta gratis + % de miembro por
+  // categoría, con exclusión de servicios estéticos) se quitó por completo
+  // (ver plan, punto 7) — ese programa de membresía es exclusivo de CMG y
+  // está fuera de alcance de este producto. El cotizador ahora solo
+  // calcula descuentos de tercera/cuarta edad sobre el subtotal completo
+  // del catálogo (ya no excluye los ítems marcados data-aesthetic="1";
+  // ese atributo se deja en el HTML sin usar, ver punto 9 del plan).
+
+  function currentDiscount() {
+    const checked = document.querySelector('input[name="coti-disc"]:checked');
+    return checked ? checked.value : 'none';
+  }
+
+  function render() {
+    const lang = document.body.dataset.lang;
+    const cartList = document.getElementById('coti-cart-list');
+    const items = [];
+    let subtotal = 0;
+
+    document.querySelectorAll('.coti-item').forEach(it => {
+      const qty = parseInt(it.querySelector('input').value, 10) || 0;
+      if (qty <= 0) return;
+      const price = parseFloat(it.dataset.price);
+      const cat = it.closest('.coti-cat').dataset.cat;
+      const name = lang === 'en' ? it.dataset.nameEn : it.dataset.nameEs;
+      const line = price * qty;
+      subtotal += line;
+      items.push({ name, qty, price, line, cat });
+    });
+
+    document.getElementById('coti-count').textContent = items.reduce((a, i) => a + i.qty, 0);
+
+    const disc = currentDiscount();
+
+    if (items.length === 0) {
+      cartList.innerHTML = '<div class="coti-cart-empty">' +
+        '<span class="lang lang-es">Aún no has agregado servicios. Selecciona uno para empezar.</span>' +
+        '<span class="lang lang-en">No services yet. Pick one to start.</span>' +
+        '</div>';
+    } else {
+      cartList.innerHTML = '<div class="coti-cart-items">' + items.map(i => {
+        return '<div class="coti-cart-item">' +
+        '<span class="coti-cart-item-name">' + escapeHtml(i.name) + '</span>' +
+        '<span class="coti-cart-item-qty">×' + i.qty + '</span>' +
+        '<span class="coti-cart-item-price">' + fmt(i.line) + '</span>' +
+        '</div>';
+      }).join('') + '</div>';
+    }
+
+    // Discount calculation (tercera/cuarta edad, sobre el subtotal completo)
+    let discount = 0;
+    let discountLabel = '';
+    if (disc === 'tercera'){ discount = subtotal * 0.25;  discountLabel = lang === 'en' ? 'Senior 3rd age (25%)' : 'Tercera edad (25%)'; }
+    if (disc === 'cuarta') { discount = subtotal * 0.30;  discountLabel = lang === 'en' ? 'Senior 4th age (30%)' : 'Cuarta edad (30%)'; }
+    const total = subtotal - discount;
+
+    document.getElementById('coti-subtotal').textContent = fmt(subtotal);
+    document.getElementById('coti-discount').textContent = '−' + fmt(discount);
+    document.getElementById('coti-discount-label').textContent = discountLabel || (lang === 'en' ? 'Discount' : 'Descuento');
+    document.getElementById('coti-discount-row').style.display = (discount > 0) ? '' : 'none';
+    document.getElementById('coti-grand').innerHTML = '<span class="price-currency">L</span>' +
+      (Number.isInteger(total) ? total.toLocaleString('en-US') : total.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}));
+
+    // WhatsApp link (elemento #coti-wa-cta no existe en el HTML actual;
+    // se deja el cálculo por si se reintroduce un enlace directo)
+    const intro = lang === 'en' ? 'Hi! I built this quote on your site:' : '¡Hola! Armé esta cotización en su sitio:';
+    const totalLabel = lang === 'en' ? 'Total' : 'Total';
+    let memberLine = '';
+    if (disc === 'tercera') memberLine = lang === 'en' ? '\n(Senior 3rd age discount, 25% off)' : '\n(Descuento tercera edad, 25%)';
+    if (disc === 'cuarta')  memberLine = lang === 'en' ? '\n(Senior 4th age discount, 30% off)' : '\n(Descuento cuarta edad, 30%)';
+    const body = items.length === 0 ?
+      (lang === 'en' ? 'Hi! I have a quote question.' : '¡Hola! Tengo una consulta sobre una cotización.') :
+      (intro + '\n\n' + items.map(i => '• ' + i.name + ' ×' + i.qty + ', ' + fmt(i.line)).join('\n') + '\n\n' + totalLabel + ': ' + fmt(total) + memberLine);
+    const waAnchor = document.getElementById('coti-wa-cta');
+    if (waAnchor) waAnchor.href = 'https://wa.me/' + (CLINIC.whatsapp || '') + '?text=' + encodeURIComponent(body);
+  }
+
+  function escapeHtml(s) {
+    return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  }
+
+  // ── Exportar carrito al Sistema de Cotizaciones ─────────────
+  function exportToSistema(action) {
+    const lang = document.body.dataset.lang;
+    const disc = currentDiscount();
+    const cartItems = [];
+    let subtotal = 0;
+
+    document.querySelectorAll('.coti-item').forEach(it => {
+      const qty = parseInt(it.querySelector('input').value, 10) || 0;
+      if (qty <= 0) return;
+      const price = parseFloat(it.dataset.price);
+      const name  = lang === 'en' ? it.dataset.nameEn : it.dataset.nameEs;
+      const line  = price * qty;
+      subtotal += line;
+      cartItems.push({ name, qty, price, line });
+    });
+
+    if (cartItems.length === 0) {
+      alert(lang === 'en'
+        ? 'Add at least one service before generating a PDF.'
+        : 'Agrega al menos un servicio antes de generar el PDF.');
+      return;
+    }
+
+    let discount = 0, discountLabel = '';
+    if (disc === 'tercera') { discount = subtotal * 0.25; discountLabel = lang === 'en' ? 'Senior discount – 3rd age (25%)' : 'Descuento tercera edad (25%)'; }
+    if (disc === 'cuarta')  { discount = subtotal * 0.30; discountLabel = lang === 'en' ? 'Senior discount – 4th age (30%)' : 'Descuento cuarta edad (30%)'; }
+
+    // NOTA: clave renombrada de 'cmg-quote-data' a 'portal-quote-data'
+    // (ver plan, punto 6/11). Cotizacion-Sistema.html todavía no está
+    // portado y sigue leyendo 'cmg-quote-data' — al portar ese archivo
+    // hay que actualizarlo para leer 'portal-quote-data', o este enlace
+    // quedará roto entre ambas páginas hasta entonces.
+    localStorage.setItem('portal-quote-data', JSON.stringify({
+      items: cartItems,
+      disc, discountLabel,
+      subtotal, discount,
+      total: subtotal - discount,
+      autoAction: action || 'pdf'   // 'pdf' | 'whatsapp'
+    }));
+
+    window.location.href = 'Cotizacion-Sistema.html';
+  }
+
+  // ── Overrides de precios (Admin-Precios.html) ──────────
+  // Clave por ítem: <categoria>__<slug(nombreEs)>. DEBE coincidir con Admin-Precios.html.
+  function cmgSlug(s){ return String(s||'').toLowerCase().replace(/á/g,'a').replace(/é/g,'e').replace(/í/g,'i').replace(/ó/g,'o').replace(/ú/g,'u').replace(/ü/g,'u').replace(/ñ/g,'n').replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,''); }
+  function cmgFmtPrice(n){ return Number.isInteger(n) ? n.toLocaleString('en-US') : n.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}); }
+  function applyItemKeys(){
+    const seen = {};
+    document.querySelectorAll('.coti-item').forEach(it => {
+      const cat = it.closest('.coti-cat').dataset.cat;
+      const base = cat + '__' + cmgSlug(it.dataset.nameEs);
+      seen[base] = (seen[base] || 0) + 1;
+      it.dataset.cfgKey = seen[base] > 1 ? base + '--' + seen[base] : base;
+    });
+  }
+  function loadCatalogOverrides(){
+    if (!window.r3adsDb || !CLINIC_ID) return;
+    r3adsDb.collection('clinics').doc(CLINIC_ID).collection('catalogoConfig').get().then(snap => {
+      const map = {};
+      snap.forEach(d => { map[d.id] = d.data(); });
+      document.querySelectorAll('.coti-item').forEach(it => {
+        const cfg = map[it.dataset.cfgKey];
+        if (!cfg) return;
+        if (cfg.precio !== undefined && cfg.precio !== null && !isNaN(cfg.precio)) {
+          it.dataset.price = String(cfg.precio);
+          const pe = it.querySelector('.coti-item-price');
+          if (pe) pe.innerHTML = '<span class="price-currency">L</span>' + cmgFmtPrice(Number(cfg.precio));
+        }
+      });
+      render();
+    }).catch(err => { console.warn('[Portal Clínico] catalogoConfig:', err); });
+  }
+
+  applyItemKeys();
+  render();
+  loadCatalogOverrides();
+
+  // Exponer al scope global para que los onclick del HTML puedan llamarla
+  window.exportToSistema = exportToSistema;
+})();
+</script>
+
+</body>
+</html>
+

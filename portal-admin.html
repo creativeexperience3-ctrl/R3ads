@@ -1,0 +1,514 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Administración · R3ads Portal Clínico</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; }
+body { margin: 0; background: #F4F6FB; font-family: 'Segoe UI', Arial, sans-serif; color: #1F2937; }
+
+/* ── Login gate ── */
+.pa-login-wrap {
+  min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px;
+}
+.pa-login-box {
+  background: #fff; border-radius: 16px; box-shadow: 0 8px 40px rgba(33,60,125,.13);
+  width: 100%; max-width: 400px; padding: 36px;
+}
+.pa-login-box h1 { font-size: 18px; font-weight: 900; color: #213C7D; margin: 0 0 4px; }
+.pa-login-box p { font-size: 13px; color: #6B7280; margin: 0 0 24px; }
+.pa-field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px; }
+.pa-field label { font-size: 12px; font-weight: 700; color: #374151; }
+.pa-input, .pa-select {
+  height: 44px; border: 1.5px solid #E5E7EB; border-radius: 8px; padding: 0 12px;
+  font-family: inherit; font-size: 14px; outline: none; color: #1F2937; background: #fff;
+}
+.pa-input:focus, .pa-select:focus { border-color: #213C7D; }
+.pa-btn {
+  height: 44px; border: none; border-radius: 8px; padding: 0 18px;
+  font-family: inherit; font-size: 14px; font-weight: 800; cursor: pointer;
+  transition: opacity .15s, transform .1s; display: inline-flex; align-items: center; justify-content: center; gap: 7px;
+}
+.pa-btn:hover { opacity: .92; } .pa-btn:active { transform: scale(.98); }
+.pa-btn:disabled { opacity: .5; cursor: not-allowed; }
+.pa-btn--primary { background: #213C7D; color: #fff; width: 100%; }
+.pa-error {
+  background: #FEE2E2; border: 1px solid #FECACA; color: #991B1B; border-radius: 8px;
+  padding: 10px 14px; font-size: 13px; margin-bottom: 14px; display: none;
+}
+.pa-error.is-visible { display: block; }
+
+/* ── Denied ── */
+.pa-denied { text-align: center; padding: 60px 24px; color: #6B7280; }
+.pa-denied h2 { color: #991B1B; }
+
+/* ── Topbar ── */
+.pa-top {
+  background: #213C7D; color: #fff; padding: 14px 24px;
+  display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap;
+  position: sticky; top: 0; z-index: 20;
+}
+.pa-top-title { font-size: 16px; font-weight: 900; letter-spacing: .3px; }
+.pa-top-title small { display: block; font-size: 11px; font-weight: 600; color: rgba(255,255,255,.6); letter-spacing: .5px; }
+.pa-top-right { display: flex; align-items: center; gap: 12px; font-size: 13px; }
+.pa-email { color: rgba(255,255,255,.75); }
+.pa-logout {
+  background: transparent; border: 1px solid rgba(255,255,255,.25); color: rgba(255,255,255,.8);
+  padding: 6px 14px; border-radius: 7px; font-size: 13px; font-weight: 600;
+  cursor: pointer; font-family: inherit;
+}
+.pa-logout:hover { background: rgba(255,255,255,.1); color: #fff; }
+
+/* ── Wrap ── */
+.pa-wrap { max-width: 1080px; margin: 0 auto; padding: 24px; }
+
+.pa-stats { display: flex; gap: 12px; margin-bottom: 20px; flex-wrap: wrap; }
+.pa-stat { background: #fff; border-radius: 12px; padding: 16px 20px; flex: 1; min-width: 110px; box-shadow: 0 2px 10px rgba(33,60,125,.07); }
+.pa-stat-num { font-size: 26px; font-weight: 900; color: #213C7D; line-height: 1; }
+.pa-stat-lbl { font-size: 12px; color: #6B7280; margin-top: 2px; }
+.pa-stat.ok .pa-stat-num { color: #15803D; }
+.pa-stat.warn .pa-stat-num { color: #B45309; }
+
+.pa-toolbar { display: flex; justify-content: flex-end; margin-bottom: 16px; }
+
+/* ── Create clinic panel ── */
+.pa-create-panel {
+  background: #fff; border: 2px solid #213C7D; border-radius: 14px; margin-bottom: 20px;
+  overflow: hidden; max-height: 0; transition: max-height .35s ease;
+}
+.pa-create-panel.is-open { max-height: 900px; }
+.pa-create-inner { padding: 24px; }
+.pa-create-heading { font-size: 15px; font-weight: 900; color: #213C7D; margin: 0 0 18px; }
+.pa-form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.pa-form-grid .full { grid-column: 1 / -1; }
+.pa-form-footer { display: flex; gap: 10px; margin-top: 20px; padding-top: 16px; border-top: 1px solid #F3F4F6; }
+.pa-hint { font-size: 11px; color: #9CA3AF; margin-top: 2px; }
+
+/* ── Table ── */
+.pa-card { background: #fff; border-radius: 14px; box-shadow: 0 2px 12px rgba(33,60,125,.07); overflow: hidden; }
+.pa-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+.pa-table th {
+  font-size: 10px; font-weight: 700; letter-spacing: .4px; text-transform: uppercase; color: #6B7280;
+  padding: 10px 16px; text-align: left; background: #FAFBFF; border-bottom: 1px solid #EEF1F8;
+}
+.pa-table td { padding: 13px 16px; border-bottom: 1px solid #F3F4F6; vertical-align: middle; }
+.pa-table tbody tr:last-child td { border-bottom: none; }
+.pa-clinic-name { font-weight: 700; color: #1F2937; }
+.pa-clinic-id { font-size: 12px; color: #9CA3AF; font-family: 'Courier New', monospace; }
+.pa-status { display: inline-flex; align-items: center; gap: 5px; font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 20px; }
+.pa-status--activa { background: #DCFCE7; color: #166534; }
+.pa-status--suspendida { background: #FEE2E2; color: #991B1B; }
+.pa-status::before { content: ''; width: 6px; height: 6px; border-radius: 50%; }
+.pa-status--activa::before { background: #16A34A; }
+.pa-status--suspendida::before { background: #DC2626; }
+.pa-row-actions { display: flex; gap: 7px; flex-wrap: wrap; }
+.pa-act { font-size: 12px; font-weight: 700; padding: 5px 11px; border-radius: 6px; border: none; cursor: pointer; font-family: inherit; }
+.pa-act--admin { background: #EEF2FF; color: #213C7D; }
+.pa-act--suspend { background: #FEF3C7; color: #92400E; }
+.pa-act--activate { background: #DCFCE7; color: #166534; }
+.pa-msg { text-align: center; padding: 50px 20px; color: #6B7280; }
+
+/* ── Modal ── */
+.pa-modal { position: fixed; inset: 0; background: rgba(33,60,125,.45); display: none; align-items: center; justify-content: center; z-index: 1000; padding: 20px; }
+.pa-modal.is-open { display: flex; }
+.pa-modal-box { background: #fff; border-radius: 14px; padding: 24px; max-width: 420px; width: 100%; }
+.pa-modal-title { font-size: 16px; font-weight: 800; color: #213C7D; margin: 0 0 4px; }
+.pa-modal-sub { font-size: 13px; color: #6B7280; margin: 0 0 18px; }
+
+/* ── Toast ── */
+.pa-toast {
+  position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(20px);
+  background: #213C7D; color: #fff; padding: 12px 22px; border-radius: 10px;
+  font-size: 14px; font-weight: 600; box-shadow: 0 6px 24px rgba(0,0,0,.25);
+  opacity: 0; pointer-events: none; transition: opacity .2s, transform .2s; z-index: 2000;
+}
+.pa-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+.pa-toast.err { background: #C70B0C; }
+.pa-toast.ok { background: #15803D; }
+
+[hidden] { display: none !important; }
+</style>
+</head>
+<body>
+
+<!-- ═══ LOGIN GATE ═══ -->
+<div class="pa-login-wrap" id="pa-login-wrap">
+  <div class="pa-login-box">
+    <h1>R3ads · Portal Clínico</h1>
+    <p>Administración interna — acceso solo para R3ads.</p>
+    <div class="pa-error" id="login-error"></div>
+    <div class="pa-field">
+      <label for="login-email">Correo</label>
+      <input type="email" id="login-email" class="pa-input" autocomplete="email">
+    </div>
+    <div class="pa-field">
+      <label for="login-pass">Contraseña</label>
+      <input type="password" id="login-pass" class="pa-input" autocomplete="current-password">
+    </div>
+    <button class="pa-btn pa-btn--primary" id="btn-login">Iniciar sesión</button>
+  </div>
+</div>
+
+<!-- ═══ ACCESO DENEGADO ═══ -->
+<div class="pa-denied" id="pa-denied" hidden>
+  <h2>🚫 Sin acceso</h2>
+  <p>Esta cuenta no tiene permisos de administración de R3ads.</p>
+  <button class="pa-btn pa-btn--primary" style="width:auto" id="btn-denied-logout">Cerrar sesión</button>
+</div>
+
+<!-- ═══ PANEL ═══ -->
+<div id="pa-panel" hidden>
+
+  <div class="pa-top">
+    <div class="pa-top-title">Administración R3ads<small>Portal Clínico · Clínicas</small></div>
+    <div class="pa-top-right">
+      <span class="pa-email" id="pa-email">—</span>
+      <button class="pa-logout" id="btn-logout">Salir</button>
+    </div>
+  </div>
+
+  <div class="pa-wrap">
+
+    <div class="pa-stats">
+      <div class="pa-stat"><div class="pa-stat-num" id="stat-total">—</div><div class="pa-stat-lbl">Clínicas totales</div></div>
+      <div class="pa-stat ok"><div class="pa-stat-num" id="stat-activas">—</div><div class="pa-stat-lbl">Activas</div></div>
+      <div class="pa-stat warn"><div class="pa-stat-num" id="stat-suspendidas">—</div><div class="pa-stat-lbl">Suspendidas</div></div>
+    </div>
+
+    <div class="pa-toolbar">
+      <button class="pa-btn pa-btn--primary" id="btn-new-clinic" style="width:auto">+ Nueva clínica</button>
+    </div>
+
+    <!-- Crear clínica -->
+    <div class="pa-create-panel" id="create-panel">
+      <div class="pa-create-inner">
+        <div class="pa-create-heading">Nueva clínica</div>
+        <div class="pa-form-grid">
+          <div class="pa-field">
+            <label>ID de la clínica *</label>
+            <input type="text" class="pa-input" id="f-clinicId" placeholder="clinica-x">
+            <div class="pa-hint">Minúsculas, números y guiones. No se puede cambiar después — se usa como ID interno y como base del subdominio futuro.</div>
+          </div>
+          <div class="pa-field">
+            <label>Nombre *</label>
+            <input type="text" class="pa-input" id="f-nombre" placeholder="Clínica X">
+          </div>
+          <div class="pa-field full">
+            <label>Razón social</label>
+            <input type="text" class="pa-input" id="f-razonSocial" placeholder="Clínica X, S. de R.L.">
+          </div>
+          <div class="pa-field">
+            <label>Prefijo de código de paciente *</label>
+            <input type="text" class="pa-input" id="f-prefijo" placeholder="CLX" maxlength="8" style="text-transform:uppercase">
+          </div>
+          <div class="pa-field">
+            <label>Subdominio (Fase 5, aún no activo)</label>
+            <input type="text" class="pa-input" id="f-subdominio" placeholder="clinica-x">
+          </div>
+          <div class="pa-field">
+            <label>Dirección</label>
+            <input type="text" class="pa-input" id="f-direccion">
+          </div>
+          <div class="pa-field">
+            <label>Ciudad</label>
+            <input type="text" class="pa-input" id="f-ciudad">
+          </div>
+          <div class="pa-field">
+            <label>Teléfono</label>
+            <input type="text" class="pa-input" id="f-telefono" placeholder="+000 0000-0000">
+          </div>
+          <div class="pa-field">
+            <label>WhatsApp (solo dígitos + código de país)</label>
+            <input type="text" class="pa-input" id="f-whatsapp" placeholder="5040000000">
+          </div>
+          <div class="pa-field">
+            <label>Correo</label>
+            <input type="email" class="pa-input" id="f-correo">
+          </div>
+          <div class="pa-field">
+            <label>Sitio web</label>
+            <input type="text" class="pa-input" id="f-sitioWeb">
+          </div>
+        </div>
+        <div class="pa-error" id="create-error" style="margin-top:14px"></div>
+        <div class="pa-form-footer">
+          <button class="pa-btn" id="btn-cancel-create" style="background:#F4F6FB;color:#6B7280">Cancelar</button>
+          <button class="pa-btn pa-btn--primary" id="btn-save-clinic" style="width:auto">Crear clínica</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="pa-card">
+      <div id="pa-list"><div class="pa-msg">Cargando clínicas…</div></div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══ MODAL: crear primer admin de una clínica ═══ -->
+<div class="pa-modal" id="modal-admin">
+  <div class="pa-modal-box">
+    <h3 class="pa-modal-title">Crear admin de <span id="modal-clinic-name">—</span></h3>
+    <p class="pa-modal-sub">Se enviará un correo con enlace para que establezca su contraseña.</p>
+    <div class="pa-error" id="modal-admin-error"></div>
+    <div class="pa-field">
+      <label>Nombre completo</label>
+      <input type="text" class="pa-input" id="m-admin-nombre">
+    </div>
+    <div class="pa-field">
+      <label>Correo electrónico</label>
+      <input type="email" class="pa-input" id="m-admin-email">
+    </div>
+    <div class="pa-form-footer">
+      <button class="pa-btn" id="m-admin-cancel" style="background:#F4F6FB;color:#6B7280">Cancelar</button>
+      <button class="pa-btn pa-btn--primary" id="m-admin-confirmar" style="width:auto">Crear admin</button>
+    </div>
+  </div>
+</div>
+
+<div class="pa-toast" id="pa-toast">—</div>
+
+<!-- Firebase compat SDK — proyecto r3ads-clinic-crm (el del PRODUCTO, no
+     el de R3ads/web que usa el resto de este sitio, r3ads-59bd8). -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script>
+(function () {
+  var FIREBASE_CFG = {
+    apiKey           : 'AIzaSyANySdjfYwE2CnLbsg-YZdBCxWrD6CNLMo',
+    authDomain       : 'r3ads-clinic-crm.firebaseapp.com',
+    projectId        : 'r3ads-clinic-crm',
+    storageBucket    : 'r3ads-clinic-crm.firebasestorage.app',
+    messagingSenderId: '185048797679',
+    appId            : '1:185048797679:web:04da52fcc3c336f7f5a61a'
+  };
+  var app = firebase.initializeApp(FIREBASE_CFG);
+  var auth = app.auth();
+  var db = app.firestore();
+
+  function $(id) { return document.getElementById(id); }
+  function esc(s) { return String(s || '').replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+
+  var toastEl = $('pa-toast'), toastT;
+  function toast(msg, type) {
+    toastEl.textContent = msg;
+    toastEl.className = 'pa-toast show' + (type ? ' ' + type : '');
+    clearTimeout(toastT);
+    toastT = setTimeout(function () { toastEl.className = 'pa-toast'; }, 3500);
+  }
+  function showErr(id, msg) { var el = $(id); el.textContent = msg; el.classList.add('is-visible'); }
+  function clearErr(id) { var el = $(id); el.textContent = ''; el.classList.remove('is-visible'); }
+
+  var _clinics = [];
+
+  /* ── Vistas ── */
+  function showView(view) {
+    $('pa-login-wrap').hidden = view !== 'login';
+    $('pa-denied').hidden = view !== 'denied';
+    $('pa-panel').hidden = view !== 'panel';
+  }
+
+  /* ── Auth guard: exige el custom claim superadmin ── */
+  auth.onAuthStateChanged(function (user) {
+    if (!user) { showView('login'); return; }
+    user.getIdTokenResult(true).then(function (token) {
+      if (token.claims.superadmin === true) {
+        $('pa-email').textContent = user.email;
+        showView('panel');
+        loadClinics();
+      } else {
+        showView('denied');
+      }
+    });
+  });
+
+  $('btn-login').addEventListener('click', function () {
+    clearErr('login-error');
+    var email = $('login-email').value.trim();
+    var pass = $('login-pass').value;
+    if (!email || !pass) { showErr('login-error', 'Completa correo y contraseña.'); return; }
+    $('btn-login').disabled = true;
+    auth.signInWithEmailAndPassword(email, pass)
+      .catch(function (err) { showErr('login-error', 'No se pudo iniciar sesión: ' + err.message); })
+      .finally(function () { $('btn-login').disabled = false; });
+  });
+  $('btn-logout').addEventListener('click', function () { auth.signOut(); });
+  $('btn-denied-logout').addEventListener('click', function () { auth.signOut(); });
+
+  /* ── Crear clínica: toggle panel ── */
+  var createOpen = false;
+  $('btn-new-clinic').addEventListener('click', function () {
+    createOpen = !createOpen;
+    $('create-panel').classList.toggle('is-open', createOpen);
+    clearErr('create-error');
+  });
+  $('btn-cancel-create').addEventListener('click', function () {
+    createOpen = false;
+    $('create-panel').classList.remove('is-open');
+  });
+
+  /* ── Cargar clínicas ── */
+  function loadClinics() {
+    db.collection('clinics').orderBy('creadoEn', 'desc').get().then(function (snap) {
+      _clinics = [];
+      snap.forEach(function (d) { _clinics.push(Object.assign({ id: d.id }, d.data())); });
+      renderClinics();
+      updateStats();
+    }).catch(function (err) {
+      $('pa-list').innerHTML = '<div class="pa-msg" style="color:#B91C1C">Error al cargar clínicas: ' + esc(err.message) + '</div>';
+    });
+  }
+
+  function updateStats() {
+    $('stat-total').textContent = _clinics.length;
+    $('stat-activas').textContent = _clinics.filter(function (c) { return c.estado === 'activa'; }).length;
+    $('stat-suspendidas').textContent = _clinics.filter(function (c) { return c.estado !== 'activa'; }).length;
+  }
+
+  function renderClinics() {
+    if (!_clinics.length) {
+      $('pa-list').innerHTML = '<div class="pa-msg">No hay clínicas todavía. Crea la primera con el botón de arriba.</div>';
+      return;
+    }
+    var rows = _clinics.map(function (c) {
+      var estado = c.estado || 'activa';
+      return '<tr>' +
+        '<td><div class="pa-clinic-name">' + esc(c.nombre || '—') + '</div><div class="pa-clinic-id">' + esc(c.id) + '</div></td>' +
+        '<td>' + esc(c.prefijoCodigoPaciente || '—') + '</td>' +
+        '<td>' + esc(c.subdominio || '—') + '</td>' +
+        '<td><span class="pa-status pa-status--' + esc(estado) + '">' + (estado === 'activa' ? 'Activa' : 'Suspendida') + '</span></td>' +
+        '<td><div class="pa-row-actions">' +
+          '<button class="pa-act pa-act--admin" data-admin-id="' + esc(c.id) + '" data-admin-name="' + esc(c.nombre || c.id) + '">+ Admin</button>' +
+          (estado === 'activa'
+            ? '<button class="pa-act pa-act--suspend" data-toggle-id="' + esc(c.id) + '" data-toggle-to="suspendida">Suspender</button>'
+            : '<button class="pa-act pa-act--activate" data-toggle-id="' + esc(c.id) + '" data-toggle-to="activa">Activar</button>') +
+        '</div></td>' +
+      '</tr>';
+    }).join('');
+    $('pa-list').innerHTML =
+      '<table class="pa-table"><thead><tr><th>Clínica</th><th>Prefijo</th><th>Subdominio</th><th>Estado</th><th>Acciones</th></tr></thead>' +
+      '<tbody>' + rows + '</tbody></table>';
+
+    $('pa-list').querySelectorAll('[data-admin-id]').forEach(function (btn) {
+      btn.addEventListener('click', function () { openAdminModal(btn.dataset.adminId, btn.dataset.adminName); });
+    });
+    $('pa-list').querySelectorAll('[data-toggle-id]').forEach(function (btn) {
+      btn.addEventListener('click', function () { toggleEstado(btn.dataset.toggleId, btn.dataset.toggleTo); });
+    });
+  }
+
+  function toggleEstado(clinicId, nuevoEstado) {
+    var label = nuevoEstado === 'activa' ? 'activar' : 'suspender';
+    if (!confirm('¿Seguro que deseas ' + label + ' esta clínica?' + (nuevoEstado === 'suspendida' ? ' Todo su personal perderá acceso de inmediato.' : ''))) return;
+    db.collection('clinics').doc(clinicId).update({ estado: nuevoEstado }).then(function () {
+      toast(nuevoEstado === 'activa' ? '✅ Clínica activada.' : '⚠️ Clínica suspendida.', 'ok');
+      loadClinics();
+    }).catch(function (err) { toast('Error: ' + err.message, 'err'); });
+  }
+
+  /* ── Guardar clínica nueva ── */
+  $('btn-save-clinic').addEventListener('click', function () {
+    clearErr('create-error');
+    var clinicId = $('f-clinicId').value.trim().toLowerCase();
+    var nombre = $('f-nombre').value.trim();
+    var prefijo = $('f-prefijo').value.trim().toUpperCase();
+
+    if (!/^[a-z0-9-]+$/.test(clinicId)) { showErr('create-error', 'El ID de la clínica solo puede tener minúsculas, números y guiones.'); return; }
+    if (!nombre) { showErr('create-error', 'El nombre es obligatorio.'); return; }
+    if (!prefijo) { showErr('create-error', 'El prefijo de código de paciente es obligatorio.'); return; }
+
+    var btn = $('btn-save-clinic');
+    btn.disabled = true; btn.textContent = 'Verificando…';
+
+    var docRef = db.collection('clinics').doc(clinicId);
+    docRef.get().then(function (snap) {
+      if (snap.exists) { throw new Error('Ya existe una clínica con ese ID.'); }
+      btn.textContent = 'Creando…';
+      return docRef.set({
+        nombre: nombre,
+        razonSocial: $('f-razonSocial').value.trim() || nombre,
+        prefijoCodigoPaciente: prefijo,
+        subdominio: $('f-subdominio').value.trim().toLowerCase() || clinicId,
+        direccion: $('f-direccion').value.trim(),
+        ciudad: $('f-ciudad').value.trim(),
+        telefono: $('f-telefono').value.trim(),
+        whatsapp: $('f-whatsapp').value.trim(),
+        correo: $('f-correo').value.trim(),
+        sitioWeb: $('f-sitioWeb').value.trim(),
+        estado: 'activa',
+        creadoEn: firebase.firestore.FieldValue.serverTimestamp()
+      });
+    }).then(function () {
+      toast('✅ Clínica "' + nombre + '" creada. Ahora créale su primer usuario admin.', 'ok');
+      createOpen = false;
+      $('create-panel').classList.remove('is-open');
+      ['f-clinicId','f-nombre','f-razonSocial','f-prefijo','f-subdominio','f-direccion','f-ciudad','f-telefono','f-whatsapp','f-correo','f-sitioWeb'].forEach(function (id) { $(id).value = ''; });
+      loadClinics();
+    }).catch(function (err) {
+      showErr('create-error', err.message);
+    }).finally(function () {
+      btn.disabled = false; btn.textContent = 'Crear clínica';
+    });
+  });
+
+  /* ── Modal: crear primer admin de una clínica ──
+     Mismo patrón que Admin-Usuarios.html en portal-clinico: instancia
+     secundaria de Firebase para no cerrar la sesión del superadmin. */
+  var _modalClinicId = null;
+  function openAdminModal(clinicId, clinicName) {
+    _modalClinicId = clinicId;
+    $('modal-clinic-name').textContent = clinicName;
+    $('m-admin-nombre').value = '';
+    $('m-admin-email').value = '';
+    clearErr('modal-admin-error');
+    $('modal-admin').classList.add('is-open');
+  }
+  $('m-admin-cancel').addEventListener('click', function () { $('modal-admin').classList.remove('is-open'); });
+  $('modal-admin').addEventListener('click', function (e) { if (e.target === $('modal-admin')) $('modal-admin').classList.remove('is-open'); });
+
+  $('m-admin-confirmar').addEventListener('click', function () {
+    clearErr('modal-admin-error');
+    var nombre = $('m-admin-nombre').value.trim();
+    var email = $('m-admin-email').value.trim().toLowerCase();
+    if (!nombre) { showErr('modal-admin-error', 'Ingresa el nombre completo.'); return; }
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { showErr('modal-admin-error', 'Ingresa un correo válido.'); return; }
+
+    var btn = $('m-admin-confirmar');
+    btn.disabled = true; btn.textContent = 'Creando…';
+
+    var secondaryApp = firebase.initializeApp(FIREBASE_CFG, 'secondary-' + Date.now());
+    var secondaryAuth = secondaryApp.auth();
+    var tempPwd = 'Rtemp!' + Math.random().toString(36).slice(2, 10);
+
+    secondaryAuth.createUserWithEmailAndPassword(email, tempPwd)
+      .then(function (cred) {
+        var uid = cred.user.uid;
+        return db.collection('usuarios').doc(uid).set({
+          nombre: nombre, email: email, rol: 'admin', estado: 'activo',
+          clinicId: _modalClinicId, uid: uid,
+          creadoEn: firebase.firestore.FieldValue.serverTimestamp()
+        });
+      })
+      .then(function () { return auth.sendPasswordResetEmail(email); })
+      .then(function () {
+        secondaryAuth.signOut().catch(function () {});
+        toast('✅ Admin creado. Se envió un correo a ' + email + ' para establecer contraseña.', 'ok');
+        $('modal-admin').classList.remove('is-open');
+      })
+      .catch(function (err) {
+        secondaryAuth.signOut().catch(function () {});
+        var msg = 'Error al crear el admin.';
+        if (err.code === 'auth/email-already-in-use') msg = 'Ese correo ya tiene una cuenta registrada.';
+        if (err.code === 'auth/invalid-email') msg = 'El correo no es válido.';
+        showErr('modal-admin-error', msg);
+      })
+      .finally(function () {
+        btn.disabled = false; btn.textContent = 'Crear admin';
+      });
+  });
+})();
+</script>
+</body>
+</html>

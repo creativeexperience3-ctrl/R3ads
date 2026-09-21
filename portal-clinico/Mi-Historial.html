@@ -1,0 +1,1820 @@
+﻿<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mi Historial Médico</title>
+<!-- Favicon: pendiente por clínica (Fase 5 del plan). -->
+<link rel="stylesheet" href="assets/cmg-tokens.css">
+<link rel="stylesheet" href="styles.css">
+<style>
+*, *::before, *::after { box-sizing: border-box; }
+
+.mh-page { background: #F4F6FB; min-height: 100vh; padding-bottom: 80px; }
+
+.mh-hero {
+  background: #213C7D;
+  padding: 40px 0 32px;
+  border-bottom: 4px solid #FDD22C;
+}
+.mh-hero-inner {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 28px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+.mh-hero-eyebrow {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: #FDD22C;
+  margin-bottom: 8px;
+}
+.mh-hero-h1 {
+  font-size: clamp(22px, 4vw, 32px);
+  font-weight: 900;
+  color: #fff;
+  margin: 0;
+}
+.mh-topbar {
+  background: #1a3068;
+  border-bottom: 1px solid rgba(253,210,44,.3);
+  text-align: center;
+  padding: 6px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+.mh-topbar-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: rgba(255,255,255,.6);
+  letter-spacing: .5px;
+  text-transform: uppercase;
+}
+.mh-topbar-code {
+  font-size: 14px;
+  font-weight: 800;
+  color: #FDD22C;
+  font-family: 'Courier New', monospace;
+  letter-spacing: 2px;
+}
+
+.mh-user-chip {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(255,255,255,.08);
+  border: 1px solid rgba(255,255,255,.15);
+  border-radius: 50px;
+  padding: 8px 18px 8px 8px;
+  color: #fff;
+  font-size: 13px;
+}
+.mh-avatar {
+  width: 34px; height: 34px;
+  border-radius: 50%;
+  background: #FDD22C;
+  color: #213C7D;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 900;
+  font-size: 14px;
+}
+.mh-logout {
+  border: 1px solid rgba(255,255,255,.25);
+  background: transparent;
+  color: rgba(255,255,255,.75);
+  border-radius: 20px;
+  padding: 6px 14px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.mh-content {
+  max-width: 1100px;
+  margin: 28px auto 0;
+  padding: 0 28px;
+}
+
+/* Selector de expediente */
+.mh-selector {
+  background: #fff;
+  border-radius: 14px;
+  padding: 18px 22px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 12px rgba(33,60,125,.08);
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+.mh-selector-label {
+  font-size: 12px;
+  font-weight: 700;
+  color: #6B7280;
+  text-transform: uppercase;
+  letter-spacing: .5px;
+}
+.mh-selector-select {
+  flex: 1;
+  min-width: 220px;
+  height: 44px;
+  border: 1.5px solid #E5E7EB;
+  border-radius: 8px;
+  padding: 0 14px;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  color: #213C7D;
+  background: #F9FAFB;
+  outline: none;
+}
+.mh-selector-select:focus { border-color: #213C7D; }
+.mh-add-btn {
+  background: #213C7D;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  height: 44px;
+  padding: 0 18px;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.mh-add-btn:hover { opacity: .9; }
+
+/* Card */
+.mh-card {
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 2px 12px rgba(33,60,125,.08);
+  padding: 28px;
+  margin-bottom: 20px;
+}
+.mh-card-title {
+  font-size: 17px;
+  font-weight: 800;
+  color: #213C7D;
+  margin: 0 0 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* Patient header card */
+.mh-patient-head {
+  background: linear-gradient(135deg, #213C7D 0%, #2d4d9b 100%);
+  border-radius: 16px;
+  padding: 24px 28px;
+  color: #fff;
+  margin-bottom: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+.mh-patient-name {
+  font-size: 22px;
+  font-weight: 900;
+  margin: 0;
+}
+.mh-patient-sub {
+  font-size: 13px;
+  color: rgba(255,255,255,.75);
+  margin-top: 4px;
+}
+.mh-patient-codebox {
+  background: rgba(253,210,44,.15);
+  border: 1.5px solid #FDD22C;
+  border-radius: 10px;
+  padding: 8px 16px;
+  font-family: 'Courier New', monospace;
+  font-weight: 700;
+  font-size: 15px;
+  letter-spacing: 2px;
+  color: #FDD22C;
+}
+
+/* Datos generales grid */
+.mh-dg-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 14px;
+}
+.mh-dg-item {
+  background: #F9FAFB;
+  border-left: 3px solid #FDD22C;
+  padding: 10px 14px;
+  border-radius: 6px;
+}
+.mh-dg-label {
+  font-size: 11px;
+  color: #6B7280;
+  text-transform: uppercase;
+  font-weight: 700;
+  letter-spacing: .5px;
+}
+.mh-dg-value {
+  font-size: 14px;
+  color: #1F2937;
+  font-weight: 600;
+  margin-top: 2px;
+}
+
+/* Antecedentes badges */
+.mh-ant-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.mh-ant-badge {
+  background: #FEE2E2;
+  border: 1px solid #FECACA;
+  color: #991B1B;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 6px 12px;
+  border-radius: 20px;
+}
+.mh-ant-badge.no-tiene {
+  background: #F3F4F6;
+  border-color: #E5E7EB;
+  color: #6B7280;
+  display: none;
+}
+.mh-ant-empty {
+  color: #9CA3AF;
+  font-style: italic;
+  font-size: 13px;
+}
+
+/* Timeline de consultas */
+.mh-timeline {
+  position: relative;
+  padding-left: 24px;
+}
+.mh-timeline::before {
+  content: '';
+  position: absolute;
+  left: 7px;
+  top: 8px;
+  bottom: 8px;
+  width: 2px;
+  background: #E5E7EB;
+}
+.mh-consulta {
+  position: relative;
+  background: #fff;
+  border: 1.5px solid #E5E7EB;
+  border-radius: 12px;
+  padding: 18px 22px;
+  margin-bottom: 16px;
+  transition: all .2s;
+}
+.mh-consulta:hover {
+  border-color: #FDD22C;
+  box-shadow: 0 4px 18px rgba(33,60,125,.08);
+}
+.mh-consulta::before {
+  content: '';
+  position: absolute;
+  left: -22px;
+  top: 22px;
+  width: 14px; height: 14px;
+  background: #FDD22C;
+  border: 3px solid #213C7D;
+  border-radius: 50%;
+}
+.mh-consulta-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+.mh-consulta-fecha {
+  font-size: 14px;
+  font-weight: 800;
+  color: #213C7D;
+}
+.mh-consulta-doctor {
+  font-size: 12px;
+  color: #6B7280;
+}
+.mh-consulta-motivo {
+  font-size: 14px;
+  color: #1F2937;
+  margin: 4px 0;
+  line-height: 1.5;
+}
+.mh-consulta-dx {
+  font-size: 13px;
+  color: #4B5563;
+  margin-top: 6px;
+  padding-top: 8px;
+  border-top: 1px dashed #E5E7EB;
+}
+.mh-consulta-dx strong { color: #213C7D; }
+.mh-consulta-actions {
+  margin-top: 12px;
+  display: flex;
+  gap: 10px;
+}
+.mh-consulta-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #213C7D;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 8px 14px;
+  border-radius: 8px;
+  text-decoration: none;
+  transition: opacity .18s;
+}
+.mh-consulta-btn:hover { opacity: .85; }
+.mh-consulta-btn-ghost {
+  background: #fff;
+  color: #213C7D;
+  border: 1.5px solid #E5E7EB;
+}
+
+/* Empty state */
+.mh-empty {
+  background: #fff;
+  border-radius: 16px;
+  padding: 80px 30px;
+  text-align: center;
+  box-shadow: 0 2px 12px rgba(33,60,125,.08);
+}
+.mh-empty-icon { font-size: 60px; margin-bottom: 16px; }
+.mh-empty h3 {
+  color: #213C7D;
+  font-size: 20px;
+  margin: 0 0 8px;
+}
+.mh-empty p {
+  color: #6B7280;
+  margin: 0 0 24px;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+/* Spinner */
+.mh-spinner {
+  width: 40px; height: 40px;
+  border: 3px solid #E5E7EB;
+  border-top-color: #213C7D;
+  border-radius: 50%;
+  animation: mh-spin .8s linear infinite;
+  margin: 40px auto;
+}
+@keyframes mh-spin { to { transform: rotate(360deg); } }
+
+/* Modal */
+.mh-modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(33,60,125,.55);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  backdrop-filter: blur(4px);
+  padding: 20px;
+}
+.mh-modal.is-open { display: flex; }
+.mh-modal-box {
+  background: #fff;
+  border-radius: 16px;
+  padding: 28px;
+  max-width: 460px;
+  width: 100%;
+  box-shadow: 0 20px 60px rgba(0,0,0,.25);
+}
+.mh-modal-title {
+  font-size: 18px;
+  font-weight: 800;
+  color: #213C7D;
+  margin: 0 0 6px;
+}
+.mh-modal-sub {
+  font-size: 13px;
+  color: #6B7280;
+  margin: 0 0 20px;
+}
+.mh-modal-input {
+  width: 100%;
+  height: 52px;
+  border: 2px solid #E5E7EB;
+  border-radius: 10px;
+  padding: 0 16px;
+  font-family: 'Courier New', monospace;
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: #213C7D;
+  outline: none;
+  text-align: center;
+}
+.mh-modal-input:focus { border-color: #213C7D; }
+.mh-modal-actions {
+  margin-top: 20px;
+  display: flex;
+  gap: 10px;
+}
+.mh-modal-btn {
+  flex: 1;
+  height: 44px;
+  border: none;
+  border-radius: 10px;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.mh-modal-btn-primary { background: #213C7D; color: #fff; }
+.mh-modal-btn-primary:hover { opacity: .9; }
+.mh-modal-btn-ghost { background: #F4F6FB; color: #6B7280; }
+.mh-modal-error {
+  background: #FEE2E2;
+  color: #991B1B;
+  border: 1px solid #FECACA;
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-size: 13px;
+  margin-top: 12px;
+  display: none;
+}
+.mh-modal-error.is-visible { display: block; }
+
+/* Code share box */
+.mh-share-box {
+  background: linear-gradient(135deg, #FDD22C 0%, #FFE070 100%);
+  border-radius: 12px;
+  padding: 18px 22px;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+.mh-share-text {
+  font-size: 13px;
+  color: #213C7D;
+  font-weight: 600;
+}
+.mh-share-text strong {
+  font-family: 'Courier New', monospace;
+  font-size: 16px;
+  letter-spacing: 2px;
+  background: #213C7D;
+  color: #FDD22C;
+  padding: 4px 10px;
+  border-radius: 6px;
+  margin: 0 4px;
+}
+.mh-share-btn {
+  background: #213C7D;
+  color: #fff;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+/* Pending access requests */
+.mh-requests-box {
+  background: #fff;
+  border: 2px solid #FDD22C;
+  border-radius: 14px;
+  padding: 20px 22px;
+  margin-bottom: 20px;
+}
+.mh-requests-title {
+  font-size: 15px;
+  font-weight: 800;
+  color: #213C7D;
+  margin: 0 0 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.mh-request-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 14px;
+  background: #F9FAFB;
+  border-radius: 10px;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+}
+.mh-request-info {
+  flex: 1;
+  min-width: 200px;
+}
+.mh-request-email {
+  font-size: 14px;
+  font-weight: 700;
+  color: #1F2937;
+}
+.mh-request-date {
+  font-size: 11px;
+  color: #9CA3AF;
+  margin-top: 2px;
+}
+.mh-request-actions {
+  display: flex;
+  gap: 8px;
+}
+.mh-request-btn {
+  padding: 6px 14px;
+  border: none;
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.mh-request-btn-approve {
+  background: #059669;
+  color: #fff;
+}
+.mh-request-btn-approve:hover { opacity: .85; }
+.mh-request-btn-deny {
+  background: #DC2626;
+  color: #fff;
+}
+.mh-request-btn-deny:hover { opacity: .85; }
+
+/* Pending state for requester */
+.mh-pending-state {
+  background: #fff;
+  border-radius: 16px;
+  padding: 60px 30px;
+  text-align: center;
+  box-shadow: 0 2px 12px rgba(33,60,125,.08);
+}
+.mh-pending-icon { font-size: 48px; margin-bottom: 12px; }
+.mh-pending-state h3 {
+  color: #213C7D;
+  font-size: 18px;
+  margin: 0 0 8px;
+}
+.mh-pending-state p {
+  color: #6B7280;
+  font-size: 14px;
+  margin: 0;
+  line-height: 1.6;
+}
+.mh-pending-remove {
+  margin-top: 18px;
+  background: transparent;
+  border: 1.5px solid #E5E7EB;
+  color: #6B7280;
+  border-radius: 8px;
+  padding: 8px 18px;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.mh-pending-remove:hover { border-color: #DC2626; color: #DC2626; }
+
+/* Toast */
+.mh-toast {
+  position: fixed;
+  bottom: 30px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #213C7D;
+  color: #fff;
+  padding: 12px 22px;
+  border-radius: 50px;
+  font-size: 14px;
+  font-weight: 600;
+  box-shadow: 0 8px 24px rgba(0,0,0,.2);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .3s;
+  z-index: 10000;
+}
+.mh-toast.is-visible { opacity: 1; }
+
+@media (max-width: 640px) {
+  .mh-patient-head { padding: 20px; }
+  .mh-patient-name { font-size: 18px; }
+  .mh-card { padding: 20px; }
+}
+</style>
+<!-- Analytics por clínica: pendiente (ver nota en Auth.html). -->
+</head>
+<body data-lang="es">
+
+<!-- Header simplificado (ver nota equivalente en Mis-Cotizaciones.html). -->
+<div class="mh-topbar" id="mh-topbar" style="display:none">
+  <span class="mh-topbar-label">N.° de expediente:</span>
+  <span class="mh-topbar-code" id="mh-topbar-code">—</span>
+</div>
+<header class="site-header">
+  <div class="container header-row">
+    <div class="brand-lockup" id="mh-brand-name" style="color:#fff;font-weight:900;font-size:18px">—</div>
+    <nav class="site-nav" aria-label="Principal">
+      <a href="Cotizador.html">Cotizador</a>
+      <a href="Mis-Cotizaciones.html">Mis Cotizaciones</a>
+    </nav>
+  </div>
+</header>
+
+<!-- ═══ MAIN ═══ -->
+<main class="mh-page">
+
+  <!-- Hero -->
+  <div class="mh-hero">
+    <div class="mh-hero-inner">
+      <div>
+        <div class="mh-hero-eyebrow">📋 Historial Médico</div>
+        <h1 class="mh-hero-h1">Mi Historial Clínico</h1>
+      </div>
+      <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+        <div class="mh-user-chip" id="mh-user-chip" style="display:none">
+          <div class="mh-avatar" id="mh-avatar">?</div>
+          <span id="mh-user-name">—</span>
+        </div>
+        <a id="mh-doctor-portal-btn" href="Expediente-Doctor.html" style="display:none;background:#FDD22C;color:#213C7D;text-decoration:none;padding:8px 16px;border-radius:8px;font-weight:800;font-size:12px;letter-spacing:.06em;text-transform:uppercase;white-space:nowrap;align-items:center;gap:7px;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><path d="M8 2v4M16 2v4M3 10h18M5 4h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z"/></svg>
+          Portal Clínico
+        </a>
+        <button class="mh-logout" id="mh-logout">Cerrar sesión</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Content -->
+  <div class="mh-content">
+
+    <!-- Selector de expediente (oculto hasta tener vinculado) -->
+    <div class="mh-selector" id="mh-selector" style="display:none">
+      <div class="mh-selector-label">Viendo expediente:</div>
+      <select class="mh-selector-select" id="mh-select-codigo"></select>
+      <button class="mh-add-btn" id="btn-vincular">+ Vincular código</button>
+    </div>
+
+    <!-- Loading -->
+    <div id="mh-loading"><div class="mh-spinner"></div></div>
+
+    <!-- Estado: sin expediente vinculado -->
+    <div class="mh-empty" id="mh-empty-novinculado" style="display:none">
+      <div class="mh-empty-icon">🩺</div>
+      <h3>Aún no tienes tu expediente vinculado</h3>
+      <p>Cuando visites la Clínica CMG, el médico te entregará un <strong>código único de paciente</strong>.<br>
+      Ingrésalo aquí para acceder a tu historial médico digital.</p>
+      <button class="mh-add-btn" id="btn-vincular-empty" style="height:48px;padding:0 28px;font-size:14px">
+        🔑 Ingresar mi código de paciente
+      </button>
+    </div>
+
+    <!-- Datos del expediente cargado -->
+    <div id="mh-expediente-data" style="display:none">
+      <!-- Header paciente -->
+      <div class="mh-patient-head">
+        <div>
+          <h2 class="mh-patient-name" id="mh-p-nombre">—</h2>
+          <div class="mh-patient-sub" id="mh-p-sub">—</div>
+        </div>
+        <div class="mh-patient-codebox" id="mh-p-codigo">—</div>
+      </div>
+
+      <!-- Compartir código (solo si es propio) -->
+      <div class="mh-share-box" id="mh-share-box" style="display:none">
+        <div class="mh-share-text">
+          🔗 Comparte tu código <strong id="mh-share-code">—</strong> con familiares para que vean tu historial
+        </div>
+        <button class="mh-share-btn" id="btn-share-code">📋 Copiar</button>
+      </div>
+
+      <!-- Solicitudes de acceso pendientes (solo visible al dueño) -->
+      <div class="mh-requests-box" id="mh-requests-box" style="display:none">
+        <h3 class="mh-requests-title">🔔 Solicitudes de acceso</h3>
+        <div id="mh-requests-list"></div>
+      </div>
+
+      <!-- Datos generales -->
+      <div class="mh-card">
+        <h3 class="mh-card-title">👤 Datos generales</h3>
+        <div class="mh-dg-grid" id="mh-dg-grid"></div>
+      </div>
+
+      <!-- Antecedentes patológicos -->
+      <div class="mh-card">
+        <h3 class="mh-card-title">🏥 Antecedentes patológicos</h3>
+        <div class="mh-ant-list" id="mh-ant-pat"></div>
+      </div>
+
+      <!-- Antecedentes no patológicos -->
+      <div class="mh-card">
+        <h3 class="mh-card-title">🚭 Antecedentes no patológicos</h3>
+        <div class="mh-ant-list" id="mh-ant-nopat"></div>
+      </div>
+
+      <!-- Antecedentes familiares -->
+      <div class="mh-card">
+        <h3 class="mh-card-title">👨‍👩‍👧 Antecedentes familiares</h3>
+        <div id="mh-ant-fam" style="color:#4B5563;line-height:1.6;font-size:14px">—</div>
+      </div>
+
+      <!-- Word del expediente principal -->
+      <div class="mh-card" id="mh-word-card" style="display:none">
+        <h3 class="mh-card-title">📄 Documento del expediente</h3>
+        <p style="color:#6B7280;font-size:14px;margin:0 0 14px">Documento Word con la información completa del expediente clínico generado por tu médico.</p>
+        <a id="mh-word-link" href="#" target="_blank" class="mh-consulta-btn">
+          📥 Descargar expediente clínico (Word)
+        </a>
+      </div>
+
+      <!-- Timeline de consultas -->
+      <div class="mh-card">
+        <h3 class="mh-card-title">📅 Historial de consultas</h3>
+        <div id="mh-consultas-container"></div>
+      </div>
+
+      <!-- Pruebas rápidas vinculadas -->
+      <div class="mh-card">
+        <h3 class="mh-card-title">🧪 Pruebas rápidas</h3>
+        <div id="mh-pruebas-container"></div>
+      </div>
+
+      <!-- Exámenes de laboratorio -->
+      <div class="mh-card">
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:8px">
+          <h3 class="mh-card-title" style="margin:0">🔬 Exámenes de laboratorio</h3>
+          <button id="btn-subir-lab" style="display:none;background:#213C7D;color:#fff;border:none;padding:9px 16px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit">
+            📤 Subir mi examen
+          </button>
+        </div>
+        <p style="font-size:12px;color:#6B7280;margin:0 0 12px">Aquí ves los exámenes de laboratorio que subió CMG o tú mismo.</p>
+        <div id="mh-laboratorio-container"></div>
+      </div>
+    </div>
+
+    <!-- Estado: pendiente de aprobación (compartido no aprobado) -->
+    <div class="mh-pending-state" id="mh-pending-state" style="display:none">
+      <div class="mh-pending-icon" id="mh-pending-icon">⏳</div>
+      <h3 id="mh-pending-title">Solicitud pendiente de aprobación</h3>
+      <p id="mh-pending-msg">El titular de este expediente debe aprobar tu solicitud<br>para que puedas ver su historial médico.</p>
+      <button class="mh-pending-remove" id="btn-remove-pending">Cancelar solicitud</button>
+    </div>
+
+  </div>
+</main>
+
+<!-- Modal vincular código -->
+<div class="mh-modal" id="modal-vincular">
+  <div class="mh-modal-box">
+    <h3 class="mh-modal-title">🔑 Vincular código de paciente</h3>
+    <p class="mh-modal-sub">Ingresa el código que te entregó el médico. Funciona para vincular tu propio expediente o el de un familiar que te haya compartido el suyo.</p>
+    <input type="text" class="mh-modal-input" id="modal-codigo-input" placeholder="PREFIJO-XXXXXX" maxlength="14">
+    <div class="mh-modal-error" id="modal-error"></div>
+    <div class="mh-modal-actions">
+      <button class="mh-modal-btn mh-modal-btn-ghost" id="modal-cancel">Cancelar</button>
+      <button class="mh-modal-btn mh-modal-btn-primary" id="modal-confirmar">Vincular</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal subir examen propio -->
+<div class="mh-modal" id="modal-subir-lab">
+  <div class="mh-modal-box" style="max-width:520px">
+    <h3 class="mh-modal-title">📤 Subir examen de laboratorio</h3>
+    <p class="mh-modal-sub">Sube un PDF con tus resultados. Quedará en tu expediente y tus médicos podrán verlo.</p>
+
+    <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:12px">
+      <div>
+        <label style="font-size:12px;font-weight:700;color:#374151;display:block;margin-bottom:4px">Tipo de examen *</label>
+        <select id="lab-tipo" class="mh-modal-input" style="text-transform:none;letter-spacing:0;font-family:inherit;font-weight:500">
+          <option value="">— Seleccionar —</option>
+          <option value="hematologia">Hematología completa</option>
+          <option value="quimica">Química sanguínea</option>
+          <option value="glucosa">Glucosa</option>
+          <option value="lipidograma">Perfil lipídico</option>
+          <option value="hepatico">Perfil hepático</option>
+          <option value="renal">Perfil renal</option>
+          <option value="tiroideas">Pruebas tiroideas</option>
+          <option value="hba1c">Hemoglobina glicosilada</option>
+          <option value="electrolitos">Electrolitos</option>
+          <option value="coagulacion">Coagulación</option>
+          <option value="orina">Orina (general)</option>
+          <option value="heces">Heces (general)</option>
+          <option value="cultivo">Cultivo</option>
+          <option value="hierro">Hierro / Ferritina</option>
+          <option value="vitb12">Vitamina B12</option>
+          <option value="vitd">Vitamina D</option>
+          <option value="vih">VIH</option>
+          <option value="vdrl">VDRL</option>
+          <option value="hepatitis">Hepatitis B/C</option>
+          <option value="embarazo-sangre">Embarazo (sangre)</option>
+          <option value="marcadores">Marcadores tumorales</option>
+          <option value="otro">Otro (escribir abajo)</option>
+        </select>
+      </div>
+      <div id="lab-tipo-otro-wrap" style="display:none">
+        <label style="font-size:12px;font-weight:700;color:#374151;display:block;margin-bottom:4px">Nombre del examen *</label>
+        <input type="text" id="lab-tipo-otro" class="mh-modal-input" style="text-transform:none;letter-spacing:0;font-family:inherit;font-weight:500">
+      </div>
+      <div>
+        <label style="font-size:12px;font-weight:700;color:#374151;display:block;margin-bottom:4px">Fecha del examen *</label>
+        <input type="date" id="lab-fecha" class="mh-modal-input" style="text-transform:none;letter-spacing:0;font-family:inherit;font-weight:500">
+      </div>
+      <div>
+        <label style="font-size:12px;font-weight:700;color:#374151;display:block;margin-bottom:4px">Notas (opcional)</label>
+        <textarea id="lab-notas" rows="2" class="mh-modal-input" placeholder="Cualquier información relevante" style="text-transform:none;letter-spacing:0;font-family:inherit;font-weight:500;resize:vertical;min-height:60px;line-height:1.4"></textarea>
+      </div>
+      <div>
+        <label id="lab-file-label" for="lab-file" style="display:block;border:2px dashed #C7D2FE;border-radius:8px;padding:18px;text-align:center;background:#F4F6FB;cursor:pointer;font-size:13px;color:#4B5563">
+          <div style="font-size:28px;margin-bottom:4px">📄</div>
+          <div id="lab-file-text">Click para elegir el PDF</div>
+        </label>
+        <input type="file" id="lab-file" accept="application/pdf" style="display:none">
+      </div>
+    </div>
+
+    <div class="mh-modal-error" id="lab-error"></div>
+    <div class="mh-modal-actions">
+      <button class="mh-modal-btn mh-modal-btn-ghost" id="lab-cancel">Cancelar</button>
+      <button class="mh-modal-btn mh-modal-btn-primary" id="lab-confirmar" disabled>📤 Subir PDF</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="mh-toast" id="mh-toast">—</div>
+
+<!-- Float WhatsApp: número de la clínica, ver clinic-config.js -->
+<a class="float-wa" id="mh-float-wa" href="#" aria-label="WhatsApp">
+  <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><path d="M.057 24l1.687-6.163a11.867 11.867 0 0 1-1.587-5.946C.16 5.335 5.495 0 12.05 0a11.817 11.817 0 0 1 8.413 3.488 11.824 11.824 0 0 1 3.48 8.414c-.003 6.557-5.338 11.892-11.893 11.892a11.9 11.9 0 0 1-5.688-1.448L.057 24z"/></svg>
+</a>
+
+<!-- Firebase compat SDK -->
+<script src="clinic-config.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
+<script src="firebase-init.js"></script>
+<script src="r3ads-staff.js"></script>
+
+<script>
+(function () {
+  var CLINIC_ID = window.R3ADS_CLINIC_ID;
+  var CLINIC = window.R3ADS_CLINIC_FALLBACK || {};
+  /* ════════════════════════════════════════════════════════════
+     HELPERS
+     ════════════════════════════════════════════════════════════ */
+  function $id(id) { return document.getElementById(id); }
+  function esc(s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  }
+  function fmtDate(ts) {
+    if (!ts) return '—';
+    var d = ts.toDate ? ts.toDate() : (ts instanceof Date ? ts : new Date(ts));
+    return d.toLocaleDateString('es-HN', { day: '2-digit', month: 'long', year: 'numeric' });
+  }
+  function fmtDateTime(ts) {
+    if (!ts) return '—';
+    var d = ts.toDate ? ts.toDate() : (ts instanceof Date ? ts : new Date(ts));
+    return d.toLocaleDateString('es-HN', { day: '2-digit', month: 'short', year: 'numeric' }) +
+           ' · ' + d.toLocaleTimeString('es-HN', { hour: '2-digit', minute: '2-digit' });
+  }
+  var CAUTERIZACION_SUBTIPOS_LABELS = { normal: 'Normal', parpadoCara: 'Párpado / Cara', lesionGrande: 'Lesión Grande' };
+  function formatCauterizacionDetalle(detalle) {
+    return '🔥 ' + Object.keys(CAUTERIZACION_SUBTIPOS_LABELS).map(function(key){
+      var n = detalle[key] || 0;
+      return n > 0 ? (CAUTERIZACION_SUBTIPOS_LABELS[key] + ' x' + n) : null;
+    }).filter(Boolean).join(' · ');
+  }
+  function calcEdad(fechaNac) {
+    if (!fechaNac) return '';
+    var fn = new Date(fechaNac);
+    if (isNaN(fn)) return '';
+    var hoy = new Date();
+    var e = hoy.getFullYear() - fn.getFullYear();
+    var m = hoy.getMonth() - fn.getMonth();
+    if (m < 0 || (m === 0 && hoy.getDate() < fn.getDate())) e--;
+    return e + ' años';
+  }
+  /* Formatea una fecha cruda "YYYY-MM-DD" (de <input type="date">) a día/mes/año */
+  function fmtFechaCorta(fechaStr) {
+    if (!fechaStr) return '';
+    var d = new Date(fechaStr + 'T00:00:00');
+    if (isNaN(d.getTime())) return fechaStr;
+    return d.toLocaleDateString('es-HN', { day: '2-digit', month: '2-digit', year: 'numeric' });
+  }
+  function toast(msg, ms) {
+    var t = $id('mh-toast');
+    t.textContent = msg;
+    t.classList.add('is-visible');
+    setTimeout(function () { t.classList.remove('is-visible'); }, ms || 2400);
+  }
+
+  /* ── Branding de la clínica ── */
+  $id('mh-brand-name').textContent = CLINIC.nombre || '—';
+  var waLink = $id('mh-float-wa');
+  if (waLink) waLink.href = 'https://wa.me/' + (CLINIC.whatsapp || '');
+
+  var header = document.querySelector('.site-header');
+  if (header) {
+    var onScroll = function () { header.classList.toggle('is-scrolled', window.scrollY > 8); };
+    window.addEventListener('scroll', onScroll, { passive: true }); onScroll();
+  }
+
+  /* ════════════════════════════════════════════════════════════
+     ESTADO
+     ════════════════════════════════════════════════════════════ */
+  var currentUser = null;
+  var userProfile = null; // { codigoExpediente, codigosCompartidos: [] }
+  var codigoActual = null;
+
+  /* ════════════════════════════════════════════════════════════
+     AUTH GUARD
+     ════════════════════════════════════════════════════════════ */
+  r3adsAuth.onAuthStateChanged(function (user) {
+    if (!user) {
+      window.location.href = 'Auth.html?returnTo=Mi-Historial.html';
+      return;
+    }
+    currentUser = user;
+    var name = user.displayName || user.email.split('@')[0];
+    $id('mh-user-chip').style.display = '';
+    $id('mh-avatar').textContent = name.charAt(0).toUpperCase();
+    $id('mh-user-name').textContent = name;
+    r3adsStaff.checkDoctor(user, CLINIC_ID, function (ok) {
+      var doctorBtn = $id('mh-doctor-portal-btn');
+      if (doctorBtn && ok) doctorBtn.style.display = 'flex';
+    });
+    cargarPerfilUsuario();
+  });
+
+  $id('mh-logout').addEventListener('click', function () {
+    r3adsAuth.signOut().then(function () { window.location.href = 'Auth.html'; });
+  });
+
+  /* ════════════════════════════════════════════════════════════
+     CARGAR PERFIL USUARIO (códigos vinculados + compartidos)
+     ════════════════════════════════════════════════════════════ */
+  function cargarPerfilUsuario() {
+    r3adsDb.collection('users').doc(currentUser.uid).get()
+      .then(function (snap) {
+        userProfile = snap.exists ? snap.data() : { codigoExpediente: null, codigosCompartidos: [] };
+        if (!userProfile.codigosCompartidos) userProfile.codigosCompartidos = [];
+
+        $id('mh-loading').style.display = 'none';
+
+        var todosLosCodigos = [];
+        if (userProfile.codigoExpediente) todosLosCodigos.push({ codigo: userProfile.codigoExpediente, propio: true });
+        userProfile.codigosCompartidos.forEach(function (c) {
+          if (c !== userProfile.codigoExpediente) todosLosCodigos.push({ codigo: c, propio: false });
+        });
+
+        if (todosLosCodigos.length === 0) {
+          $id('mh-empty-novinculado').style.display = '';
+          $id('mh-topbar').style.display = 'none';
+          return;
+        }
+
+        /* Mostrar selector */
+        $id('mh-selector').style.display = '';
+        var sel = $id('mh-select-codigo');
+        sel.innerHTML = todosLosCodigos.map(function (x) {
+          return '<option value="' + esc(x.codigo) + '">' +
+            esc(x.codigo) + (x.propio ? ' · Mi expediente' : ' · Compartido conmigo') +
+          '</option>';
+        }).join('');
+        sel.addEventListener('change', function () {
+          cargarExpediente(sel.value);
+        });
+        cargarExpediente(todosLosCodigos[0].codigo);
+      })
+      .catch(function (err) {
+        $id('mh-loading').style.display = 'none';
+        console.error('[Portal Clínico] Error perfil:', err);
+        toast('Error al cargar tu perfil');
+      });
+  }
+
+  /* ════════════════════════════════════════════════════════════
+     CARGAR EXPEDIENTE
+     ════════════════════════════════════════════════════════════ */
+  function cargarExpediente(codigo) {
+    codigoActual = codigo;
+    $id('mh-expediente-data').style.display = 'none';
+    $id('mh-loading').style.display = '';
+    r3adsDb.collection('expedientes').doc(codigo).get()
+      .then(function (snap) {
+        $id('mh-loading').style.display = 'none';
+        if (!snap.exists) {
+          toast('El expediente ' + codigo + ' ya no existe. Quitándolo de tu lista...');
+          desvincularCodigoInexistente(codigo);
+          return;
+        }
+        var exp = snap.data();
+        renderExpediente(codigo, exp);
+        cargarConsultas(codigo);
+        cargarPruebas(codigo, exp);
+        cargarLaboratorio(codigo);
+      })
+      .catch(function (err) {
+        $id('mh-loading').style.display = 'none';
+        console.error('[Portal Clínico] Error expediente:', err);
+        toast('Error al cargar el expediente');
+      });
+  }
+
+  /* Un doctor puede eliminar un expediente por completo (Expediente-Doctor.html),
+     pero las reglas de Firestore solo permiten a cada usuario escribir su propio
+     documento en /users, así que esa referencia queda huérfana en el perfil del
+     paciente. Al detectarla aquí (único lugar donde el propio usuario la lee),
+     se limpia de inmediato para que no vuelva a aparecer en el selector. */
+  function desvincularCodigoInexistente(codigo) {
+    if (!currentUser || !userProfile) return;
+    var esPropio = userProfile.codigoExpediente === codigo;
+    var codigosCompartidos = (userProfile.codigosCompartidos || []).filter(function (c) { return c !== codigo; });
+    r3adsDb.collection('users').doc(currentUser.uid).set({
+      email: currentUser.email,
+      codigoExpediente: esPropio ? null : (userProfile.codigoExpediente || null),
+      codigosCompartidos: codigosCompartidos,
+      updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+    }, { merge: true })
+      .then(function () { cargarPerfilUsuario(); })
+      .catch(function (err) { console.error('[Portal Clínico] Error al desvincular expediente inexistente:', err); });
+  }
+
+  function renderExpediente(codigo, exp) {
+    var dg = exp.datosGenerales || {};
+    var esPropio = userProfile.codigoExpediente && codigo === userProfile.codigoExpediente;
+    var esOwner = exp.ownerUid === currentUser.uid;
+    var enCompartidoCon = exp.compartidoCon && exp.compartidoCon.indexOf(currentUser.uid) !== -1;
+    var solicitudes = exp.solicitudesAcceso || [];
+    var solicitudPendiente = solicitudes.some(function (s) { return s.uid === currentUser.uid; });
+
+    /* Topbar solo si es propio */
+    if (esPropio || esOwner) {
+      $id('mh-topbar').style.display = '';
+      $id('mh-topbar-code').textContent = codigo;
+    } else {
+      $id('mh-topbar').style.display = 'none';
+    }
+
+    /* Si es compartido y NO aprobado → mostrar estado pendiente */
+    if (!esPropio && !esOwner && !enCompartidoCon) {
+      $id('mh-expediente-data').style.display = 'none';
+      $id('mh-pending-state').style.display = '';
+      if (solicitudPendiente) {
+        $id('mh-pending-icon').textContent = '⏳';
+        $id('mh-pending-title').textContent = 'Solicitud pendiente de aprobación';
+        $id('mh-pending-msg').innerHTML = 'El titular de este expediente debe aprobar tu solicitud<br>para que puedas ver su historial médico.';
+        $id('btn-remove-pending').textContent = 'Cancelar solicitud';
+      } else {
+        $id('mh-pending-icon').textContent = '🚫';
+        $id('mh-pending-title').textContent = 'Sin acceso a este expediente';
+        $id('mh-pending-msg').innerHTML = 'Tu solicitud fue rechazada o aún no has solicitado acceso.<br>Puedes quitar este expediente de tu lista.';
+        $id('btn-remove-pending').textContent = 'Quitar de mi lista';
+      }
+      return;
+    }
+
+    /* Ocultar estado pendiente, mostrar datos */
+    $id('mh-pending-state').style.display = 'none';
+    $id('mh-expediente-data').style.display = '';
+
+    $id('mh-p-nombre').textContent = dg.nombreCompleto || '—';
+    var sub = [];
+    if (calcEdad(dg.fechaNacimiento)) sub.push(calcEdad(dg.fechaNacimiento));
+    if (dg.sexo) sub.push(dg.sexo === 'M' ? 'Masculino' : dg.sexo === 'F' ? 'Femenino' : dg.sexo);
+    if (dg.tipoSangre) sub.push('Sangre ' + dg.tipoSangre);
+    $id('mh-p-sub').textContent = sub.join(' · ') || '—';
+    $id('mh-p-codigo').textContent = codigo;
+
+    /* Share box solo si es propio */
+    if (esPropio || esOwner) {
+      $id('mh-share-box').style.display = '';
+      $id('mh-share-code').textContent = codigo;
+    } else {
+      $id('mh-share-box').style.display = 'none';
+    }
+
+    /* Solicitudes de acceso pendientes (solo visible al dueño) */
+    if ((esPropio || esOwner) && solicitudes.length > 0) {
+      $id('mh-requests-box').style.display = '';
+      $id('mh-requests-list').innerHTML = solicitudes.map(function (sol) {
+        return '<div class="mh-request-item">' +
+          '<div class="mh-request-info">' +
+            '<div class="mh-request-email">' + esc(sol.displayName || sol.email) + '</div>' +
+            '<div class="mh-request-date">' + esc(sol.email) + (sol.fecha ? ' · ' + fmtDate(sol.fecha) : '') + '</div>' +
+          '</div>' +
+          '<div class="mh-request-actions">' +
+            '<button class="mh-request-btn mh-request-btn-approve" data-uid="' + esc(sol.uid) + '" data-codigo="' + esc(codigo) + '">✓ Aprobar</button>' +
+            '<button class="mh-request-btn mh-request-btn-deny" data-uid="' + esc(sol.uid) + '" data-codigo="' + esc(codigo) + '">✗ Rechazar</button>' +
+          '</div>' +
+        '</div>';
+      }).join('');
+
+      /* Event delegation para aprobar/rechazar */
+      $id('mh-requests-list').onclick = function (e) {
+        var btn = e.target.closest('.mh-request-btn');
+        if (!btn) return;
+        var uid = btn.getAttribute('data-uid');
+        var cod = btn.getAttribute('data-codigo');
+        if (btn.classList.contains('mh-request-btn-approve')) {
+          aprobarSolicitud(cod, uid);
+        } else if (btn.classList.contains('mh-request-btn-deny')) {
+          rechazarSolicitud(cod, uid);
+        }
+      };
+    } else {
+      $id('mh-requests-box').style.display = 'none';
+    }
+
+    /* Datos generales grid */
+    var items = [
+      ['Fecha nacimiento', dg.fechaNacimiento ? new Date(dg.fechaNacimiento + 'T00:00:00').toLocaleDateString('es-HN', { day:'2-digit', month:'long', year:'numeric' }) : null],
+      ['Teléfono', dg.telefono],
+      ['Correo', dg.email],
+      ['Estado civil', dg.estadoCivil],
+      ['Ocupación', dg.ocupacion],
+      ['Escolaridad', dg.escolaridad],
+      ['Religión', dg.religion],
+      ['Lugar nacimiento', dg.lugarNacimiento],
+      ['Dirección', dg.direccion],
+      ['Contacto emergencia', dg.contactoEmergencia],
+      ['Tel. emergencia', dg.telefonoEmergencia],
+      ['Alergias', dg.alergias]
+    ].filter(function (it) { return it[1]; });
+
+    if (items.length === 0) {
+      $id('mh-dg-grid').innerHTML = '<div class="mh-ant-empty">No hay datos generales registrados</div>';
+    } else {
+      $id('mh-dg-grid').innerHTML = items.map(function (it) {
+        return '<div class="mh-dg-item">' +
+          '<div class="mh-dg-label">' + esc(it[0]) + '</div>' +
+          '<div class="mh-dg-value">' + esc(it[1]) + '</div>' +
+        '</div>';
+      }).join('');
+    }
+
+    /* Antecedentes patológicos */
+    renderAntecedentes('mh-ant-pat', exp.antecedentesPatologicos);
+    renderAntecedentes('mh-ant-nopat', exp.antecedentesNoPatologicos);
+
+    /* Familiares */
+    $id('mh-ant-fam').textContent = exp.antecedentesFamiliares || '— Sin registrar —';
+
+    /* Word card */
+    if (exp.wordExpedienteUrl) {
+      $id('mh-word-card').style.display = '';
+      $id('mh-word-link').href = exp.wordExpedienteUrl;
+    } else {
+      $id('mh-word-card').style.display = 'none';
+    }
+  }
+
+  function renderAntecedentes(containerId, data) {
+    var c = $id(containerId);
+    if (!data || Object.keys(data).length === 0) {
+      c.innerHTML = '<div class="mh-ant-empty">— Sin registrar —</div>';
+      return;
+    }
+    var conSi = Object.keys(data).filter(function (k) { return data[k].tiene; });
+    if (conSi.length === 0) {
+      c.innerHTML = '<div class="mh-ant-empty">✓ Sin antecedentes positivos registrados</div>';
+      return;
+    }
+    c.innerHTML = conSi.map(function (k) {
+      var item = data[k];
+      return '<div class="mh-ant-badge" title="' + esc(item.detalle || '') + '">' +
+        esc(k) + (item.detalle ? ' · ' + esc(item.detalle) : '') +
+      '</div>';
+    }).join('');
+  }
+
+  /* ════════════════════════════════════════════════════════════
+     CARGAR CONSULTAS
+     ════════════════════════════════════════════════════════════ */
+  function cargarConsultas(codigo) {
+    var cont = $id('mh-consultas-container');
+    cont.innerHTML = '<div class="mh-spinner"></div>';
+    // NOTA: where compuesto puede pedir índice — la consola de Firebase da
+    // el enlace para crearlo si falla.
+    r3adsDb.collection('consultas')
+      .where('clinicId', '==', CLINIC_ID)
+      .where('codigoPaciente', '==', codigo)
+      .get()
+      .then(function (snap) {
+        var consultas = [];
+        snap.forEach(function (doc) {
+          var data = doc.data();
+          /* ocultar Pre clínicas pendientes; servicios sí aparecen (pendientes o completados) */
+          if (data.status === 'preclinica') return;
+          /* ocultar consultas incompletas/vacías: documentos creados pero nunca
+             finalizados por un médico (sin motivo ni diagnóstico). Los servicios
+             tienen su propia tarjeta y no deben filtrarse aquí. */
+          var esServicio = data.status === 'servicio' || data.status === 'servicio-completo';
+          var tieneContenido = (data.motivoConsulta && data.motivoConsulta.trim()) ||
+                               (data.diagnostico   && data.diagnostico.trim());
+          if (!esServicio && !tieneContenido) return;
+          consultas.push(Object.assign({ _id: doc.id }, data));
+        });
+        consultas.sort(function (a, b) {
+          var getMs = function (c) {
+            var f = c.fecha || c.fechaServicio;
+            return f && f.toMillis ? f.toMillis() : 0;
+          };
+          return getMs(b) - getMs(a);
+        });
+        renderConsultas(consultas);
+      })
+      .catch(function (err) {
+        cont.innerHTML = '<div class="mh-ant-empty">Error al cargar consultas</div>';
+        console.error('[Portal Clínico] Error consultas:', err);
+      });
+  }
+
+  function renderConsultas(consultas) {
+    var cont = $id('mh-consultas-container');
+    if (!consultas.length) {
+      cont.innerHTML = '<div class="mh-ant-empty" style="text-align:center;padding:30px">Aún no hay consultas registradas en este expediente.</div>';
+      return;
+    }
+    cont.innerHTML = '<div class="mh-timeline">' + consultas.map(function (c) {
+      var esServicioCompleto  = c.status === 'servicio-completo';
+      var esServicioPendiente = c.status === 'servicio';
+
+      if (esServicioCompleto || esServicioPendiente) {
+        /* ── Tarjeta de servicio ── */
+        var fechaDisplay  = c.fecha || c.fechaServicio;
+        var badgeColor    = esServicioCompleto ? '#d1fae5' : '#FEF3C7';
+        var badgeText     = esServicioCompleto ? '#065f46' : '#92400E';
+        var badgeLabel    = esServicioCompleto ? '🛎️ Servicio completado' : '🕐 Servicio pendiente';
+        return '<div class="mh-consulta">' +
+          '<div class="mh-consulta-head">' +
+            '<div class="mh-consulta-fecha">📅 ' + fmtDateTime(fechaDisplay) +
+              ' <span style="background:' + badgeColor + ';color:' + badgeText + ';font-size:11px;font-weight:700;padding:1px 7px;border-radius:20px;margin-left:4px">' + badgeLabel + '</span>' +
+            '</div>' +
+            '<div class="mh-consulta-doctor">' + esc(CLINIC.nombre || '') + '</div>' +
+          '</div>' +
+          '<div class="mh-consulta-motivo"><strong>Servicio:</strong> ' + esc(c.servicioNombre || '—') + (c.servicioCantidad > 1 ? ' <span style="color:#6B7280">x' + c.servicioCantidad + '</span>' : '') + '</div>' +
+          (c.servicioCauterizacionDetalle ? '<div class="mh-consulta-motivo" style="font-size:12px;color:#9A3412;margin-top:2px">' + esc(formatCauterizacionDetalle(c.servicioCauterizacionDetalle)) + '</div>' : '') +
+          (c.servicioNotas ? '<div class="mh-consulta-motivo" style="font-size:12px;color:#6B7280;margin-top:4px"><strong>Notas:</strong> ' + esc(c.servicioNotas) + '</div>' : '') +
+          (c.servicioNotasFin ? '<div class="mh-consulta-dx"><strong>Observaciones:</strong> ' + esc(c.servicioNotasFin) + '</div>' : '') +
+          '<div class="mh-consulta-actions"></div>' +
+        '</div>';
+      }
+
+      /* ── Tarjeta de consulta médica normal ── */
+      var sv = c.signosVitales || {};
+      var vitales = [];
+      if (sv.ta) vitales.push('TA ' + sv.ta);
+      if (sv.fc) vitales.push('FC ' + sv.fc);
+      if (sv.temp) vitales.push('T° ' + sv.temp);
+      if (sv.peso) vitales.push(sv.peso + ' kg');
+
+      return '<div class="mh-consulta">' +
+        '<div class="mh-consulta-head">' +
+          '<div class="mh-consulta-fecha">📅 ' + fmtDateTime(c.fecha) + '</div>' +
+          '<div class="mh-consulta-doctor">Dr. ' + esc(c.doctorNombre || c.doctorEmail || CLINIC.nombre || '—') + '</div>' +
+        '</div>' +
+        '<div class="mh-consulta-motivo"><strong>Motivo:</strong> ' + esc(c.motivoConsulta || '—') + '</div>' +
+        (vitales.length ? '<div class="mh-consulta-motivo" style="font-size:12px;color:#6B7280;margin-top:4px"><strong>Signos vitales:</strong> ' + esc(vitales.join(' · ')) + '</div>' : '') +
+        (c.diagnostico ? '<div class="mh-consulta-dx"><strong>Diagnóstico:</strong> ' + esc(c.diagnostico) + '</div>' : '') +
+        (c.tratamiento ? '<div class="mh-consulta-dx"><strong>Tratamiento:</strong> ' + esc(c.tratamiento) + '</div>' : '') +
+        (c.recetaExterna && c.recetaExterna.trim() ? '<div class="mh-consulta-dx" style="background:#FFF7ED;border:1px solid #FED7AA;padding:8px 12px;border-radius:6px;margin-top:8px"><strong>🏥 Receta externa (comprar en farmacia):</strong><br>' + esc(c.recetaExterna) + '</div>' : '') +
+        (c.pruebaSensibilidad && c.pruebaSensibilidad.realizada ? '<div class="mh-consulta-dx" style="background:#FFF7ED;border:1px solid #FED7AA;padding:8px 12px;border-radius:6px;margin-top:8px"><strong>🧪 Prueba de sensibilidad:</strong> ' + esc(c.pruebaSensibilidad.medicamento) + ' → ' + esc(c.pruebaSensibilidad.resultado) + (c.pruebaSensibilidad.observaciones ? '<br><small>' + esc(c.pruebaSensibilidad.observaciones) + '</small>' : '') + '</div>' : '') +
+        (c.proximaCita ? '<div class="mh-consulta-dx" style="color:#FDD22C;background:#213C7D;padding:8px 12px;border-radius:6px;margin-top:10px"><strong>📅 Próxima cita:</strong> ' + esc(new Date(c.proximaCita).toLocaleDateString('es-HN', { day:'2-digit', month:'long', year:'numeric' })) + '</div>' : '') +
+        '<div class="mh-consulta-actions">' +
+          (c.pdfUrl ? '<a class="mh-consulta-btn" href="' + esc(c.pdfUrl) + '" target="_blank">📄 Descargar PDF</a>' : '') +
+        '</div>' +
+      '</div>';
+    }).join('') + '</div>';
+  }
+
+  /* ════════════════════════════════════════════════════════════
+     PRUEBAS RÁPIDAS
+     ════════════════════════════════════════════════════════════ */
+  function cargarPruebas(codigo, exp) {
+    var cont = $id('mh-pruebas-container');
+    if (!cont) return;
+    cont.innerHTML = '<div class="mh-spinner"></div>';
+
+    /* Solo consultamos por codigoPaciente + clinicId; las reglas Firestore
+       además permiten leer únicamente pruebas ligadas al expediente del
+       paciente dentro de esta clínica. */
+    r3adsDb.collection('resultadosPruebas')
+      .where('clinicId', '==', CLINIC_ID)
+      .where('codigoPaciente', '==', codigo)
+      .get()
+      .then(function (snap) {
+        var arr = [];
+        snap.forEach(function (doc) {
+          arr.push(Object.assign({ _id: doc.id }, doc.data()));
+        });
+        arr.sort(function (a, b) {
+          var ta = a.createdAt && a.createdAt.toMillis ? a.createdAt.toMillis() : 0;
+          var tb = b.createdAt && b.createdAt.toMillis ? b.createdAt.toMillis() : 0;
+          return tb - ta;
+        });
+        renderPruebas(arr);
+      })
+      .catch(function (err) {
+        cont.innerHTML = '<div class="mh-ant-empty">Error al cargar pruebas</div>';
+        console.error('[Portal Clínico] Error pruebas:', err);
+      });
+  }
+
+  function renderPruebas(pruebas) {
+    var cont = $id('mh-pruebas-container');
+    if (!pruebas.length) {
+      cont.innerHTML = '<div class="mh-ant-empty">Aún no tienes pruebas rápidas registradas.</div>';
+      return;
+    }
+    var labels = {
+      embarazo: '🤰 Embarazo',
+      dengue: '🦟 Dengue NS1',
+      duo: '🧬 DUO (COVID-Influenza)',
+      antigeno: '🧪 Antígeno COVID-19'
+    };
+    cont.innerHTML = pruebas.map(function (pr) {
+      var resumen = '';
+      if (pr.resultados) {
+        resumen = Object.keys(pr.resultados).map(function (k) {
+          return '<strong>' + esc(k) + ':</strong> ' + esc(pr.resultados[k]);
+        }).join(' · ');
+      }
+      var fechaTxt = pr.fecha || '—';
+      return '<div style="background:#F9FAFB;border-left:4px solid #FDD22C;border-radius:8px;padding:14px 16px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap">' +
+        '<div style="flex:1;min-width:0">' +
+          '<div style="font-size:13px;font-weight:700;color:#213C7D;margin-bottom:4px">' + (labels[pr.tipo] || '🧪 ' + esc(pr.tipo)) + ' · 📅 ' + esc(fechaTxt) + (pr.horaToma ? ' ' + esc(pr.horaToma) : '') + '</div>' +
+          '<div style="font-size:13px;color:#4B5563">' + resumen + '</div>' +
+        '</div>' +
+        '<a href="Ver-Prueba.html?id=' + esc(pr._id) + '" target="_blank" rel="noopener" style="background:#213C7D;color:#fff;text-decoration:none;padding:8px 14px;border-radius:6px;font-size:12px;font-weight:700;white-space:nowrap">📄 Ver / PDF</a>' +
+      '</div>';
+    }).join('');
+  }
+
+  /* ════════════════════════════════════════════════════════════
+     EXÁMENES DE LABORATORIO
+     ════════════════════════════════════════════════════════════ */
+  var puedeSubirLab = false; /* true si el usuario es owner del expediente actual */
+
+  function cargarLaboratorio(codigo) {
+    var cont = $id('mh-laboratorio-container');
+    if (!cont) return;
+    cont.innerHTML = '<div class="mh-spinner"></div>';
+
+    /* Mostrar/ocultar botón de subir según ownership */
+    r3adsDb.collection('expedientes').doc(codigo).get().then(function (expSnap) {
+      var exp = expSnap.exists ? expSnap.data() : null;
+      puedeSubirLab = !!(exp && exp.ownerUid === currentUser.uid);
+      var btn = $id('btn-subir-lab');
+      if (btn) btn.style.display = puedeSubirLab ? '' : 'none';
+    });
+
+    r3adsDb.collection('examenesLaboratorio')
+      .where('clinicId', '==', CLINIC_ID)
+      .where('codigoPaciente', '==', codigo)
+      .get()
+      .then(function (snap) {
+        var arr = [];
+        snap.forEach(function (doc) {
+          arr.push(Object.assign({ _id: doc.id }, doc.data()));
+        });
+        arr.sort(function (a, b) {
+          var ta = a.createdAt && a.createdAt.toMillis ? a.createdAt.toMillis() : 0;
+          var tb = b.createdAt && b.createdAt.toMillis ? b.createdAt.toMillis() : 0;
+          return tb - ta;
+        });
+        renderLaboratorio(arr);
+      })
+      .catch(function (err) {
+        cont.innerHTML = '<div class="mh-ant-empty">Error al cargar exámenes</div>';
+        console.error('[Portal Clínico] Error laboratorio:', err);
+      });
+  }
+
+  function renderLaboratorio(examenes) {
+    var cont = $id('mh-laboratorio-container');
+    if (!examenes.length) {
+      cont.innerHTML = '<div class="mh-ant-empty">Aún no hay exámenes registrados. ' + (puedeSubirLab ? 'Puedes subir el primero con el botón de arriba.' : '') + '</div>';
+      return;
+    }
+    cont.innerHTML = examenes.map(function (ex) {
+      var fecha = fmtFechaCorta(ex.fechaExamen) || '—';
+      var origen = ex.subidoPorPaciente
+        ? '<span style="background:#DBEAFE;color:#1E40AF;padding:2px 8px;border-radius:100px;font-size:11px;font-weight:700;margin-left:6px">Subido por ti</span>'
+        : '<span style="background:#FEF3C7;color:#92400E;padding:2px 8px;border-radius:100px;font-size:11px;font-weight:700;margin-left:6px">Por ' + esc(CLINIC.nombre || 'la clínica') + '</span>';
+      return '<div style="background:#F9FAFB;border-left:4px solid #4BACC6;border-radius:8px;padding:14px 16px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap">' +
+        '<div style="flex:1;min-width:0">' +
+          '<div style="font-size:13px;font-weight:700;color:#213C7D;margin-bottom:4px">🔬 ' + esc(ex.tipoNombre || ex.tipo) + ' · 📅 ' + esc(fecha) + origen + '</div>' +
+          (ex.proveedor ? '<div style="font-size:12px;color:#6B7280">Proveedor: ' + esc(ex.proveedor) + '</div>' : '') +
+          (ex.notas ? '<div style="font-size:12px;color:#4B5563;margin-top:4px">' + esc(ex.notas) + '</div>' : '') +
+        '</div>' +
+        '<a href="' + esc(ex.pdfUrl) + '" target="_blank" rel="noopener" style="background:#213C7D;color:#fff;text-decoration:none;padding:8px 14px;border-radius:6px;font-size:12px;font-weight:700;white-space:nowrap">📄 Ver / Descargar</a>' +
+      '</div>';
+    }).join('');
+  }
+
+  /* ─── Modal subir examen (paciente) ─── */
+  var labFile = null;
+
+  function abrirModalLab() {
+    if (!puedeSubirLab || !codigoActual) {
+      toast('Solo puedes subir exámenes a tu propio expediente');
+      return;
+    }
+    $id('lab-tipo').value = '';
+    $id('lab-tipo-otro').value = '';
+    $id('lab-tipo-otro-wrap').style.display = 'none';
+    $id('lab-fecha').value = new Date().toISOString().slice(0, 10);
+    $id('lab-notas').value = '';
+    $id('lab-file').value = '';
+    $id('lab-file-text').textContent = 'Click para elegir el PDF';
+    $id('lab-file-label').style.borderColor = '#C7D2FE';
+    $id('lab-file-label').style.background = '#F4F6FB';
+    $id('lab-error').classList.remove('is-visible');
+    $id('lab-confirmar').disabled = true;
+    labFile = null;
+    $id('modal-subir-lab').classList.add('is-open');
+  }
+  function cerrarModalLab() { $id('modal-subir-lab').classList.remove('is-open'); }
+
+  function updateLabBtn() {
+    var tipo = $id('lab-tipo').value;
+    var tipoOtro = $id('lab-tipo-otro').value.trim();
+    var fecha = $id('lab-fecha').value;
+    var valid = tipo && (tipo !== 'otro' || tipoOtro) && fecha && labFile;
+    $id('lab-confirmar').disabled = !valid;
+  }
+
+  if ($id('btn-subir-lab')) {
+    $id('btn-subir-lab').addEventListener('click', abrirModalLab);
+    $id('lab-cancel').addEventListener('click', cerrarModalLab);
+    $id('modal-subir-lab').addEventListener('click', function (e) {
+      if (e.target === $id('modal-subir-lab')) cerrarModalLab();
+    });
+    $id('lab-tipo').addEventListener('change', function () {
+      $id('lab-tipo-otro-wrap').style.display = this.value === 'otro' ? '' : 'none';
+      updateLabBtn();
+    });
+    ['lab-tipo-otro', 'lab-fecha'].forEach(function (id) {
+      $id(id).addEventListener('input', updateLabBtn);
+    });
+    $id('lab-file').addEventListener('change', function (e) {
+      var f = e.target.files[0];
+      if (!f) { labFile = null; return; }
+      if (f.type !== 'application/pdf' && !f.name.toLowerCase().endsWith('.pdf')) {
+        toast('Solo se aceptan archivos PDF');
+        e.target.value = '';
+        return;
+      }
+      if (f.size > 15 * 1024 * 1024) {
+        toast('El archivo excede 15 MB');
+        e.target.value = '';
+        return;
+      }
+      labFile = f;
+      $id('lab-file-text').innerHTML = '✓ <strong>' + esc(f.name) + '</strong><br><span style="font-size:11px;color:#6B7280">(' + (f.size / 1024 / 1024).toFixed(2) + ' MB)</span>';
+      $id('lab-file-label').style.borderColor = '#059669';
+      $id('lab-file-label').style.background = '#ECFDF5';
+      updateLabBtn();
+    });
+
+    $id('lab-confirmar').addEventListener('click', function () {
+      if ($id('lab-confirmar').disabled) return;
+      var TIPOS_LABELS = {
+        hematologia:'Hematología completa',quimica:'Química sanguínea',glucosa:'Glucosa',
+        lipidograma:'Perfil lipídico',hepatico:'Perfil hepático',renal:'Perfil renal',
+        tiroideas:'Pruebas tiroideas',hba1c:'Hemoglobina glicosilada',electrolitos:'Electrolitos',
+        coagulacion:'Coagulación',orina:'Orina (general)',heces:'Heces (general)',
+        cultivo:'Cultivo',hierro:'Hierro / Ferritina',vitb12:'Vitamina B12',vitd:'Vitamina D',
+        vih:'VIH',vdrl:'VDRL',hepatitis:'Hepatitis B/C','embarazo-sangre':'Embarazo (sangre)',
+        marcadores:'Marcadores tumorales',otro:'Otro'
+      };
+      var tipoVal = $id('lab-tipo').value;
+      var tipoNombre = tipoVal === 'otro' ? $id('lab-tipo-otro').value.trim() : TIPOS_LABELS[tipoVal];
+      var fecha = $id('lab-fecha').value;
+      var notas = $id('lab-notas').value.trim();
+
+      var btn = $id('lab-confirmar');
+      btn.disabled = true;
+      btn.textContent = 'Subiendo...';
+
+      var ts = new Date().toISOString().replace(/[:.]/g, '-');
+      var safeTipo = (tipoNombre || 'examen').replace(/[^a-zA-Z0-9-]/g, '_').slice(0, 30);
+      var storagePath = 'clinics/' + CLINIC_ID + '/examenes-laboratorio/paciente-' + currentUser.uid + '/' + ts + '-' + safeTipo + '.pdf';
+      var ref = firebase.storage().ref(storagePath);
+
+      ref.put(labFile)
+        .then(function (snap) { return snap.ref.getDownloadURL(); })
+        .then(function (url) {
+          var docData = {
+            tipo: tipoVal,
+            tipoNombre: tipoNombre,
+            clinicId: CLINIC_ID,
+            fechaExamen: fecha,
+            notas: notas,
+            pdfUrl: url,
+            storagePath: storagePath,
+            codigoPaciente: codigoActual,
+            fileName: labFile.name,
+            fileSize: labFile.size,
+            subidoPorPaciente: true,
+            subidoPor: currentUser.email,
+            subidoPorNombre: currentUser.displayName || currentUser.email.split('@')[0],
+            createdAt: firebase.firestore.FieldValue.serverTimestamp()
+          };
+          return r3adsDb.collection('examenesLaboratorio').add(docData);
+        })
+        .then(function () {
+          btn.disabled = false;
+          btn.textContent = '📤 Subir PDF';
+          toast('✓ Examen subido a tu expediente');
+          cerrarModalLab();
+          cargarLaboratorio(codigoActual);
+        })
+        .catch(function (err) {
+          console.error('[Portal Clínico] Error subiendo:', err);
+          btn.disabled = false;
+          btn.textContent = '📤 Subir PDF';
+          var e = $id('lab-error');
+          e.textContent = 'Error: ' + err.message;
+          e.classList.add('is-visible');
+        });
+    });
+  }
+
+  /* ════════════════════════════════════════════════════════════
+     MODAL VINCULAR CÓDIGO
+     ════════════════════════════════════════════════════════════ */
+  function openModal() {
+    $id('modal-codigo-input').value = '';
+    $id('modal-error').classList.remove('is-visible');
+    $id('modal-vincular').classList.add('is-open');
+    setTimeout(function () { $id('modal-codigo-input').focus(); }, 100);
+  }
+  function closeModal() { $id('modal-vincular').classList.remove('is-open'); }
+
+  $id('btn-vincular').addEventListener('click', openModal);
+  $id('btn-vincular-empty').addEventListener('click', openModal);
+  $id('modal-cancel').addEventListener('click', closeModal);
+  $id('modal-vincular').addEventListener('click', function (e) {
+    if (e.target === $id('modal-vincular')) closeModal();
+  });
+  $id('modal-codigo-input').addEventListener('input', function (e) {
+    e.target.value = e.target.value.toUpperCase();
+  });
+  $id('modal-codigo-input').addEventListener('keydown', function (e) {
+    if (e.key === 'Enter') $id('modal-confirmar').click();
+  });
+
+  $id('modal-confirmar').addEventListener('click', function () {
+    var codigo = $id('modal-codigo-input').value.trim().toUpperCase();
+    if (!codigo) {
+      mostrarErrorModal('Ingresa un código válido.');
+      return;
+    }
+    var prefijo = (CLINIC.prefijoCodigoPaciente || 'CLI') + '-';
+    if (codigo.indexOf(prefijo) !== 0) codigo = prefijo + codigo;
+
+    $id('modal-confirmar').disabled = true;
+    $id('modal-confirmar').textContent = 'Verificando...';
+
+    /* Verificar que existe el expediente */
+    r3adsDb.collection('expedientes').doc(codigo).get()
+      .then(function (snap) {
+        if (!snap.exists) {
+          mostrarErrorModal('No existe un expediente con ese código. Verifica que esté correcto.');
+          resetModalBtn();
+          return null;
+        }
+        var exp = snap.data();
+        /* Determinar si es propio o compartido:
+           - Si el expediente NO tiene ownerUid → vincular como propio
+           - Si el expediente tiene ownerUid === currentUser.uid → ya es mío
+           - Si el expediente tiene otro ownerUid → es compartido
+        */
+        if (!exp.ownerUid && !userProfile.codigoExpediente) {
+          /* Vincular como propio */
+          return r3adsDb.collection('expedientes').doc(codigo).update({
+            ownerUid: currentUser.uid,
+            ownerVinculado: true,
+            ownerEmail: currentUser.email,
+            updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+          }).then(function () {
+            return r3adsDb.collection('users').doc(currentUser.uid).set({
+              email: currentUser.email,
+              codigoExpediente: codigo,
+              codigosCompartidos: userProfile.codigosCompartidos || [],
+              updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+            }, { merge: true });
+          }).then(function () {
+            toast('✓ Expediente vinculado como tuyo');
+            closeModal();
+            cargarPerfilUsuario();
+          });
+        } else if (exp.ownerUid === currentUser.uid) {
+          mostrarErrorModal('Este expediente ya está vinculado a tu cuenta.');
+          resetModalBtn();
+          return null;
+        } else {
+          /* Solicitar acceso compartido (requiere aprobación del titular) */
+          /* Verificar si ya tiene acceso aprobado */
+          if (exp.compartidoCon && exp.compartidoCon.indexOf(currentUser.uid) !== -1) {
+            if (userProfile.codigosCompartidos.indexOf(codigo) !== -1) {
+              mostrarErrorModal('Ya tienes acceso a este expediente compartido.');
+              resetModalBtn();
+              return null;
+            }
+            var nuevosAprobados = (userProfile.codigosCompartidos || []).concat([codigo]);
+            return r3adsDb.collection('users').doc(currentUser.uid).set({
+              email: currentUser.email,
+              codigoExpediente: userProfile.codigoExpediente || null,
+              codigosCompartidos: nuevosAprobados,
+              updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+            }, { merge: true }).then(function () {
+              toast('✓ Expediente compartido agregado');
+              closeModal();
+              cargarPerfilUsuario();
+            });
+          }
+          /* Verificar si ya tiene solicitud pendiente */
+          var solicitudes = exp.solicitudesAcceso || [];
+          var yaSolicitado = solicitudes.some(function (s) { return s.uid === currentUser.uid; });
+          if (yaSolicitado) {
+            mostrarErrorModal('Ya enviaste una solicitud de acceso. Espera a que el titular la apruebe.');
+            resetModalBtn();
+            return null;
+          }
+          if (userProfile.codigosCompartidos.indexOf(codigo) !== -1) {
+            mostrarErrorModal('Ya tienes este expediente en tu lista. Espera a que el titular apruebe tu solicitud.');
+            resetModalBtn();
+            return null;
+          }
+          /* Crear solicitud de acceso */
+          var nuevaSolicitud = {
+            uid: currentUser.uid,
+            email: currentUser.email,
+            displayName: currentUser.displayName || currentUser.email.split('@')[0],
+            fecha: new Date().toISOString()
+          };
+          var nuevos = (userProfile.codigosCompartidos || []).concat([codigo]);
+          return r3adsDb.collection('expedientes').doc(codigo).update({
+            solicitudesAcceso: firebase.firestore.FieldValue.arrayUnion(nuevaSolicitud),
+            updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+          }).then(function () {
+            return r3adsDb.collection('users').doc(currentUser.uid).set({
+              email: currentUser.email,
+              codigoExpediente: userProfile.codigoExpediente || null,
+              codigosCompartidos: nuevos,
+              updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+            }, { merge: true });
+          }).then(function () {
+            toast('✓ Solicitud enviada. El titular debe aprobar tu acceso.');
+            closeModal();
+            cargarPerfilUsuario();
+          });
+        }
+      })
+      .catch(function (err) {
+        console.error('[Portal Clínico] Vincular error:', err);
+        mostrarErrorModal('Error: ' + err.message);
+        resetModalBtn();
+      });
+  });
+
+  function mostrarErrorModal(msg) {
+    var el = $id('modal-error');
+    el.textContent = msg;
+    el.classList.add('is-visible');
+  }
+  function resetModalBtn() {
+    $id('modal-confirmar').disabled = false;
+    $id('modal-confirmar').textContent = 'Vincular';
+  }
+
+  /* ════════════════════════════════════════════════════════════
+     APROBAR / RECHAZAR SOLICITUDES DE ACCESO
+     ════════════════════════════════════════════════════════════ */
+  function aprobarSolicitud(codigo, uid) {
+    r3adsDb.collection('expedientes').doc(codigo).get().then(function (snap) {
+      if (!snap.exists) return;
+      var exp = snap.data();
+      var solicitudes = exp.solicitudesAcceso || [];
+      var solicitante = solicitudes.find(function (s) { return s.uid === uid; });
+      if (!solicitante) { toast('Solicitud no encontrada'); return; }
+
+      /* Remover de solicitudesAcceso y agregar a compartidoCon */
+      var nuevasSolicitudes = solicitudes.filter(function (s) { return s.uid !== uid; });
+      return r3adsDb.collection('expedientes').doc(codigo).update({
+        solicitudesAcceso: nuevasSolicitudes,
+        compartidoCon: firebase.firestore.FieldValue.arrayUnion(uid),
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+      });
+    }).then(function () {
+      toast('✓ Acceso aprobado');
+      cargarExpediente(codigoActual);
+    }).catch(function (err) {
+      console.error('[Portal Clínico] Error aprobar:', err);
+      toast('Error al aprobar solicitud');
+    });
+  }
+
+  function rechazarSolicitud(codigo, uid) {
+    r3adsDb.collection('expedientes').doc(codigo).get().then(function (snap) {
+      if (!snap.exists) return;
+      var exp = snap.data();
+      var solicitudes = exp.solicitudesAcceso || [];
+      var nuevasSolicitudes = solicitudes.filter(function (s) { return s.uid !== uid; });
+
+      return r3adsDb.collection('expedientes').doc(codigo).update({
+        solicitudesAcceso: nuevasSolicitudes,
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+      });
+    }).then(function () {
+      toast('Solicitud rechazada');
+      cargarExpediente(codigoActual);
+    }).catch(function (err) {
+      console.error('[Portal Clínico] Error rechazar:', err);
+      toast('Error al rechazar solicitud');
+    });
+  }
+
+  /* Botón "Cancelar solicitud" / "Quitar de mi lista" */
+  $id('btn-remove-pending').addEventListener('click', function () {
+    if (!codigoActual || !currentUser) return;
+    r3adsDb.collection('expedientes').doc(codigoActual).get().then(function (snap) {
+      if (!snap.exists) return Promise.resolve();
+      var exp = snap.data();
+      var solicitudes = exp.solicitudesAcceso || [];
+      var miSolicitud = solicitudes.some(function (s) { return s.uid === currentUser.uid; });
+      if (miSolicitud) {
+        var nuevas = solicitudes.filter(function (s) { return s.uid !== currentUser.uid; });
+        return r3adsDb.collection('expedientes').doc(codigoActual).update({
+          solicitudesAcceso: nuevas,
+          updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+      }
+      return Promise.resolve();
+    }).then(function () {
+      /* Remover de codigosCompartidos del usuario */
+      var codigos = (userProfile.codigosCompartidos || []).filter(function (c) { return c !== codigoActual; });
+      return r3adsDb.collection('users').doc(currentUser.uid).set({
+        email: currentUser.email,
+        codigoExpediente: userProfile.codigoExpediente || null,
+        codigosCompartidos: codigos,
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+      }, { merge: true });
+    }).then(function () {
+      toast('Solicitud cancelada');
+      cargarPerfilUsuario();
+    }).catch(function (err) {
+      console.error('[Portal Clínico] Error cancelar:', err);
+      toast('Error al cancelar solicitud');
+    });
+  });
+
+  /* ════════════════════════════════════════════════════════════
+     COPIAR CÓDIGO PROPIO
+     ════════════════════════════════════════════════════════════ */
+  $id('btn-share-code').addEventListener('click', function () {
+    var c = $id('mh-share-code').textContent;
+    navigator.clipboard.writeText(c).then(function () {
+      toast('✓ Código copiado al portapapeles');
+    });
+  });
+
+})();
+</script>
+
+</body>
+</html>

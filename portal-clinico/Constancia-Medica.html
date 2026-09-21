@@ -1,0 +1,428 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Constancia Médica</title>
+<!-- Favicon: pendiente por clínica (Fase 5 del plan). -->
+<link rel="stylesheet" href="assets/cmg-tokens.css">
+<style>
+*, *::before, *::after { box-sizing: border-box; }
+body { margin: 0; background: #F4F6FB; font-family: 'Segoe UI', Arial, sans-serif; min-height: 100vh; }
+
+/* ── Toolbar ── */
+.cm-toolbar {
+  max-width: 850px;
+  margin: 28px auto 16px;
+  padding: 0 28px;
+  display: flex;
+  gap: 10px;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.cm-back {
+  color: #213C7D;
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 600;
+}
+.cm-back:hover { text-decoration: underline; }
+.cm-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+.cm-btn {
+  border: none;
+  border-radius: 8px;
+  padding: 10px 18px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+  transition: opacity .15s, transform .1s;
+}
+.cm-btn:hover { opacity: .9; }
+.cm-btn:active { transform: scale(.98); }
+.cm-btn-print { background: #059669; color: #fff; }
+
+/* ── Loading / Error ── */
+.cm-message {
+  max-width: 850px;
+  margin: 60px auto;
+  padding: 40px;
+  background: #fff;
+  border-radius: 12px;
+  text-align: center;
+  color: #4B5563;
+}
+.cm-spinner {
+  width: 28px; height: 28px;
+  border: 3px solid #E5E7EB;
+  border-top-color: #213C7D;
+  border-radius: 50%;
+  animation: spin .7s linear infinite;
+  margin: 0 auto 16px;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ═══ HOJA DE CONSTANCIA ═══ */
+.cm-container {
+  max-width: 850px;
+  margin: 0 auto;
+  padding: 0 28px 40px;
+}
+.cm-sheet {
+  background: #fff;
+  border: 1px solid #ddd;
+  padding: 0;
+  font-family: 'Segoe UI', Arial, sans-serif;
+  color: #213C7D;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 2px 16px rgba(0,0,0,.06);
+}
+/* Marca de agua */
+.cm-watermark {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  opacity: .06;
+  z-index: 0;
+}
+.cm-watermark img { width: 60%; max-width: 480px; }
+
+/* Header */
+.cm-header {
+  position: relative; z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 22px 32px;
+  border-bottom: 3px solid #FDD22C;
+  background: linear-gradient(180deg,#fafbff 0%,#fff 100%);
+}
+.cm-header img { width: 56px; height: auto; }
+.cm-header .cm-h-name {
+  font-size: 18px;
+  font-weight: 900;
+  letter-spacing: .3px;
+  margin: 0;
+}
+.cm-header .cm-h-sub {
+  font-size: 12px;
+  color: #6B7280;
+  margin: 2px 0 0;
+  font-weight: 600;
+}
+
+/* Body */
+.cm-body { position: relative; z-index: 1; padding: 28px 32px; }
+.cm-title {
+  text-align: center;
+  font-size: 22px;
+  font-weight: 900;
+  letter-spacing: 2px;
+  margin: 4px 0 22px;
+  color: #213C7D;
+  border-top: 1px solid #E5E7EB;
+  border-bottom: 1px solid #E5E7EB;
+  padding: 12px 0;
+  background: #F9FAFB;
+}
+
+.cm-meta {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+  font-size: 12px;
+  color: #6B7280;
+  margin-bottom: 18px;
+}
+.cm-meta b { color: #213C7D; }
+
+.cm-paragraph {
+  font-size: 14.5px;
+  line-height: 1.75;
+  color: #1F2937;
+  margin: 14px 0;
+  text-align: justify;
+}
+.cm-paragraph b { color: #213C7D; }
+
+.cm-details {
+  background: #F9FAFB;
+  border: 1px solid #E5E7EB;
+  border-radius: 8px;
+  padding: 14px 18px;
+  margin: 18px 0;
+  font-size: 14px;
+  color: #1F2937;
+}
+.cm-details-row {
+  display: flex;
+  justify-content: space-between;
+  border-bottom: 1px dashed #E5E7EB;
+  padding: 6px 0;
+  gap: 12px;
+}
+.cm-details-row:last-child { border-bottom: 0; }
+.cm-details-row b { color: #213C7D; min-width: 180px; }
+
+/* Firma */
+.cm-firma {
+  margin-top: 60px;
+  display: flex;
+  justify-content: flex-end;
+}
+.cm-firma-box {
+  width: 280px;
+  text-align: center;
+  border-top: 1px solid #213C7D;
+  padding-top: 6px;
+  font-size: 13px;
+  color: #213C7D;
+}
+.cm-firma-box small {
+  display: block;
+  color: #6B7280;
+  font-size: 11px;
+  margin-top: 2px;
+}
+
+/* Pie de página */
+.cm-foot {
+  position: relative; z-index: 1;
+  padding: 16px 32px 24px;
+  border-top: 1px solid #E5E7EB;
+  background: #F9FAFB;
+  text-align: center;
+  font-size: 11px;
+  color: #6B7280;
+  line-height: 1.6;
+}
+.cm-foot b { color: #213C7D; }
+
+/* Print */
+@media print {
+  body { background: #fff; }
+  .no-print { display: none !important; }
+  .cm-toolbar { display: none; }
+  .cm-container { padding: 0; max-width: none; }
+  .cm-sheet { border: none; box-shadow: none; }
+  @page { size: A4; margin: 16mm; }
+}
+</style>
+<!-- Analytics por clínica: pendiente (ver nota en Auth.html). -->
+</head>
+<body>
+
+<!-- Toolbar -->
+<div class="cm-toolbar no-print">
+  <a href="Expediente-Doctor.html" class="cm-back">← Volver al expediente</a>
+  <div class="cm-actions">
+    <button class="cm-btn cm-btn-print" id="cm-btn-print">🖨️ Imprimir</button>
+  </div>
+</div>
+
+<!-- Loading / Error placeholder -->
+<div id="cm-loading" class="cm-message">
+  <div class="cm-spinner"></div>
+  Cargando constancia...
+</div>
+
+<!-- Constancia -->
+<div id="cm-container" class="cm-container" style="display:none">
+  <div class="cm-sheet" id="cm-sheet">
+    <!-- Watermark/logo por clínica: pendiente (Fase 5). -->
+
+    <!-- Header -->
+    <div class="cm-header">
+      <div>
+        <p class="cm-h-name" id="cm-h-name">—</p>
+        <p class="cm-h-sub" id="cm-h-sub">—</p>
+      </div>
+    </div>
+
+    <div class="cm-body">
+      <h2 class="cm-title">CONSTANCIA MÉDICA</h2>
+
+      <div class="cm-meta">
+        <div>N° Constancia: <b id="cm-num">—</b></div>
+        <div><span id="cm-ciudad">—</span>, <b id="cm-fecha-emision">—</b></div>
+      </div>
+
+      <p class="cm-paragraph">
+        Por medio de la presente se hace constar que el/la paciente
+        <b id="cm-paciente-nombre">—</b>,
+        identificado(a) con <b id="cm-paciente-tipoid">documento</b> N° <b id="cm-paciente-dni">—</b>,
+        de <b id="cm-paciente-edad">—</b>,
+        ha sido evaluado(a) en esta institución el día <b id="cm-fecha-consulta">—</b>,
+        presentando el siguiente cuadro clínico:
+      </p>
+
+      <p class="cm-paragraph" style="background:#FFFBEB;border-left:4px solid #FDD22C;padding:10px 14px;font-style:italic">
+        <span id="cm-motivo">—</span>
+      </p>
+
+      <p class="cm-paragraph">
+        En virtud de lo anterior, y siguiendo criterio médico, se le concede
+        <b>incapacidad médica</b> por el período que se detalla a continuación,
+        recomendándole reposo y seguimiento de las indicaciones brindadas durante la consulta.
+      </p>
+
+      <div class="cm-details">
+        <div class="cm-details-row"><b>Días de incapacidad:</b> <span id="cm-dias">—</span></div>
+        <div class="cm-details-row"><b>A partir del:</b> <span id="cm-desde">—</span></div>
+        <div class="cm-details-row"><b>Hasta el:</b> <span id="cm-hasta">—</span></div>
+        <div class="cm-details-row" id="cm-obs-row" style="display:none"><b>Observaciones:</b> <span id="cm-obs">—</span></div>
+      </div>
+
+      <p class="cm-paragraph">
+        Se extiende la presente constancia a solicitud del/la interesado(a) para los
+        fines legales, laborales o académicos que estime convenientes.
+      </p>
+
+      <!-- Firma -->
+      <div class="cm-firma">
+        <div class="cm-firma-box">
+          <b id="cm-medico-nombre">—</b>
+          <small id="cm-medico-sub">Médico tratante</small>
+        </div>
+      </div>
+    </div>
+
+    <!-- Pie: datos de la clínica, ver clinic-config.js -->
+    <div class="cm-foot">
+      <p>
+        <b id="cm-foot-razon">—</b> · <span id="cm-foot-correo">—</span> · <span id="cm-foot-web">—</span>
+      </p>
+      <p style="margin-top:4px">
+        Empresa receptora: solicitar verificación primero.
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- Firebase + lógica -->
+<script src="clinic-config.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="firebase-init.js"></script>
+<script>
+(function(){
+  var CLINIC_ID = window.R3ADS_CLINIC_ID;
+  var CLINIC = window.R3ADS_CLINIC_FALLBACK || {};
+  function $(id){ return document.getElementById(id); }
+
+  $('cm-h-name').textContent = (CLINIC.razonSocial || CLINIC.nombre || '—').toUpperCase();
+  $('cm-h-sub').textContent = [CLINIC.direccion, CLINIC.telefono].filter(Boolean).join(' · ') || '—';
+  $('cm-ciudad').textContent = CLINIC.ciudad || '—';
+  $('cm-medico-sub').textContent = 'Médico tratante · ' + (CLINIC.nombre || 'la clínica');
+  $('cm-foot-razon').textContent = CLINIC.razonSocial || CLINIC.nombre || '—';
+  $('cm-foot-correo').textContent = CLINIC.correo || '—';
+  $('cm-foot-web').textContent = CLINIC.sitioWeb || '—';
+  function esc(s){ return (s||'').toString().replace(/[&<>]/g, function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;'}[c];}); }
+  function fmtFecha(s){
+    if (!s) return '—';
+    try {
+      var d = new Date(s + 'T00:00:00');
+      if (isNaN(d.getTime())) d = new Date(s);
+      return d.toLocaleDateString('es-HN', { day:'2-digit', month:'long', year:'numeric' });
+    } catch(e){ return s; }
+  }
+  function fechaHoyLocal(){
+    var d = new Date();
+    var pad = function (n) { return String(n).padStart(2, '0'); };
+    return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
+  }
+  function addDays(fechaStr, dias){
+    if (!fechaStr || !dias) return null;
+    try {
+      var d = new Date(fechaStr + 'T00:00:00');
+      d.setDate(d.getDate() + parseInt(dias, 10) - 1);
+      return d.toISOString().slice(0,10);
+    } catch(e){ return null; }
+  }
+  function calcEdad(fechaNac){
+    if (!fechaNac) return '';
+    try {
+      var d = new Date(fechaNac);
+      var hoy = new Date();
+      var e = hoy.getFullYear() - d.getFullYear();
+      var m = hoy.getMonth() - d.getMonth();
+      if (m < 0 || (m === 0 && hoy.getDate() < d.getDate())) e--;
+      return e + ' años';
+    } catch(err){ return ''; }
+  }
+
+  function getParam(name){
+    var m = new RegExp('[?&]' + name + '=([^&]+)').exec(window.location.search);
+    return m ? decodeURIComponent(m[1]) : null;
+  }
+
+  function tipoIdLabel(tipo){
+    if (!tipo) return 'documento de identidad';
+    if (tipo === 'dni') return 'DNI';
+    if (tipo === 'residencia') return 'Carnet de Residencia';
+    if (tipo === 'extranjera') return 'Identidad Extranjera';
+    return tipo;
+  }
+
+  function render(data){
+    $('cm-num').textContent = data.numero || data._id || '—';
+    $('cm-fecha-emision').textContent = fmtFecha((data.emitidaEn || fechaHoyLocal()).slice(0,10));
+    $('cm-paciente-nombre').textContent = data.pacienteNombre || '—';
+    $('cm-paciente-tipoid').textContent = tipoIdLabel(data.pacienteTipoId);
+    $('cm-paciente-dni').textContent = data.pacienteDNI || '—';
+    $('cm-paciente-edad').textContent = data.pacienteEdad || calcEdad(data.pacienteFechaNacimiento) || '—';
+    $('cm-fecha-consulta').textContent = fmtFecha(data.fechaConsulta);
+    $('cm-motivo').textContent = data.motivo || '—';
+    $('cm-dias').textContent = data.dias ? (data.dias + ' día(s)') : '—';
+    $('cm-desde').textContent = fmtFecha(data.desde);
+    var hasta = data.hasta || (data.dias && data.desde ? addDays(data.desde, data.dias) : null);
+    $('cm-hasta').textContent = fmtFecha(hasta);
+    if (data.observaciones) {
+      $('cm-obs').textContent = data.observaciones;
+      $('cm-obs-row').style.display = '';
+    }
+    $('cm-medico-nombre').textContent = data.emitidaPor || '—';
+
+    $('cm-loading').style.display = 'none';
+    $('cm-container').style.display = '';
+    document.title = 'Constancia ' + (data.pacienteNombre || '') + ' · ' + (CLINIC.nombre || 'Portal Clínico');
+  }
+
+  function showError(msg){
+    $('cm-loading').innerHTML = '<div style="color:#b91c1c;font-weight:700">❌ ' + esc(msg) + '</div><div style="margin-top:8px;font-size:13px">' +
+      '<a href="Expediente-Doctor.html" class="cm-back">← Volver al expediente</a></div>';
+  }
+
+  /* Imprimir */
+  $('cm-btn-print').addEventListener('click', function(){ window.print(); });
+
+  /* Inicializar */
+  var id = getParam('id');
+  if (!id) { showError('No se especificó la constancia (parámetro ?id= ausente).'); return; }
+
+  r3adsAuth.onAuthStateChanged(function(user){
+    if (!user) { showError('Sesión requerida. Inicia sesión.'); return; }
+    r3adsDb.collection('constancias').doc(id).get()
+      .then(function(snap){
+        if (!snap.exists) { showError('La constancia no existe o fue eliminada.'); return; }
+        var d = snap.data();
+        d._id = snap.id;
+        if (d.clinicId && d.clinicId !== CLINIC_ID) { showError('Esta constancia no pertenece a esta clínica.'); return; }
+        render(d);
+      })
+      .catch(function(err){
+        showError('Error al cargar la constancia: ' + err.message);
+      });
+  });
+})();
+</script>
+
+</body>
+</html>

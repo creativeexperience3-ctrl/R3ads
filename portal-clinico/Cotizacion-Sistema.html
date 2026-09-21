@@ -1,0 +1,1754 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sistema de Cotizaciones</title>
+<!-- Favicon: pendiente por clínica (Fase 5 del plan). -->
+<link rel="stylesheet" href="assets/cmg-tokens.css">
+<link rel="stylesheet" href="styles.css">
+<!-- Firebase compat SDK -->
+<script src="clinic-config.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="firebase-init.js"></script>
+<script src="r3ads-staff.js"></script>
+
+<style>
+/* ============================================================
+   SISTEMA DE COTIZACIONES, estilos propios
+   Namespace: .cs-  para no interferir con styles.css global
+   ============================================================ */
+
+/* --- Variables adicionales --------------------------------- */
+:root {
+  --cs-border   : #E5E7EB;
+  --cs-bg       : #F4F6FB;
+  --cs-card     : #FFFFFF;
+  --cs-text     : #1F2937;
+  --cs-muted    : #6B7280;
+  --cs-input-h  : 38px;
+  --cs-radius   : 10px;
+  --cs-shadow   : 0 2px 12px rgba(33,60,125,.08);
+  --cs-shadow-lg: 0 8px 40px rgba(33,60,125,.13);
+}
+
+/* ── Auth nav pill ─────────────────────────────────────── */
+.cmg-nav-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  color: rgba(255,255,255,.85);
+  text-decoration: none;
+  padding: 6px 14px;
+  border-radius: 20px;
+  border: 1px solid rgba(255,255,255,.25);
+  transition: all .18s;
+  white-space: nowrap;
+}
+.cmg-nav-pill:hover { background: rgba(255,255,255,.12); color: #fff; }
+
+/* ── Botón guardar ─────────────────────────────────────── */
+.cs-btn--save {
+  background: #599FB2;
+  color: #fff;
+  font-weight: 700;
+}
+.cs-btn--save:hover:not(:disabled) { background: #4a8a9b; }
+
+/* --- Layout página ----------------------------------------- */
+.cs-page {
+  background: var(--cs-bg);
+  min-height: 100vh;
+  padding-bottom: 64px;
+}
+
+.cs-page-header {
+  background: var(--cmg-navy, #213C7D);
+  padding: 36px 0 32px;
+  text-align: center;
+  border-bottom: 4px solid var(--cmg-yellow, #FDD22C);
+}
+.cs-page-header .eyebrow {
+  color: var(--cmg-yellow, #FDD22C);
+  font-size: 11px;
+  letter-spacing: 2px;
+  font-weight: 700;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+.cs-page-header h1 {
+  color: #fff;
+  font-size: clamp(22px, 4vw, 36px);
+  font-weight: 900;
+  letter-spacing: -.5px;
+  margin: 0;
+}
+.cs-page-header p {
+  color: rgba(255,255,255,.65);
+  font-size: 14px;
+  margin-top: 8px;
+}
+
+/* --- Workspace: editor izquierdo + preview derecho --------- */
+.cs-workspace {
+  display: grid;
+  grid-template-columns: 420px 1fr;
+  gap: 24px;
+  max-width: 1280px;
+  margin: 32px auto 0;
+  padding: 0 24px;
+  align-items: start;
+}
+@media (max-width: 960px) {
+  .cs-workspace { grid-template-columns: 1fr; padding: 0 16px; }
+}
+
+/* --- Cards del editor -------------------------------------- */
+.cs-card {
+  background: var(--cs-card);
+  border-radius: var(--cs-radius);
+  box-shadow: var(--cs-shadow);
+  border: 1px solid var(--cs-border);
+  overflow: hidden;
+  margin-bottom: 16px;
+  transition: box-shadow .2s;
+}
+.cs-card:hover { box-shadow: var(--cs-shadow-lg); }
+
+.cs-card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 18px;
+  border-bottom: 1px solid var(--cs-border);
+  background: #FAFBFD;
+}
+.cs-card-head h3 {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--cmg-navy, #213C7D);
+  margin: 0;
+}
+
+.cs-card-body { padding: 18px; }
+.cs-card-body--flush { padding: 0; }
+
+/* --- Formulario -------------------------------------------- */
+.cs-grid2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+.cs-fgroup {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 12px;
+}
+.cs-fgroup:last-child { margin-bottom: 0; }
+.cs-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--cs-muted);
+  text-transform: uppercase;
+  letter-spacing: .5px;
+}
+.cs-input, .cs-textarea {
+  height: var(--cs-input-h);
+  padding: 0 10px;
+  border: 1.5px solid var(--cs-border);
+  border-radius: 7px;
+  font-size: 13px;
+  color: var(--cs-text);
+  background: #fff;
+  font-family: inherit;
+  outline: none;
+  transition: border-color .15s, box-shadow .15s;
+  width: 100%;
+}
+.cs-input:focus {
+  border-color: var(--cmg-teal, #599FB2);
+  box-shadow: 0 0 0 3px rgba(89,159,178,.15);
+}
+.cs-textarea {
+  height: auto;
+  min-height: 72px;
+  padding: 8px 10px;
+  resize: vertical;
+}
+.cs-hint {
+  font-size: 11px;
+  color: var(--cs-muted);
+  margin-top: 2px;
+}
+.cs-prefix-wrap {
+  display: flex;
+  border: 1.5px solid var(--cs-border);
+  border-radius: 7px;
+  overflow: hidden;
+  transition: border-color .15s;
+}
+.cs-prefix-wrap:focus-within {
+  border-color: var(--cmg-teal, #599FB2);
+  box-shadow: 0 0 0 3px rgba(89,159,178,.15);
+}
+.cs-prefix {
+  padding: 0 10px;
+  background: #F3F4F6;
+  font-size: 12px;
+  color: var(--cs-muted);
+  display: flex;
+  align-items: center;
+  border-right: 1.5px solid var(--cs-border);
+  white-space: nowrap;
+}
+.cs-prefix-wrap .cs-input {
+  border: none;
+  border-radius: 0;
+  box-shadow: none !important;
+}
+
+/* --- Tabla de ítems ---------------------------------------- */
+.cs-items-wrap { overflow-x: auto; }
+.cs-items-tbl {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+.cs-items-tbl thead tr {
+  background: var(--cmg-navy, #213C7D);
+  color: #fff;
+}
+.cs-items-tbl th {
+  padding: 8px 10px;
+  font-size: 11px;
+  font-weight: 700;
+  text-align: left;
+  white-space: nowrap;
+}
+.cs-items-tbl td {
+  padding: 5px 5px;
+  border-bottom: 1px solid #F3F4F6;
+  vertical-align: top;
+}
+.cs-ti {
+  width: 100%;
+  padding: 5px 7px;
+  border: 1px solid #E5E7EB;
+  border-radius: 5px;
+  font-size: 12px;
+  font-family: inherit;
+  background: #fff;
+  outline: none;
+  transition: border-color .15s;
+}
+.cs-ti:focus { border-color: var(--cmg-teal, #599FB2); }
+.cs-ti--sm   { font-size: 11px; color: var(--cs-muted); margin-top: 3px; }
+.cs-ti--num  { text-align: right; width: 72px; }
+.cs-line-total {
+  text-align: right;
+  font-weight: 700;
+  color: var(--cmg-navy, #213C7D);
+  padding: 5px 10px;
+  white-space: nowrap;
+  font-size: 12px;
+}
+.cs-btn-remove {
+  background: none;
+  border: none;
+  color: #CBD5E1;
+  cursor: pointer;
+  padding: 4px 6px;
+  border-radius: 4px;
+  font-size: 13px;
+  transition: all .15s;
+}
+.cs-btn-remove:hover { color: #EF4444; background: #FEF2F2; }
+.cs-items-empty {
+  text-align: center;
+  color: var(--cs-muted);
+  padding: 20px;
+  font-size: 12px;
+  font-style: italic;
+}
+
+/* --- Resumen de totales ------------------------------------ */
+.cs-totals {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.cs-total-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+  color: var(--cs-muted);
+}
+.cs-total-row--grand {
+  padding-top: 10px;
+  border-top: 2px solid var(--cs-border);
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--cmg-navy, #213C7D);
+}
+
+/* --- Botones ----------------------------------------------- */
+.cs-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all .15s;
+  white-space: nowrap;
+}
+.cs-btn:disabled { opacity: .6; cursor: not-allowed; }
+.cs-btn--primary {
+  background: var(--cmg-navy, #213C7D);
+  color: #fff;
+}
+.cs-btn--primary:hover:not(:disabled) { background: #1a306a; }
+.cs-btn--sm { padding: 5px 12px; font-size: 12px; }
+.cs-btn--wa {
+  background: #25D366;
+  color: #fff;
+  width: 100%;
+  padding: 14px;
+  font-size: 15px;
+  border-radius: 10px;
+  margin-top: 4px;
+}
+.cs-btn--wa:hover:not(:disabled) { background: #1eb857; }
+.cs-btn--dl {
+  background: var(--cmg-navy, #213C7D);
+  color: #fff;
+  width: 100%;
+  padding: 12px;
+  font-size: 14px;
+  border-radius: 10px;
+}
+.cs-btn--dl:hover:not(:disabled) { background: #1a306a; }
+.cs-actions { display: flex; flex-direction: column; gap: 10px; margin-top: 4px; }
+
+/* --- Spinner ---------------------------------------------- */
+.cs-spin {
+  display: inline-block;
+  width: 15px; height: 15px;
+  border: 2px solid rgba(255,255,255,.3);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: cs-spin .7s linear infinite;
+}
+@keyframes cs-spin  { to { transform: rotate(360deg); } }
+@keyframes cs-pulse {
+  0%   { box-shadow: 0 0 0 0 rgba(37,211,102,.6); }
+  70%  { box-shadow: 0 0 0 12px rgba(37,211,102,0); }
+  100% { box-shadow: 0 0 0 0 rgba(37,211,102,0); }
+}
+
+/* --- Toast ------------------------------------------------- */
+.cs-toast {
+  position: fixed;
+  bottom: 80px; right: 24px;
+  background: #1F2937;
+  color: #fff;
+  padding: 12px 20px;
+  border-radius: 8px;
+  font-size: 13px;
+  box-shadow: 0 8px 32px rgba(0,0,0,.2);
+  z-index: 9999;
+  opacity: 0;
+  transform: translateY(10px);
+  transition: all .3s;
+  pointer-events: none;
+  max-width: 320px;
+}
+.cs-toast.is-visible { opacity: 1; transform: translateY(0); }
+
+/* ============================================================
+   PANEL PREVIEW (DERECHO)
+   ============================================================ */
+.cs-preview-panel {
+  position: sticky;
+  top: 90px;
+}
+.cs-preview-label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+.cs-preview-label h4 {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--cs-text);
+}
+.cs-live-badge {
+  font-size: 11px;
+  background: rgba(89,159,178,.12);
+  color: var(--cmg-teal, #599FB2);
+  padding: 2px 8px;
+  border-radius: 20px;
+  font-weight: 600;
+}
+.cs-preview-frame {
+  background: #DDE1EC;
+  border-radius: var(--cs-radius);
+  padding: 20px;
+  overflow: auto;
+  max-height: 80vh;
+}
+
+/* ============================================================
+   PDF PAGE, replica exacta del diseño del ejemplo
+   ============================================================ */
+#cs-pdf-doc {
+  width: 750px;
+  min-height: 1050px;
+  background: #fff;
+  box-shadow: 0 4px 32px rgba(0,0,0,.18);
+  padding: 36px 44px 40px;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 10.5px;
+  color: #333;
+  line-height: 1.5;
+  border-radius: 4px;
+  margin: 0 auto;
+}
+
+/* PDF: cabecera */
+.pdf-top {
+  display: flex;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 14px;
+}
+.pdf-brand {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  flex: 1;
+}
+.pdf-brand-logo {
+  width: 52px;
+  height: 52px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+.pdf-brand-text {}
+.pdf-brand-name {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: #213C7D;
+  line-height: 1.2;
+}
+.pdf-brand-rtn {
+  font-size: 10px;
+  color: #6B7280;
+  margin-bottom: 7px;
+}
+.pdf-brand-row {
+  display: flex;
+  gap: 4px;
+  font-size: 9.5px;
+  color: #444;
+  margin-top: 2px;
+}
+.pdf-brand-row b { color: #222; }
+
+/* PDF: meta derecha */
+.pdf-meta {
+  width: 240px;
+  flex-shrink: 0;
+  border: 1px solid #E5E7EB;
+  border-radius: 6px;
+  overflow: hidden;
+}
+.pdf-meta-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 4px 8px;
+  font-size: 9.5px;
+  border-bottom: 1px solid #F3F4F6;
+}
+.pdf-meta-row:last-child { border-bottom: none; }
+.pdf-meta-row:first-child {
+  background: #213C7D;
+  color: #fff;
+  font-weight: 700;
+  font-size: 10px;
+}
+.pdf-meta-key { color: #6B7280; }
+.pdf-meta-val { text-align: right; color: #222; max-width: 140px; }
+
+/* PDF: divisor */
+.pdf-hr {
+  border: none;
+  border-top: 1px solid #D1D5DB;
+  margin: 12px 0;
+}
+
+/* PDF: cliente */
+.pdf-client {
+  display: flex;
+  gap: 20px;
+  font-size: 10px;
+  margin-bottom: 14px;
+}
+.pdf-client-l { flex: 1; }
+.pdf-client-r { width: 240px; flex-shrink: 0; }
+.pdf-cr {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 3px;
+  color: #444;
+}
+.pdf-cr b { color: #222; }
+.pdf-ck { color: #6B7280; font-weight: 600; }
+
+/* PDF: tabla productos */
+.pdf-tbl {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 9.5px;
+}
+.pdf-tbl thead tr {
+  background: #F9FAFB;
+  border-top: 1.5px solid #9CA3AF;
+  border-bottom: 1.5px solid #9CA3AF;
+}
+.pdf-tbl th {
+  padding: 6px 8px;
+  font-weight: 700;
+  text-align: left;
+  color: #222;
+}
+.pdf-tbl th:not(:first-child) { text-align: right; }
+.pdf-tbl td {
+  padding: 7px 8px;
+  border-bottom: 1px solid #F3F4F6;
+  color: #444;
+  vertical-align: top;
+}
+.pdf-tbl td:not(:first-child) { text-align: right; }
+.pdf-tbl td small { display: block; color: #9CA3AF; font-size: 8.5px; margin-top: 1px; }
+.pdf-tbl-empty { text-align: center !important; color: #9CA3AF; padding: 18px !important; font-style: italic; }
+
+/* PDF: ultima línea */
+.pdf-ultima {
+  text-align: center;
+  font-size: 9px;
+  color: #9CA3AF;
+  padding: 10px 0 2px;
+  letter-spacing: 1px;
+}
+
+/* PDF: totales */
+.pdf-totals-wrap {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 4px;
+  margin-bottom: 16px;
+}
+.pdf-totals-box {
+  width: 240px;
+  border: 1px solid #E5E7EB;
+  border-radius: 6px;
+  overflow: hidden;
+}
+.pdf-trow {
+  display: flex;
+  justify-content: space-between;
+  padding: 4px 10px;
+  font-size: 10px;
+  border-bottom: 1px solid #F3F4F6;
+  color: #555;
+}
+.pdf-trow:last-child { border-bottom: none; }
+.pdf-trow--grand {
+  background: #213C7D;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 800;
+  padding: 7px 10px;
+}
+.pdf-trow--currency {
+  font-size: 9px;
+  color: #9CA3AF;
+  background: #FAFAFA;
+}
+
+/* PDF: notas */
+.pdf-notes {
+  border-left: 3px solid #599FB2;
+  background: #F9FAFB;
+  padding: 8px 12px;
+  font-size: 9.5px;
+  color: #555;
+  border-radius: 0 4px 4px 0;
+  margin-bottom: 16px;
+}
+.pdf-notes strong { color: #222; }
+.pdf-notes p { margin-top: 3px; white-space: pre-wrap; }
+
+/* PDF: footer */
+.pdf-foot {
+  border-top: 1px solid #E5E7EB;
+  padding-top: 10px;
+  text-align: center;
+  font-size: 8.5px;
+  color: #9CA3AF;
+}
+.pdf-foot p + p { margin-top: 2px; }
+
+@media (max-width: 960px) {
+  .cs-preview-panel { position: static; }
+  .cs-preview-frame { max-height: none; }
+  #cs-pdf-doc { width: 100%; min-width: 0; padding: 20px; }
+}
+@media (max-width: 600px) {
+  /* Editor form: stack 2-col grids to single column */
+  .cs-grid2 { grid-template-columns: 1fr; }
+  /* PDF preview: reduce padding so it's not eating into the narrow viewport */
+  .cs-preview-frame { padding: 10px; }
+  /* PDF header: stack brand info and meta box vertically instead of side-by-side */
+  .pdf-top { flex-direction: column; gap: 10px; }
+  .pdf-meta { width: 100%; }
+  /* PDF client section: stack client-left and client-right vertically */
+  .pdf-client { flex-direction: column; gap: 6px; }
+  .pdf-client-r { width: 100%; }
+  /* PDF totals: stretch box to full width */
+  .pdf-totals-wrap { justify-content: stretch; }
+  .pdf-totals-box { width: 100%; }
+}
+
+/* ============================================================
+   MODO IMPRESIÓN, oculta todo excepto el documento PDF
+   El usuario selecciona "Guardar como PDF" en el diálogo
+   ============================================================ */
+@media print {
+  /* Ocultar toda la UI del sitio */
+  .promo-strip,
+  .site-header,
+  .site-footer,
+  .float-wa,
+  .cs-toast,
+  .cs-page-header,
+  .cs-editor,
+  .cs-preview-label,
+  .cs-cdn-warn,
+  #cs-cdn-warn { display: none !important; }
+
+  /* Reset de márgenes del body */
+  html, body {
+    margin: 0 !important;
+    padding: 0 !important;
+    background: #fff !important;
+  }
+
+  /* Mostrar solo el documento */
+  .cs-page       { background: #fff !important; padding: 0 !important; }
+  .cs-workspace  { display: block !important; padding: 0 !important; margin: 0 !important; }
+  .cs-preview-panel { position: static !important; display: block !important; }
+  .cs-preview-frame {
+    background: none !important;
+    padding: 0 !important;
+    max-height: none !important;
+    overflow: visible !important;
+    border-radius: 0 !important;
+  }
+
+  /* El documento PDF imprime perfectamente */
+  #cs-pdf-doc {
+    width: 100% !important;
+    box-shadow: none !important;
+    padding: 20px !important;
+    margin: 0 !important;
+    border-radius: 0 !important;
+    font-size: 11px !important;
+    page-break-after: avoid !important;
+  }
+
+  /* Evitar que la tabla se corte entre páginas */
+  .pdf-tbl tr { page-break-inside: avoid; }
+  .pdf-totals-wrap { page-break-inside: avoid; }
+}
+</style>
+<!-- Analytics por clínica: pendiente (ver nota en Auth.html). -->
+</head>
+<body data-screen-label="Cotización · Sistema" data-lang="es">
+
+<!-- Header simplificado: el original tenía aquí el header de marketing
+     completo de CMG (promo strip con horario/Doctor 365, nav a
+     Inicio/Sobre-nosotros/Doctor 365). Esas páginas son del sitio de
+     marketing de CMG, fuera del alcance del módulo clínico (ver plan) —
+     se quita ese chrome y se deja un header mínimo propio del portal,
+     igual que en Mis-Cotizaciones.html. -->
+<header class="site-header">
+  <div class="container header-row">
+    <div class="brand-lockup" id="cs-brand-name" aria-label="Nombre de la clínica" style="color:#fff;font-weight:900;font-size:18px">—</div>
+    <nav class="site-nav" aria-label="Principal">
+      <a href="Cotizador.html">Cotizador</a>
+      <a href="Mis-Cotizaciones.html">Mis Cotizaciones</a>
+    </nav>
+    <div class="header-actions">
+      <a id="cmg-nav-admin" href="Admin-Usuarios.html" class="cmg-nav-pill" style="display:none;border-color:#FDD22C;background:#FDD22C;color:#213C7D;font-weight:800;">🛡️ Panel Admin</a>
+      <a id="cmg-nav-account" href="Auth.html?returnTo=Cotizacion-Sistema.html"
+         class="cmg-nav-pill">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+        <span id="cmg-nav-name">Mi Cuenta</span>
+      </a>
+    </div>
+  </div>
+</header>
+
+<!-- ═══════════════ SISTEMA DE COTIZACIONES ═══════════════ -->
+<main class="cs-page">
+
+  <!-- Encabezado de página -->
+  <div class="cs-page-header">
+    <div class="eyebrow" id="cs-eyebrow">Herramienta interna</div>
+    <h1>Sistema de Cotizaciones</h1>
+    <p>Completa el formulario · genera el PDF · envíalo por WhatsApp</p>
+  </div>
+
+  <!-- Workspace: editor + preview -->
+  <div class="cs-workspace">
+
+    <!-- ======================================================
+         PANEL IZQUIERDO: Editor
+         ====================================================== -->
+    <div class="cs-editor">
+
+      <!-- Card: Datos de la cotización -->
+      <div class="cs-card">
+        <div class="cs-card-head">
+          <h3>📋 Datos de la Cotización</h3>
+        </div>
+        <div class="cs-card-body">
+          <div class="cs-fgroup">
+            <label class="cs-label">Nº Cotización</label>
+            <input type="text" id="f-quot-num" class="cs-input" placeholder="Auto-generado">
+            <!-- Campo 'Válida hasta' removido (DRM Fun-1): todas las cotizaciones vencen a las 24h -->
+            <input type="hidden" id="f-expiry">
+          </div>
+          <div class="cs-fgroup" style="margin-top:2px">
+            <label class="cs-label">WhatsApp del cliente</label>
+            <div class="cs-prefix-wrap">
+              <span class="cs-prefix">+504</span>
+              <input type="tel" id="f-wa-num" class="cs-input" placeholder="9999-9999" inputmode="numeric">
+            </div>
+            <span class="cs-hint">Número donde se abrirá la conversación</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card: Cliente -->
+      <div class="cs-card">
+        <div class="cs-card-head">
+          <h3>👤 Información del Cliente</h3>
+        </div>
+        <div class="cs-card-body">
+          <div class="cs-fgroup">
+            <label class="cs-label">Nombre completo</label>
+            <input type="text" id="f-client-name" class="cs-input">
+          </div>
+          <div class="cs-grid2">
+            <div class="cs-fgroup">
+              <label class="cs-label">RTN</label>
+              <input type="text" id="f-client-rtn" class="cs-input" placeholder="0000-0000-000000">
+            </div>
+            <div class="cs-fgroup">
+              <label class="cs-label">Teléfono</label>
+              <input type="tel" id="f-client-phone" class="cs-input" placeholder="+504 9999-9999">
+            </div>
+          </div>
+          <div class="cs-fgroup">
+            <label class="cs-label">Correo electrónico</label>
+            <input type="email" id="f-client-email" class="cs-input" placeholder="correo@ejemplo.com">
+          </div>
+          <div class="cs-fgroup">
+            <label class="cs-label">Dirección</label>
+            <input type="text" id="f-client-addr" class="cs-input" placeholder="Dirección del cliente">
+          </div>
+        </div>
+      </div>
+
+      <!-- Card: Productos -->
+      <div class="cs-card">
+        <div class="cs-card-head">
+          <h3>🛒 Productos / Servicios</h3>
+          <button class="cs-btn cs-btn--primary cs-btn--sm" onclick="CS.addItem()">+ Agregar</button>
+        </div>
+        <div class="cs-card-body cs-card-body--flush">
+          <div class="cs-items-wrap">
+            <table class="cs-items-tbl">
+              <thead>
+                <tr>
+                  <th style="min-width:140px">Producto / Servicio</th>
+                  <th>Precio</th>
+                  <th>Cant.</th>
+                  <th>Desc.</th>
+                  <th>Total</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody id="cs-items-tbody">
+                <!-- JS inserta filas aquí -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card: Ajustes de totales -->
+      <div class="cs-card">
+        <div class="cs-card-head">
+          <h3>💰 Ajustes de Totales</h3>
+        </div>
+        <div class="cs-card-body">
+          <div class="cs-grid2">
+            <div class="cs-fgroup">
+              <label class="cs-label">Descuento global (L)</label>
+              <input type="number" id="f-discount" class="cs-input" value="0" min="0" step="0.01">
+            </div>
+            <div class="cs-fgroup">
+              <label class="cs-label">Impuesto (L)</label>
+              <input type="number" id="f-tax" class="cs-input" value="0" min="0" step="0.01">
+            </div>
+            <div class="cs-fgroup">
+              <label class="cs-label">Envío (L)</label>
+              <input type="number" id="f-shipping" class="cs-input" value="0" min="0" step="0.01">
+            </div>
+            <div class="cs-fgroup">
+              <label class="cs-label">Otro Importe (L)</label>
+              <input type="number" id="f-other" class="cs-input" value="0" min="0" step="0.01">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card: Resumen -->
+      <div class="cs-card" style="border-top:3px solid #213C7D">
+        <div class="cs-card-body">
+          <div class="cs-totals">
+            <div class="cs-total-row"><span>Subtotal:</span><span id="cs-show-sub">L 0.00</span></div>
+            <div class="cs-total-row"><span>Descuento:</span><span id="cs-show-disc">L 0.00</span></div>
+            <div class="cs-total-row"><span>Impuesto:</span><span id="cs-show-tax">L 0.00</span></div>
+            <div class="cs-total-row"><span>Envío:</span><span id="cs-show-ship">L 0.00</span></div>
+            <div class="cs-total-row"><span>Otro Importe:</span><span id="cs-show-other">L 0.00</span></div>
+            <div class="cs-total-row cs-total-row--grand">
+              <span>TOTAL:</span><span id="cs-show-total">L 0.00</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card: Notas -->
+      <div class="cs-card">
+        <div class="cs-card-head">
+          <h3>📝 Indicaciones especiales para la clínica</h3>
+        </div>
+        <div class="cs-card-body">
+          <textarea id="f-notes" class="cs-textarea" style="width:100%"
+            placeholder="Indicaciones especiales, consideraciones del paciente, observaciones internas..."></textarea>
+        </div>
+      </div>
+
+      <!-- Aviso si el CDN no carga (oculto por defecto) -->
+      <div id="cs-cdn-warn" style="display:none;background:#FEF3C7;border:1px solid #F59E0B;border-radius:8px;padding:12px 14px;font-size:12px;color:#92400E;margin-bottom:8px;">
+        ⚠️ No se pudo cargar html2pdf.js. Verifica tu conexión a internet e intenta recargar la página.
+      </div>
+
+      <!-- Botones de acción -->
+      <div class="cs-actions">
+        <button class="cs-btn cs-btn--save" id="cs-btn-save" onclick="CS.saveQuote()">
+          💾 Guardar Cotización en mi Cuenta
+        </button>
+        <button class="cs-btn cs-btn--dl" id="cs-btn-dl" onclick="CS.downloadPDF()">
+          🖨️ Guardar como PDF
+        </button>
+        <button class="cs-btn cs-btn--wa" id="cs-btn-wa" onclick="CS.sendWhatsApp()">
+          📲 Generar PDF y Enviar por WhatsApp
+        </button>
+      </div>
+
+    </div><!-- /cs-editor -->
+
+    <!-- ======================================================
+         PANEL DERECHO: Vista previa PDF
+         ====================================================== -->
+    <div class="cs-preview-panel">
+      <div class="cs-preview-label">
+        <h4>Vista previa del PDF</h4>
+        <span class="cs-live-badge">⚡ Tiempo real</span>
+      </div>
+
+      <div class="cs-preview-frame">
+
+        <!-- ================================================
+             DOCUMENTO PDF, este div se convierte al PDF
+             ================================================ -->
+        <div id="cs-pdf-doc">
+
+          <!-- Cabecera empresa + meta cotización -->
+          <div class="pdf-top">
+
+            <!-- Empresa -->
+            <div class="pdf-brand">
+              <!-- Watermark/logo por clínica: pendiente (Fase 5). -->
+              <div class="pdf-brand-text">
+                <div class="pdf-brand-name" id="p-brand-name">—</div>
+                <div class="pdf-brand-rtn">RTN</div>
+                <div class="pdf-brand-row"><b>Correo electrónico:</b><span id="p-brand-email">—</span></div>
+                <div class="pdf-brand-row"><b>Teléfono:</b><span id="p-brand-phone">—</span></div>
+                <div class="pdf-brand-row"><b>Dirección:</b><span id="p-brand-addr">—</span></div>
+              </div>
+            </div>
+
+            <!-- Meta -->
+            <div class="pdf-meta">
+              <div class="pdf-meta-row">
+                <span>Nº Cotización:</span>
+                <span id="p-quot-num" class="pdf-meta-val">—</span>
+              </div>
+              <div class="pdf-meta-row">
+                <span class="pdf-meta-key">Fecha de creación:</span>
+                <span id="p-created" class="pdf-meta-val">—</span>
+              </div>
+              <div class="pdf-meta-row">
+                <span class="pdf-meta-key">Vigencia:</span>
+                <span id="p-expiry" class="pdf-meta-val">Válida por 24 horas desde la creación</span>
+              </div>
+              <div class="pdf-meta-row">
+                <span class="pdf-meta-key">Establecimiento:</span>
+                <span class="pdf-meta-val" id="p-establecimiento">—</span>
+              </div>
+              <div class="pdf-meta-row">
+                <span class="pdf-meta-key">Creado por:</span>
+                <span class="pdf-meta-val">Caja General</span>
+              </div>
+            </div>
+
+          </div><!-- /pdf-top -->
+
+          <hr class="pdf-hr">
+
+          <!-- Cliente -->
+          <div class="pdf-client">
+            <div class="pdf-client-l">
+              <div class="pdf-cr"><b>Cliente:</b><span id="p-client-name">—</span></div>
+              <div class="pdf-cr"><b>RTN:</b><span id="p-client-rtn">0000-0000-000000</span></div>
+            </div>
+            <div class="pdf-client-r">
+              <div class="pdf-cr"><span class="pdf-ck">Correo electrónico:</span><span id="p-client-email">—</span></div>
+              <div class="pdf-cr"><span class="pdf-ck">Teléfono:</span><span id="p-client-phone">—</span></div>
+              <div class="pdf-cr"><span class="pdf-ck">Dirección:</span><span id="p-client-addr">—</span></div>
+            </div>
+          </div>
+
+          <hr class="pdf-hr">
+
+          <!-- Tabla de productos -->
+          <table class="pdf-tbl">
+            <thead>
+              <tr>
+                <th>Producto</th>
+                <th>Precio Unit.</th>
+                <th>Cant.</th>
+                <th>Descuentos</th>
+                <th>Impuestos</th>
+                <th>Total</th>
+              </tr>
+            </thead>
+            <tbody id="p-items-tbody">
+              <tr><td colspan="6" class="pdf-tbl-empty">Sin productos</td></tr>
+            </tbody>
+          </table>
+
+          <!-- Ultima Linea -->
+          <div class="pdf-ultima">----------- Ultima Linea -----------</div>
+
+          <!-- Totales -->
+          <div class="pdf-totals-wrap">
+            <div class="pdf-totals-box">
+              <div class="pdf-trow">
+                <span>Subtotal:</span><span id="p-sub">L 0.00</span>
+              </div>
+              <div class="pdf-trow">
+                <span>Descuento:</span><strong id="p-disc">L 0.00</strong>
+              </div>
+              <div class="pdf-trow">
+                <span>Impuesto:</span><span id="p-tax">L 0.00</span>
+              </div>
+              <div class="pdf-trow">
+                <span>Envío:</span><span id="p-ship">L 0.00</span>
+              </div>
+              <div class="pdf-trow">
+                <span>Otro Importe:</span><span id="p-other">L 0.00</span>
+              </div>
+              <div class="pdf-trow pdf-trow--grand">
+                <span>Total:</span><span id="p-total">L 0.00</span>
+              </div>
+              <div class="pdf-trow pdf-trow--currency">
+                <span>Moneda:</span><span>Lempiras</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Notas (ocultas si vacías) -->
+          <div id="p-notes-block" class="pdf-notes" style="display:none">
+            <strong>Notas:</strong>
+            <p id="p-notes-text"></p>
+          </div>
+
+          <!-- Pie de página -->
+          <div class="pdf-foot">
+            <p style="font-weight:600;color:#213C7D;">
+              Cotización válida por 24 horas &middot; Cotización sujeta a cambios &middot; Precios pueden variar en los procedimientos.
+            </p>
+            <p id="p-foot-clinic">—</p>
+            <p id="p-foot-contact">—</p>
+          </div>
+
+        </div><!-- /cs-pdf-doc -->
+      </div><!-- /cs-preview-frame -->
+    </div><!-- /cs-preview-panel -->
+
+  </div><!-- /cs-workspace -->
+</main>
+
+<!-- Footer simplificado: datos de la clínica desde clinic-config.js
+     (igual que en Mis-Cotizaciones.html). El original tenía aquí el
+     footer de marketing completo de CMG (Doctor 365, redes sociales
+     propias de CMG), fuera del alcance del módulo clínico. -->
+<footer class="site-footer">
+  <div class="container footer-grid">
+    <div class="footer-brand">
+      <div class="footer-lockup" id="cs-footer-name" style="color:#fff;font-weight:900;font-size:16px">—</div>
+      <p class="footer-strap" id="cs-footer-direccion">—</p>
+    </div>
+    <div class="footer-col">
+      <h5>Portal</h5>
+      <a href="Cotizador.html">Cotizador</a>
+      <a href="Mis-Cotizaciones.html">Mis Cotizaciones</a>
+    </div>
+    <div class="footer-col footer-contact">
+      <h5>Contacto</h5>
+      <p id="cs-footer-telefono">—</p>
+    </div>
+  </div>
+  <div class="footer-base">
+    <div class="container footer-base-row">
+      <span id="cs-footer-copy">—</span>
+    </div>
+  </div>
+</footer>
+
+<!-- Flotante WhatsApp: número de la clínica, ver clinic-config.js -->
+<a class="float-wa" id="cs-float-wa" href="#" aria-label="WhatsApp">
+  <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><path d="M.057 24l1.687-6.163a11.867 11.867 0 0 1-1.587-5.946C.16 5.335 5.495 0 12.05 0a11.817 11.817 0 0 1 8.413 3.488 11.824 11.824 0 0 1 3.48 8.414c-.003 6.557-5.338 11.892-11.893 11.892a11.9 11.9 0 0 1-5.688-1.448L.057 24z"/></svg>
+</a>
+
+<!-- Toast -->
+<div id="cs-toast" class="cs-toast"></div>
+
+<!-- ═══════════════ SCRIPTS ═══════════════ -->
+<script>
+/* ============================================================
+   SITE: comportamiento compartido (promo, lang, header, nav)
+   ============================================================ */
+(function () {
+  /* Promo strip y selector de idioma ES/EN removidos junto con el header
+     de marketing (ver comentario sobre el <header> más arriba) — ya no
+     hay nada que alimentar con horario/día ni con data-set-lang. */
+  var header = document.querySelector('.site-header');
+  if (header) {
+    var onScroll = function() { header.classList.toggle('is-scrolled', window.scrollY > 8); };
+    window.addEventListener('scroll', onScroll, { passive: true }); onScroll();
+  }
+})();
+
+/* ============================================================
+   COTIZACIÓN: lógica principal
+   ============================================================ */
+var CS = (function () {
+  'use strict';
+
+  /* ----------------------------------------------------------
+     CONFIGURACIÓN DE INSTANCIA (clinic-config.js)
+  ---------------------------------------------------------- */
+  var CLINIC_ID = window.R3ADS_CLINIC_ID;
+  var CLINIC = window.R3ADS_CLINIC_FALLBACK || {};
+
+  var CFG = {
+    company: {
+      name : CLINIC.razonSocial || CLINIC.nombre || '—',
+      email: CLINIC.correo  || '—',
+      phone: CLINIC.telefono || '—'
+    },
+    currency: 'L'
+  };
+
+  /* ----------------------------------------------------------
+     ESTADO
+  ---------------------------------------------------------- */
+  var state = {
+    quotNum  : genQuotNum(),
+    created  : new Date(),
+    expiry   : addDays(new Date(), 30),
+    client   : { name:'', rtn:'', email:'', phone:'', addr:'' },
+    items    : [],
+    discount : 0,
+    tax      : 0,
+    shipping : 0,
+    other    : 0,
+    notes    : '',
+    waNum    : ''
+  };
+
+  /* ----------------------------------------------------------
+     UTILIDADES
+  ---------------------------------------------------------- */
+  function genQuotNum() {
+    var n = new Date();
+    return n.getFullYear() + '-' +
+           String(n.getMonth()+1).padStart(4,'0') + '-' +
+           (Math.floor(Math.random()*900)+100) + '-' +
+           String(n.getHours()).padStart(2,'0') +
+           String(n.getMinutes()).padStart(2,'0');
+  }
+
+  function addDays(d, days) {
+    var r = new Date(d); r.setDate(r.getDate() + days); return r;
+  }
+
+  function fmtDate(d) {
+    if (!(d instanceof Date) || isNaN(d)) return '—';
+    return d.toLocaleDateString('es-HN', {
+      day:'2-digit', month:'2-digit', year:'numeric',
+      hour:'2-digit', minute:'2-digit'
+    });
+  }
+
+  function fmtCur(n) {
+    return CFG.currency + ' ' + (parseFloat(n)||0).toFixed(2);
+  }
+
+  function esc(str) {
+    var d = document.createElement('div');
+    d.appendChild(document.createTextNode(str||''));
+    return d.innerHTML;
+  }
+
+  function toast(msg, ms) {
+    var el = document.getElementById('cs-toast');
+    el.textContent = msg;
+    el.classList.add('is-visible');
+    setTimeout(function(){ el.classList.remove('is-visible'); }, ms||3000);
+  }
+
+  function $id(id) { return document.getElementById(id); }
+  function setText(id, v) { var el=$id(id); if(el) el.textContent = v; }
+  function setHTML(id, v) { var el=$id(id); if(el) el.innerHTML = v; }
+
+  /* ----------------------------------------------------------
+     CÁLCULOS
+  ---------------------------------------------------------- */
+  function lineTotal(it) {
+    return (parseFloat(it.price)||0) * (parseInt(it.qty)||0) - (parseFloat(it.disc)||0);
+  }
+
+  function subtotal() {
+    return state.items.reduce(function(s,it){ return s + lineTotal(it); }, 0);
+  }
+
+  function grandTotal() {
+    return subtotal()
+      - (parseFloat(state.discount)||0)
+      + (parseFloat(state.tax)||0)
+      + (parseFloat(state.shipping)||0)
+      + (parseFloat(state.other)||0);
+  }
+
+  /* ----------------------------------------------------------
+     GESTIÓN DE ÍTEMS
+  ---------------------------------------------------------- */
+  function addItem() {
+    state.items.push({ desc:'', comment:'', price:0, qty:1, disc:0, tax:0 });
+    renderEditorItems();
+    syncTotals();
+    syncPreview();
+  }
+
+  function removeItem(i) {
+    state.items.splice(i, 1);
+    renderEditorItems();
+    syncTotals();
+    syncPreview();
+  }
+
+  function updateItem(i, field, val) {
+    var textFields = ['desc','comment'];
+    state.items[i][field] = textFields.indexOf(field) > -1 ? val : (parseFloat(val)||0);
+    syncTotals();
+    syncPreview();
+    /* actualizar celda total en línea */
+    var cells = document.querySelectorAll('.cs-line-total');
+    if (cells[i]) cells[i].textContent = fmtCur(lineTotal(state.items[i]));
+  }
+
+  function renderEditorItems() {
+    var tbody = $id('cs-items-tbody');
+    if (!tbody) return;
+    if (state.items.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="6" class="cs-items-empty">Haz clic en "+ Agregar" para añadir productos o servicios</td></tr>';
+      return;
+    }
+    tbody.innerHTML = state.items.map(function(it, i) {
+      return '<tr>' +
+        '<td style="min-width:140px">' +
+          '<input class="cs-ti" type="text" placeholder="Producto o servicio" value="' + esc(it.desc) + '" oninput="CS.updateItem(' + i + ',\'desc\',this.value)">' +
+          '<input class="cs-ti cs-ti--sm" type="text" placeholder="Comentarios" value="' + esc(it.comment) + '" oninput="CS.updateItem(' + i + ',\'comment\',this.value)">' +
+        '</td>' +
+        '<td><input class="cs-ti cs-ti--num" type="number" value="' + it.price + '" min="0" step="0.01" oninput="CS.updateItem(' + i + ',\'price\',this.value)"></td>' +
+        '<td><input class="cs-ti cs-ti--num" type="number" value="' + it.qty + '" min="1" step="1" oninput="CS.updateItem(' + i + ',\'qty\',this.value)"></td>' +
+        '<td><input class="cs-ti cs-ti--num" type="number" value="' + it.disc + '" min="0" step="0.01" oninput="CS.updateItem(' + i + ',\'disc\',this.value)"></td>' +
+        '<td class="cs-line-total">' + fmtCur(lineTotal(it)) + '</td>' +
+        '<td><button class="cs-btn-remove" onclick="CS.removeItem(' + i + ')" title="Eliminar">✕</button></td>' +
+      '</tr>';
+    }).join('');
+  }
+
+  /* ----------------------------------------------------------
+     SINCRONIZAR TOTALES (barra lateral)
+  ---------------------------------------------------------- */
+  function syncTotals() {
+    setText('cs-show-sub',   fmtCur(subtotal()));
+    setText('cs-show-disc',  fmtCur(state.discount));
+    setText('cs-show-tax',   fmtCur(state.tax));
+    setText('cs-show-ship',  fmtCur(state.shipping));
+    setText('cs-show-other', fmtCur(state.other));
+    setText('cs-show-total', fmtCur(grandTotal()));
+  }
+
+  /* ----------------------------------------------------------
+     SINCRONIZAR PREVIEW PDF
+  ---------------------------------------------------------- */
+  function syncPreview() {
+    /* datos de la clínica (header/pie del PDF) */
+    setText('p-brand-name', CFG.company.name);
+    setText('p-brand-email', CFG.company.email);
+    setText('p-brand-phone', CFG.company.phone);
+    setText('p-brand-addr',  CLINIC.direccion || '—');
+    setText('p-establecimiento', CLINIC.direccion || '—');
+    setText('p-foot-clinic', [CLINIC.nombre, CLINIC.direccion, CLINIC.telefono].filter(Boolean).join(' · ') || '—');
+    setText('p-foot-contact', (CLINIC.correo ? CLINIC.correo + ' · ' : '') + 'Empresa receptora: solicitar verificación primero.');
+
+    /* meta */
+    setText('p-quot-num', state.quotNum);
+    setText('p-created',  fmtDate(state.created));
+    /* Fun-1 DRM: vigencia fija de 24h, no se muestra fecha específica */
+    setText('p-expiry',   'Válida por 24 horas desde la creación');
+
+    /* cliente */
+    setText('p-client-name',  state.client.name  || '—');
+    setText('p-client-rtn',   state.client.rtn   || '0000-0000-000000');
+    setText('p-client-email', state.client.email || '—');
+    setText('p-client-phone', state.client.phone || '—');
+    setText('p-client-addr',  state.client.addr  || '—');
+
+    /* tabla */
+    var tbody = $id('p-items-tbody');
+    if (tbody) {
+      if (state.items.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" class="pdf-tbl-empty">Sin productos</td></tr>';
+      } else {
+        tbody.innerHTML = state.items.map(function(it) {
+          return '<tr>' +
+            '<td>' + esc(it.desc || '—') +
+              (it.comment ? '<small>' + esc(it.comment) + '</small>' : '') +
+            '</td>' +
+            '<td>' + (parseFloat(it.price)||0).toFixed(2) + '</td>' +
+            '<td>' + (parseInt(it.qty)||0) + '</td>' +
+            '<td>' + (parseFloat(it.disc)||0).toFixed(2) + '</td>' +
+            '<td>' + (parseFloat(it.tax)||0).toFixed(2) + '</td>' +
+            '<td>' + lineTotal(it).toFixed(2) + '</td>' +
+          '</tr>';
+        }).join('');
+      }
+    }
+
+    /* totales */
+    setText('p-sub',   fmtCur(subtotal()));
+    setHTML('p-disc',  '<strong>' + fmtCur(state.discount) + '</strong>');
+    setText('p-tax',   fmtCur(state.tax));
+    setText('p-ship',  fmtCur(state.shipping));
+    setText('p-other', fmtCur(state.other));
+    setHTML('p-total', fmtCur(grandTotal()));
+
+    /* notas */
+    var nb = $id('p-notes-block');
+    var nt = $id('p-notes-text');
+    if (nb && nt) {
+      nb.style.display = state.notes ? 'block' : 'none';
+      nt.textContent = state.notes;
+    }
+  }
+
+  /* ----------------------------------------------------------
+     GENERAR PDF, usa window.print() para máxima compatibilidad
+     El navegador abre el diálogo de impresión; el usuario
+     selecciona "Guardar como PDF" o "Destino: PDF".
+     Funciona en Chrome, Firefox, Safari, Edge, sin librerías.
+  ---------------------------------------------------------- */
+
+  function downloadPDF() {
+    if (state.items.length === 0) {
+      toast('⚠️ Agrega al menos un servicio antes de generar el PDF.');
+      return;
+    }
+
+    /* Actualizar el título del documento para que el nombre del
+       archivo sugerido sea el número de cotización */
+    var prevTitle = document.title;
+    document.title = (CLINIC.prefijoCodigoPaciente || 'Cotizacion') + '-' + state.quotNum;
+
+    /* Pequeña pausa para que el DOM esté listo antes de imprimir */
+    setTimeout(function () {
+      window.print();
+      /* Restaurar título después del diálogo */
+      setTimeout(function () {
+        document.title = prevTitle;
+      }, 1000);
+    }, 150);
+  }
+
+  /* Alias usado internamente por sendWhatsApp */
+  function generatePDF() {
+    downloadPDF();
+  }
+
+  /* ----------------------------------------------------------
+     ENVIAR POR WHATSAPP
+     Flujo: 1) genera & descarga PDF  2) abre WhatsApp con mensaje corto
+  ---------------------------------------------------------- */
+  async function sendWhatsApp() {
+    if (state.items.length === 0) {
+      toast('⚠️ Agrega al menos un producto antes de continuar.');
+      return;
+    }
+
+    var btn = $id('cs-btn-wa');
+    var orig = btn ? btn.innerHTML : '';
+    function setLoading(on) {
+      if (!btn) return;
+      btn.disabled = on;
+      btn.innerHTML = on
+        ? '<span class="cs-spin"></span> Generando PDF...'
+        : orig;
+    }
+
+    setLoading(true);
+    try {
+      /* 1. Abrir diálogo de impresión para guardar el PDF */
+      generatePDF();
+
+      /* 2. Construir mensaje con detalle completo de la cotización */
+      var clientName = state.client.name || 'cliente';
+      var phone = state.waNum.replace(/\D/g, '');
+      var wa504 = phone
+        ? (phone.startsWith('504') ? phone : '504' + phone)
+        : '';
+
+      /* Líneas de ítems */
+      var itemLines = state.items.map(function(it) {
+        var lineAmt = (parseFloat(it.price)||0) * (parseInt(it.qty)||0) - (parseFloat(it.disc)||0);
+        var line = '• ' + (it.desc || '—') + ' ×' + it.qty + ', L ' + lineAmt.toFixed(2);
+        if (it.comment) line += ' (' + it.comment + ')';
+        return line;
+      }).join('\n');
+
+      /* Totales */
+      var sub   = subtotal();
+      var disc  = parseFloat(state.discount)  || 0;
+      var tax   = parseFloat(state.tax)       || 0;
+      var ship  = parseFloat(state.shipping)  || 0;
+      var other = parseFloat(state.other)     || 0;
+      var grand = grandTotal();
+
+      /* Armar mensaje */
+      var lines = [];
+      lines.push('🏥 *' + (CLINIC.nombre || CFG.company.name) + '*');
+      lines.push('📋 *Cotización N° ' + state.quotNum + '*');
+      lines.push('⏳ _Cotización válida por 24 horas · sujeta a cambios · precios pueden variar en los procedimientos._');
+      lines.push('');
+      lines.push('Hola *' + clientName + '*, aquí tienes el detalle de tu cotización:');
+      lines.push('');
+      lines.push('*SERVICIOS*');
+      lines.push(itemLines);
+      lines.push('');
+      lines.push('─────────────────────');
+      lines.push('Subtotal:      L ' + sub.toFixed(2));
+      if (disc  > 0) lines.push('Descuento:    −L ' + disc.toFixed(2));
+      if (tax   > 0) lines.push('Impuesto:      L ' + tax.toFixed(2));
+      if (ship  > 0) lines.push('Envío:         L ' + ship.toFixed(2));
+      if (other > 0) lines.push('Otro:          L ' + other.toFixed(2));
+      lines.push('─────────────────────');
+      lines.push('*TOTAL:        L ' + grand.toFixed(2) + '*');
+      lines.push('');
+      if (state.notes) lines.push('📝 ' + state.notes + '\n');
+      if (CLINIC.direccion) lines.push('📍 ' + CLINIC.direccion);
+      if (CLINIC.telefono)  lines.push('📞 ' + CLINIC.telefono);
+      lines.push('');
+      lines.push('¡Quedamos a tu disposición! 😊');
+
+      var msg = encodeURIComponent(lines.join('\n'));
+
+      var url = wa504
+        ? 'https://wa.me/' + wa504 + '?text=' + msg
+        : 'https://web.whatsapp.com/?text=' + msg;
+
+      /* 3. Abrir WhatsApp después del diálogo de impresión */
+      setTimeout(function () {
+        window.open(url, '_blank');
+        toast('📲 WhatsApp abierto con la cotización completa.');
+      }, 800);
+
+    } catch (err) {
+      console.error(err);
+      toast('❌ Error al generar el PDF. Intenta de nuevo.');
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  /* ----------------------------------------------------------
+     ESCUCHAR CAMBIOS DEL FORMULARIO
+  ---------------------------------------------------------- */
+  function bindForm() {
+    /* Campos de cliente */
+    var clientMap = {
+      'f-client-name' : 'name',
+      'f-client-rtn'  : 'rtn',
+      'f-client-email': 'email',
+      'f-client-phone': 'phone',
+      'f-client-addr' : 'addr'
+    };
+    Object.keys(clientMap).forEach(function(id) {
+      var el = $id(id);
+      if (el) el.addEventListener('input', function(e) {
+        state.client[clientMap[id]] = e.target.value;
+        syncPreview();
+      });
+    });
+
+    /* Número de cotización */
+    var qn = $id('f-quot-num');
+    if (qn) qn.addEventListener('input', function(e) {
+      state.quotNum = e.target.value;
+      syncPreview();
+    });
+
+    /* Fecha de vencimiento */
+    var ex = $id('f-expiry');
+    if (ex) ex.addEventListener('change', function(e) {
+      state.expiry = e.target.value ? new Date(e.target.value + 'T00:00:00') : null;
+      syncPreview();
+    });
+
+    /* Ajustes de totales */
+    var adjMap = {
+      'f-discount': 'discount',
+      'f-tax'     : 'tax',
+      'f-shipping': 'shipping',
+      'f-other'   : 'other'
+    };
+    Object.keys(adjMap).forEach(function(id) {
+      var el = $id(id);
+      if (el) el.addEventListener('input', function(e) {
+        state[adjMap[id]] = parseFloat(e.target.value) || 0;
+        syncTotals();
+        syncPreview();
+      });
+    });
+
+    /* Notas */
+    var nt = $id('f-notes');
+    if (nt) nt.addEventListener('input', function(e) {
+      state.notes = e.target.value;
+      syncPreview();
+    });
+
+    /* WhatsApp */
+    var wa = $id('f-wa-num');
+    if (wa) wa.addEventListener('input', function(e) {
+      state.waNum = e.target.value;
+    });
+  }
+
+  /* ----------------------------------------------------------
+     GUARDAR COTIZACIÓN EN FIRESTORE
+  ---------------------------------------------------------- */
+  function saveQuote() {
+    if (state.items.length === 0) {
+      toast('⚠️ Agrega al menos un servicio antes de guardar.');
+      return;
+    }
+    /* ¿Usuario logueado? */
+    if (typeof r3adsAuth === 'undefined' || !r3adsAuth.currentUser) {
+      /* Guardar estado pendiente para recuperar tras el login */
+      localStorage.setItem('cmg-pending-save', JSON.stringify(buildSavePayload(null)));
+      window.location.href = 'Auth.html?returnTo=Cotizacion-Sistema.html';
+      return;
+    }
+    var btn = $id('cs-btn-save');
+    if (btn) { btn.disabled = true; btn.textContent = '💾 Guardando...'; }
+    var user    = r3adsAuth.currentUser;
+    var payload = buildSavePayload(user);
+    r3adsDb.collection('quotations').add(payload)
+      .then(function () {
+        toast('✅ Cotización guardada en tu cuenta.');
+        if (btn) { btn.disabled = false; btn.textContent = '💾 Guardar Cotización en mi Cuenta'; }
+      })
+      .catch(function (err) {
+        toast('❌ Error al guardar: ' + err.message);
+        if (btn) { btn.disabled = false; btn.textContent = '💾 Guardar Cotización en mi Cuenta'; }
+      });
+  }
+
+  function buildSavePayload(user) {
+    return {
+      clinicId  : CLINIC_ID,
+      userId    : user ? user.uid   : null,
+      userEmail : user ? user.email : null,
+      savedAt   : firebase.firestore.FieldValue.serverTimestamp(),
+      quotNum   : state.quotNum,
+      expiry    : state.expiry ? state.expiry.toISOString().split('T')[0] : null,
+      client    : state.client,
+      waNum     : state.waNum,
+      items     : state.items,
+      discount  : state.discount,
+      tax       : state.tax,
+      shipping  : state.shipping,
+      other     : state.other,
+      notes     : state.notes,
+      subtotal  : subtotal(),
+      grandTotal: grandTotal()
+    };
+  }
+
+  /* ----------------------------------------------------------
+     RESTAURAR COTIZACIÓN GUARDADA (desde Mis-Cotizaciones)
+  ---------------------------------------------------------- */
+  function restoreFromSaved(data) {
+    state.items    = data.items    || [];
+    state.discount = parseFloat(data.discount)  || 0;
+    state.tax      = parseFloat(data.tax)       || 0;
+    state.shipping = parseFloat(data.shipping)  || 0;
+    state.other    = parseFloat(data.other)     || 0;
+    state.notes    = data.notes   || '';
+    state.waNum    = data.waNum   || '';
+    if (data.client)  state.client  = data.client;
+    if (data.quotNum) state.quotNum = data.quotNum;
+    if (data.expiry) {
+      state.expiry = new Date(data.expiry);
+      var ex = $id('f-expiry');
+      if (ex) ex.value = data.expiry;
+    }
+    /* Rellenar campos cliente */
+    ['name','rtn','email','phone','addr'].forEach(function(k) {
+      var el = $id('f-client-' + k);
+      if (el && state.client[k]) el.value = state.client[k];
+    });
+    var wn = $id('f-wa-num');
+    if (wn) wn.value = state.waNum;
+    var fn = $id('f-notes');
+    if (fn) fn.value = state.notes;
+    var fd = $id('f-discount');
+    if (fd) fd.value = state.discount.toFixed(2);
+    var qn = $id('f-quot-num');
+    if (qn) qn.value = state.quotNum;
+    renderEditorItems();
+    syncTotals();
+    syncPreview();
+    toast('✅ Cotización cargada desde tu historial.');
+  }
+
+  /* ----------------------------------------------------------
+     CARGAR DATOS DESDE COTIZADOR.HTML (localStorage)
+  ---------------------------------------------------------- */
+  function loadFromCotizador(data) {
+    /* Mapear ítems del carrito al formato del sistema.
+       NOTA (port a Portal Clínico): el original marcaba aquí los ítems
+       gratis por la membresía Doctor 365 (it.isD365Free + data.disc==='d365')
+       con el comentario "Gratis con Doctor 365". Doctor 365 está fuera de
+       alcance de este producto (R3ads no vende ese programa a otras
+       clínicas) — se removió esa lógica de descuento/regalo por completo,
+       no solo el texto. */
+    state.items = (data.items || []).map(function(it) {
+      return { desc: it.name, comment: '', price: it.price, qty: it.qty, disc: 0, tax: 0 };
+    });
+
+    /* Descuento global */
+    state.discount = parseFloat(data.discount) || 0;
+    var discEl = $id('f-discount');
+    if (discEl) discEl.value = state.discount.toFixed(2);
+
+    /* Nota automática con el tipo de descuento */
+    if (data.discountLabel) {
+      state.notes = 'Descuento aplicado: ' + data.discountLabel;
+      var notesEl = $id('f-notes');
+      if (notesEl) notesEl.value = state.notes;
+    }
+
+    renderEditorItems();
+    syncTotals();
+
+    /* Ejecutar acción automática según el botón que presionó el usuario */
+    var action = data.autoAction || 'pdf';
+
+    if (action === 'whatsapp') {
+      /* Resaltar el botón de WhatsApp y mostrar instrucción */
+      toast('✅ ' + state.items.length + ' servicio(s) importado(s). Completa tus datos y envía por WhatsApp.');
+      setTimeout(function () {
+        var btn = $id('cs-btn-wa');
+        if (btn) {
+          btn.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          btn.style.animation = 'cs-pulse 1s ease 3';
+        }
+      }, 400);
+    } else {
+      /* PDF: iniciar impresión directamente */
+      toast('✅ ' + state.items.length + ' servicio(s) importado(s). Abriendo vista de impresión...');
+      setTimeout(function () {
+        downloadPDF();
+      }, 600);
+    }
+  }
+
+  /* ----------------------------------------------------------
+     INICIALIZAR
+  ---------------------------------------------------------- */
+  function init() {
+    /* pre-rellenar número cotización */
+    var qn = $id('f-quot-num');
+    if (qn) qn.value = state.quotNum;
+
+    /* pre-rellenar fecha vencimiento */
+    var ex = $id('f-expiry');
+    if (ex) ex.value = state.expiry.toISOString().split('T')[0];
+
+    bindForm();
+
+    /* ¿Vienen datos del Cotizador? Clave renombrada de 'cmg-quote-data' a
+       'portal-quote-data' al portar Cotizador.html — leer la misma aquí o
+       el handoff desde el cotizador público queda roto en silencio. */
+    var raw        = localStorage.getItem('portal-quote-data');
+    /* Handoff desde Mis-Cotizaciones.html: esa página ya guarda bajo la
+       clave 'portal-saved-quote' (antes 'cmg-saved-quote') — hay que leer
+       la misma clave aquí o el flujo "Abrir en Editor" queda roto en
+       silencio. */
+    var savedRaw   = localStorage.getItem('portal-saved-quote');
+    var pendingRaw = localStorage.getItem('cmg-pending-save');
+
+    if (savedRaw) {
+      /* Restaurar cotización guardada desde Mis-Cotizaciones */
+      localStorage.removeItem('portal-saved-quote');
+      try { restoreFromSaved(JSON.parse(savedRaw)); }
+      catch (e) { console.warn('[Portal Clínico] Error al restaurar cotización:', e); addItem(); }
+    } else if (pendingRaw) {
+      /* Restaurar estado pendiente (después de login) */
+      localStorage.removeItem('cmg-pending-save');
+      try {
+        var pending = JSON.parse(pendingRaw);
+        restoreFromSaved(pending);
+        /* Auto-guardar si ya hay sesión */
+        window._cmgAutoSave = true;
+      }
+      catch (e) { console.warn('[Portal Clínico] Error al restaurar pendiente:', e); addItem(); }
+    } else if (raw) {
+      /* Datos del Cotizador público */
+      localStorage.removeItem('portal-quote-data');
+      try { loadFromCotizador(JSON.parse(raw)); }
+      catch (e) { console.warn('[Portal Clínico] Error al leer portal-quote-data:', e); addItem(); }
+    } else {
+      addItem(); /* ítem vacío por defecto */
+    }
+
+    syncPreview();
+  }
+
+  /* API pública */
+  return {
+    init        : init,
+    addItem     : addItem,
+    removeItem  : removeItem,
+    updateItem  : updateItem,
+    downloadPDF : downloadPDF,
+    generatePDF : generatePDF,
+    sendWhatsApp: sendWhatsApp,
+    saveQuote   : saveQuote
+  };
+})();
+
+document.addEventListener('DOMContentLoaded', CS.init);
+
+/* ── Branding de la clínica (header/footer), ver clinic-config.js ── */
+(function () {
+  var CLINIC_ID = window.R3ADS_CLINIC_ID;
+  var CLINIC = window.R3ADS_CLINIC_FALLBACK || {};
+  function $id(id) { return document.getElementById(id); }
+
+  var brandName = $id('cs-brand-name'); if (brandName) brandName.textContent = CLINIC.nombre || '—';
+  var eyebrow = $id('cs-eyebrow'); if (eyebrow) eyebrow.textContent = 'Herramienta interna · ' + (CLINIC.nombre || '');
+  var footName = $id('cs-footer-name'); if (footName) footName.textContent = CLINIC.nombre || '—';
+  var footDir  = $id('cs-footer-direccion'); if (footDir) footDir.textContent = CLINIC.direccion || '';
+  var footTel  = $id('cs-footer-telefono'); if (footTel) footTel.textContent = CLINIC.telefono || '';
+  var footCopy = $id('cs-footer-copy'); if (footCopy) footCopy.textContent = '© ' + new Date().getFullYear() + ' ' + (CLINIC.razonSocial || CLINIC.nombre || '');
+  var waLink = $id('cs-float-wa'); if (waLink) waLink.href = 'https://wa.me/' + (CLINIC.whatsapp || '');
+})();
+
+/* ── Auth state: actualiza nav + auto-guarda si hay pendiente ── */
+if (typeof r3adsAuth !== 'undefined') {
+  r3adsAuth.onAuthStateChanged(function (user) {
+    var CLINIC_ID = window.R3ADS_CLINIC_ID;
+    var link = document.getElementById('cmg-nav-account');
+    var name = document.getElementById('cmg-nav-name');
+    if (user) {
+      var displayName = user.displayName || user.email.split('@')[0];
+      if (link) link.href = 'Mis-Cotizaciones.html';
+      if (name) name.textContent = displayName;
+      /* Admin pill */
+      r3adsStaff.checkAdmin(user, CLINIC_ID, function (ok) {
+        if (!ok) return;
+        var adminPill = document.getElementById('cmg-nav-admin');
+        if (adminPill) adminPill.style.display = 'inline-flex';
+      });
+      /* Auto-guardar cotización pendiente tras login */
+      if (window._cmgAutoSave) {
+        window._cmgAutoSave = false;
+        CS.saveQuote();
+      }
+    } else {
+      if (link) link.href = 'Auth.html?returnTo=Cotizacion-Sistema.html';
+      if (name) name.textContent = 'Mi Cuenta';
+    }
+  });
+}
+</script>
+
+</body>
+</html>
+

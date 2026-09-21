@@ -1,0 +1,437 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Informe Electrocardiograma</title>
+<!-- Favicon: pendiente por clínica (Fase 5 del plan). -->
+<link rel="stylesheet" href="assets/cmg-tokens.css">
+<style>
+*, *::before, *::after { box-sizing: border-box; }
+body { margin: 0; background: #F4F6FB; font-family: 'Segoe UI', Arial, sans-serif; min-height: 100vh; }
+
+/* ── Toolbar ── */
+.ek-toolbar {
+  max-width: 850px;
+  margin: 28px auto 16px;
+  padding: 0 28px;
+  display: flex;
+  gap: 10px;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.ek-back {
+  color: #213C7D;
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 600;
+}
+.ek-back:hover { text-decoration: underline; }
+.ek-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+.ek-btn {
+  border: none;
+  border-radius: 8px;
+  padding: 10px 18px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+  transition: opacity .15s, transform .1s;
+}
+.ek-btn:hover { opacity: .9; }
+.ek-btn:active { transform: scale(.98); }
+.ek-btn-print { background: #059669; color: #fff; }
+
+/* ── Loading / Error ── */
+.ek-message {
+  max-width: 850px;
+  margin: 60px auto;
+  padding: 40px;
+  background: #fff;
+  border-radius: 12px;
+  text-align: center;
+  color: #4B5563;
+}
+.ek-spinner {
+  width: 28px; height: 28px;
+  border: 3px solid #E5E7EB;
+  border-top-color: #213C7D;
+  border-radius: 50%;
+  animation: spin .7s linear infinite;
+  margin: 0 auto 16px;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ═══ HOJA DE RESULTADOS ═══ */
+.ek-container {
+  max-width: 850px;
+  margin: 0 auto;
+  padding: 0 28px 40px;
+}
+.ek-sheet {
+  background: #fff;
+  border: 1px solid #ddd;
+  padding: 0;
+  font-family: 'Segoe UI', Arial, sans-serif;
+  color: #213C7D;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 2px 16px rgba(0,0,0,.06);
+}
+.ek-watermark {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  opacity: .06;
+  z-index: 0;
+}
+.ek-watermark img { width: 60%; max-width: 480px; }
+
+/* Header */
+.ek-header {
+  position: relative; z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 24px;
+  border-bottom: 3px solid #FDD22C;
+  background: linear-gradient(180deg,#fafbff 0%,#fff 100%);
+}
+.ek-header img { width: 40px; height: auto; }
+.ek-header .ek-h-name {
+  font-size: 15px;
+  font-weight: 900;
+  letter-spacing: .3px;
+  margin: 0;
+}
+.ek-header .ek-h-sub {
+  font-size: 10.5px;
+  color: #6B7280;
+  margin: 1px 0 0;
+  font-weight: 600;
+}
+
+/* Body */
+.ek-body { position: relative; z-index: 1; padding: 14px 24px; }
+.ek-title {
+  text-align: center;
+  font-size: 17px;
+  font-weight: 900;
+  letter-spacing: 1.5px;
+  margin: 0 0 10px;
+  color: #213C7D;
+  border-top: 1px solid #E5E7EB;
+  border-bottom: 1px solid #E5E7EB;
+  padding: 6px 0;
+  background: #F9FAFB;
+}
+
+.ek-section-label {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: .4px;
+  text-transform: uppercase;
+  color: #213C7D;
+  margin: 10px 0 4px;
+}
+
+.ek-details {
+  background: #F9FAFB;
+  border: 1px solid #E5E7EB;
+  border-radius: 6px;
+  padding: 0 14px;
+  font-size: 12.5px;
+  color: #1F2937;
+}
+.ek-details-row {
+  display: flex;
+  justify-content: space-between;
+  border-bottom: 1px dashed #E5E7EB;
+  padding: 4px 0;
+  gap: 12px;
+}
+.ek-details-row:last-child { border-bottom: 0; }
+.ek-details-row b { color: #213C7D; min-width: 140px; }
+
+/* Ondas del EKG: grid compacto de "chips" en vez de tabla alta, para dejar
+   más espacio vertical al trazo impreso. */
+.ek-ondas-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 4px 6px;
+  margin-top: 2px;
+}
+.ek-onda-chip {
+  background: #F9FAFB;
+  border: 1px solid #E5E7EB;
+  border-radius: 5px;
+  padding: 3px 7px;
+  font-size: 10.5px;
+  color: #1F2937;
+  line-height: 1.35;
+}
+.ek-onda-chip b {
+  display: block;
+  color: #213C7D;
+  font-size: 9.5px;
+  font-weight: 800;
+  letter-spacing: .2px;
+  text-transform: uppercase;
+}
+
+/* Espacio del trazo impreso */
+.ek-strip {
+  margin-top: 4px;
+  border: 1.5px solid #9CA3AF;
+  border-radius: 6px;
+  min-height: 280px;
+  max-height: 500px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #FAFBFF;
+  overflow: hidden;
+}
+.ek-strip img { width: 100%; height: auto; max-height: 500px; object-fit: contain; display: block; }
+.ek-strip .ek-strip-empty { color: #9CA3AF; font-size: 12px; text-align: center; padding: 10px; }
+
+/* Firma */
+.ek-firma {
+  margin-top: 16px;
+  display: flex;
+  justify-content: flex-end;
+}
+.ek-firma-box {
+  width: 260px;
+  text-align: center;
+  border-top: 1px solid #213C7D;
+  padding-top: 4px;
+  font-size: 12px;
+  color: #213C7D;
+}
+.ek-firma-box small {
+  display: block;
+  color: #6B7280;
+  font-size: 10px;
+  margin-top: 1px;
+}
+
+/* Pie de página */
+.ek-foot {
+  position: relative; z-index: 1;
+  padding: 8px 24px 12px;
+  border-top: 1px solid #E5E7EB;
+  background: #F9FAFB;
+  text-align: center;
+  font-size: 10px;
+  color: #6B7280;
+  line-height: 1.4;
+}
+.ek-foot b { color: #213C7D; }
+
+/* Print */
+@media print {
+  body { background: #fff; }
+  .no-print { display: none !important; }
+  .ek-toolbar { display: none; }
+  .ek-container { padding: 0; max-width: none; }
+  .ek-sheet {
+    border: none; box-shadow: none;
+    min-height: 277mm; /* llena la hoja A4 (297mm - 2x10mm de margen) */
+    display: flex;
+    flex-direction: column;
+  }
+  .ek-body { flex: 1 0 auto; display: flex; flex-direction: column; }
+  /* Sin tope: crece para llenar el espacio sobrante de la hoja (acotado por
+     el min-height fijo de .ek-sheet, así nunca desborda a una segunda hoja) */
+  .ek-strip { flex: 1 0 auto; max-height: none; break-inside: avoid; }
+  .ek-strip img { max-height: none; }
+  .ek-foot { margin-top: auto; }
+  @page { size: A4; margin: 10mm; }
+}
+</style>
+<!-- Analytics por clínica: pendiente (ver nota en Auth.html). -->
+</head>
+<body>
+
+<!-- Toolbar -->
+<div class="ek-toolbar no-print">
+  <a href="Expediente-Doctor.html" class="ek-back">← Volver al expediente</a>
+  <div class="ek-actions">
+    <button class="ek-btn ek-btn-print" id="ek-btn-print">🖨️ Imprimir</button>
+  </div>
+</div>
+
+<!-- Loading / Error placeholder -->
+<div id="ek-loading" class="ek-message">
+  <div class="ek-spinner"></div>
+  Cargando informe...
+</div>
+
+<!-- Informe -->
+<div id="ek-container" class="ek-container" style="display:none">
+  <div class="ek-sheet" id="ek-sheet">
+    <!-- Watermark/logo por clínica: pendiente (Fase 5) — mientras tanto sin
+         imagen, solo el nombre en texto en el header. -->
+
+    <!-- Header -->
+    <div class="ek-header">
+      <div>
+        <p class="ek-h-name" id="ek-h-name">—</p>
+        <p class="ek-h-sub" id="ek-h-sub">—</p>
+      </div>
+    </div>
+
+    <div class="ek-body">
+      <h2 class="ek-title">INFORME ELECTROCARDIOGRAMA</h2>
+
+      <div class="ek-section-label">I. Generales del paciente</div>
+      <div class="ek-details">
+        <div class="ek-details-row"><b>Nombre:</b> <span id="ek-paciente-nombre">—</span></div>
+        <div class="ek-details-row"><b>Edad:</b> <span id="ek-paciente-edad">—</span></div>
+        <div class="ek-details-row"><b>Fecha:</b> <span id="ek-fecha">—</span></div>
+      </div>
+
+      <div class="ek-section-label">II. Impresión diagnóstica</div>
+      <div class="ek-details" style="margin-bottom:10px">
+        <div class="ek-details-row"><b>Frecuencia cardíaca:</b> <span id="ek-fc">—</span></div>
+        <div class="ek-details-row"><b>Ritmo:</b> <span id="ek-ritmo">—</span></div>
+        <div class="ek-details-row"><b>Eje eléctrico:</b> <span id="ek-eje">—</span></div>
+      </div>
+
+      <div class="ek-ondas-grid" id="ek-tabla-ondas"></div>
+
+      <div class="ek-section-label">Electrocardiograma impreso</div>
+      <div class="ek-strip" id="ek-strip">
+        <div class="ek-strip-empty">Sin imagen adjunta. Espacio reservado para el trazo del electrocardiograma.</div>
+      </div>
+
+      <!-- Firma: médico tratante que finalizó el servicio (no interpreta el trazo) -->
+      <div class="ek-firma">
+        <div class="ek-firma-box">
+          <b id="ek-medico-nombre">—</b>
+          <small id="ek-medico-sub">Médico General</small>
+        </div>
+      </div>
+    </div>
+
+    <!-- Pie: datos de la clínica, ver clinic-config.js -->
+    <div class="ek-foot">
+      <p>
+        <b id="ek-foot-razon">—</b> · <span id="ek-foot-correo">—</span> · <span id="ek-foot-web">—</span>
+      </p>
+      <p style="margin-top:4px" id="ek-foot-direccion">—</p>
+    </div>
+  </div>
+</div>
+
+<!-- Firebase + lógica -->
+<script src="clinic-config.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="firebase-init.js"></script>
+<script>
+(function(){
+  var CLINIC_ID = window.R3ADS_CLINIC_ID;
+  var CLINIC = window.R3ADS_CLINIC_FALLBACK || {};
+  function $(id){ return document.getElementById(id); }
+
+  /* ── Encabezado/pie con los datos de la clínica (no de CMG) ── */
+  $('ek-h-name').textContent = (CLINIC.razonSocial || CLINIC.nombre || '—').toUpperCase();
+  $('ek-h-sub').textContent = [CLINIC.direccion, CLINIC.telefono].filter(Boolean).join(' · ') || '—';
+  $('ek-medico-sub').textContent = 'Médico General · ' + (CLINIC.nombre || 'la clínica');
+  $('ek-foot-razon').textContent = CLINIC.razonSocial || CLINIC.nombre || '—';
+  $('ek-foot-correo').textContent = CLINIC.correo || '—';
+  $('ek-foot-web').textContent = CLINIC.sitioWeb || '—';
+  $('ek-foot-direccion').textContent = [CLINIC.direccion, CLINIC.telefono ? ('Tel. ' + CLINIC.telefono) : null].filter(Boolean).join(' · ') || '—';
+  function esc(s){ return (s||'').toString().replace(/[&<>]/g, function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;'}[c];}); }
+  function fmtFechaHora(ts){
+    if (!ts) return '—';
+    try {
+      var d = ts.toDate ? ts.toDate() : new Date(ts);
+      return d.toLocaleString('es-HN', { day:'2-digit', month:'long', year:'numeric', hour:'2-digit', minute:'2-digit' });
+    } catch(e){ return '—'; }
+  }
+  function calcEdad(fechaNac){
+    if (!fechaNac) return '';
+    try {
+      var d = new Date(fechaNac);
+      var hoy = new Date();
+      var e = hoy.getFullYear() - d.getFullYear();
+      var m = hoy.getMonth() - d.getMonth();
+      if (m < 0 || (m === 0 && hoy.getDate() < d.getDate())) e--;
+      return e + ' años';
+    } catch(err){ return ''; }
+  }
+
+  function getParam(name){
+    var m = new RegExp('[?&]' + name + '=([^&]+)').exec(window.location.search);
+    return m ? decodeURIComponent(m[1]) : null;
+  }
+
+  function ondaRow(label, amp, dur){
+    return '<div class="ek-onda-chip"><b>' + esc(label) + '</b>Amp: ' + esc(amp || '—') + ' mV · Dur: ' + esc(dur || '—') + ' s</div>';
+  }
+
+  function render(data){
+    $('ek-paciente-nombre').textContent = data.pacienteNombre || '—';
+    $('ek-paciente-edad').textContent = calcEdad(data.pacienteFechaNacimiento) || '—';
+    $('ek-fecha').textContent = fmtFechaHora(data.emitidoEn);
+    $('ek-fc').textContent = data.fc || '—';
+    $('ek-ritmo').textContent = data.ritmo || '—';
+    $('ek-eje').textContent = data.eje || '—';
+    $('ek-tabla-ondas').innerHTML =
+      ondaRow('Onda P', data.aondap, data.dondap) +
+      ondaRow('Intervalo P.R', data.aintpr, data.dintpr) +
+      ondaRow('Complejo QRS', data.acompqrs, data.dcompqrs) +
+      ondaRow('Onda R', data.aondar, data.dondaqrs) +
+      ondaRow('Intervalo Q – T', data.aintqt, data.dintqt) +
+      ondaRow('Onda T', data.aondat, data.dondat);
+    if (data.imagenUrl) {
+      $('ek-strip').innerHTML = '<img src="' + esc(data.imagenUrl) + '" alt="Electrocardiograma">';
+    }
+    $('ek-medico-nombre').textContent = data.medico || '—';
+    $('ek-loading').style.display = 'none';
+    $('ek-container').style.display = '';
+    document.title = 'EKG ' + (data.pacienteNombre || '') + ' · ' + (CLINIC.nombre || 'Portal Clínico');
+  }
+
+  function showError(msg){
+    $('ek-loading').innerHTML = '<div style="color:#b91c1c;font-weight:700">❌ ' + esc(msg) + '</div><div style="margin-top:8px;font-size:13px">' +
+      '<a href="Expediente-Doctor.html" class="ek-back">← Volver al expediente</a></div>';
+  }
+
+  /* Imprimir */
+  $('ek-btn-print').addEventListener('click', function(){ window.print(); });
+
+  /* Inicializar */
+  var id = getParam('id');
+  if (!id) { showError('No se especificó el electrocardiograma (parámetro ?id= ausente).'); return; }
+
+  r3adsAuth.onAuthStateChanged(function(user){
+    if (!user) { showError('Sesión requerida. Inicia sesión.'); return; }
+    r3adsDb.collection('electrocardiogramas').doc(id).get()
+      .then(function(snap){
+        if (!snap.exists) { showError('El electrocardiograma no existe o fue eliminado.'); return; }
+        var d = snap.data();
+        d._id = snap.id;
+        // Las Security Rules ya exigen que d.clinicId coincida con la
+        // clínica del usuario logueado; esto es defensa adicional en el
+        // cliente por si algún día se relaja esa regla.
+        if (d.clinicId && d.clinicId !== CLINIC_ID) { showError('Este electrocardiograma no pertenece a esta clínica.'); return; }
+        render(d);
+      })
+      .catch(function(err){
+        showError('Error al cargar el electrocardiograma: ' + err.message);
+      });
+  });
+})();
+</script>
+
+</body>
+</html>

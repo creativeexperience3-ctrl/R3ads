@@ -1,0 +1,1481 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pruebas Rápidas</title>
+<!-- Favicon: pendiente por clínica (Fase 5 del plan). -->
+<link rel="stylesheet" href="assets/cmg-tokens.css">
+<link rel="stylesheet" href="styles.css">
+<style>
+*, *::before, *::after { box-sizing: border-box; }
+
+/* ═══ FORM PAGE ═══════════════════════════════════════════ */
+.pr-page { background: #F4F6FB; min-height: 100vh; padding-bottom: 80px; }
+
+.pr-hero {
+  background: #213C7D;
+  padding: 40px 0 32px;
+  border-bottom: 4px solid #FDD22C;
+}
+.pr-hero-inner {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 0 28px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+.pr-hero-eyebrow {
+  font-size: 11px; font-weight: 700; letter-spacing: 2px;
+  text-transform: uppercase; color: #FDD22C; margin-bottom: 8px;
+}
+.pr-hero-h1 { font-size: clamp(22px,4vw,32px); font-weight: 900; color: #fff; margin: 0; }
+.pr-user-chip {
+  display: flex; align-items: center; gap: 10px;
+  background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.15);
+  border-radius: 50px; padding: 8px 18px 8px 8px; color: #fff; font-size: 13px;
+}
+.pr-avatar {
+  width: 34px; height: 34px; border-radius: 50%; background: #FDD22C;
+  color: #213C7D; display: flex; align-items: center; justify-content: center;
+  font-weight: 900; font-size: 14px;
+}
+.pr-logout {
+  border: 1px solid rgba(255,255,255,.25); background: transparent;
+  color: rgba(255,255,255,.75); border-radius: 20px; padding: 6px 14px;
+  font-size: 12px; font-weight: 600; cursor: pointer; font-family: inherit;
+}
+
+.pr-content { max-width: 900px; margin: 28px auto 0; padding: 0 28px; }
+
+/* Test type selector */
+.pr-type-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+  margin-bottom: 24px;
+}
+.pr-type-btn {
+  background: #fff;
+  border: 2.5px solid #E5E7EB;
+  border-radius: 14px;
+  padding: 20px 16px;
+  text-align: center;
+  cursor: pointer;
+  transition: all .2s;
+  font-family: inherit;
+}
+.pr-type-btn:hover { border-color: #213C7D; }
+.pr-type-btn.is-active { border-color: #213C7D; background: #213C7D; color: #fff; }
+.pr-type-btn.is-active .pr-type-icon { filter: brightness(0) invert(1); }
+.pr-type-icon { font-size: 28px; margin-bottom: 6px; display: block; }
+.pr-type-label { font-size: 13px; font-weight: 700; }
+
+/* Form card */
+.pr-card {
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 2px 12px rgba(33,60,125,.08);
+  padding: 28px;
+  margin-bottom: 20px;
+}
+.pr-card-title {
+  font-size: 16px; font-weight: 800; color: #213C7D;
+  margin: 0 0 18px; display: flex; align-items: center; gap: 10px;
+  border-bottom: 2px solid #F4F6FB; padding-bottom: 12px;
+}
+.pr-form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 16px;
+}
+.pr-field { display: flex; flex-direction: column; gap: 4px; }
+.pr-field.full-width { grid-column: 1 / -1; }
+.pr-label {
+  font-size: 11px; font-weight: 700; color: #6B7280;
+  text-transform: uppercase; letter-spacing: .5px;
+}
+.pr-input, .pr-select {
+  height: 44px; border: 1.5px solid #E5E7EB; border-radius: 8px;
+  padding: 0 14px; font-family: inherit; font-size: 14px;
+  font-weight: 600; color: #1F2937; background: #F9FAFB; outline: none;
+}
+.pr-input:focus, .pr-select:focus { border-color: #213C7D; }
+.pr-select { cursor: pointer; }
+
+/* Result options (Positivo/Negativo) */
+.pr-result-options {
+  display: flex; gap: 8px;
+}
+.pr-result-opt {
+  flex: 1; height: 44px; border: 2px solid #E5E7EB; border-radius: 8px;
+  background: #F9FAFB; font-family: inherit; font-size: 13px;
+  font-weight: 700; cursor: pointer; transition: all .15s;
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+}
+.pr-result-opt:hover { border-color: #9CA3AF; }
+.pr-result-opt.is-positive { border-color: #DC2626; background: #FEE2E2; color: #991B1B; }
+.pr-result-opt.is-negative { border-color: #059669; background: #D1FAE5; color: #065F46; }
+
+/* Actions */
+.pr-actions {
+  display: flex; gap: 12px; justify-content: flex-end; margin-top: 24px;
+}
+.pr-btn {
+  height: 48px; padding: 0 28px; border: none; border-radius: 10px;
+  font-family: inherit; font-size: 14px; font-weight: 700; cursor: pointer;
+}
+.pr-btn-primary { background: #213C7D; color: #fff; }
+.pr-btn-primary:hover { opacity: .9; }
+.pr-btn-primary:disabled { opacity: .5; cursor: not-allowed; }
+.pr-btn-ghost { background: #F4F6FB; color: #6B7280; border: 1.5px solid #E5E7EB; }
+.pr-btn-print { background: #059669; color: #fff; }
+
+/* Toast */
+.pr-toast {
+  position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
+  background: #213C7D; color: #fff; padding: 12px 22px; border-radius: 50px;
+  font-size: 14px; font-weight: 600; box-shadow: 0 8px 24px rgba(0,0,0,.2);
+  opacity: 0; pointer-events: none; transition: opacity .3s; z-index: 10000;
+}
+.pr-toast.is-visible { opacity: 1; }
+
+/* Spinner */
+.pr-spinner {
+  width: 40px; height: 40px; border: 3px solid #E5E7EB;
+  border-top-color: #213C7D; border-radius: 50%;
+  animation: pr-spin .8s linear infinite; margin: 40px auto;
+}
+@keyframes pr-spin { to { transform: rotate(360deg); } }
+
+/* History list */
+.pr-history-item {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 18px; background: #F9FAFB; border-radius: 10px;
+  margin-bottom: 8px; gap: 12px; flex-wrap: wrap;
+}
+.pr-history-name { font-size: 14px; font-weight: 700; color: #1F2937; }
+.pr-history-meta { font-size: 12px; color: #6B7280; }
+.pr-history-btn {
+  background: #213C7D; color: #fff; border: none; border-radius: 6px;
+  padding: 6px 12px; font-size: 12px; font-weight: 700;
+  cursor: pointer; font-family: inherit;
+}
+
+/* ═══ RESULT SHEET (Printable) ════════════════════════════ */
+.rs-container {
+  display: none;
+  max-width: 800px;
+  margin: 28px auto 0;
+  padding: 0 28px;
+}
+.rs-toolbar {
+  display: flex; gap: 10px; margin-bottom: 16px; justify-content: flex-end;
+  flex-wrap: wrap;
+  align-items: center;
+}
+.rs-edit-hint {
+  margin-right: auto;
+  font-size: 12px;
+  color: #6B7280;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.pr-btn-save { background: #213C7D; color: #fff; }
+.pr-btn-save:hover { opacity: .92; }
+
+/* Editable cells / blocks */
+.result-sheet [contenteditable="true"] {
+  outline: none;
+  border-radius: 3px;
+  transition: background .15s, box-shadow .15s;
+  cursor: text;
+}
+.result-sheet [contenteditable="true"]:hover {
+  background: #FFFBEB;
+}
+.result-sheet [contenteditable="true"]:focus {
+  background: #FEF3C7;
+  box-shadow: 0 0 0 2px #FDD22C;
+}
+/* En modo impresión, no se ven los hovers/focus de edición */
+@media print {
+  .result-sheet [contenteditable="true"] {
+    background: transparent !important;
+    box-shadow: none !important;
+    outline: none !important;
+  }
+}
+
+.result-sheet {
+  background: #fff;
+  border: 1px solid #ddd;
+  padding: 0;
+  font-family: 'Segoe UI', Arial, sans-serif;
+  font-size: 12px;
+  color: #1a1a1a;
+  line-height: 1.4;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Header */
+.rs-header {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 20px 32px 16px;
+  border-bottom: 3px solid #4BACC6;
+  background: linear-gradient(135deg, #f0f8ff 0%, #e8f4f8 50%, #fff 100%);
+  position: relative;
+}
+.rs-header::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 0; right: 0; bottom: 0;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 80'%3E%3Cpath d='M0 40 L60 40 L80 15 L100 65 L120 25 L140 55 L160 40 L400 40' fill='none' stroke='%234BACC6' stroke-width='1.5' opacity='0.15'/%3E%3C/svg%3E") no-repeat center;
+  background-size: cover;
+  pointer-events: none;
+}
+.rs-logo {
+  width: 70px; height: auto; position: relative; z-index: 1;
+}
+.rs-header-text {
+  position: relative; z-index: 1;
+}
+.rs-header-text h1 {
+  font-size: 18px; font-weight: 800; color: #213C7D; margin: 0;
+}
+.rs-header-text h2 {
+  font-size: 14px; font-weight: 600; color: #4BACC6; margin: 2px 0 0;
+}
+.rs-arsa-badge {
+  position: absolute; right: 24px; top: 12px; z-index: 1;
+  font-size: 9px; color: #666; text-align: center;
+  border: 1px solid #999; border-radius: 4px; padding: 4px 8px;
+  background: rgba(255,255,255,.8);
+}
+
+/* Watermark */
+.rs-watermark {
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  opacity: .06;
+  pointer-events: none;
+  z-index: 0;
+  width: 300px;
+}
+
+/* Body */
+.rs-body { padding: 20px 32px 16px; position: relative; z-index: 1; }
+
+.rs-title {
+  text-align: center;
+  font-size: 15px;
+  font-weight: 800;
+  color: #1a1a1a;
+  margin: 0 0 4px;
+  text-decoration: underline;
+}
+.rs-correlativo {
+  text-align: center;
+  font-size: 11px;
+  color: #555;
+  margin: 0 0 16px;
+}
+
+.rs-section-title {
+  font-size: 11px;
+  font-weight: 800;
+  color: #1a1a1a;
+  margin: 16px 0 6px;
+  text-transform: uppercase;
+}
+
+.rs-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 8px;
+}
+.rs-table td {
+  border: 1px solid #bbb;
+  padding: 5px 10px;
+  font-size: 12px;
+}
+.rs-table td:first-child {
+  font-weight: 700;
+  color: #333;
+  width: 160px;
+  background: #f0f8ff;
+}
+.rs-table td:nth-child(2) {
+  color: #1a1a1a;
+}
+
+/* Two-column patient table for COVID antigeno */
+.rs-table-2col td:first-child { width: 100px; }
+.rs-table-2col td:nth-child(3) { width: 100px; font-weight: 700; background: #f0f8ff; }
+
+/* Results table */
+.rs-results-table td:first-child {
+  width: auto;
+  font-weight: 700;
+}
+.rs-results-table td:last-child {
+  font-weight: 800;
+  font-size: 13px;
+  text-align: right;
+  width: 140px;
+}
+
+/* Sensitivity note */
+.rs-sensitivity {
+  text-align: center;
+  font-size: 10px;
+  color: #DC2626;
+  margin: 8px 0;
+}
+
+/* Nota */
+.rs-nota {
+  margin-top: 20px;
+  padding-top: 12px;
+  border-top: 1px solid #ddd;
+}
+.rs-nota strong {
+  font-size: 11px;
+  color: #333;
+}
+.rs-nota p {
+  font-size: 9px;
+  color: #666;
+  margin: 2px 0;
+  line-height: 1.3;
+}
+
+/* Stamp area */
+.rs-stamp {
+  margin-top: 16px;
+  display: flex;
+  align-items: flex-end;
+  gap: 20px;
+}
+.rs-stamp-img {
+  width: 80px; height: 80px;
+  object-fit: contain;
+  opacity: .85;
+}
+.rs-stamp-text {
+  font-size: 10px;
+  font-weight: 800;
+  color: #213C7D;
+  line-height: 1.3;
+}
+.rs-stamp-right {
+  margin-left: auto;
+  text-align: center;
+}
+.rs-qr { width: 90px; height: 90px; }
+.rs-qr-label { font-size: 8px; color: #999; font-style: italic; margin-top: 2px; }
+
+/* Footer */
+.rs-footer {
+  margin-top: 16px;
+  padding-top: 10px;
+  border-top: 2px solid #4BACC6;
+  font-size: 10px;
+  color: #555;
+  line-height: 1.4;
+}
+.rs-footer a { color: #213C7D; }
+
+/* ═══ PRINT STYLES ════════════════════════════════════════ */
+@media print {
+  body * { visibility: hidden; }
+  .result-sheet, .result-sheet * { visibility: visible; }
+  .result-sheet {
+    position: fixed;
+    left: 0; top: 0;
+    width: 100%;
+    border: none;
+    box-shadow: none;
+    margin: 0; padding: 0;
+  }
+  .rs-toolbar, .pr-page, .site-header, .promo-strip, .float-wa,
+  .pr-toast, .rs-container > .rs-toolbar { display: none !important; }
+
+  @page {
+    size: letter;
+    margin: 12mm 10mm;
+  }
+}
+
+@media (max-width: 640px) {
+  .pr-card { padding: 20px; }
+  .pr-type-grid { grid-template-columns: 1fr 1fr; }
+  .pr-form-grid { grid-template-columns: 1fr; }
+}
+</style>
+<!-- Analytics por clínica: pendiente (ver nota en Auth.html). -->
+</head>
+<body data-lang="es">
+
+<!-- Header simplificado (ver nota equivalente en Mis-Cotizaciones.html):
+     se quita el chrome de marketing de CMG (promo strip, nav a Inicio/
+     Sobre-nosotros), fuera del alcance del módulo clínico. -->
+<header class="site-header">
+  <div class="container header-row">
+    <div class="brand-lockup" id="pr-brand-name" style="color:#fff;font-weight:900;font-size:18px">—</div>
+    <nav class="site-nav" aria-label="Principal">
+      <a href="Expediente-Doctor.html">Expedientes</a>
+      <a href="Mi-Historial.html">Mi Historial</a>
+    </nav>
+  </div>
+</header>
+
+<!-- ═══ MAIN ═══ -->
+<main class="pr-page" id="pr-page">
+
+  <!-- Hero -->
+  <div class="pr-hero">
+    <div class="pr-hero-inner">
+      <div>
+        <div class="pr-hero-eyebrow">🧪 Laboratorio</div>
+        <h1 class="pr-hero-h1">Pruebas Rápidas</h1>
+      </div>
+      <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+        <div class="pr-user-chip" id="pr-user-chip" style="display:none">
+          <div class="pr-avatar" id="pr-avatar">?</div>
+          <span id="pr-user-name">—</span>
+        </div>
+        <button class="pr-logout" id="pr-logout">Cerrar sesión</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Content -->
+  <div class="pr-content" id="pr-form-section">
+
+    <!-- Loading -->
+    <div id="pr-loading"><div class="pr-spinner"></div></div>
+
+    <!-- Tipo de prueba -->
+    <div class="pr-card" id="pr-type-card" style="display:none">
+      <h3 class="pr-card-title">📋 Selecciona el tipo de prueba</h3>
+      <div class="pr-type-grid">
+        <button class="pr-type-btn" data-type="embarazo">
+          <span class="pr-type-icon">🤰</span>
+          <span class="pr-type-label">Prueba de<br>Embarazo</span>
+        </button>
+        <button class="pr-type-btn" data-type="dengue">
+          <span class="pr-type-icon">🦟</span>
+          <span class="pr-type-label">Dengue<br>NS1</span>
+        </button>
+        <button class="pr-type-btn" data-type="duo">
+          <span class="pr-type-icon">🧪</span>
+          <span class="pr-type-label">DUO<br>COVID - Influenza</span>
+        </button>
+        <button class="pr-type-btn" data-type="antigeno">
+          <span class="pr-type-icon">🩹</span>
+          <span class="pr-type-label">Antígeno<br>COVID-19</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Formulario -->
+    <div id="pr-form-card" style="display:none">
+
+      <!-- Datos del paciente -->
+      <div class="pr-card">
+        <h3 class="pr-card-title">👤 Información del paciente</h3>
+        <div class="pr-form-grid">
+          <div class="pr-field">
+            <label class="pr-label">Nombre completo</label>
+            <input type="text" class="pr-input" id="f-nombre" placeholder="Nombre del paciente">
+          </div>
+          <div class="pr-field">
+            <label class="pr-label">Fecha de nacimiento</label>
+            <input type="date" class="pr-input" id="f-fechanac">
+          </div>
+          <div class="pr-field">
+            <label class="pr-label">DNI / Identidad</label>
+            <input type="text" class="pr-input" id="f-dni" placeholder="0000-0000-00000">
+          </div>
+          <div class="pr-field" id="field-edad" style="display:none">
+            <label class="pr-label">Edad</label>
+            <input type="text" class="pr-input" id="f-edad" readonly placeholder="Auto">
+          </div>
+          <div class="pr-field" id="field-pasaporte" style="display:none">
+            <label class="pr-label">Pasaporte</label>
+            <input type="text" class="pr-input" id="f-pasaporte" placeholder="Número de pasaporte">
+          </div>
+          <div class="pr-field" id="field-sexo" style="display:none">
+            <label class="pr-label">Sexo</label>
+            <select class="pr-select" id="f-sexo">
+              <option value="">Seleccionar</option>
+              <option value="Masculino">Masculino</option>
+              <option value="Femenino">Femenino</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Información de muestra -->
+      <div class="pr-card">
+        <h3 class="pr-card-title">🕐 Información de toma de muestra</h3>
+        <div class="pr-form-grid">
+          <div class="pr-field">
+            <label class="pr-label">Fecha</label>
+            <input type="date" class="pr-input" id="f-fecha">
+          </div>
+          <div class="pr-field">
+            <label class="pr-label">Hora de toma de muestra</label>
+            <input type="time" class="pr-input" id="f-horatoma">
+          </div>
+          <div class="pr-field" id="field-correlativo" style="display:none">
+            <label class="pr-label">Correlativo</label>
+            <input type="text" class="pr-input" id="f-correlativo">
+          </div>
+        </div>
+      </div>
+
+      <!-- Resultados -->
+      <div class="pr-card">
+        <h3 class="pr-card-title">📊 Resultados del examen</h3>
+
+        <!-- Embarazo -->
+        <div id="results-embarazo" class="pr-results-section" style="display:none">
+          <div class="pr-field">
+            <label class="pr-label">Prueba de Embarazo</label>
+            <div class="pr-result-options" data-field="res-embarazo">
+              <button type="button" class="pr-result-opt" data-value="POSITIVO">🔴 Positivo</button>
+              <button type="button" class="pr-result-opt" data-value="NEGATIVO">🟢 Negativo</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Dengue -->
+        <div id="results-dengue" class="pr-results-section" style="display:none">
+          <div class="pr-form-grid">
+            <div class="pr-field">
+              <label class="pr-label">Anticuerpo IgG</label>
+              <div class="pr-result-options" data-field="res-igg">
+                <button type="button" class="pr-result-opt" data-value="POSITIVO">🔴 Positivo</button>
+                <button type="button" class="pr-result-opt" data-value="NEGATIVO">🟢 Negativo</button>
+              </div>
+            </div>
+            <div class="pr-field">
+              <label class="pr-label">Anticuerpo IgM</label>
+              <div class="pr-result-options" data-field="res-igm">
+                <button type="button" class="pr-result-opt" data-value="POSITIVO">🔴 Positivo</button>
+                <button type="button" class="pr-result-opt" data-value="NEGATIVO">🟢 Negativo</button>
+              </div>
+            </div>
+            <div class="pr-field">
+              <label class="pr-label">NS1</label>
+              <div class="pr-result-options" data-field="res-ns1">
+                <button type="button" class="pr-result-opt" data-value="POSITIVO">🔴 Positivo</button>
+                <button type="button" class="pr-result-opt" data-value="NEGATIVO">🟢 Negativo</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- DUO -->
+        <div id="results-duo" class="pr-results-section" style="display:none">
+          <div class="pr-form-grid">
+            <div class="pr-field">
+              <label class="pr-label">SARS-COV-2 / COVID-19</label>
+              <div class="pr-result-options" data-field="res-sarcov2">
+                <button type="button" class="pr-result-opt" data-value="POSITIVO">🔴 Positivo</button>
+                <button type="button" class="pr-result-opt" data-value="NEGATIVO">🟢 Negativo</button>
+              </div>
+            </div>
+            <div class="pr-field">
+              <label class="pr-label">Influenza H1N1 A</label>
+              <div class="pr-result-options" data-field="res-tipoa">
+                <button type="button" class="pr-result-opt" data-value="POSITIVO">🔴 Positivo</button>
+                <button type="button" class="pr-result-opt" data-value="NEGATIVO">🟢 Negativo</button>
+              </div>
+            </div>
+            <div class="pr-field">
+              <label class="pr-label">Influenza H1N1 B</label>
+              <div class="pr-result-options" data-field="res-tipob">
+                <button type="button" class="pr-result-opt" data-value="POSITIVO">🔴 Positivo</button>
+                <button type="button" class="pr-result-opt" data-value="NEGATIVO">🟢 Negativo</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Antígeno COVID -->
+        <div id="results-antigeno" class="pr-results-section" style="display:none">
+          <div class="pr-field">
+            <label class="pr-label">Antígeno SARS COV-2</label>
+            <div class="pr-result-options" data-field="res-antigeno">
+              <button type="button" class="pr-result-opt" data-value="POSITIVO">🔴 Positivo</button>
+              <button type="button" class="pr-result-opt" data-value="NEGATIVO">🟢 Negativo</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <div class="pr-actions">
+        <button class="pr-btn pr-btn-ghost" id="btn-cancelar">← Cambiar prueba</button>
+        <!-- DRM Fun-6: dejar pendiente -->
+        <button class="pr-btn pr-btn-ghost" id="btn-pendiente" title="Guardar sin imprimir, podrás reabrirla luego" disabled>📋 Dejar pendiente</button>
+        <button class="pr-btn pr-btn-primary" id="btn-guardar" disabled>💾 Confirmar e Imprimir</button>
+      </div>
+    </div>
+
+    <!-- DRM Fun-6: Pruebas pendientes (sin resultado confirmado) -->
+    <div class="pr-card" id="pr-pending-card">
+      <h3 class="pr-card-title">⏳ Pruebas pendientes de resultado</h3>
+      <p style="font-size:13px;color:#6B7280;margin-top:-6px">Reanuda una prueba para confirmar el resultado e imprimirla.</p>
+      <div id="pr-pending-list"><div style="font-size:13px;color:#9CA3AF">Cargando…</div></div>
+    </div>
+
+    <!-- Historial reciente -->
+    <div class="pr-card" id="pr-history-card" style="display:none">
+      <h3 class="pr-card-title">📋 Resultados recientes</h3>
+      <div id="pr-history-list"></div>
+    </div>
+
+  </div>
+</main>
+
+<!-- ═══ RESULT SHEET (for print) ═══ -->
+<div class="rs-container" id="rs-container">
+  <div class="rs-toolbar">
+    <span class="rs-edit-hint">✏️ Los campos resaltados son editables · revisa antes de imprimir</span>
+    <button class="pr-btn pr-btn-ghost" id="btn-new-test">+ Nueva prueba</button>
+    <button class="pr-btn pr-btn-save" id="btn-save-edits">💾 Guardar cambios</button>
+    <button class="pr-btn pr-btn-print" id="btn-print">🖨️ Imprimir</button>
+  </div>
+  <div class="result-sheet" id="result-sheet">
+    <!-- Watermark/logo por clínica: pendiente (Fase 5). -->
+
+    <!-- Header -->
+    <div class="rs-header">
+      <div class="rs-header-text">
+        <h1 id="rs-h-name">—</h1>
+        <h2 id="rs-h-sub">—</h2>
+      </div>
+      <div class="rs-arsa-badge" id="rs-arsa" style="display:none">
+        Certificado de<br>Prueba (ARSA)
+      </div>
+    </div>
+
+    <!-- Body -->
+    <div class="rs-body">
+      <h3 class="rs-title">INFORME DE RESULTADOS</h3>
+      <div class="rs-correlativo" id="rs-correlativo" style="display:none"></div>
+
+      <!-- I. Paciente -->
+      <div class="rs-section-title">I.- INFORMACIÓN DEL PACIENTE</div>
+      <table class="rs-table" id="rs-paciente-table">
+        <!-- filled by JS -->
+      </table>
+
+      <!-- II. Muestra -->
+      <div class="rs-section-title">II.- INFORMACIÓN DE TOMA DE MUESTRA</div>
+      <table class="rs-table" id="rs-muestra-table">
+        <!-- filled by JS -->
+      </table>
+
+      <!-- III. Resultados -->
+      <div class="rs-section-title" id="rs-exam-title">III.- EXÁMENES REALIZADOS</div>
+      <table class="rs-table rs-results-table" id="rs-results-table">
+        <!-- filled by JS -->
+      </table>
+
+      <div id="rs-extra-info" style="display:none"></div>
+
+      <div class="rs-sensitivity" id="rs-sensitivity" style="display:none">
+        Sensibilidad: 97.1% | Especificidad: 99.5%<br>
+        Porcentajes según especificaciones del fabricante
+      </div>
+
+      <!-- Nota -->
+      <div class="rs-nota">
+        <strong>Nota:</strong>
+        <p>Los resultados del Laboratorio clínico, no son datos concluyentes de patologías.</p>
+        <p>Es responsabilidad del paciente el manejo de resultados de exámenes no ordenados por un médico.</p>
+        <p>La apreciación médica es indispensable.</p>
+        <p style="margin-top:6px;font-weight:700;color:#b91c1c;">Empresa receptora: solicitar verificación primero.</p>
+      </div>
+
+      <!-- Stamp -->
+      <div class="rs-stamp">
+        <div>
+          <div class="rs-stamp-text" id="rs-stamp-text">
+            TOMA Y RECEPCIÓN DE MUESTRAS
+          </div>
+        </div>
+        <div class="rs-stamp-right" id="rs-qr-container" style="display:none">
+          <canvas id="rs-qr-canvas" class="rs-qr"></canvas>
+          <div class="rs-qr-label">¡Escanea para verificar tus resultados!</div>
+        </div>
+      </div>
+
+      <!-- Footer: datos de la clínica, ver clinic-config.js -->
+      <div class="rs-footer" id="rs-footer">—</div>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="pr-toast" id="pr-toast">—</div>
+
+<!-- Float WhatsApp: número de la clínica, ver clinic-config.js -->
+<a class="float-wa" id="pr-float-wa" href="#" aria-label="WhatsApp">
+  <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><path d="M.057 24l1.687-6.163a11.867 11.867 0 0 1-1.587-5.946C.16 5.335 5.495 0 12.05 0a11.817 11.817 0 0 1 8.413 3.488 11.824 11.824 0 0 1 3.48 8.414c-.003 6.557-5.338 11.892-11.893 11.892a11.9 11.9 0 0 1-5.688-1.448L.057 24z"/></svg>
+</a>
+
+<!-- Firebase compat SDK -->
+<script src="clinic-config.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="firebase-init.js"></script>
+
+<script>
+(function () {
+  var CLINIC_ID = window.R3ADS_CLINIC_ID;
+  var CLINIC = window.R3ADS_CLINIC_FALLBACK || {};
+  /* ════════════════════════════════════════════════════════════
+     HELPERS
+     ════════════════════════════════════════════════════════════ */
+  function $id(id) { return document.getElementById(id); }
+  function esc(s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  }
+  function toast(msg, ms) {
+    var t = $id('pr-toast');
+    t.textContent = msg;
+    t.classList.add('is-visible');
+    setTimeout(function () { t.classList.remove('is-visible'); }, ms || 2400);
+  }
+  function formatDateLong(dateStr) {
+    if (!dateStr) return '—';
+    var d = new Date(dateStr + 'T12:00:00');
+    var DAYS = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+    var MONTHS = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+    return DAYS[d.getDay()] + ' ' + d.getDate() + ' de ' + MONTHS[d.getMonth()] + ' del ' + d.getFullYear();
+  }
+  function formatTime12(time24) {
+    if (!time24) return '—';
+    var parts = time24.split(':');
+    var h = parseInt(parts[0]);
+    var m = parts[1];
+    var ampm = h >= 12 ? 'PM' : 'AM';
+    h = h % 12 || 12;
+    return h + ':' + m + ' ' + ampm;
+  }
+  function calcAge(dateStr) {
+    if (!dateStr) return '';
+    var fn = new Date(dateStr + 'T12:00:00');
+    var hoy = new Date();
+    var e = hoy.getFullYear() - fn.getFullYear();
+    var m = hoy.getMonth() - fn.getMonth();
+    if (m < 0 || (m === 0 && hoy.getDate() < fn.getDate())) e--;
+    return e;
+  }
+  function nowTime() {
+    var d = new Date();
+    return String(d.getHours()).padStart(2,'0') + ':' + String(d.getMinutes()).padStart(2,'0');
+  }
+  function todayStr() {
+    var d = new Date();
+    return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+  }
+
+  /* ── Branding de la clínica ── */
+  $id('pr-brand-name').textContent = CLINIC.nombre || '—';
+  $id('rs-h-name').textContent = (CLINIC.razonSocial || CLINIC.nombre || '—').toUpperCase();
+  $id('rs-h-sub').textContent = CLINIC.nombre || '';
+  $id('rs-stamp-text').innerHTML = 'TOMA Y RECEPCIÓN DE MUESTRAS<br>' + (CLINIC.nombre || '').toUpperCase();
+  $id('rs-footer').innerHTML =
+    esc(CLINIC.direccion || '') + '<br>' +
+    'Correo-e: <a href="mailto:' + esc(CLINIC.correo || '') + '">' + esc(CLINIC.correo || '') + '</a><br>' +
+    'Teléfonos: ' + esc(CLINIC.telefono || '');
+  var waLink = $id('pr-float-wa');
+  if (waLink) waLink.href = 'https://wa.me/' + (CLINIC.whatsapp || '');
+
+  var header = document.querySelector('.site-header');
+  if (header) {
+    var onScroll = function () { header.classList.toggle('is-scrolled', window.scrollY > 8); };
+    window.addEventListener('scroll', onScroll, { passive: true }); onScroll();
+  }
+
+  /* ════════════════════════════════════════════════════════════
+     STATE
+     ════════════════════════════════════════════════════════════ */
+  var currentUser = null;
+  var selectedType = null;
+  var resultValues = {};
+
+  /* ════════════════════════════════════════════════════════════
+     AUTH GUARD
+     ════════════════════════════════════════════════════════════ */
+  r3adsAuth.onAuthStateChanged(function (user) {
+    if (!user) {
+      window.location.href = 'Auth.html?returnTo=Pruebas-Rapidas.html';
+      return;
+    }
+    currentUser = user;
+    var name = user.displayName || user.email.split('@')[0];
+    $id('pr-user-chip').style.display = '';
+    $id('pr-avatar').textContent = name.charAt(0).toUpperCase();
+    $id('pr-user-name').textContent = name;
+    $id('pr-loading').style.display = 'none';
+    $id('pr-type-card').style.display = '';
+    loadHistory();
+    /* Las pruebas pendientes se cargan aquí, ya con sesión: si se consultan antes
+       de que Firebase restaure la sesión, Firestore responde "Missing or
+       insufficient permissions" y la lista se queda vacía o en error. */
+    cargarPendientes();
+  });
+
+  $id('pr-logout').addEventListener('click', function () {
+    r3adsAuth.signOut().then(function () { window.location.href = 'Auth.html'; });
+  });
+
+  /* ════════════════════════════════════════════════════════════
+     TEST TYPE SELECTION
+     ════════════════════════════════════════════════════════════ */
+  var typeButtons = document.querySelectorAll('.pr-type-btn');
+  typeButtons.forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      selectedType = btn.getAttribute('data-type');
+      typeButtons.forEach(function (b) { b.classList.remove('is-active'); });
+      btn.classList.add('is-active');
+      showForm(selectedType);
+    });
+  });
+
+  function showForm(type) {
+    $id('pr-form-card').style.display = '';
+    resultValues = {};
+
+    /* Reset all result buttons */
+    document.querySelectorAll('.pr-result-opt').forEach(function (b) {
+      b.classList.remove('is-positive', 'is-negative');
+    });
+
+    /* Show/hide fields based on type */
+    var showEdad = type !== 'embarazo';
+    var showPasaporte = type === 'antigeno';
+    var showSexo = type === 'antigeno';
+    var showCorrelativo = type === 'antigeno';
+
+    $id('field-edad').style.display = showEdad ? '' : 'none';
+    $id('field-pasaporte').style.display = showPasaporte ? '' : 'none';
+    $id('field-sexo').style.display = showSexo ? '' : 'none';
+    $id('field-correlativo').style.display = showCorrelativo ? '' : 'none';
+
+    /* Show correct results section */
+    document.querySelectorAll('.pr-results-section').forEach(function (s) { s.style.display = 'none'; });
+    $id('results-' + type).style.display = '';
+
+    /* Set defaults */
+    $id('f-fecha').value = todayStr();
+    $id('f-horatoma').value = nowTime();
+
+    updateSaveBtn();
+  }
+
+  /* Auto-calc edad */
+  $id('f-fechanac').addEventListener('change', function () {
+    var age = calcAge(this.value);
+    $id('f-edad').value = age !== '' ? age + ' años' : '';
+  });
+
+  /* DRM v3 #3: pre-llenar desde query params si vienen desde Expediente-Doctor.
+     qCodigoPaciente identifica al paciente ya seleccionado en el expediente,
+     para vincular la prueba directamente a él sin depender de DNI o nombre. */
+  var qCodigoPaciente = '';
+  (function(){
+    function getQP(n){ var m = new RegExp('[?&]' + n + '=([^&]+)').exec(location.search); return m ? decodeURIComponent(m[1]) : ''; }
+    var qDni = getQP('dni'), qNombre = getQP('nombre'), qFecha = getQP('fechanac');
+    qCodigoPaciente = getQP('codigo');
+    if (qDni)    $id('f-dni').value = qDni;
+    if (qNombre) $id('f-nombre').value = qNombre;
+    if (qFecha)  { $id('f-fechanac').value = qFecha; $id('f-edad').value = (calcAge(qFecha) + ' años'); }
+  })();
+
+  /* Cancel / change type */
+  $id('btn-cancelar').addEventListener('click', function () {
+    $id('pr-form-card').style.display = 'none';
+    selectedType = null;
+    typeButtons.forEach(function (b) { b.classList.remove('is-active'); });
+    clearForm();
+  });
+
+  function clearForm() {
+    $id('f-nombre').value = '';
+    $id('f-fechanac').value = '';
+    $id('f-dni').value = '';
+    $id('f-edad').value = '';
+    $id('f-pasaporte').value = '';
+    $id('f-sexo').value = '';
+    $id('f-fecha').value = todayStr();
+    $id('f-horatoma').value = nowTime();
+    $id('f-correlativo').value = '';
+    resultValues = {};
+    document.querySelectorAll('.pr-result-opt').forEach(function (b) {
+      b.classList.remove('is-positive', 'is-negative');
+    });
+    updateSaveBtn();
+  }
+
+  /* ════════════════════════════════════════════════════════════
+     RESULT BUTTONS
+     ════════════════════════════════════════════════════════════ */
+  document.addEventListener('click', function (e) {
+    var opt = e.target.closest('.pr-result-opt');
+    if (!opt) return;
+    var container = opt.closest('.pr-result-options');
+    var field = container.getAttribute('data-field');
+    var value = opt.getAttribute('data-value');
+
+    /* Toggle siblings */
+    container.querySelectorAll('.pr-result-opt').forEach(function (b) {
+      b.classList.remove('is-positive', 'is-negative');
+    });
+
+    var isPositive = value === 'POSITIVO' || value === 'REACTIVO';
+    opt.classList.add(isPositive ? 'is-positive' : 'is-negative');
+    resultValues[field] = value;
+    updateSaveBtn();
+  });
+
+  function updateSaveBtn() {
+    var nombre = $id('f-nombre').value.trim();
+    var hasResults = false;
+
+    if (selectedType === 'embarazo') hasResults = !!resultValues['res-embarazo'];
+    else if (selectedType === 'dengue') hasResults = !!resultValues['res-igg'] && !!resultValues['res-igm'] && !!resultValues['res-ns1'];
+    else if (selectedType === 'duo') hasResults = !!resultValues['res-sarcov2'] && !!resultValues['res-tipoa'] && !!resultValues['res-tipob'];
+    else if (selectedType === 'antigeno') hasResults = !!resultValues['res-antigeno'];
+
+    $id('btn-guardar').disabled = !(nombre && hasResults);
+    /* DRM Fun-6: dejar pendiente solo requiere nombre */
+    var btnPend = $id('btn-pendiente');
+    if (btnPend) btnPend.disabled = !nombre;
+  }
+
+  $id('f-nombre').addEventListener('input', updateSaveBtn);
+
+  /* ════════════════════════════════════════════════════════════
+     SAVE & GENERATE RESULT
+     ════════════════════════════════════════════════════════════ */
+  /* Normaliza DNI (solo dígitos, para hacer match aunque tenga guiones) */
+  function normalizarDNI(v) { return (v || '').replace(/\D/g, ''); }
+
+  /* Busca expediente cuyo numeroIdentidad coincida (con o sin guiones) */
+  function buscarExpedientePorDNI(dniRaw) {
+    var dniNorm = normalizarDNI(dniRaw);
+    if (!dniNorm) return Promise.resolve(null);
+    // Acotado a esta clínica (ver misma nota en Examenes-Laboratorio.html).
+    return r3adsDb.collection('expedientes').where('clinicId', '==', CLINIC_ID).get().then(function (snap) {
+      var match = null;
+      snap.forEach(function (doc) {
+        if (match) return;
+        var dg = (doc.data() || {}).datosGenerales || {};
+        if (normalizarDNI(dg.numeroIdentidad) === dniNorm) {
+          match = { codigoPaciente: doc.id, nombrePaciente: dg.nombreCompleto || '' };
+        }
+      });
+      return match;
+    });
+  }
+
+  /* DRM: fallback para expedientes sin número de identidad — empareja por nombre completo */
+  function normalizarNombre(v) { return (v || '').trim().toLowerCase().replace(/\s+/g, ' '); }
+  function buscarExpedientePorNombre(nombreRaw) {
+    var nombreNorm = normalizarNombre(nombreRaw);
+    if (!nombreNorm) return Promise.resolve(null);
+    return r3adsDb.collection('expedientes').where('clinicId', '==', CLINIC_ID).get().then(function (snap) {
+      var match = null;
+      snap.forEach(function (doc) {
+        if (match) return;
+        var dg = (doc.data() || {}).datosGenerales || {};
+        if (normalizarNombre(dg.nombreCompleto) === nombreNorm) {
+          match = { codigoPaciente: doc.id, nombrePaciente: dg.nombreCompleto || '' };
+        }
+      });
+      return match;
+    });
+  }
+
+  /* DRM: si la prueba se abrió desde el expediente de un paciente ya seleccionado,
+     se vincula directamente a él (prioridad máxima, no depende de DNI ni nombre). */
+  function obtenerExpedientePorCodigo(codigo) {
+    if (!codigo) return Promise.resolve(null);
+    return r3adsDb.collection('expedientes').doc(codigo).get().then(function (doc) {
+      if (!doc.exists || doc.data().clinicId !== CLINIC_ID) return null;
+      var dg = (doc.data() || {}).datosGenerales || {};
+      return { codigoPaciente: doc.id, nombrePaciente: dg.nombreCompleto || '' };
+    });
+  }
+
+  /* DRM Fun-6: handler unificado, soporta confirmar e imprimir o dejar pendiente */
+  function guardarPrueba(modo /* 'confirmado' | 'pendiente' */) {
+    var btn = (modo === 'pendiente') ? $id('btn-pendiente') : $id('btn-guardar');
+    if (btn.disabled) return;
+    btn.disabled = true;
+    var textoBase = btn.textContent;
+    btn.textContent = 'Buscando expediente...';
+
+    var horaImpresion = (modo === 'pendiente') ? null : nowTime();
+    var dniRaw = $id('f-dni').value.trim();
+    var data = {
+      tipo: selectedType,
+      clinicId: CLINIC_ID,
+      nombre: $id('f-nombre').value.trim(),
+      fechaNacimiento: $id('f-fechanac').value,
+      dni: dniRaw,
+      dniNormalizado: normalizarDNI(dniRaw),
+      edad: calcAge($id('f-fechanac').value),
+      fecha: $id('f-fecha').value,
+      horaToma: $id('f-horatoma').value,
+      horaImpresion: horaImpresion,
+      resultados: Object.assign({}, resultValues),
+      creadoPor: currentUser.email,
+      creadoPorNombre: currentUser.displayName || currentUser.email.split('@')[0],
+      createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+      codigoPaciente: null,
+      /* DRM Fun-6: estado de la prueba */
+      status: modo === 'pendiente' ? 'pendiente_resultado' : 'confirmado'
+    };
+
+    if (selectedType === 'antigeno') {
+      data.pasaporte = $id('f-pasaporte').value.trim();
+      data.sexo = $id('f-sexo').value;
+      data.correlativo = $id('f-correlativo').value.trim();
+    }
+
+    /* Paso 1: Vincular al expediente. Prioridad: paciente ya seleccionado en el
+       expediente (codigo en la URL) > coincidencia por DNI > coincidencia por nombre completo. */
+    obtenerExpedientePorCodigo(qCodigoPaciente)
+      .then(function (match) {
+        if (match) return match;
+        return buscarExpedientePorDNI(dniRaw);
+      })
+      .then(function (match) {
+        if (match) return match;
+        return buscarExpedientePorNombre($id('f-nombre').value.trim());
+      })
+      .then(function (match) {
+        if (match) {
+          data.codigoPaciente = match.codigoPaciente;
+          data.pacienteNombreExpediente = match.nombrePaciente;
+        }
+        btn.textContent = 'Guardando...';
+        /* Paso 2: Guardar resultado */
+        return r3adsDb.collection('resultadosPruebas').add(data).then(function (docRef) {
+          data._id = docRef.id;
+          /* Generar liquidación pendiente en Caja */
+          var TIPO_LABEL = {
+            embarazo: 'Prueba de Embarazo',
+            dengue:   'Prueba de Dengue',
+            duo:      'Prueba Dúo (COVID/Influenza)',
+            antigeno: 'Prueba de Antígeno COVID'
+          };
+          var tipoPrueba = TIPO_LABEL[data.tipo] || ('Prueba rápida: ' + data.tipo);
+          var now2 = new Date();
+          var pad2 = function(n){ return String(n).padStart(2,'0'); };
+          var fechaLocalPR = now2.getFullYear() + '-' + pad2(now2.getMonth()+1) + '-' + pad2(now2.getDate()) +
+            'T' + pad2(now2.getHours()) + ':' + pad2(now2.getMinutes());
+          r3adsDb.collection('consultas').add({
+            status              : 'pendiente_caja',
+            tipoRegistro        : 'prueba-standalone',
+            clinicId            : CLINIC_ID,
+            codigoPaciente      : data.codigoPaciente || null,
+            pacienteNombre      : data.nombre || '—',
+            servicioNombre      : tipoPrueba,
+            serviciosBrindados  : [tipoPrueba],
+            doctorNombre        : data.creadoPorNombre || data.creadoPor,
+            fechaLocal          : fechaLocalPR,
+            resultadosPruebasId : docRef.id,
+            createdAt           : firebase.firestore.FieldValue.serverTimestamp()
+          }).catch(function(e){ console.warn('[Portal Clínico] Error creando caja entry para prueba rápida:', e); });
+
+          btn.textContent = textoBase;
+          if (modo === 'pendiente') {
+            toast('📋 Prueba dejada pendiente. Podrás reabrirla cuando tengas el resultado.');
+            cargarPendientes();
+            /* Limpiar form y NO renderizar hoja */
+            $id('btn-cancelar').click();
+            /* El botón queda según el formulario (vacío = deshabilitado). Antes se
+               reactivaba a ciegas y se podía guardar una segunda prueba en blanco. */
+            updateSaveBtn();
+          } else {
+            if (match) toast('✓ Vinculado al expediente ' + match.codigoPaciente);
+            else       toast('✓ Resultado guardado (sin expediente vinculado)');
+            renderResultSheet(data);
+            btn.disabled = false;
+          }
+        });
+      })
+      .catch(function (err) {
+        console.error('[Portal Clínico] Error guardando resultado:', err);
+        toast('Error: ' + err.message);
+        btn.textContent = textoBase;
+        btn.disabled = false;
+      });
+  }
+  $id('btn-guardar').addEventListener('click', function(){ guardarPrueba('confirmado'); });
+  if ($id('btn-pendiente')) {
+    $id('btn-pendiente').addEventListener('click', function(){ guardarPrueba('pendiente'); });
+  }
+
+  /* DRM Fun-6: cargar y mostrar pruebas pendientes */
+  function cargarPendientes() {
+    var box = $id('pr-pending-list');
+    if (!box) return;
+    // NOTA: where compuesto (clinicId + status) puede pedir un índice
+    // compuesto la primera vez — la consola de Firebase da el enlace.
+    r3adsDb.collection('resultadosPruebas')
+      .where('clinicId', '==', CLINIC_ID)
+      .where('status', '==', 'pendiente_resultado')
+      .limit(20).get()
+      .then(function(snap){
+        if (snap.empty) {
+          box.innerHTML = '<div style="font-size:13px;color:#9CA3AF;padding:8px 0">No hay pruebas pendientes.</div>';
+          return;
+        }
+        var html = '<div style="display:flex;flex-direction:column;gap:8px">';
+        snap.forEach(function(doc){
+          var d = doc.data();
+          html += '<div style="display:flex;justify-content:space-between;align-items:center;background:#FFFBEB;border:1px solid #FCD34D;border-radius:8px;padding:10px 12px">' +
+            '<div><b>' + esc(d.nombre || '—') + '</b><br><small style="color:#6B7280">' + esc(d.tipo) + ' · ' + esc(d.fecha) + (d.horaToma ? ' · Toma: ' + esc(d.horaToma) : '') + '</small></div>' +
+            '<div style="display:flex;gap:8px">' +
+              '<button class="pr-btn pr-btn-primary" data-pending-id="' + doc.id + '">▶ Reanudar</button>' +
+              '<button class="pr-btn pr-btn-ghost" data-eliminar-id="' + doc.id + '" style="color:#B91C1C;border-color:#FCA5A5">🗑️ Eliminar</button>' +
+            '</div>' +
+          '</div>';
+        });
+        html += '</div>';
+        box.innerHTML = html;
+        box.querySelectorAll('[data-pending-id]').forEach(function(btn){
+          btn.addEventListener('click', function(){
+            reanudarPendiente(this.getAttribute('data-pending-id'));
+          });
+        });
+        box.querySelectorAll('[data-eliminar-id]').forEach(function(btn){
+          btn.addEventListener('click', function(){
+            var id = this.getAttribute('data-eliminar-id');
+            if (!confirm('¿Eliminar esta prueba pendiente? Esta acción no se puede deshacer (útil si se repitió por accidente).')) return;
+            r3adsDb.collection('resultadosPruebas').doc(id).delete()
+              .then(function(){ toast('✓ Prueba pendiente eliminada'); cargarPendientes(); })
+              .catch(function(err){ toast('Error: ' + err.message); });
+          });
+        });
+      })
+      .catch(function(err){
+        box.innerHTML = '<div style="font-size:12px;color:#b91c1c">Error: ' + esc(err.message) + '</div>';
+      });
+  }
+  function reanudarPendiente(id) {
+    r3adsDb.collection('resultadosPruebas').doc(id).get().then(function(snap){
+      if (!snap.exists) { toast('No se encontró la prueba'); return; }
+      var d = snap.data();
+      d._id = snap.id;
+      /* DRM: la prueba sigue "pendiente_resultado" hasta que se confirme con Imprimir,
+         así se puede salir de esta pantalla sin perder el pendiente. */
+      renderResultSheet(d);
+      toast('Prueba reanudada. Confirma y haz clic en Imprimir.');
+    });
+  }
+  /* La carga inicial de pendientes ocurre en onAuthStateChanged (ver AUTH GUARD),
+     no con un temporizador: hacerlo antes de tener sesión da error de permisos. */
+
+  /* ════════════════════════════════════════════════════════════
+     RENDER RESULT SHEET
+     ════════════════════════════════════════════════════════════ */
+  /* Estado del documento actualmente mostrado (para guardar ediciones) */
+  var currentResultDoc = null;
+
+  /* Helper: celda editable con data-edit-key */
+  function edCell(key, value) {
+    return '<td contenteditable="true" data-edit-key="' + key + '">' + esc(value || '') + '</td>';
+  }
+
+  function renderResultSheet(data) {
+    /* Hide form, show result sheet */
+    $id('pr-page').style.display = 'none';
+    $id('rs-container').style.display = 'block';
+    currentResultDoc = data;
+
+    var isAntigeno = data.tipo === 'antigeno';
+    var edad = data.edad !== '' && data.edad !== null ? data.edad + ' AÑOS' : '';
+
+    /* ARSA badge */
+    $id('rs-arsa').style.display = isAntigeno ? '' : 'none';
+
+    /* Correlativo */
+    if (isAntigeno && data.correlativo) {
+      $id('rs-correlativo').style.display = '';
+      $id('rs-correlativo').setAttribute('contenteditable', 'true');
+      $id('rs-correlativo').setAttribute('data-edit-key', 'correlativo');
+      $id('rs-correlativo').textContent = data.correlativo;
+    } else {
+      $id('rs-correlativo').style.display = 'none';
+      $id('rs-correlativo').removeAttribute('contenteditable');
+    }
+
+    /* Patient table */
+    var pacienteHTML = '';
+    if (isAntigeno) {
+      /* Two-column layout for antigeno */
+      pacienteHTML =
+        '<tr><td>Paciente</td>' + edCell('nombre', data.nombre) + '<td>Fecha de Nac</td>' + edCell('fechaNacimientoTxt', data.fechaNacimientoTxt || formatDateLong(data.fechaNacimiento)) + '</tr>' +
+        '<tr><td>Pasaporte</td>' + edCell('pasaporte', data.pasaporte) + '<td>Edad</td>' + edCell('edadTxt', edad) + '</tr>' +
+        '<tr><td>Identidad</td>' + edCell('dni', data.dni) + '<td>Sexo</td>' + edCell('sexo', data.sexo) + '</tr>';
+      $id('rs-paciente-table').classList.add('rs-table-2col');
+    } else {
+      pacienteHTML =
+        '<tr><td>Nombre</td>' + edCell('nombre', data.nombre) + '</tr>' +
+        '<tr><td>Fecha de Nacimiento</td>' + edCell('fechaNacimientoTxt', data.fechaNacimientoTxt || formatDateLong(data.fechaNacimiento)) + '</tr>';
+      if (data.tipo !== 'embarazo') {
+        pacienteHTML += '<tr><td>Edad</td>' + edCell('edadTxt', edad) + '</tr>';
+      }
+      pacienteHTML += '<tr><td>DNI</td>' + edCell('dni', data.dni) + '</tr>';
+      $id('rs-paciente-table').classList.remove('rs-table-2col');
+    }
+    $id('rs-paciente-table').innerHTML = pacienteHTML;
+
+    /* Sample table */
+    $id('rs-muestra-table').innerHTML =
+      '<tr><td>Fecha</td>' + edCell('fechaTxt', formatDateLong(data.fecha)) + '</tr>' +
+      '<tr><td>Hora de Toma</td>' + edCell('horaTomaTxt', formatTime12(data.horaToma)) + '</tr>' +
+      '<tr><td>Hora de Impresión</td>' + edCell('horaImpresionTxt', formatTime12(data.horaImpresion)) + '</tr>';
+
+    /* Results table */
+    var resultsHTML = '';
+    var res = data.resultados || {};
+
+    if (data.tipo === 'embarazo') {
+      $id('rs-exam-title').textContent = 'III.- EXÁMENES REALIZADOS';
+      resultsHTML = '<tr><td>PRUEBA DE EMBARAZO:</td>' + edCell('r-res-embarazo', res['res-embarazo']) + '</tr>';
+    } else if (data.tipo === 'dengue') {
+      $id('rs-exam-title').textContent = 'III.- EXÁMENES REALIZADO';
+      resultsHTML =
+        '<tr><td colspan="2" style="font-weight:800;background:#f0f8ff">PRUEBA DE DENGUE</td></tr>' +
+        '<tr><td>ANTICUERPO IgG:</td>' + edCell('r-res-igg', res['res-igg']) + '</tr>' +
+        '<tr><td>ANTICUERPO IgM:</td>' + edCell('r-res-igm', res['res-igm']) + '</tr>' +
+        '<tr><td>NS1:</td>' + edCell('r-res-ns1', res['res-ns1']) + '</tr>';
+    } else if (data.tipo === 'duo') {
+      $id('rs-exam-title').textContent = 'III.- EXÁMENES REALIZADO';
+      resultsHTML =
+        '<tr><td>SARS-COV-2:<br>COVID-19</td>' + edCell('r-res-sarcov2', res['res-sarcov2']) + '</tr>' +
+        '<tr><td>INFLUENZA H1N1 A:</td>' + edCell('r-res-tipoa', res['res-tipoa']) + '</tr>' +
+        '<tr><td>INFLUENZA H1N1 B:</td>' + edCell('r-res-tipob', res['res-tipob']) + '</tr>';
+    } else if (data.tipo === 'antigeno') {
+      $id('rs-exam-title').textContent = 'III.-INMUNOLOGÍA';
+      resultsHTML =
+        '<tr><td colspan="2" style="font-weight:800;background:#f0f8ff;border-bottom:none">DETECCIÓN DE:<br>COVID-19 | ANTÍGENO</td></tr>' +
+        '<tr><td>ANTÍGENO SARS COV-2</td><td contenteditable="true" data-edit-key="r-res-antigeno">: ' + esc(res['res-antigeno'] || '') + '</td></tr>' +
+        '<tr><td colspan="2" style="font-size:11px;color:#555;border-top:none">TIPO DE MUESTRA:<br>HISOPADO NASOFARÍNGEO</td></tr>';
+    }
+    $id('rs-results-table').innerHTML = resultsHTML;
+
+    /* Sensitivity note */
+    $id('rs-sensitivity').style.display = isAntigeno ? '' : 'none';
+
+    /* Extra info */
+    $id('rs-extra-info').style.display = 'none';
+
+    /* QR code for antigeno */
+    if (isAntigeno && data._id) {
+      $id('rs-qr-container').style.display = '';
+      generateQR(data._id);
+    } else {
+      $id('rs-qr-container').style.display = 'none';
+    }
+
+    window.scrollTo(0, 0);
+  }
+
+  /* Simple QR code generator (creates a placeholder) */
+  function generateQR(id) {
+    var canvas = $id('rs-qr-canvas');
+    var ctx = canvas.getContext('2d');
+    canvas.width = 90;
+    canvas.height = 90;
+    ctx.fillStyle = '#fff';
+    ctx.fillRect(0, 0, 90, 90);
+    ctx.fillStyle = '#213C7D';
+    ctx.font = 'bold 10px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('QR', 45, 40);
+    ctx.font = '7px sans-serif';
+    ctx.fillText(id.substring(0, 10), 45, 55);
+    ctx.strokeStyle = '#213C7D';
+    ctx.strokeRect(2, 2, 86, 86);
+  }
+
+  /* ════════════════════════════════════════════════════════════
+     TOOLBAR ACTIONS
+     ════════════════════════════════════════════════════════════ */
+  $id('btn-print').addEventListener('click', function () {
+    /* DRM: una prueba reanudada (aún "pendiente_resultado") solo se confirma
+       hasta este momento — así queda en pendientes si el usuario sale sin imprimir. */
+    if (currentResultDoc && currentResultDoc._id && currentResultDoc.status === 'pendiente_resultado') {
+      var horaImpresion = nowTime();
+      r3adsDb.collection('resultadosPruebas').doc(currentResultDoc._id).update({
+        status: 'confirmado',
+        horaImpresion: horaImpresion
+      }).then(function () {
+        currentResultDoc.status = 'confirmado';
+        currentResultDoc.horaImpresion = horaImpresion;
+        window.print();
+      }).catch(function (err) {
+        toast('Error al confirmar la prueba: ' + err.message);
+      });
+    } else {
+      window.print();
+    }
+  });
+
+  $id('btn-new-test').addEventListener('click', function () {
+    $id('rs-container').style.display = 'none';
+    $id('pr-page').style.display = '';
+    clearForm();
+    loadHistory();
+    window.scrollTo(0, 0);
+  });
+
+  /* ─── Guardar ediciones in-place de la hoja de resultados ─── */
+  $id('btn-save-edits').addEventListener('click', function () {
+    if (!currentResultDoc || !currentResultDoc._id) {
+      toast('No hay documento que guardar');
+      return;
+    }
+    var btn = $id('btn-save-edits');
+    btn.disabled = true;
+    btn.textContent = 'Guardando...';
+
+    /* Recolectar todas las ediciones */
+    var edits = {};
+    document.querySelectorAll('.result-sheet [data-edit-key]').forEach(function (el) {
+      edits[el.getAttribute('data-edit-key')] = (el.textContent || '').trim();
+    });
+
+    /* Mapeo de campos editados a campos del documento Firestore */
+    var update = {
+      editedAt: firebase.firestore.FieldValue.serverTimestamp(),
+      editedBy: currentUser.email
+    };
+    var resultados = Object.assign({}, currentResultDoc.resultados || {});
+
+    if (edits.nombre !== undefined) update.nombre = edits.nombre;
+    if (edits.fechaNacimientoTxt !== undefined) update.fechaNacimientoTxt = edits.fechaNacimientoTxt;
+    if (edits.dni !== undefined) {
+      update.dni = edits.dni;
+      update.dniNormalizado = edits.dni.replace(/\D/g, '');
+    }
+    if (edits.pasaporte !== undefined) update.pasaporte = edits.pasaporte;
+    if (edits.sexo !== undefined) update.sexo = edits.sexo;
+    if (edits.correlativo !== undefined) update.correlativo = edits.correlativo;
+    if (edits.edadTxt !== undefined) update.edadTxt = edits.edadTxt;
+    if (edits.fechaTxt !== undefined) update.fechaTxt = edits.fechaTxt;
+    if (edits.horaTomaTxt !== undefined) update.horaTomaTxt = edits.horaTomaTxt;
+    if (edits.horaImpresionTxt !== undefined) update.horaImpresionTxt = edits.horaImpresionTxt;
+
+    /* Resultados (keys con prefijo r-) */
+    Object.keys(edits).forEach(function (k) {
+      if (k.indexOf('r-') === 0) {
+        var realKey = k.substring(2);
+        /* Para antigeno el valor incluye ": " al inicio en algunos casos, limpiar */
+        var v = edits[k].replace(/^[:\s]+/, '');
+        resultados[realKey] = v;
+      }
+    });
+    update.resultados = resultados;
+
+    r3adsDb.collection('resultadosPruebas').doc(currentResultDoc._id).update(update)
+      .then(function () {
+        /* Actualizar estado en memoria */
+        Object.assign(currentResultDoc, update);
+        currentResultDoc.resultados = resultados;
+        btn.disabled = false;
+        btn.textContent = '💾 Guardar cambios';
+        toast('✓ Cambios guardados');
+      })
+      .catch(function (err) {
+        console.error('[Portal Clínico] Error guardando ediciones:', err);
+        btn.disabled = false;
+        btn.textContent = '💾 Guardar cambios';
+        toast('Error: ' + err.message);
+      });
+  });
+
+  /* ════════════════════════════════════════════════════════════
+     LOAD HISTORY
+     ════════════════════════════════════════════════════════════ */
+  function loadHistory() {
+    var container = $id('pr-history-list');
+    container.innerHTML = '<div class="pr-spinner" style="margin:20px auto"></div>';
+    $id('pr-history-card').style.display = '';
+
+    // NOTA: where + orderBy pide índice compuesto (clinicId ASC, createdAt
+    // DESC) — la consola de Firebase da el enlace para crearlo si falla.
+    r3adsDb.collection('resultadosPruebas')
+      .where('clinicId', '==', CLINIC_ID)
+      .orderBy('createdAt', 'desc')
+      .limit(15)
+      .get()
+      .then(function (snap) {
+        if (snap.empty) {
+          container.innerHTML = '<div style="text-align:center;color:#9CA3AF;padding:20px;font-size:13px">Aún no hay resultados registrados.</div>';
+          return;
+        }
+        var LABELS = { embarazo: '🤰 Embarazo', dengue: '🦟 Dengue NS1', duo: '🧪 DUO', antigeno: '🩹 Antígeno COVID' };
+        var html = '';
+        snap.forEach(function (doc) {
+          var d = doc.data();
+          d._id = doc.id;
+          var ts = d.createdAt ? d.createdAt.toDate().toLocaleDateString('es-HN', { day:'2-digit', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' }) : '—';
+          html += '<div class="pr-history-item">' +
+            '<div><div class="pr-history-name">' + esc(d.nombre) + '</div>' +
+            '<div class="pr-history-meta">' + (LABELS[d.tipo] || d.tipo) + ' · ' + ts + '</div></div>' +
+            '<button class="pr-history-btn" data-id="' + doc.id + '">🖨️ Ver / Imprimir</button>' +
+          '</div>';
+        });
+        container.innerHTML = html;
+
+        /* Event delegation for history items */
+        container.onclick = function (e) {
+          var btn = e.target.closest('.pr-history-btn');
+          if (!btn) return;
+          var id = btn.getAttribute('data-id');
+          r3adsDb.collection('resultadosPruebas').doc(id).get().then(function (snap) {
+            if (!snap.exists) { toast('Resultado no encontrado'); return; }
+            var data = snap.data();
+            data._id = snap.id;
+            renderResultSheet(data);
+          });
+        };
+      })
+      .catch(function (err) {
+        console.error('[Portal Clínico] Error cargando historial:', err);
+        container.innerHTML = '<div style="text-align:center;color:#DC2626;padding:20px;font-size:13px">Error al cargar historial</div>';
+      });
+  }
+
+})();
+</script>
+
+</body>
+</html>

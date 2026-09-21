@@ -1,0 +1,255 @@
+/* =============================================================
+   CMG — Clínica Médica General
+   Core design tokens: color, type, spacing, radius, elevation.
+   Drop this file into any CMG-branded HTML and start composing.
+   ============================================================= */
+
+/* ---------- Brand webfonts ---------------------------------
+   `Now` & `NowAlt` (Sudtipos) — the licensed CMG brand fonts —
+   are embedded as base64 in `fonts.css` so they're available
+   synchronously for any preview capture / screenshot pipeline.
+   `Allura` is loaded from Google Fonts as the script accent.
+------------------------------------------------------------- */
+@import url('./fonts.css');
+@import url('https://fonts.googleapis.com/css2?family=Allura&display=swap');
+
+:root {
+  /* ── Brand palette ─────────────────────────────────────── */
+  --cmg-navy:        #213C7D;   /* primary surface / chatbot bg */
+  --cmg-navy-tint:   #3F5483;   /* photo + multiply navy */
+  --cmg-navy-deep:   #182C5C;   /* hover / press of navy */
+  --cmg-yellow:      #FDD22C;   /* signature accent */
+  --cmg-yellow-deep: #E8BD20;   /* yellow hover */
+  --cmg-red:         #F20F10;   /* script / CTA strip */
+  --cmg-red-deep:    #C70B0C;   /* red hover */
+  --cmg-teal:        #599FB2;   /* isotipo heart fill */
+  --cmg-teal-light:  #B7D6E4;   /* isotipo heart outline */
+  --wa-green:        #25D366;   /* WhatsApp icon */
+  --wa-green-deep:   #1FB257;
+
+  --white:           #FFFFFF;
+  --black:           #0A0F1F;
+
+  /* ── Neutrals (sparingly used) ─────────────────────────── */
+  --neutral-100: #F6F7FB;
+  --neutral-200: #E6E9F2;
+  --neutral-300: #C8CEE0;
+  --neutral-400: #8C95B1;
+  --neutral-500: #5A6485;
+  --neutral-600: #38415F;
+  --neutral-700: #232A44;
+
+  /* ── Semantic foregrounds / surfaces ───────────────────── */
+  --fg-1:        var(--white);                /* primary on navy */
+  --fg-2:        rgba(255,255,255,.78);       /* secondary on navy */
+  --fg-3:        rgba(255,255,255,.54);
+  --fg-on-light: var(--cmg-navy);             /* primary on white */
+  --fg-on-light-2: var(--neutral-500);
+  --surface-1:   var(--cmg-navy);             /* brand surface */
+  --surface-2:   var(--cmg-navy-tint);
+  --surface-light: var(--white);
+  --surface-light-2: var(--neutral-100);
+  --accent:      var(--cmg-yellow);
+  --accent-2:    var(--cmg-red);
+  --link:        var(--cmg-yellow);
+  --divider:     rgba(255,255,255,.18);
+  --divider-on-light: var(--neutral-200);
+
+  /* ── Type families ─────────────────────────────────────── */
+  /* Now is the workhorse geometric sans. NowAlt swaps a/g/y for
+     more humanist alternates — use it for display headlines so
+     the wordmark and ad copy share the same DNA. */
+  --font-display: 'NowAlt', 'Now', system-ui, sans-serif;
+  --font-body:    'Now', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-sub:     'Now', system-ui, sans-serif;
+  --font-script:  'Allura', 'Sacramento', 'Brush Script MT', cursive;
+  --font-mono:    ui-monospace, 'SF Mono', 'JetBrains Mono', Menlo, monospace;
+
+  /* ── Type ramp (display / headline) ────────────────────── */
+  /* Now Black is heavy and wide; headlines breathe at ~0.92 lh */
+  --h1-size:     clamp(48px, 8vw, 96px);
+  --h1-weight:   900;
+  --h1-tracking: -0.02em;
+  --h1-lh:       0.92;
+
+  --h2-size:     clamp(36px, 5.5vw, 64px);
+  --h2-weight:   900;
+  --h2-tracking: -0.015em;
+  --h2-lh:       0.96;
+
+  --h3-size:     clamp(24px, 3vw, 36px);
+  --h3-weight:   700;
+  --h3-tracking: -0.005em;
+  --h3-lh:       1.05;
+
+  --eyebrow-size:    14px;
+  --eyebrow-weight:  700;
+  --eyebrow-tracking:.14em;
+
+  --price-size:  clamp(56px, 10vw, 132px);
+  --price-weight: 900;
+
+  --script-size: clamp(28px, 4vw, 56px);
+
+  --body-size:   16px;
+  --body-lh:     1.5;
+  --body-weight: 400;
+
+  --small-size:  13px;
+  --small-lh:    1.4;
+
+  /* ── Spacing scale (4-point) ───────────────────────────── */
+  --s-0:  0;
+  --s-1:  4px;
+  --s-2:  8px;
+  --s-3:  12px;
+  --s-4:  16px;
+  --s-5:  24px;
+  --s-6:  32px;
+  --s-7:  48px;
+  --s-8:  64px;
+  --s-9:  96px;
+  --s-10: 128px;
+
+  /* ── Radius ────────────────────────────────────────────── */
+  --r-sm:   4px;
+  --r-md:   8px;
+  --r-lg:   16px;
+  --r-xl:   24px;
+  --r-pill: 9999px;
+
+  /* ── Elevation / shadow ────────────────────────────────── */
+  --shadow-1: 0 1px 2px rgba(10,15,31,.10);
+  --shadow-2: 0 4px 12px rgba(10,15,31,.14);
+  --shadow-3: 0 10px 28px rgba(10,15,31,.20);
+  /* For floating photographic objects on the navy surface: */
+  --shadow-cutout: 0 8px 24px rgba(0,0,0,.35);
+
+  /* ── Misc ──────────────────────────────────────────────── */
+  --icon-stroke: 1.75;
+  --easing-decel: cubic-bezier(.22,1,.36,1);
+  --easing-snap:  cubic-bezier(.4,0,.2,1);
+  --dur-fast:    160ms;
+  --dur-base:    240ms;
+  --dur-slow:    420ms;
+
+  /* ── Asset paths (override if you nest the system) ────── */
+  --asset-logo-white:    url('./assets/logo-white.png');
+  --asset-isotipo-color: url('./assets/isotipo-color.png');
+}
+
+/* ============================================================
+   Semantic element styles — apply directly to HTML tags so a
+   blank page that imports this file already looks like CMG.
+   ============================================================ */
+
+html, body {
+  font-family: var(--font-body);
+  font-size: var(--body-size);
+  line-height: var(--body-lh);
+  color: var(--fg-on-light);
+  background: var(--surface-light);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+h1 {
+  font-family: var(--font-display);
+  font-size: var(--h1-size);
+  font-weight: var(--h1-weight);
+  letter-spacing: var(--h1-tracking);
+  line-height: var(--h1-lh);
+  text-transform: uppercase;
+  margin: 0 0 var(--s-5);
+}
+
+h2 {
+  font-family: var(--font-display);
+  font-size: var(--h2-size);
+  font-weight: var(--h2-weight);
+  line-height: var(--h2-lh);
+  text-transform: uppercase;
+  margin: 0 0 var(--s-4);
+}
+
+h3 {
+  font-family: var(--font-display);
+  font-size: var(--h3-size);
+  font-weight: var(--h3-weight);
+  line-height: var(--h3-lh);
+  text-transform: uppercase;
+  margin: 0 0 var(--s-3);
+}
+
+h4, h5, h6 {
+  font-family: var(--font-body);
+  font-weight: 700;
+  margin: 0 0 var(--s-3);
+}
+
+p {
+  margin: 0 0 var(--s-4);
+  text-wrap: pretty;
+}
+
+a {
+  color: var(--link);
+  text-decoration: none;
+}
+a:hover { filter: brightness(.92); }
+
+small, .small { font-size: var(--small-size); line-height: var(--small-lh); }
+
+/* Utility classes — opt-in flavors of the brand voice */
+
+.cmg-eyebrow {
+  font-family: var(--font-body);
+  font-size: var(--eyebrow-size);
+  font-weight: var(--eyebrow-weight);
+  letter-spacing: var(--eyebrow-tracking);
+  text-transform: uppercase;
+  color: var(--cmg-yellow);
+}
+
+.cmg-script {
+  font-family: var(--font-script);
+  font-size: var(--script-size);
+  color: var(--cmg-red);
+  line-height: 1;
+  font-weight: 400;
+}
+
+.cmg-price {
+  font-family: var(--font-display);
+  font-size: var(--price-size);
+  font-weight: var(--price-weight);
+  color: var(--cmg-yellow);
+  line-height: .9;
+  letter-spacing: -0.02em;
+}
+
+.cmg-on-navy   { background: var(--cmg-navy); color: var(--fg-1); }
+.cmg-on-yellow { background: var(--cmg-yellow); color: var(--cmg-navy); }
+
+/* Pill button — phone, WhatsApp, generic CTA */
+.cmg-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-2);
+  padding: var(--s-3) var(--s-5);
+  border-radius: var(--r-pill);
+  background: var(--white);
+  color: var(--cmg-navy);
+  font-family: var(--font-body);
+  font-weight: 700;
+  border: 0;
+  cursor: pointer;
+  transition: filter var(--dur-fast) var(--easing-snap),
+              transform var(--dur-fast) var(--easing-snap);
+}
+.cmg-pill:hover  { filter: brightness(.95); }
+.cmg-pill:active { transform: translateY(1px) scale(.98); filter: brightness(.88); }
+
+.cmg-pill--yellow { background: var(--cmg-yellow); color: var(--cmg-navy); }
+.cmg-pill--red    { background: var(--cmg-red);    color: var(--white);    }
+.cmg-pill--wa     { background: var(--wa-green);   color: var(--white);    }

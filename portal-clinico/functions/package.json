@@ -1,0 +1,16 @@
+{
+  "name": "r3ads-portal-clinico-functions",
+  "description": "Cloud Functions del Portal Clínico R3ads — fija los custom claims (clinicId, rol) de cada usuario a partir de /usuarios/{uid}.",
+  "private": true,
+  "engines": {
+    "node": "22"
+  },
+  "main": "index.js",
+  "scripts": {
+    "logs": "firebase functions:log"
+  },
+  "dependencies": {
+    "firebase-admin": "^12.1.0",
+    "firebase-functions": "^5.0.0"
+  }
+}

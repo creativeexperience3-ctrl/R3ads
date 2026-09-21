@@ -1,0 +1,64 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    // ═══════════════════════════════════════════════════════════════
+    // R3ads Portal Clínico — Storage multi-tenant
+    //
+    // Origen: CMG-Website/storage.rules (rutas planas /expedientes/{codigo}/...
+    // sin ningún concepto de clínica). Aquí el aislamiento se hace por PATH:
+    // todo archivo clínico vive bajo /clinics/{clinicId}/..., y la regla
+    // exige que el clinicId del token coincida con el segmento de la ruta.
+    // Esto es más estricto que depender solo de un campo en Firestore — ni
+    // siquiera es posible construir una URL de storage de otra clínica sin
+    // que la regla la rechace, aunque el código de la app tuviera un bug.
+    //
+    // IMPORTANTE: esto cambia las rutas que debe escribir la app respecto al
+    // original (antes: /expedientes/{codigo}/...; ahora:
+    // /clinics/{clinicId}/expedientes/{codigo}/...). Hay que actualizar cada
+    // getStorageRef()/subida de PDF/Word en Expediente-Doctor.html,
+    // Examenes-Laboratorio.html, Constancia-Medica.html y Resultado-EKG.html
+    // al portarlos (pendiente).
+    // ═══════════════════════════════════════════════════════════════
+
+    function isAuth() {
+      return request.auth != null;
+    }
+    function myClinic() {
+      return request.auth.token.clinicId;
+    }
+    function myRole() {
+      return request.auth.token.rol;
+    }
+    // isDoctor: acceso clínico completo. Rol: medico | enf | admin. Sin
+    // listas de correos — solo custom claims (ver firestore.rules).
+    function isDoctor(clinicId) {
+      return isAuth() && myClinic() == clinicId && myRole() in ['medico', 'enf', 'admin'];
+    }
+
+    // ─── Archivos de expedientes (PDFs de consulta, Word del expediente) ──
+    // Estructura: /clinics/{clinicId}/expedientes/{codigo}/...
+    //   - Lectura: cualquier autenticado de ESA clínica (la URL es secreta y
+    //     se guarda en Firestore, protegido por firestore.rules).
+    //   - Escritura: solo doctores de esa clínica.
+    match /clinics/{clinicId}/expedientes/{codigo}/{allPaths=**} {
+      allow read: if isAuth() && myClinic() == clinicId;
+      allow write: if isDoctor(clinicId);
+    }
+
+    // ─── Exámenes de laboratorio (PDFs externos) ──
+    // Estructura: /clinics/{clinicId}/examenes-laboratorio/{folder}/...
+    //   - Lectura: cualquier autenticado de esa clínica.
+    //   - Escritura: doctores (cualquier carpeta) y pacientes (control real
+    //     de a qué expediente queda vinculado lo hace Firestore).
+    match /clinics/{clinicId}/examenes-laboratorio/{folder}/{allPaths=**} {
+      allow read: if isAuth() && myClinic() == clinicId;
+      allow write: if isAuth() && myClinic() == clinicId;
+    }
+
+    // ─── Cualquier otra ruta ──
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}
