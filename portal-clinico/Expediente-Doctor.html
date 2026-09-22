@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Portal Médico · Expedientes</title>
 <!-- Favicon: pendiente por clínica (Fase 5 del plan). -->
-<link rel="stylesheet" href="assets/cmg-tokens.css">
+<link rel="stylesheet" href="assets/portal-tokens.css">
 <link rel="stylesheet" href="styles.css">
 <style>
 *, *::before, *::after { box-sizing: border-box; }
@@ -14,9 +14,9 @@
 .ed-page { background: #F4F6FB; min-height: 100vh; padding-bottom: 80px; }
 
 .ed-hero {
-  background: #213C7D;
+  background: #334155;
   padding: 40px 0 32px;
-  border-bottom: 4px solid #FDD22C;
+  border-bottom: 4px solid #7DD3FC;
 }
 .ed-hero-inner {
   max-width: 1200px;
@@ -34,7 +34,7 @@
   font-weight: 700;
   letter-spacing: 2px;
   text-transform: uppercase;
-  color: #FDD22C;
+  color: #7DD3FC;
   margin-bottom: 8px;
 }
 .ed-hero-h1 {
@@ -54,7 +54,7 @@
   color: #fff;
   font-size: 13px;
 }
-.ed-user-chip strong { color: #FDD22C; }
+.ed-user-chip strong { color: #7DD3FC; }
 .ed-logout {
   border: 1px solid rgba(255,255,255,.25);
   background: transparent;
@@ -106,9 +106,9 @@
 /* DRM: etiquetas más largas que el min-width no deben achicarse (se
    superponían con la pestaña vecina) — que el contenedor scrollee en su lugar */
 .ed-tab-wide { flex: 0 0 auto; min-width: 260px; }
-.ed-tab:hover { background: #F4F6FB; color: #213C7D; }
+.ed-tab:hover { background: #F4F6FB; color: #334155; }
 .ed-tab.is-active {
-  background: #213C7D;
+  background: #334155;
   color: #fff;
 }
 
@@ -123,7 +123,7 @@
 .ed-card-title {
   font-size: 18px;
   font-weight: 800;
-  color: #213C7D;
+  color: #334155;
   margin: 0 0 6px;
   display: flex;
   align-items: center;
@@ -177,7 +177,7 @@
   resize: vertical;
   line-height: 1.5;
 }
-.ed-input:focus, .ed-select:focus, .ed-textarea:focus { border-color: #213C7D; }
+.ed-input:focus, .ed-select:focus, .ed-textarea:focus { border-color: #334155; }
 
 /* ── Section divider ── */
 .ed-section {
@@ -188,7 +188,7 @@
 .ed-section-title {
   font-size: 15px;
   font-weight: 800;
-  color: #213C7D;
+  color: #334155;
   margin: 0 0 16px;
   display: flex;
   align-items: center;
@@ -199,7 +199,7 @@
 .ed-section-title::before {
   content: '';
   width: 4px; height: 18px;
-  background: #FDD22C;
+  background: #7DD3FC;
   border-radius: 2px;
 }
 
@@ -239,7 +239,7 @@
   transition: all .15s;
 }
 .ed-ant-btn.is-yes-active {
-  background: #213C7D;
+  background: #334155;
   color: #fff;
 }
 .ed-ant-btn.is-no-active {
@@ -256,7 +256,7 @@
   outline: none;
   width: 100%;
 }
-.ed-ant-detail:focus { border-color: #213C7D; }
+.ed-ant-detail:focus { border-color: #334155; }
 .ed-ant-detail:disabled { background: #F9FAFB; color: #9CA3AF; }
 
 /* ── Buttons ── */
@@ -277,21 +277,21 @@
   text-decoration: none;
 }
 .ed-btn-primary {
-  background: #213C7D;
+  background: #334155;
   color: #fff;
 }
 .ed-btn-primary:hover { opacity: .9; }
 .ed-btn-yellow {
-  background: #FDD22C;
-  color: #213C7D;
+  background: #7DD3FC;
+  color: #334155;
 }
-.ed-btn-yellow:hover { background: #f5c800; }
+.ed-btn-yellow:hover { background: #38BDF8; }
 .ed-btn-ghost {
   background: #fff;
-  color: #213C7D;
+  color: #334155;
   border: 1.5px solid #E5E7EB;
 }
-.ed-btn-ghost:hover { border-color: #213C7D; }
+.ed-btn-ghost:hover { border-color: #334155; }
 .ed-btn-danger {
   background: #FEE2E2;
   color: #991B1B;
@@ -309,18 +309,18 @@
 
 /* ── Code badge ── */
 .ed-code-display {
-  background: linear-gradient(135deg, #213C7D 0%, #2d4d9b 100%);
+  background: linear-gradient(135deg, #334155 0%, #2d4d9b 100%);
   border-radius: 14px;
   padding: 28px;
   text-align: center;
   color: #fff;
   margin-bottom: 20px;
-  border: 2px solid #FDD22C;
+  border: 2px solid #7DD3FC;
 }
 .ed-code-label {
   font-size: 12px;
   letter-spacing: 2px;
-  color: #FDD22C;
+  color: #7DD3FC;
   font-weight: 700;
   text-transform: uppercase;
   margin-bottom: 10px;
@@ -368,15 +368,15 @@
   font-weight: 700;
   letter-spacing: 2px;
   text-transform: uppercase;
-  color: #213C7D;
+  color: #334155;
   outline: none;
 }
-.ed-search-input:focus { border-color: #213C7D; }
+.ed-search-input:focus { border-color: #334155; }
 
 /* ── Consultas list ── */
 .ed-consulta-item {
   background: #F9FAFB;
-  border-left: 4px solid #213C7D;
+  border-left: 4px solid #334155;
   border-radius: 8px;
   padding: 14px 18px;
   margin-bottom: 10px;
@@ -388,7 +388,7 @@
 .ed-consulta-fecha {
   font-size: 13px;
   font-weight: 700;
-  color: #213C7D;
+  color: #334155;
 }
 .ed-consulta-motivo {
   font-size: 13px;
@@ -401,7 +401,7 @@
 }
 .ed-consulta-link {
   font-size: 12px;
-  color: #213C7D;
+  color: #334155;
   text-decoration: none;
   padding: 6px 12px;
   border-radius: 6px;
@@ -409,7 +409,7 @@
   border: 1px solid #E5E7EB;
   font-weight: 600;
 }
-.ed-consulta-link:hover { background: #FDD22C; border-color: #FDD22C; }
+.ed-consulta-link:hover { background: #7DD3FC; border-color: #7DD3FC; }
 
 button.ed-consulta-link {
   font-family: inherit;
@@ -465,25 +465,25 @@ button.ed-consulta-link {
   align-items: flex-start;
 }
 .ed-mode-card:hover {
-  border-color: #213C7D;
+  border-color: #334155;
   box-shadow: 0 6px 18px rgba(33,60,125,.10);
   transform: translateY(-2px);
 }
 .ed-mode-icon {
   width: 48px; height: 48px;
   border-radius: 12px;
-  background: #213C7D;
+  background: #334155;
   color: #fff;
   font-size: 24px;
   display: flex; align-items: center; justify-content: center;
   flex-shrink: 0;
 }
-.ed-mode-card.is-yellow .ed-mode-icon { background: #FDD22C; color: #213C7D; }
+.ed-mode-card.is-yellow .ed-mode-icon { background: #7DD3FC; color: #334155; }
 .ed-mode-card.is-green .ed-mode-icon  { background: #10B981; color: #fff; }
 .ed-mode-title {
   font-size: 15px;
   font-weight: 700;
-  color: #213C7D;
+  color: #334155;
   margin: 0 0 4px;
 }
 .ed-mode-desc {
@@ -509,7 +509,7 @@ button.ed-consulta-link {
 .ed-pending-name {
   font-size: 14px;
   font-weight: 700;
-  color: #213C7D;
+  color: #334155;
   margin: 0 0 3px;
 }
 .ed-pending-meta {
@@ -536,7 +536,7 @@ button.ed-consulta-link {
   align-items: center;
   gap: 4px;
 }
-.ed-back-link:hover { color: #213C7D; }
+.ed-back-link:hover { color: #334155; }
 .ed-vitals-readonly {
   background: #F4F6FB;
   border-radius: 10px;
@@ -562,7 +562,7 @@ button.ed-consulta-link {
   border-radius: 6px;
   padding: 4px 10px;
   font-size: 12px;
-  color: #213C7D;
+  color: #334155;
 }
 .ed-vital-chip strong { font-weight: 700; }
 
@@ -590,9 +590,9 @@ button.ed-consulta-link {
   font-weight: 800;
   letter-spacing: .04em;
   text-transform: uppercase;
-  color: #213C7D;
+  color: #334155;
   background: #EEF2FB;
-  border-left: 3px solid #213C7D;
+  border-left: 3px solid #334155;
   border-radius: 4px;
   cursor: pointer;
 }
@@ -608,13 +608,13 @@ summary.ed-meds-cat { list-style: revert; }
   align-items: center;
   gap: 6px;
   font-size: 13px;
-  color: #213C7D;
+  color: #334155;
   cursor: pointer;
   padding: 4px 6px;
   border-radius: 4px;
 }
 .ed-meds-opt:hover { background: #fff; }
-.ed-meds-opt input { accent-color: #213C7D; }
+.ed-meds-opt input { accent-color: #334155; }
 
 /* ── Alert ── */
 .ed-alert {
@@ -662,7 +662,7 @@ summary.ed-meds-cat { list-style: revert; }
 .ed-overlay-spinner {
   width: 44px; height: 44px;
   border: 4px solid #E5E7EB;
-  border-top-color: #213C7D;
+  border-top-color: #334155;
   border-radius: 50%;
   animation: ed-spin 1s linear infinite;
   margin: 0 auto 12px;
@@ -671,7 +671,7 @@ summary.ed-meds-cat { list-style: revert; }
 .ed-overlay-text {
   font-size: 14px;
   font-weight: 600;
-  color: #213C7D;
+  color: #334155;
 }
 
 /* ── Empty state ── */
@@ -690,7 +690,7 @@ summary.ed-meds-cat { list-style: revert; }
   font-size: 13px;
 }
 .ed-pt-table th {
-  background: #213C7D;
+  background: #334155;
   color: #fff;
   font-weight: 700;
   padding: 10px 14px;
@@ -710,14 +710,14 @@ summary.ed-meds-cat { list-style: revert; }
 .ed-pt-table tr:last-child td { border-bottom: none; }
 .ed-pt-table tr:hover td { background: #F9FAFB; }
 .ed-pt-table tr.is-selected td { background: #FFF9E0; }
-.ed-pt-table tr.is-selected td:first-child { border-left: 3px solid #FDD22C; }
+.ed-pt-table tr.is-selected td:first-child { border-left: 3px solid #7DD3FC; }
 .ed-pt-table tr.is-selected:hover td { background: #FFF3C4; }
 .ed-pt-selected-badge {
   display: inline-block;
   font-size: 10px;
   font-weight: 700;
-  background: #213C7D;
-  color: #FDD22C;
+  background: #334155;
+  color: #7DD3FC;
   padding: 1px 6px;
   border-radius: 10px;
   margin-left: 6px;
@@ -727,8 +727,8 @@ summary.ed-meds-cat { list-style: revert; }
   font-family: 'Courier New', monospace;
   font-size: 11px;
   font-weight: 700;
-  background: #213C7D;
-  color: #FDD22C;
+  background: #334155;
+  color: #7DD3FC;
   padding: 3px 8px;
   border-radius: 4px;
   letter-spacing: 1px;
@@ -750,13 +750,13 @@ summary.ed-meds-cat { list-style: revert; }
   font-size: 14px;
   outline: none;
 }
-.ed-pt-filter-input:focus { border-color: #213C7D; }
+.ed-pt-filter-input:focus { border-color: #334155; }
 .ed-pt-count {
   font-size: 13px;
   color: #6B7280;
   margin-bottom: 12px;
 }
-.ed-pt-count strong { color: #213C7D; }
+.ed-pt-count strong { color: #334155; }
 
 /* ── Search type pills ── */
 .ed-search-types {
@@ -778,14 +778,14 @@ summary.ed-meds-cat { list-style: revert; }
   transition: all .15s;
 }
 .ed-search-type-btn.is-active {
-  background: #213C7D;
+  background: #334155;
   color: #fff;
-  border-color: #213C7D;
+  border-color: #334155;
 }
 
 /* ── Patient summary ── */
 .ed-patient-summary {
-  background: linear-gradient(90deg, #FDD22C 0%, #FFE070 100%);
+  background: linear-gradient(90deg, #7DD3FC 0%, #BAE6FD 100%);
   border-radius: 12px;
   padding: 18px 22px;
   margin-bottom: 20px;
@@ -798,7 +798,7 @@ summary.ed-meds-cat { list-style: revert; }
 .ed-patient-name {
   font-size: 18px;
   font-weight: 900;
-  color: #213C7D;
+  color: #334155;
   margin: 0;
 }
 .ed-patient-meta {
@@ -807,8 +807,8 @@ summary.ed-meds-cat { list-style: revert; }
   margin-top: 3px;
 }
 .ed-patient-code {
-  background: #213C7D;
-  color: #FDD22C;
+  background: #334155;
+  color: #7DD3FC;
   padding: 8px 16px;
   border-radius: 8px;
   font-family: 'Courier New', monospace;
@@ -841,7 +841,7 @@ summary.ed-meds-cat { list-style: revert; }
   background: transparent;
   font-size: 14px;
   font-weight: 700;
-  color: #213C7D;
+  color: #334155;
   outline: none;
   padding: 0;
 }
@@ -1282,7 +1282,7 @@ summary.ed-meds-cat { list-style: revert; }
 <!-- Modal: Mover archivo a otro expediente -->
 <div class="ed-modal" id="modal-mover">
   <div class="ed-modal-box">
-    <h3 style="margin:0 0 6px;color:#213C7D;font-size:17px">📂 Mover archivo a otro expediente</h3>
+    <h3 style="margin:0 0 6px;color:#334155;font-size:17px">📂 Mover archivo a otro expediente</h3>
     <p style="margin:0 0 14px;font-size:13px;color:#6B7280">Ingresa el código del expediente destino. El archivo se re-vinculará y aparecerá allí.</p>
     <input type="text" id="mover-codigo-input" class="ed-input" placeholder="XXX-XXXXXX" maxlength="20" autocomplete="off" style="text-transform:uppercase;font-family:'Courier New',monospace;letter-spacing:2px;text-align:center;font-size:15px;font-weight:700">
     <div id="mover-info" class="mover-info" style="margin-top:10px;min-height:18px;font-size:12px"></div>
@@ -1868,7 +1868,7 @@ summary.ed-meds-cat { list-style: revert; }
     var prefix = 'cajaedit-' + id;
     var esServicioConNombre = !!d.servicioNombre;
     return '<div id="' + prefix + '-panel" style="display:none;margin-top:12px;background:#F8FAFC;border:1px dashed #93A5C7;border-radius:8px;padding:12px">' +
-      '<div style="font-size:12px;font-weight:800;color:#213C7D;text-transform:uppercase;letter-spacing:.4px;margin-bottom:8px">✏️ Ajustar antes de liquidar</div>' +
+      '<div style="font-size:12px;font-weight:800;color:#334155;text-transform:uppercase;letter-spacing:.4px;margin-bottom:8px">✏️ Ajustar antes de liquidar</div>' +
       '<div class="ed-grid ed-grid-2">' +
         (esServicioConNombre ?
           '<div class="ed-fgroup"><label class="ed-label">Servicio</label><input type="text" class="ed-input" id="' + prefix + '-servicio" value="' + esc(d.servicioNombre || '') + '"></div>' +
@@ -1925,7 +1925,7 @@ summary.ed-meds-cat { list-style: revert; }
     var html =
       '<div style="background:#000a;position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px" id="caja-const-modal">' +
         '<div style="background:#fff;border-radius:12px;max-width:520px;width:100%;padding:24px;max-height:90vh;overflow:auto">' +
-          '<h3 style="margin:0 0 6px;color:#213C7D">📄 Emitir constancia médica</h3>' +
+          '<h3 style="margin:0 0 6px;color:#334155">📄 Emitir constancia médica</h3>' +
           '<p style="margin:0 0 10px;font-size:13px;color:#6B7280">Paciente: <b>' + esc(nombrePac) + '</b> · Expediente <code style="background:#F3F4F6;padding:1px 6px;border-radius:4px">' + esc(d.codigoPaciente || '—') + '</code></p>' +
           '<p style="margin:0 0 14px;font-size:12px;color:#92400E;background:#FFFBEB;border:1px solid #FCD34D;border-radius:6px;padding:6px 8px">El registro sigue <b>pendiente de caja</b>. Emitir la constancia no lo liquida.</p>' +
           '<div class="ed-grid ed-grid-2" style="gap:10px">' +
@@ -2024,7 +2024,7 @@ summary.ed-meds-cat { list-style: revert; }
           var datosYaloHtml =
             '<div style="margin-top:10px;background:#F0FDF4;border:1px solid #BBF7D0;border-radius:8px;padding:10px">' +
               '<div style="font-size:11px;font-weight:800;color:#166534;letter-spacing:.4px;text-transform:uppercase;margin-bottom:6px">📋 Datos del paciente (copiar a Yalo)</div>' +
-              '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:8px;font-size:13px;color:#213C7D">' +
+              '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:8px;font-size:13px;color:#334155">' +
                 '<div><b>Nombre:</b><br>' + esc(d.pacienteNombre || '—') + '</div>' +
                 '<div><b>Identidad:</b><br>' + esc(dgPac.numeroIdentidad || '— sin dato —') + '</div>' +
                 '<div><b>N° Expediente:</b><br>' + esc(d.codigoPaciente || '—') + '</div>' +
@@ -2078,7 +2078,7 @@ summary.ed-meds-cat { list-style: revert; }
             '<div style="background:#fff;border:1px solid #E5E7EB;border-radius:10px;padding:14px">' +
               '<div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:8px">' +
                 '<div>' +
-                  '<b style="color:#213C7D;font-size:16px">' + esc(nombrePaciente) + '</b>' + tipoLabel + '<span id="constancia-badge-' + esc(doc.id) + '">' + badgeConstancia + '</span>' + badgeConvertido + '<br>' +
+                  '<b style="color:#334155;font-size:16px">' + esc(nombrePaciente) + '</b>' + tipoLabel + '<span id="constancia-badge-' + esc(doc.id) + '">' + badgeConstancia + '</span>' + badgeConvertido + '<br>' +
                   '<small style="color:#6B7280">Expediente: <code style="background:#F3F4F6;padding:1px 6px;border-radius:4px">' + esc(d.codigoPaciente || '—') + '</code> · Médico: ' + esc(d.doctorNombre || d.servicioRealizadoPor || '—') + ' · ' + esc(d.fechaLocal ? d.fechaLocal.slice(0,16).replace('T',' ') : '') + '</small>' +
                 '</div>' +
                 '<div style="display:flex;gap:8px;flex-wrap:wrap">' +
@@ -2213,7 +2213,7 @@ summary.ed-meds-cat { list-style: revert; }
                 badgeSlot.innerHTML = '<span style="background:#FEF3C7;color:#92400E;padding:3px 10px;border-radius:100px;font-size:11px;font-weight:700;margin-left:8px">📄 Constancia emitida</span>';
               }
             }
-            var lines = ['<div style="background:#F9FAFB;border:1px dashed #D1D5DB;border-radius:6px;padding:8px 10px;font-size:12px"><b style="color:#213C7D">🔗 Servicios vinculados (mismo pago):</b><ul style="margin:4px 0 0 18px;padding:0">'];
+            var lines = ['<div style="background:#F9FAFB;border:1px dashed #D1D5DB;border-radius:6px;padding:8px 10px;font-size:12px"><b style="color:#334155">🔗 Servicios vinculados (mismo pago):</b><ul style="margin:4px 0 0 18px;padding:0">'];
             hijos.forEach(function(h){
               var hd = h.data();
               lines.push('<li>' + esc(servicioLabelConCantidad(hd)) + (hd.servicioRealizadoPor ? ' <span style="color:#6B7280">· ' + esc(hd.servicioRealizadoPor) + '</span>' : '') +
@@ -2304,7 +2304,7 @@ summary.ed-meds-cat { list-style: revert; }
             '<div style="background:#FFFBEB;border:1px solid #FCD34D;border-radius:10px;padding:12px">' +
               '<div style="display:flex;justify-content:space-between;align-items:start;flex-wrap:wrap;gap:8px">' +
                 '<div>' +
-                  '<div style="font-size:14px;color:#213C7D"><b>Conservar:</b> ' + esc(d.codigoA) + ' <span style="color:#6B7280">(' + esc((d.datosA||{}).nombreCompleto || '—') + ')</span></div>' +
+                  '<div style="font-size:14px;color:#334155"><b>Conservar:</b> ' + esc(d.codigoA) + ' <span style="color:#6B7280">(' + esc((d.datosA||{}).nombreCompleto || '—') + ')</span></div>' +
                   '<div style="font-size:14px;color:#b91c1c"><b>Eliminar:</b> ' + esc(d.codigoB) + ' <span style="color:#6B7280">(' + esc((d.datosB||{}).nombreCompleto || '—') + ')</span></div>' +
                   '<div style="font-size:12px;color:#6B7280;margin-top:4px">Solicitado por: ' + esc(d.solicitadoPor) + ' · ' + esc((d.creadaEn && d.creadaEn.toDate) ? d.creadaEn.toDate().toLocaleString('es-HN') : '—') + '</div>' +
                   '<div style="font-size:13px;color:#374151;margin-top:6px"><b>Motivo:</b> ' + esc(d.motivo || '—') + '</div>' +
@@ -2518,7 +2518,7 @@ summary.ed-meds-cat { list-style: revert; }
           '<div style="display:flex;align-items:center;justify-content:center;min-height:100vh;padding:40px;text-align:center;font-family:system-ui">' +
           '<div><h1 style="color:#991B1B">🚫 Acceso restringido</h1>' +
           '<p style="color:#6B7280;margin:14px 0 24px">Solo el personal médico autorizado puede acceder a este portal.</p>' +
-          '<a href="Auth.html" style="background:#213C7D;color:#fff;padding:12px 24px;border-radius:10px;text-decoration:none;font-weight:700">Volver al inicio de sesión</a>' +
+          '<a href="Auth.html" style="background:#334155;color:#fff;padding:12px 24px;border-radius:10px;text-decoration:none;font-weight:700">Volver al inicio de sesión</a>' +
           '</div></div>';
         return;
       }
@@ -3929,7 +3929,7 @@ summary.ed-meds-cat { list-style: revert; }
         html += '<div class="reg-serv-opt" data-value="' + esc(item.value) + '" data-label="' + esc(item.label) + '" style="padding:8px 10px;cursor:pointer">' + esc(item.label) + '</div>';
       });
       if (!huboMatch) html += '<div style="padding:10px;font-size:13px;color:#9CA3AF">Sin resultados</div>';
-      html += '<div class="reg-serv-opt" data-value="__otro__" data-label="✏️ Otro (escribir)" style="padding:8px 10px;cursor:pointer;border-top:1px solid #E5E7EB;font-weight:600;color:#213C7D">✏️ Otro (escribir)</div>';
+      html += '<div class="reg-serv-opt" data-value="__otro__" data-label="✏️ Otro (escribir)" style="padding:8px 10px;cursor:pointer;border-top:1px solid #E5E7EB;font-weight:600;color:#334155">✏️ Otro (escribir)</div>';
       dd.innerHTML = html;
       dd.querySelectorAll('.reg-serv-opt').forEach(function (op) {
         /* mousedown (no click) para que dispare antes del blur del input de búsqueda */
@@ -4091,9 +4091,9 @@ summary.ed-meds-cat { list-style: revert; }
       '<div style="overflow-x:auto;margin-top:6px">' +
         '<table style="width:100%;border-collapse:collapse;font-size:13px">' +
           '<thead><tr>' +
-            '<th style="text-align:left;padding:5px 8px;border-bottom:2px solid #213C7D;color:#213C7D"></th>' +
-            '<th style="text-align:left;padding:5px 8px;border-bottom:2px solid #213C7D;color:#213C7D">Amplitud (mV)</th>' +
-            '<th style="text-align:left;padding:5px 8px;border-bottom:2px solid #213C7D;color:#213C7D">Duración (Seg)</th>' +
+            '<th style="text-align:left;padding:5px 8px;border-bottom:2px solid #334155;color:#334155"></th>' +
+            '<th style="text-align:left;padding:5px 8px;border-bottom:2px solid #334155;color:#334155">Amplitud (mV)</th>' +
+            '<th style="text-align:left;padding:5px 8px;border-bottom:2px solid #334155;color:#334155">Duración (Seg)</th>' +
           '</tr></thead>' +
           '<tbody>' +
             ekgTableRow('Onda P', 'ekg-aondap', 'ekg-dondap') +
@@ -4173,7 +4173,7 @@ summary.ed-meds-cat { list-style: revert; }
         '<div class="ed-vital"><div class="ed-vital-label">Temp (°C)</div><input id="enf-temp"></div>' +
         '<div class="ed-vital"><div class="ed-vital-label">Peso (kg)</div><input id="enf-peso"></div>' +
         '<div class="ed-vital"><div class="ed-vital-label">Talla (m)</div><input id="enf-talla"></div>' +
-        '<div class="ed-vital"><div class="ed-vital-label">IMC</div><input id="enf-imc" placeholder="—" readonly style="background:#F3F4F6;cursor:default;font-weight:700;color:#213C7D"></div>' +
+        '<div class="ed-vital"><div class="ed-vital-label">IMC</div><input id="enf-imc" placeholder="—" readonly style="background:#F3F4F6;cursor:default;font-weight:700;color:#334155"></div>' +
         '<div class="ed-vital"><div class="ed-vital-label">Glucosa (mg/dL)' + (esSuero ? ' *' : '') + '</div><input id="enf-glucosa"></div>' +
       '</div>' +
       (!esServicio
@@ -4667,7 +4667,7 @@ summary.ed-meds-cat { list-style: revert; }
         (srv.servicioNotas ? '<div style="margin-top:8px;font-size:12px;color:#374151"><strong>Notas de registro:</strong> ' + esc(srv.servicioNotas) + '</div>' : '') +
         (srv.pruebaSensibilidadServicio && srv.pruebaSensibilidadServicio.requerida ? '<div style="margin-top:8px;font-size:12px;background:#FFF7ED;border:1px solid #FED7AA;border-radius:6px;padding:8px"><strong>🧪 Prueba de sensibilidad:</strong> ' + esc(srv.pruebaSensibilidadServicio.resultado) + ' · confirmada por ' + esc(srv.pruebaSensibilidadServicio.confirmadaPor || '—') + '</div>' : '') +
         (srv.pruebaSensibilidadServicio && srv.pruebaSensibilidadServicio.noRequiere ? '<div style="margin-top:8px;font-size:12px;background:#F0FDF4;border:1px solid #BBF7D0;border-radius:6px;padding:8px;color:#166534"><strong>🧪 Prueba de sensibilidad:</strong> no necesaria para este medicamento.</div>' : '') +
-        (srv.signosVitales && buildVitalsChipsHtml(srv.signosVitales) ? '<div style="margin-top:8px"><div style="font-size:12px;font-weight:700;color:#213C7D;margin-bottom:4px">📊 Signos vitales</div><div class="ed-vitals-chips">' + buildVitalsChipsHtml(srv.signosVitales) + '</div></div>' : '') +
+        (srv.signosVitales && buildVitalsChipsHtml(srv.signosVitales) ? '<div style="margin-top:8px"><div style="font-size:12px;font-weight:700;color:#334155;margin-bottom:4px">📊 Signos vitales</div><div class="ed-vitals-chips">' + buildVitalsChipsHtml(srv.signosVitales) + '</div></div>' : '') +
       '</div>' +
       buildServicioResultadoSectionHtml(srv.servicioNombre) +
       '<div class="ed-section">' +
@@ -5460,7 +5460,7 @@ summary.ed-meds-cat { list-style: revert; }
     var html =
       '<div style="background:#000a;position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px" id="ed-quick-modal">' +
         '<div style="background:#fff;border-radius:12px;max-width:760px;width:100%;padding:24px;max-height:92vh;overflow:auto;display:flex;flex-direction:column">' +
-          '<h3 style="margin:0 0 6px;color:#213C7D">🔬 Solicitar exámenes de laboratorio</h3>' +
+          '<h3 style="margin:0 0 6px;color:#334155">🔬 Solicitar exámenes de laboratorio</h3>' +
           '<p style="margin:0 0 14px;font-size:13px;color:#6B7280">Catálogo: <b>' + totalItems + ' exámenes</b> disponibles. Marca los que necesitás (uno o varios). El PDF del resultado se sube después.</p>' +
           '<input type="text" id="qm-lab-buscar" class="ed-input" placeholder="🔍 Buscar examen (escribe parte del nombre)..." style="margin-bottom:8px">' +
           '<div style="display:flex;gap:8px;font-size:12px;margin-bottom:8px">' +
@@ -5641,7 +5641,7 @@ summary.ed-meds-cat { list-style: revert; }
     var html =
       '<div style="background:#000a;position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px" id="ed-quick-modal">' +
         '<div style="background:#fff;border-radius:12px;max-width:480px;width:100%;padding:24px">' +
-          '<h3 style="margin:0 0 6px;color:#213C7D">📤 Subir resultado a la orden</h3>' +
+          '<h3 style="margin:0 0 6px;color:#334155">📤 Subir resultado a la orden</h3>' +
           '<p style="margin:0 0 14px;font-size:13px;color:#6B7280">' + (multiple ? 'El PDF se vincula a la orden. Se confirma cuando todos los exámenes queden marcados.' : 'El PDF se vincula a la orden y la marca como confirmada.') + '</p>' +
           checklistHtml +
           '<input type="file" id="qm-up-pdf" accept="application/pdf" class="ed-input" style="margin-top:10px">' +
@@ -5760,7 +5760,7 @@ summary.ed-meds-cat { list-style: revert; }
     var html =
       '<div style="background:#000a;position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px" id="ed-quick-modal">' +
         '<div style="background:#fff;border-radius:12px;max-width:680px;width:100%;padding:24px;max-height:90vh;overflow:auto">' +
-          '<h3 style="margin:0 0 6px;color:#213C7D">🛎️ Realizar servicio(s)</h3>' +
+          '<h3 style="margin:0 0 6px;color:#334155">🛎️ Realizar servicio(s)</h3>' +
           '<p style="margin:0 0 14px;font-size:13px;color:#6B7280">Marca uno o varios servicios del catálogo. Se vinculan automáticamente al pago de esta consulta.</p>' +
           '<div style="max-height:340px;overflow:auto;border:1px solid #E5E7EB;border-radius:8px;padding:10px 12px;background:#FAFBFF">' +
             checkboxesHtml +
@@ -6369,7 +6369,7 @@ summary.ed-meds-cat { list-style: revert; }
     var prefix = 'histedit-' + c._id;
     var esServicio = c._kind === 'servicio';
     return '<div id="' + prefix + '-panel" style="display:none;margin-top:12px;background:#F8FAFC;border:1px dashed #93A5C7;border-radius:8px;padding:12px">' +
-      '<div style="font-size:12px;font-weight:800;color:#213C7D;text-transform:uppercase;letter-spacing:.4px;margin-bottom:8px">✏️ Editar registro (Administración)</div>' +
+      '<div style="font-size:12px;font-weight:800;color:#334155;text-transform:uppercase;letter-spacing:.4px;margin-bottom:8px">✏️ Editar registro (Administración)</div>' +
       '<div class="ed-grid ed-grid-2">' +
         (esServicio
           ? '<div class="ed-fgroup"><label class="ed-label">Servicio</label><input type="text" class="ed-input" id="' + prefix + '-servicio" value="' + esc(c.servicioNombre || '') + '"></div>' +
@@ -6491,7 +6491,7 @@ summary.ed-meds-cat { list-style: revert; }
 
     var vitalsChips = buildVitalsChipsHtml(c.signosVitales);
     var vitalsHtml = vitalsChips
-      ? '<div style="margin-top:6px"><div style="font-size:12px;font-weight:700;color:#213C7D;margin-bottom:4px">📊 Signos vitales</div><div class="ed-vitals-chips">' + vitalsChips + '</div></div>'
+      ? '<div style="margin-top:6px"><div style="font-size:12px;font-weight:700;color:#334155;margin-bottom:4px">📊 Signos vitales</div><div class="ed-vitals-chips">' + vitalsChips + '</div></div>'
       : '';
 
     /* DRM v3 #5: badge constancia + permitir editar si < 24h */
@@ -6605,7 +6605,7 @@ summary.ed-meds-cat { list-style: revert; }
       var html =
         '<div style="background:#000a;position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px" id="ed-quick-modal">' +
           '<div style="background:#fff;border-radius:12px;max-width:560px;width:100%;padding:24px;max-height:90vh;overflow:auto">' +
-            '<h3 style="margin:0 0 6px;color:#213C7D">✏️ Editar constancia ' + esc(d.numero || '') + '</h3>' +
+            '<h3 style="margin:0 0 6px;color:#334155">✏️ Editar constancia ' + esc(d.numero || '') + '</h3>' +
             '<p style="margin:0 0 14px;font-size:13px;color:#6B7280">Solo editable durante las primeras 24h. Los cambios quedan auditados con autor y timestamp.</p>' +
             '<div class="ed-grid ed-grid-2" style="gap:10px">' +
               /* DRM v3.7: datos del paciente editables (corrige errores de tipeo sin recrear consulta) */
@@ -6739,7 +6739,7 @@ summary.ed-meds-cat { list-style: revert; }
           '<div class="ed-patient-code">' + esc(p.codigoPaciente) + '</div>' +
         '</div>'
       : '<div style="background:#F9FAFB;border:1px dashed #D1D5DB;border-radius:10px;padding:14px 18px;margin-bottom:16px;font-size:13px;color:#6B7280">' +
-          '<b style="color:#213C7D">📋 Vista global de pruebas rápidas.</b> Las pruebas pendientes de resultado aparecen sin importar qué paciente esté seleccionado. Para ver las pruebas de un paciente, primero buscalo en la pestaña Buscar.' +
+          '<b style="color:#334155">📋 Vista global de pruebas rápidas.</b> Las pruebas pendientes de resultado aparecen sin importar qué paciente esté seleccionado. Para ver las pruebas de un paciente, primero buscalo en la pestaña Buscar.' +
         '</div>';
 
     cont.innerHTML =
@@ -6833,7 +6833,7 @@ summary.ed-meds-cat { list-style: revert; }
           return '<div style="background:#FEF3C7;border:1px solid #F59E0B;border-radius:10px;padding:12px;margin-bottom:8px">' +
             '<div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px">' +
               '<div style="flex:1;min-width:0">' +
-                '<div style="font-weight:700;color:#213C7D;font-size:15px">👤 ' + esc(nombrePaciente) +
+                '<div style="font-weight:700;color:#334155;font-size:15px">👤 ' + esc(nombrePaciente) +
                   (pr.codigoPaciente ? ' <code style="background:#fff;padding:1px 6px;border-radius:4px;font-size:11px;font-weight:400">' + esc(pr.codigoPaciente) + '</code>' : '') +
                 '</div>' +
                 '<div style="font-weight:600;color:#374151;margin-top:4px">' + (LABELS_PRUEBA_TIPO[pr.tipo] || '🧪 ' + esc(pr.tipo)) + ' <span style="background:#F59E0B;color:#fff;font-size:10px;padding:2px 8px;border-radius:100px;margin-left:6px">Pendiente</span></div>' +
@@ -6929,7 +6929,7 @@ summary.ed-meds-cat { list-style: revert; }
           '<div class="ed-patient-code">' + esc(p.codigoPaciente) + '</div>' +
         '</div>'
       : '<div style="background:#F9FAFB;border:1px dashed #D1D5DB;border-radius:10px;padding:14px 18px;margin-bottom:16px;font-size:13px;color:#6B7280">' +
-          '<b style="color:#213C7D">📋 Vista global de laboratorio.</b> Las órdenes pendientes/procesando aparecen sin importar qué paciente esté seleccionado. Para crear órdenes nuevas o ver exámenes confirmados de un paciente, primero buscalo en la pestaña Buscar.' +
+          '<b style="color:#334155">📋 Vista global de laboratorio.</b> Las órdenes pendientes/procesando aparecen sin importar qué paciente esté seleccionado. Para crear órdenes nuevas o ver exámenes confirmados de un paciente, primero buscalo en la pestaña Buscar.' +
         '</div>';
 
     cont.innerHTML =
@@ -7084,7 +7084,7 @@ summary.ed-meds-cat { list-style: revert; }
             '<div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px">' +
               '<div style="flex:1;min-width:0">' +
                 /* Paciente prominente */
-                '<div style="font-weight:700;color:#213C7D;font-size:15px">👤 ' + esc(nombrePaciente) +
+                '<div style="font-weight:700;color:#334155;font-size:15px">👤 ' + esc(nombrePaciente) +
                   (ex.codigoPaciente ? ' <code style="background:#fff;padding:1px 6px;border-radius:4px;font-size:11px;font-weight:400">' + esc(ex.codigoPaciente) + '</code>' : '') +
                 '</div>' +
                 '<div style="font-size:12px;color:#6B7280;margin-top:2px">' +

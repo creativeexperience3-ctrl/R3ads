@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Pruebas Rápidas</title>
 <!-- Favicon: pendiente por clínica (Fase 5 del plan). -->
-<link rel="stylesheet" href="assets/cmg-tokens.css">
+<link rel="stylesheet" href="assets/portal-tokens.css">
 <link rel="stylesheet" href="styles.css">
 <style>
 *, *::before, *::after { box-sizing: border-box; }
@@ -14,9 +14,9 @@
 .pr-page { background: #F4F6FB; min-height: 100vh; padding-bottom: 80px; }
 
 .pr-hero {
-  background: #213C7D;
+  background: #334155;
   padding: 40px 0 32px;
-  border-bottom: 4px solid #FDD22C;
+  border-bottom: 4px solid #7DD3FC;
 }
 .pr-hero-inner {
   max-width: 900px;
@@ -30,7 +30,7 @@
 }
 .pr-hero-eyebrow {
   font-size: 11px; font-weight: 700; letter-spacing: 2px;
-  text-transform: uppercase; color: #FDD22C; margin-bottom: 8px;
+  text-transform: uppercase; color: #7DD3FC; margin-bottom: 8px;
 }
 .pr-hero-h1 { font-size: clamp(22px,4vw,32px); font-weight: 900; color: #fff; margin: 0; }
 .pr-user-chip {
@@ -39,8 +39,8 @@
   border-radius: 50px; padding: 8px 18px 8px 8px; color: #fff; font-size: 13px;
 }
 .pr-avatar {
-  width: 34px; height: 34px; border-radius: 50%; background: #FDD22C;
-  color: #213C7D; display: flex; align-items: center; justify-content: center;
+  width: 34px; height: 34px; border-radius: 50%; background: #7DD3FC;
+  color: #334155; display: flex; align-items: center; justify-content: center;
   font-weight: 900; font-size: 14px;
 }
 .pr-logout {
@@ -68,8 +68,8 @@
   transition: all .2s;
   font-family: inherit;
 }
-.pr-type-btn:hover { border-color: #213C7D; }
-.pr-type-btn.is-active { border-color: #213C7D; background: #213C7D; color: #fff; }
+.pr-type-btn:hover { border-color: #334155; }
+.pr-type-btn.is-active { border-color: #334155; background: #334155; color: #fff; }
 .pr-type-btn.is-active .pr-type-icon { filter: brightness(0) invert(1); }
 .pr-type-icon { font-size: 28px; margin-bottom: 6px; display: block; }
 .pr-type-label { font-size: 13px; font-weight: 700; }
@@ -83,7 +83,7 @@
   margin-bottom: 20px;
 }
 .pr-card-title {
-  font-size: 16px; font-weight: 800; color: #213C7D;
+  font-size: 16px; font-weight: 800; color: #334155;
   margin: 0 0 18px; display: flex; align-items: center; gap: 10px;
   border-bottom: 2px solid #F4F6FB; padding-bottom: 12px;
 }
@@ -103,7 +103,7 @@
   padding: 0 14px; font-family: inherit; font-size: 14px;
   font-weight: 600; color: #1F2937; background: #F9FAFB; outline: none;
 }
-.pr-input:focus, .pr-select:focus { border-color: #213C7D; }
+.pr-input:focus, .pr-select:focus { border-color: #334155; }
 .pr-select { cursor: pointer; }
 
 /* Result options (Positivo/Negativo) */
@@ -128,7 +128,7 @@
   height: 48px; padding: 0 28px; border: none; border-radius: 10px;
   font-family: inherit; font-size: 14px; font-weight: 700; cursor: pointer;
 }
-.pr-btn-primary { background: #213C7D; color: #fff; }
+.pr-btn-primary { background: #334155; color: #fff; }
 .pr-btn-primary:hover { opacity: .9; }
 .pr-btn-primary:disabled { opacity: .5; cursor: not-allowed; }
 .pr-btn-ghost { background: #F4F6FB; color: #6B7280; border: 1.5px solid #E5E7EB; }
@@ -137,7 +137,7 @@
 /* Toast */
 .pr-toast {
   position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
-  background: #213C7D; color: #fff; padding: 12px 22px; border-radius: 50px;
+  background: #334155; color: #fff; padding: 12px 22px; border-radius: 50px;
   font-size: 14px; font-weight: 600; box-shadow: 0 8px 24px rgba(0,0,0,.2);
   opacity: 0; pointer-events: none; transition: opacity .3s; z-index: 10000;
 }
@@ -146,7 +146,7 @@
 /* Spinner */
 .pr-spinner {
   width: 40px; height: 40px; border: 3px solid #E5E7EB;
-  border-top-color: #213C7D; border-radius: 50%;
+  border-top-color: #334155; border-radius: 50%;
   animation: pr-spin .8s linear infinite; margin: 40px auto;
 }
 @keyframes pr-spin { to { transform: rotate(360deg); } }
@@ -160,7 +160,7 @@
 .pr-history-name { font-size: 14px; font-weight: 700; color: #1F2937; }
 .pr-history-meta { font-size: 12px; color: #6B7280; }
 .pr-history-btn {
-  background: #213C7D; color: #fff; border: none; border-radius: 6px;
+  background: #334155; color: #fff; border: none; border-radius: 6px;
   padding: 6px 12px; font-size: 12px; font-weight: 700;
   cursor: pointer; font-family: inherit;
 }
@@ -185,7 +185,7 @@
   align-items: center;
   gap: 6px;
 }
-.pr-btn-save { background: #213C7D; color: #fff; }
+.pr-btn-save { background: #334155; color: #fff; }
 .pr-btn-save:hover { opacity: .92; }
 
 /* Editable cells / blocks */
@@ -200,7 +200,7 @@
 }
 .result-sheet [contenteditable="true"]:focus {
   background: #FEF3C7;
-  box-shadow: 0 0 0 2px #FDD22C;
+  box-shadow: 0 0 0 2px #7DD3FC;
 }
 /* En modo impresión, no se ven los hovers/focus de edición */
 @media print {
@@ -248,7 +248,7 @@
   position: relative; z-index: 1;
 }
 .rs-header-text h1 {
-  font-size: 18px; font-weight: 800; color: #213C7D; margin: 0;
+  font-size: 18px; font-weight: 800; color: #334155; margin: 0;
 }
 .rs-header-text h2 {
   font-size: 14px; font-weight: 600; color: #4BACC6; margin: 2px 0 0;
@@ -373,7 +373,7 @@
 .rs-stamp-text {
   font-size: 10px;
   font-weight: 800;
-  color: #213C7D;
+  color: #334155;
   line-height: 1.3;
 }
 .rs-stamp-right {
@@ -392,7 +392,7 @@
   color: #555;
   line-height: 1.4;
 }
-.rs-footer a { color: #213C7D; }
+.rs-footer a { color: #334155; }
 
 /* ═══ PRINT STYLES ════════════════════════════════════════ */
 @media print {
@@ -1314,13 +1314,13 @@
     canvas.height = 90;
     ctx.fillStyle = '#fff';
     ctx.fillRect(0, 0, 90, 90);
-    ctx.fillStyle = '#213C7D';
+    ctx.fillStyle = '#334155';
     ctx.font = 'bold 10px sans-serif';
     ctx.textAlign = 'center';
     ctx.fillText('QR', 45, 40);
     ctx.font = '7px sans-serif';
     ctx.fillText(id.substring(0, 10), 45, 55);
-    ctx.strokeStyle = '#213C7D';
+    ctx.strokeStyle = '#334155';
     ctx.strokeRect(2, 2, 86, 86);
   }
 
