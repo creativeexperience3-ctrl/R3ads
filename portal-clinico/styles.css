@@ -793,12 +793,12 @@ body.nav-open .nav-toggle .icon-close { display: block; }
 .cmg-nav-admin {
   display: none; /* shown via adminPill.style.display = 'inline-flex' in JS */
   align-items: center; gap: 6px;
-  font-size: 13px; font-weight: 800; color: #334155;
+  font-size: 13px; font-weight: 800; color: #242F40;
   text-decoration: none; padding: 6px 14px;
-  border-radius: 20px; border: 1.5px solid #7DD3FC; background: #7DD3FC;
+  border-radius: 20px; border: 1.5px solid #CCA43B; background: #CCA43B;
   transition: all .18s; white-space: nowrap; letter-spacing: .2px; flex-shrink: 0;
 }
-.cmg-nav-admin:hover { background: #38BDF8; border-color: #38BDF8; }
+.cmg-nav-admin:hover { background: #A2802A; border-color: #A2802A; }
 
 /* ═══════════════ FLOATING WHATSAPP ═══════════════ */
 .float-wa {

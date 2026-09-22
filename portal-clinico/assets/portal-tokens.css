@@ -1,25 +1,28 @@
 /* =============================================================
-   R3ads Portal Clínico — generic design tokens (placeholder brand)
-   Origen: copia genericizada de assets/cmg-tokens.css (CMG-Website).
-   Paleta y tipografía neutras a propósito — el producto todavía no
-   tiene marca propia. Cuando exista (branding blanco/label del
-   cliente o marca final de R3ads), estos valores son lo único que
-   hay que cambiar; nada del layout depende del nombre "cmg".
+   R3ads Portal Clínico — design tokens
+   Origen: copia genericizada de assets/cmg-tokens.css (CMG-Website),
+   con la paleta de marca (2026-09-21): Graphite / Jet Black /
+   Golden Bronze. Sin logo todavía ("haremos uno profesional luego") —
+   solo color. Nada del layout depende del nombre "cmg".
    ============================================================= */
 
 :root {
-  /* ── Paleta placeholder (neutra, sin identidad de marca) ──── */
-  --brand-primary:        #334155;   /* superficie/header principal */
-  --brand-primary-tint:   #475569;   /* variante más clara */
-  --brand-primary-deep:   #1E293B;   /* hover/press del primario */
-  --brand-accent:         #7DD3FC;   /* acento CLARO — texto sobre fondo oscuro,
-                                         o fondo con texto oscuro encima (mismo
-                                         doble rol que cumplía el amarillo) */
-  --brand-accent-deep:    #38BDF8;   /* variante más saturada del acento (hover) */
-  --brand-accent-2:       #64748B;   /* acento secundario OSCURO — fondo con
-                                         texto blanco encima (mismo rol que el
-                                         rojo: pills, bordes, texto sobre blanco) */
-  --brand-accent-2-deep:  #475569;   /* hover del acento secundario */
+  /* ── Paleta de marca ────────────────────────────────────── */
+  --graphite:        #363636;
+  --jet-black:        #242F40;
+  --golden-bronze:    #CCA43B;
+
+  --brand-primary:        #242F40;   /* jet-black — superficie/header principal */
+  --brand-primary-tint:   #3B4D68;   /* variante más clara (derivada) */
+  --brand-primary-deep:   #161D27;   /* hover/press del primario (derivada) */
+  --brand-accent:         #CCA43B;   /* golden-bronze — acento CLARO: texto sobre
+                                         fondo oscuro, o fondo con texto oscuro
+                                         encima (mismo doble rol que el amarillo) */
+  --brand-accent-deep:    #A2802A;   /* golden-bronze oscurecido (hover, derivada) */
+  --brand-accent-2:       #363636;   /* graphite — acento secundario OSCURO:
+                                         fondo con texto blanco encima (pills,
+                                         bordes, mismo rol que el rojo) */
+  --brand-accent-2-deep:  #212121;   /* graphite oscurecido (hover, derivada) */
   --brand-teal:           #5B8A9E;
   --brand-teal-light:     #C3D8E0;
   --wa-green:             #25D366;   /* WhatsApp icon */
