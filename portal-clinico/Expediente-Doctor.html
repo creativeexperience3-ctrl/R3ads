@@ -864,8 +864,8 @@ summary.ed-meds-cat { list-style: revert; }
   <div class="container header-row">
     <div class="brand-lockup" id="ed-brand-name" style="color:#fff;font-weight:900;font-size:18px">—</div>
     <nav class="site-nav" aria-label="Principal">
-      <a href="Pruebas-Rapidas.html">Pruebas Rápidas</a>
-      <a href="Examenes-Laboratorio.html">Laboratorio</a>
+      <a href="Pruebas-Rapidas.html" data-modulo="pruebasRapidas">Pruebas Rápidas</a>
+      <a href="Examenes-Laboratorio.html" data-modulo="laboratorio">Laboratorio</a>
     </nav>
   </div>
 </header>
@@ -1170,7 +1170,7 @@ summary.ed-meds-cat { list-style: revert; }
 
     <!-- ─── TAB: PRUEBAS RÁPIDAS ─── -->
     <section id="tab-pruebas" class="ed-tab-content" style="display:none">
-      <div class="ed-card">
+      <div class="ed-card" data-modulo="pruebasRapidas">
         <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:6px">
           <div>
             <h2 class="ed-card-title" style="margin-bottom:4px">Pruebas rápidas del paciente</h2>
@@ -1188,7 +1188,7 @@ summary.ed-meds-cat { list-style: revert; }
         </div>
       </div>
 
-      <div class="ed-card" style="margin-top:18px">
+      <div class="ed-card" style="margin-top:18px" data-modulo="laboratorio">
         <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:6px">
           <div>
             <h2 class="ed-card-title" style="margin-bottom:4px">Exámenes de laboratorio</h2>
@@ -1307,6 +1307,7 @@ summary.ed-meds-cat { list-style: revert; }
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
 <script src="firebase-init.js"></script>
 <script src="r3ads-staff.js"></script>
+<script src="clinic-modules.js"></script>
 
 <!-- jsPDF para generar PDF de consultas -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -2533,6 +2534,10 @@ summary.ed-meds-cat { list-style: revert; }
       /* Precarga del catálogo (enfermeriaCompletable) de ESTA clínica — ver
          cargarCatalogoEnfermeria() y puedeEnfermeriaCompletarServicio() más abajo. */
       cargarCatalogoEnfermeria();
+      /* Módulos contratados: saca del DOM lo que esta clínica no pagó
+         (ver clinic-modules.js). El portal en sí y la pestaña Caja son
+         núcleo, no se tocan. */
+      r3adsModulos.cargar(CLINIC_ID).then(aplicarModulos);
       /* Mostrar nombre del doctor */
       $id('ed-user-chip').style.display = '';
       var _edN = user.displayName || user.email.split('@')[0]; $id('ed-user-name').textContent = _edN;
@@ -2541,6 +2546,22 @@ summary.ed-meds-cat { list-style: revert; }
       renderAntecedentes('nuevo-nopat-container', ANTECEDENTES_NO_PATOLOGICOS, 'nvonopat');
     });
   });
+
+  /* Quita del portal las herramientas que esta clínica no tiene contratadas.
+     Los elementos con [data-modulo] los saca r3adsModulos.aplicar().
+     La pestaña "Pruebas Rápidas / Laboratorio" es el caso especial: cubre DOS
+     módulos a la vez, así que solo desaparece si ambos están apagados — si
+     queda uno, la pestaña sigue y adentro se ve nada más la tarjeta del que
+     sí está contratado. */
+  function aplicarModulos() {
+    r3adsModulos.aplicar();
+    if (!r3adsModulos.activo('pruebasRapidas') && !r3adsModulos.activo('laboratorio')) {
+      var tabBtn = document.querySelector('.ed-tab[data-tab="pruebas"]');
+      if (tabBtn && tabBtn.parentNode) tabBtn.parentNode.removeChild(tabBtn);
+      var tabSec = $id('tab-pruebas');
+      if (tabSec && tabSec.parentNode) tabSec.parentNode.removeChild(tabSec);
+    }
+  }
 
   /* Logout */
   $id('ed-logout').addEventListener('click', function () {

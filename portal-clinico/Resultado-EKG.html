@@ -335,6 +335,7 @@ body { margin: 0; background: #F4F6FB; font-family: 'Segoe UI', Arial, sans-seri
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <script src="firebase-init.js"></script>
+<script src="clinic-modules.js"></script>
 <script>
 (function(){
   var CLINIC_ID = window.R3ADS_CLINIC_ID;
@@ -415,6 +416,13 @@ body { margin: 0; background: #F4F6FB; font-family: 'Segoe UI', Arial, sans-seri
 
   r3adsAuth.onAuthStateChanged(function(user){
     if (!user) { showError('Sesión requerida. Inicia sesión.'); return; }
+    r3adsModulos.cargar(CLINIC_ID).then(function () {
+      if (!r3adsModulos.exigir('ekg', 'Electrocardiogramas')) return;
+      cargarEkg();
+    });
+  });
+
+  function cargarEkg() {
     r3adsDb.collection('electrocardiogramas').doc(id).get()
       .then(function(snap){
         if (!snap.exists) { showError('El electrocardiograma no existe o fue eliminado.'); return; }
@@ -429,7 +437,7 @@ body { margin: 0; background: #F4F6FB; font-family: 'Segoe UI', Arial, sans-seri
       .catch(function(err){
         showError('Error al cargar el electrocardiograma: ' + err.message);
       });
-  });
+  }
 })();
 </script>
 

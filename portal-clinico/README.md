@@ -71,6 +71,54 @@ El panel de administración interno de R3ads (Fase 4) vive aparte, dentro de
 `r3ads.com`, y solo se conecta a `r3ads-clinic-crm` vía SDK — no necesita
 compartir dominio con el producto.
 
+## Módulos contratados (2026-09-22)
+
+Cada clínica paga por lo que usa. Qué tiene contratado vive en
+`/clinics/{clinicId}.modulos`, un mapa de banderas que **solo superadmin
+puede escribir** (es decisión de facturación, no de la clínica; las reglas
+de `/clinics` ya son `allow write: if isSuperAdmin()`):
+
+```
+modulos: { laboratorio: true, pruebasRapidas: false,
+           constancias: true, ekg: false }
+```
+
+**Semántica** (igual en cliente y en reglas, a propósito):
+- Mapa ausente → **todo habilitado**. Compatibilidad con las clínicas dadas
+  de alta antes de que esto existiera.
+- Mapa presente → solo lo que está en `true`. Una clave ausente cuenta como
+  apagada. El panel de alta (Fase 4) debe escribir siempre el mapa completo.
+
+**Los 4 módulos opcionales:** `laboratorio`, `pruebasRapidas`, `constancias`,
+`ekg`.
+
+**Lo que NO es opcional:** expedientes, consultas/pendientes, búsqueda,
+edición, historial, unificación y **caja**. Caja parece un módulo pero es el
+cierre del circuito de la consulta (`pendiente_caja` → `completa`);
+apagarla no oculta una pestaña, deja consultas sin poder cerrarse.
+
+**Cómo está implementado, en tres capas:**
+1. `clinic-modules.js` — saca del DOM los elementos con `[data-modulo="x"]`
+   cuyo módulo esté apagado (se eliminan, no se ocultan con CSS, para que no
+   queden botones invisibles alcanzables por teclado).
+2. `r3adsModulos.exigir()` en el auth guard de cada página-módulo
+   (`Examenes-Laboratorio`, `Pruebas-Rapidas`, `Ver-Prueba`,
+   `Constancia-Medica`, `Resultado-EKG`). **Este es el candado que importa
+   del lado del cliente**: muchos links a esas páginas se generan
+   dinámicamente dentro de JS, imposibles de etiquetar uno por uno, pero
+   todos terminan en la misma pantalla de "módulo no contratado".
+3. `moduloActivo()` en `firestore.rules` — el candado real. Esconder botones
+   no impide que alguien escriba directo contra Firestore.
+
+**Alcance deliberado en las reglas: se exige el módulo para ESCRIBIR, no para
+leer.** Si una clínica da de baja un módulo deja de registrar cosas nuevas,
+pero sigue viendo lo que ya tenía: son datos clínicos de sus pacientes, no se
+le pueden ocultar por una decisión comercial.
+
+La pestaña "Pruebas Rápidas / Laboratorio" del portal cubre dos módulos a la
+vez: solo desaparece si ambos están apagados (ver `aplicarModulos()` en
+`Expediente-Doctor.html`).
+
 ## Cómo desplegar (una vez configurado)
 
 ```bash

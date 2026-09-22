@@ -743,6 +743,7 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <script src="firebase-init.js"></script>
+<script src="clinic-modules.js"></script>
 
 <script>
 (function () {
@@ -830,6 +831,13 @@
       window.location.href = 'Auth.html?returnTo=Pruebas-Rapidas.html';
       return;
     }
+    r3adsModulos.cargar(CLINIC_ID).then(function () {
+      if (!r3adsModulos.exigir('pruebasRapidas', 'Pruebas Rápidas')) return;
+      arrancar(user);
+    });
+  });
+
+  function arrancar(user) {
     currentUser = user;
     var name = user.displayName || user.email.split('@')[0];
     $id('pr-user-chip').style.display = '';
@@ -842,7 +850,7 @@
        de que Firebase restaure la sesión, Firestore responde "Missing or
        insufficient permissions" y la lista se queda vacía o en error. */
     cargarPendientes();
-  });
+  }
 
   $id('pr-logout').addEventListener('click', function () {
     r3adsAuth.signOut().then(function () { window.location.href = 'Auth.html'; });

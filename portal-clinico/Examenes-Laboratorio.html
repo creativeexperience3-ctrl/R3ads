@@ -521,6 +521,7 @@ body { margin: 0; background: #F4F6FB; font-family: 'Segoe UI', Arial, sans-seri
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
 <script src="firebase-init.js"></script>
+<script src="clinic-modules.js"></script>
 
 <script>
 (function () {
@@ -573,6 +574,13 @@ body { margin: 0; background: #F4F6FB; font-family: 'Segoe UI', Arial, sans-seri
   /* ── Auth ── */
   r3adsAuth.onAuthStateChanged(function (user) {
     if (!user) { window.location.href = 'Auth.html?returnTo=Examenes-Laboratorio.html'; return; }
+    r3adsModulos.cargar(CLINIC_ID).then(function () {
+      if (!r3adsModulos.exigir('laboratorio', 'Laboratorio')) return;
+      arrancar(user);
+    });
+  });
+
+  function arrancar(user) {
     currentUser = user;
     var name = user.displayName || user.email.split('@')[0];
     $id('el-user-chip').style.visibility = '';
@@ -587,7 +595,7 @@ body { margin: 0; background: #F4F6FB; font-family: 'Segoe UI', Arial, sans-seri
     var nombreParam = params.get('nombre');
     if (dniParam) { $id('f-dni').value = dniParam; checkDniMatch(); }
     if (nombreParam) $id('f-nombre').value = nombreParam;
-  });
+  }
 
   $id('el-logout').addEventListener('click', function () {
     r3adsAuth.signOut().then(function () { window.location.href = 'Auth.html'; });
