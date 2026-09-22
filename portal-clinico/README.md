@@ -1,4 +1,4 @@
-# R3ads Portal Clínico
+# Ancla — Portal Clínico (producto de R3ads)
 
 SaaS white-label por suscripción del sistema de expedientes/consultas/caja
 que R3ads construyó originalmente para Clínica Médica General (CMG). Cada
@@ -32,9 +32,27 @@ el hosting/Firestore del sitio de la agencia.
 `creativeexperience3@gmail.com` (creado 2026-09-21). `.firebaserc` en esta
 carpeta ya apunta ahí.
 
-**Dominio del producto:** subdominio por clínica sobre un dominio nuevo que
-R3ads va a comprar específicamente para este producto (ej.
-`clinica-x.eldominio.com`) — no cada clínica con su propio dominio propio.
+**Marca del producto (2026-09-21):** el producto se llama **Ancla**. Identidad
+casi monocromática (Jet Black `#242F40` + Graphite `#363636` + blanco, con
+Golden Bronze `#CCA43B` solo como detalle mínimo) — ver
+`assets/portal-tokens.css`. Logo pendiente: se diseñará con un diseñador.
+
+**Dominio (decidido 2026-09-21):** Ancla vive como subdominio de R3ads, no
+en un dominio propio comprado aparte (esa era la decisión anterior, ya
+descartada):
+
+- `ancla.r3ads.com` — landing/marca del producto.
+- `clinica-x.ancla.r3ads.com` — la instancia de cada clínica (Fase 5).
+- Un solo certificado wildcard `*.ancla.r3ads.com` cubre a todas las
+  clínicas. OJO: un wildcard cubre **un solo nivel**, así que meter otro
+  nivel intermedio (ej. `ancla.byr3ads.r3ads.com`) obligaría a un
+  certificado extra — por eso se descartó esa forma.
+
+**Pendiente antes de que esto exista:** `r3ads.com` todavía no apunta a
+ningún lado — no hay archivo `CNAME` en `R3ads/web/`, el sitio de la agencia
+sigue servido desde `creativeexperience3-ctrl.github.io/R3ads/`. Hay que
+configurar el dominio y el DNS antes de poder publicar en `ancla.r3ads.com`.
+
 El panel de administración interno de R3ads (Fase 4) vive aparte, dentro de
 `r3ads.com`, y solo se conecta a `r3ads-clinic-crm` vía SDK — no necesita
 compartir dominio con el producto.
@@ -143,11 +161,15 @@ quedan fuera, ver el plan).
 - **Panel de administración R3ads** (alta manual de clínicas, Fase 4).
 - **Suscripción/cobro** (Stripe) y gating por `clinics/{clinicId}.estado`
   (Fase 6).
-- **Resolutor dinámico de subdominio** (Fase 5) — con el dominio del
-  producto decidido como subdominio-por-clínica, `clinic-config.js` (hoy un
+- **Resolutor dinámico de subdominio** (Fase 5) — `clinic-config.js` (hoy un
   archivo estático por despliegue) debe reemplazarse por algo que lea
   `window.location.hostname` y busque la clínica correspondiente en
-  Firestore en vez de depender de un archivo distinto por clínica.
+  Firestore en vez de depender de un archivo distinto por clínica. Con el
+  dominio ya decidido, el patrón a parsear es
+  `{clinicId}.ancla.r3ads.com` — el primer label del hostname es el
+  `clinicId`. Mientras tanto sigue existiendo el `clinic-config.js` de la
+  Clínica Demo commiteado a la fuerza (ver `.gitignore`), que hay que sacar
+  cuando este resolutor exista.
 
 ### ⚠️ Gaps conocidos (revisar antes de la primera clínica de pago)
 - **Qué servicios registra Caja directo sin preclínica de enfermería**:
