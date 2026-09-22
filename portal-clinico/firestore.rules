@@ -93,6 +93,11 @@ service cloud.firestore {
     // función slug() para que coincida exactamente con el ID en Firestore.
     // Mientras el ítem no tenga ese doc o ese campo, esta función devuelve
     // false (fail-closed): el servicio requiere médico tratante por defecto.
+    function esServicioEnfermeria(clinicId, servicioKey) {
+      return exists(/databases/$(database)/documents/clinics/$(clinicId)/catalogoConfig/$(servicioKey))
+        && get(/databases/$(database)/documents/clinics/$(clinicId)/catalogoConfig/$(servicioKey)).data.enfermeriaCompletable == true;
+    }
+
     // moduloActivo: ¿esta clínica tiene contratado este módulo?
     // Se guarda en /clinics/{clinicId}.modulos como mapa de banderas
     // ({ laboratorio: true, pruebasRapidas: false, ... }), escrito SOLO por
@@ -105,6 +110,7 @@ service cloud.firestore {
     //
     // Esto es el candado de verdad. Esconder botones en el cliente no
     // impide que alguien escriba directo contra Firestore.
+    //
     // Se da por hecho que la clínica existe: moduloActivo() siempre se usa
     // detrás de un isDoctor()/isCaja(), que ya pasaron por clinicActiva() y
     // por lo tanto por exists(). Se evita repetir ese exists() acá porque
@@ -114,11 +120,6 @@ service cloud.firestore {
     function moduloActivo(clinicId, nombre) {
       return !('modulos' in get(/databases/$(database)/documents/clinics/$(clinicId)).data)
         || get(/databases/$(database)/documents/clinics/$(clinicId)).data.modulos.get(nombre, false) == true;
-    }
-
-    function esServicioEnfermeria(clinicId, servicioKey) {
-      return exists(/databases/$(database)/documents/clinics/$(clinicId)/catalogoConfig/$(servicioKey))
-        && get(/databases/$(database)/documents/clinics/$(clinicId)/catalogoConfig/$(servicioKey)).data.enfermeriaCompletable == true;
     }
 
     // ═══ /clinics/{clinicId} ═══════════════════════════════════════
@@ -133,7 +134,10 @@ service cloud.firestore {
       // ═══ /clinics/{clinicId}/catalogoConfig/{itemKey} ═════════════
       // Catálogo de servicios/precios propio de la clínica (reemplaza el
       // catalogoConfig global del sistema de una sola clínica).
-      // Lectura PÚBLICA: el Cotizador lo usan visitantes anónimos sin login.
+      // Lectura PÚBLICA: heredado de cuando existía el Cotizador anónimo,
+      // que ya se removió. Hoy solo lo leen páginas con sesión, así que
+      // esto podría cerrarse a isAuth() — son precios, no PII, por eso no
+      // se tocó todavía.
       // Escritura: solo admin de esa clínica o superadmin.
       match /catalogoConfig/{itemKey} {
         allow read: if true;
