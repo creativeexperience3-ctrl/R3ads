@@ -37,21 +37,35 @@ casi monocromática (Jet Black `#242F40` + Graphite `#363636` + blanco, con
 Golden Bronze `#CCA43B` solo como detalle mínimo) — ver
 `assets/portal-tokens.css`. Logo pendiente: se diseñará con un diseñador.
 
-**Dominio (decidido 2026-09-21):** Ancla vive como subdominio de R3ads, no
-en un dominio propio comprado aparte (esa era la decisión anterior, ya
-descartada):
+**Dominio (decidido 2026-09-22): UN SOLO dominio, sin subdominio por
+clínica.** Todas las clínicas entran por `ancla.r3ads.com`; el `clinicId`
+sale del usuario logueado, no del hostname.
 
-- `ancla.r3ads.com` — landing/marca del producto.
-- `clinica-x.ancla.r3ads.com` — la instancia de cada clínica (Fase 5).
-- Un solo certificado wildcard `*.ancla.r3ads.com` cubre a todas las
-  clínicas. OJO: un wildcard cubre **un solo nivel**, así que meter otro
-  nivel intermedio (ej. `ancla.byr3ads.r3ads.com`) obligaría a un
-  certificado extra — por eso se descartó esa forma.
+Por qué se descartó el subdominio-por-clínica (`clinica-x.ancla.r3ads.com`),
+que era el plan original: Firebase Hosting **no soporta dominios wildcard** y
+su documentación dice *"Each custom domain is limited to having 20 subdomains
+per apex domain, due to SSL certificate minting limits"*. O sea que el
+esquema topaba en ~20 clínicas sobre `r3ads.com`, y cada alta exigía agregar
+DNS + dominio a mano en la consola.
 
-**Pendiente antes de que esto exista:** `r3ads.com` todavía no apunta a
-ningún lado — no hay archivo `CNAME` en `R3ads/web/`, el sitio de la agencia
-sigue servido desde `creativeexperience3-ctrl.github.io/R3ads/`. Hay que
-configurar el dominio y el DNS antes de poder publicar en `ancla.r3ads.com`.
+Lo que habilita esta decisión: desde que se removió el autoservicio de
+paciente, el portal es **solo para staff**, y el staff se loguea. Su
+`clinicId` ya vive en `/usuarios/{uid}` y en sus custom claims (los fija la
+Cloud Function `onUsuarioWrite`, y `r3ads-staff.js` ya los lee). El
+subdominio solo aportaba branding antes del login — que ahora se muestra
+después de autenticar.
+
+Consecuencias:
+- **La Fase 5 (resolutor dinámico de subdominio) queda eliminada del plan.**
+- Dar de alta una clínica = crear su doc en `/clinics/{clinicId}` y sus
+  usuarios. Sin DNS, sin dominios, sin despliegue nuevo.
+- Sin techo de 20 clínicas.
+
+**`r3ads.com` ya está en vivo (2026-09-22)** — DNS configurado en Hostinger
+(4 A records de GitHub Pages en el apex + `www` como CNAME al apex) y el
+archivo `CNAME` está en `R3ads/web/`. Apex y `www` responden por HTTPS con
+certificado válido. Falta configurar `ancla.r3ads.com` en Firebase Hosting
+del proyecto `r3ads-clinic-crm`.
 
 El panel de administración interno de R3ads (Fase 4) vive aparte, dentro de
 `r3ads.com`, y solo se conecta a `r3ads-clinic-crm` vía SDK — no necesita
@@ -161,15 +175,25 @@ quedan fuera, ver el plan).
 - **Panel de administración R3ads** (alta manual de clínicas, Fase 4).
 - **Suscripción/cobro** (Stripe) y gating por `clinics/{clinicId}.estado`
   (Fase 6).
-- **Resolutor dinámico de subdominio** (Fase 5) — `clinic-config.js` (hoy un
-  archivo estático por despliegue) debe reemplazarse por algo que lea
-  `window.location.hostname` y busque la clínica correspondiente en
-  Firestore en vez de depender de un archivo distinto por clínica. Con el
-  dominio ya decidido, el patrón a parsear es
-  `{clinicId}.ancla.r3ads.com` — el primer label del hostname es el
-  `clinicId`. Mientras tanto sigue existiendo el `clinic-config.js` de la
-  Clínica Demo commiteado a la fuerza (ver `.gitignore`), que hay que sacar
-  cuando este resolutor exista.
+- **`clinicId` desde la sesión, no desde un archivo estático** (reemplaza a
+  la vieja Fase 5, ver "Dominio" arriba). Hoy `clinic-config.js` fija
+  `window.R3ADS_CLINIC_ID` en tiempo de build, lo cual solo funciona con una
+  clínica. Con un único dominio para todas, tiene que resolverse del usuario
+  logueado (custom claim `clinicId`, o `/usuarios/{uid}`), y el branding
+  (`window.R3ADS_CLINIC_FALLBACK`, usado en los documentos impresos) desde
+  `/clinics/{clinicId}`.
+
+  **Alcance real del cambio:** los ~77 usos de `CLINIC_ID` y ~44 de `CLINIC`
+  repartidos en las páginas **no cambian** — solo cambian las 8 líneas
+  `var CLINIC_ID = window.R3ADS_CLINIC_ID;` (una por página). El detalle
+  fino es de orden de ejecución: hoy esa línea corre al parsear el script,
+  y la sesión se resuelve después (async), así que la asignación tiene que
+  moverse adentro del AUTH GUARD de cada página, antes de su `boot()`.
+
+  **No bloquea nada hoy**: con una sola clínica (Demo) el archivo estático
+  funciona. Hace falta antes de dar de alta la clínica #2. Mientras tanto
+  sigue existiendo el `clinic-config.js` de la Clínica Demo commiteado a la
+  fuerza (ver `.gitignore`), que hay que sacar cuando esto exista.
 
 ### ⚠️ Gaps conocidos (revisar antes de la primera clínica de pago)
 - **Qué servicios registra Caja directo sin preclínica de enfermería**:
