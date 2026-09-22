@@ -165,13 +165,17 @@ quedan fuera, ver el plan).
   ("vincular pruebas/exámenes viejos sin código de paciente") ahora llevan
   `.where('clinicId', ...)` — antes no tenían ningún filtro; probar ese
   flujo específico una vez exista una clínica de prueba real.
-- **`firestore.rules` todavía tiene reglas del portal de autoservicio de
-  paciente removido** (colección `/quotations/{id}` completa, y las ramas
-  `ownerUid`/`compartidoCon` en `expedientes` y varias colecciones
-  dependientes que permitían que un paciente autenticado leyera su propio
-  historial). Ya no hay ninguna página que las use, pero no se tocó el
-  archivo de reglas — es deploy a producción y toca ~8 bloques `match`, así
-  que se dejó pendiente de una pasada dedicada en vez de hacerlo de paso.
+- **⚠️ `firestore.rules` editado (2026-09-21) pero NO redesplegado** — se
+  quitaron la colección `/quotations/{id}`, el doc `/users/{uid}` (perfil de
+  paciente, sin código que lo creara ni lo leyera), y las ramas
+  `ownerUid`/`compartidoCon`/`solicitudesAcceso` en `expedientes`,
+  `consultas`, `resultadosPruebas`, `examenesLaboratorio`, `constancias` y
+  `electrocardiogramas` (autoservicio de paciente, muerto junto con
+  `Mi-Historial.html`). El archivo local ya no coincide con lo desplegado en
+  `r3ads-clinic-crm` hasta correr `firebase deploy --only firestore:rules`.
+  `catalogoConfig` se dejó con lectura pública (`allow read: if true`)
+  aunque ya no hay Cotizador anónimo que la necesite — bajo riesgo (son
+  precios, no PII), no se tocó sin pedirlo explícitamente.
 
 `HISTORIAL-MEDICO-README.md` se mantiene como referencia del modelo de
 datos original de CMG (útil para portar cada página), pero ya no describe

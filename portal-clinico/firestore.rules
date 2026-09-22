@@ -137,18 +137,6 @@ service cloud.firestore {
       allow write: if false;
     }
 
-    // ═══ /users/{uid} ══════════════════════════════════════════════
-    // Perfil del PACIENTE (códigos de expediente vinculados/compartidos).
-    // A propósito NO lleva clinicId: la cuenta es de la persona, no de una
-    // clínica — el mismo paciente puede vincular códigos emitidos por
-    // distintas clínicas si las visita a todas. El aislamiento entre
-    // clínicas ya lo dan los propios códigos y las reglas de /expedientes.
-    match /users/{userId} {
-      allow read: if (isAuth() && request.auth.uid == userId) || isSuperAdmin();
-      allow create, update: if isAuth() && request.auth.uid == userId;
-      allow delete: if isSuperAdmin();
-    }
-
     // ═══ /usuarios/{uid} ═══════════════════════════════════════════
     // Cuentas de STAFF (personal clínico/caja/admin), gestionadas desde
     // Admin-Usuarios.html. Cada doc lleva clinicId. Solo el admin de esa
@@ -173,8 +161,7 @@ service cloud.firestore {
     // (ej. {prefijo}-A7K9M2, ver Fase 2 del plan).
     match /expedientes/{codigo} {
       // Doctor/Caja de la MISMA clínica, o cualquier autenticado que conozca
-      // el código (el código sigue actuando como control de acceso para el
-      // paciente/familiar) — pero siempre dentro de la misma clínica activa.
+      // el código — pero siempre dentro de la misma clínica activa.
       allow read: if isDoctor(resource.data.clinicId)
         || isCaja(resource.data.clinicId)
         || sameClinic(resource.data.clinicId);
@@ -185,31 +172,12 @@ service cloud.firestore {
       allow create: if isDoctor(request.resource.data.clinicId)
         && request.resource.data.clinicId == myClinic();
 
-      // Update — igual que el original, pero SIEMPRE dentro de la misma
-      // clínica y sin permitir cambiar el clinicId del documento:
-      //   - Doctor: siempre.
-      //   - Paciente sin owner asignado: puede reclamar (set ownerUid).
-      //   - Paciente con owner: solo agregarse a sí mismo a compartidoCon.
+      // Update — solo el doctor de esa clínica, sin permitir cambiar el
+      // clinicId del documento. (El producto no tiene autoservicio de
+      // paciente — se quitaron las ramas que permitían reclamar ownerUid o
+      // compartir vía compartidoCon/solicitudesAcceso junto con Mi-Historial.html.)
       allow update: if request.resource.data.clinicId == resource.data.clinicId
-        && (
-          isDoctor(resource.data.clinicId)
-          || (
-            isAuth()
-            && resource.data.ownerUid == null
-            && request.resource.data.ownerUid == request.auth.uid
-          )
-          || (
-            isAuth()
-            && resource.data.ownerUid == request.auth.uid
-            && request.resource.data.diff(resource.data).affectedKeys()
-                .hasOnly(['compartidoCon', 'solicitudesAcceso', 'updatedAt'])
-          )
-          || (
-            isAuth()
-            && request.resource.data.diff(resource.data).affectedKeys()
-                .hasOnly(['solicitudesAcceso', 'updatedAt'])
-          )
-        );
+        && isDoctor(resource.data.clinicId);
 
       allow delete: if isDoctor(resource.data.clinicId);
     }
@@ -218,19 +186,7 @@ service cloud.firestore {
     // Mismo flujo de estados que el original (listo_enfermeria → preclinica/
     // servicio → pendiente_caja/servicio-completo → completa), con clinicId.
     match /consultas/{consultaId} {
-      allow read: if isDoctor(resource.data.clinicId) || isCaja(resource.data.clinicId)
-        || (
-          isAuth()
-          && exists(/databases/$(database)/documents/expedientes/$(resource.data.codigoPaciente))
-          && get(/databases/$(database)/documents/expedientes/$(resource.data.codigoPaciente)).data.clinicId == resource.data.clinicId
-          && (
-            get(/databases/$(database)/documents/expedientes/$(resource.data.codigoPaciente)).data.ownerUid == request.auth.uid
-            || (
-              get(/databases/$(database)/documents/expedientes/$(resource.data.codigoPaciente)).data.compartidoCon is list
-              && request.auth.uid in get(/databases/$(database)/documents/expedientes/$(resource.data.codigoPaciente)).data.compartidoCon
-            )
-          )
-        );
+      allow read: if isDoctor(resource.data.clinicId) || isCaja(resource.data.clinicId);
 
       allow create: if request.resource.data.clinicId == myClinic()
         && (
@@ -279,62 +235,17 @@ service cloud.firestore {
         );
     }
 
-    // ═══ /quotations/{id} ══════════════════════════════════════════
-    // Cotizaciones guardadas: cada usuario lee/escribe solo las suyas.
-    // clinicId identifica de qué instancia/clínica salió la cotización.
-    match /quotations/{quotationId} {
-      allow read: if (isAuth() && resource.data.userId == request.auth.uid) || isSuperAdmin();
-      allow create: if isAuth() && request.resource.data.userId == request.auth.uid;
-      allow update: if isAuth() && resource.data.userId == request.auth.uid
-        && request.resource.data.clinicId == resource.data.clinicId;
-      allow delete: if isSuperAdmin() || (isAuth() && resource.data.userId == request.auth.uid);
-    }
-
     // ═══ /resultadosPruebas/{id} ═══════════════════════════════════
     match /resultadosPruebas/{resultadoId} {
-      allow read: if isDoctor(resource.data.clinicId) || isCaja(resource.data.clinicId)
-        || (
-          isAuth()
-          && resource.data.codigoPaciente != null
-          && exists(/databases/$(database)/documents/expedientes/$(resource.data.codigoPaciente))
-          && get(/databases/$(database)/documents/expedientes/$(resource.data.codigoPaciente)).data.clinicId == resource.data.clinicId
-          && (
-            get(/databases/$(database)/documents/expedientes/$(resource.data.codigoPaciente)).data.ownerUid == request.auth.uid
-            || (
-              get(/databases/$(database)/documents/expedientes/$(resource.data.codigoPaciente)).data.compartidoCon is list
-              && request.auth.uid in get(/databases/$(database)/documents/expedientes/$(resource.data.codigoPaciente)).data.compartidoCon
-            )
-          )
-        );
+      allow read: if isDoctor(resource.data.clinicId) || isCaja(resource.data.clinicId);
       allow create, update: if isDoctor(request.resource.data.clinicId) || isCaja(request.resource.data.clinicId);
       allow delete: if isDoctor(resource.data.clinicId);
     }
 
     // ═══ /examenesLaboratorio/{id} ═════════════════════════════════
     match /examenesLaboratorio/{examenId} {
-      allow read: if isDoctor(resource.data.clinicId) || isCaja(resource.data.clinicId)
-        || (
-          isAuth()
-          && resource.data.codigoPaciente != null
-          && exists(/databases/$(database)/documents/expedientes/$(resource.data.codigoPaciente))
-          && get(/databases/$(database)/documents/expedientes/$(resource.data.codigoPaciente)).data.clinicId == resource.data.clinicId
-          && (
-            get(/databases/$(database)/documents/expedientes/$(resource.data.codigoPaciente)).data.ownerUid == request.auth.uid
-            || (
-              get(/databases/$(database)/documents/expedientes/$(resource.data.codigoPaciente)).data.compartidoCon is list
-              && request.auth.uid in get(/databases/$(database)/documents/expedientes/$(resource.data.codigoPaciente)).data.compartidoCon
-            )
-          )
-        );
-      allow create: if isDoctor(request.resource.data.clinicId) || isCaja(request.resource.data.clinicId)
-        || (
-          isAuth()
-          && request.resource.data.codigoPaciente != null
-          && request.resource.data.subidoPorPaciente == true
-          && exists(/databases/$(database)/documents/expedientes/$(request.resource.data.codigoPaciente))
-          && get(/databases/$(database)/documents/expedientes/$(request.resource.data.codigoPaciente)).data.clinicId == request.resource.data.clinicId
-          && get(/databases/$(database)/documents/expedientes/$(request.resource.data.codigoPaciente)).data.ownerUid == request.auth.uid
-        );
+      allow read: if isDoctor(resource.data.clinicId) || isCaja(resource.data.clinicId);
+      allow create: if isDoctor(request.resource.data.clinicId) || isCaja(request.resource.data.clinicId);
       allow update: if isDoctor(resource.data.clinicId) || isCaja(resource.data.clinicId);
       allow delete: if isDoctor(resource.data.clinicId);
     }
@@ -351,40 +262,14 @@ service cloud.firestore {
 
     // ═══ /constancias/{id} ═════════════════════════════════════════
     match /constancias/{constanciaId} {
-      allow read: if isDoctor(resource.data.clinicId) || isCaja(resource.data.clinicId)
-        || (
-          isAuth()
-          && resource.data.codigoPaciente != null
-          && exists(/databases/$(database)/documents/expedientes/$(resource.data.codigoPaciente))
-          && get(/databases/$(database)/documents/expedientes/$(resource.data.codigoPaciente)).data.clinicId == resource.data.clinicId
-          && (
-            get(/databases/$(database)/documents/expedientes/$(resource.data.codigoPaciente)).data.ownerUid == request.auth.uid
-            || (
-              get(/databases/$(database)/documents/expedientes/$(resource.data.codigoPaciente)).data.compartidoCon is list
-              && request.auth.uid in get(/databases/$(database)/documents/expedientes/$(resource.data.codigoPaciente)).data.compartidoCon
-            )
-          )
-        );
+      allow read: if isDoctor(resource.data.clinicId) || isCaja(resource.data.clinicId);
       allow create, update: if isDoctor(request.resource.data.clinicId);
       allow delete: if isAdmin(resource.data.clinicId);
     }
 
     // ═══ /electrocardiogramas/{id} ═════════════════════════════════
     match /electrocardiogramas/{ekgId} {
-      allow read: if isDoctor(resource.data.clinicId) || isCaja(resource.data.clinicId)
-        || (
-          isAuth()
-          && resource.data.codigoPaciente != null
-          && exists(/databases/$(database)/documents/expedientes/$(resource.data.codigoPaciente))
-          && get(/databases/$(database)/documents/expedientes/$(resource.data.codigoPaciente)).data.clinicId == resource.data.clinicId
-          && (
-            get(/databases/$(database)/documents/expedientes/$(resource.data.codigoPaciente)).data.ownerUid == request.auth.uid
-            || (
-              get(/databases/$(database)/documents/expedientes/$(resource.data.codigoPaciente)).data.compartidoCon is list
-              && request.auth.uid in get(/databases/$(database)/documents/expedientes/$(resource.data.codigoPaciente)).data.compartidoCon
-            )
-          )
-        );
+      allow read: if isDoctor(resource.data.clinicId) || isCaja(resource.data.clinicId);
       allow create, update, delete: if isDoctor(request.resource.data.clinicId);
     }
 
