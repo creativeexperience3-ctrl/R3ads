@@ -215,12 +215,27 @@ quedan fuera, ver el plan).
   se descubren en runtime — Firebase da un enlace en el error de consola
   para crear el índice que falte la primera vez que corra esa query.
 
+- **Panel de administración R3ads (Fase 4, 2026-09-22)** — `web/portal-admin.html`
+  (fuera de esta carpeta, a propósito: vive dentro de `r3ads.com`/GitHub Pages,
+  como dice la sección "Dominio" arriba, y se conecta a `r3ads-clinic-crm`
+  solo vía SDK, con su propia config de Firebase embebida en el archivo).
+  Gate de acceso por custom claim `superadmin` (mismo mecanismo que
+  `checkSuperAdmin` en `r3ads-staff.js`, pero implementado aparte porque este
+  panel no carga ese archivo). Permite, sin tocar la consola de Firebase:
+  crear `clinics/{clinicId}` (con validación de ID único y formato), editar
+  cualquier campo de una clínica ya creada (el ID queda bloqueado), activar/
+  suspender, y crear el primer usuario `admin` de una clínica nueva (mismo
+  patrón de instancia secundaria de Firebase que `Admin-Usuarios.html`, para
+  no cerrar la sesión del superadmin al crear el `Auth` del nuevo admin).
+  El formulario de alta/edición siempre escribe el mapa `modulos` completo
+  (las 4 claves, nunca parcial ni ausente) — ver "Módulos contratados" arriba.
+
 ### ⏳ Pendiente
 - **Otorgar el primer `superadmin`** — no hay forma de hacerlo desde la app
   a propósito (ver nota de seguridad en `firestore.rules`); se hace una
   sola vez con el Admin SDK / `firebase-admin` desde una consola local,
-  nunca vía un endpoint que el cliente pueda alcanzar.
-- **Panel de administración R3ads** (alta manual de clínicas, Fase 4).
+  nunca vía un endpoint que el cliente pueda alcanzar. Sin esto, el panel
+  de administración R3ads (arriba) no deja entrar a nadie.
 - **Suscripción/cobro** (Stripe) y gating por `clinics/{clinicId}.estado`
   (Fase 6).
 - **`clinicId` desde la sesión, no desde un archivo estático** (reemplaza a

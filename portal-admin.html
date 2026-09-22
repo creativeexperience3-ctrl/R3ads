@@ -84,6 +84,9 @@ body { margin: 0; background: #F4F6FB; font-family: 'Segoe UI', Arial, sans-seri
 .pa-form-grid .full { grid-column: 1 / -1; }
 .pa-form-footer { display: flex; gap: 10px; margin-top: 20px; padding-top: 16px; border-top: 1px solid #F3F4F6; }
 .pa-hint { font-size: 11px; color: #9CA3AF; margin-top: 2px; }
+.pa-modulos-row { display: flex; gap: 18px; flex-wrap: wrap; padding: 8px 0 2px; }
+.pa-check { display: flex; align-items: center; gap: 7px; font-size: 13.5px; color: #374151; cursor: pointer; user-select: none; }
+.pa-check input { width: 16px; height: 16px; accent-color: #213C7D; cursor: pointer; }
 
 /* ── Table ── */
 .pa-card { background: #fff; border-radius: 14px; box-shadow: 0 2px 12px rgba(33,60,125,.07); overflow: hidden; }
@@ -105,9 +108,14 @@ body { margin: 0; background: #F4F6FB; font-family: 'Segoe UI', Arial, sans-seri
 .pa-row-actions { display: flex; gap: 7px; flex-wrap: wrap; }
 .pa-act { font-size: 12px; font-weight: 700; padding: 5px 11px; border-radius: 6px; border: none; cursor: pointer; font-family: inherit; }
 .pa-act--admin { background: #EEF2FF; color: #213C7D; }
+.pa-act--edit { background: #F3F4F6; color: #374151; }
 .pa-act--suspend { background: #FEF3C7; color: #92400E; }
 .pa-act--activate { background: #DCFCE7; color: #166534; }
 .pa-msg { text-align: center; padding: 50px 20px; color: #6B7280; }
+.pa-mod-badges { display: flex; gap: 4px; flex-wrap: wrap; max-width: 160px; }
+.pa-mod-badge { font-size: 10.5px; font-weight: 700; padding: 2px 7px; border-radius: 10px; background: #EEF2FF; color: #213C7D; white-space: nowrap; }
+.pa-mod-badge--all { background: #F3F4F6; color: #6B7280; }
+.pa-mod-badge--none { background: #FEE2E2; color: #991B1B; }
 
 /* ── Modal ── */
 .pa-modal { position: fixed; inset: 0; background: rgba(33,60,125,.45); display: none; align-items: center; justify-content: center; z-index: 1000; padding: 20px; }
@@ -183,12 +191,12 @@ body { margin: 0; background: #F4F6FB; font-family: 'Segoe UI', Arial, sans-seri
     <!-- Crear clínica -->
     <div class="pa-create-panel" id="create-panel">
       <div class="pa-create-inner">
-        <div class="pa-create-heading">Nueva clínica</div>
+        <div class="pa-create-heading" id="create-heading">Nueva clínica</div>
         <div class="pa-form-grid">
           <div class="pa-field">
             <label>ID de la clínica *</label>
             <input type="text" class="pa-input" id="f-clinicId" placeholder="clinica-x">
-            <div class="pa-hint">Minúsculas, números y guiones. No se puede cambiar después — se usa como ID interno y como base del subdominio futuro.</div>
+            <div class="pa-hint" id="clinicId-hint">Minúsculas, números y guiones. No se puede cambiar después — se usa como ID interno y como base del subdominio futuro.</div>
           </div>
           <div class="pa-field">
             <label>Nombre *</label>
@@ -229,6 +237,16 @@ body { margin: 0; background: #F4F6FB; font-family: 'Segoe UI', Arial, sans-seri
           <div class="pa-field">
             <label>Sitio web</label>
             <input type="text" class="pa-input" id="f-sitioWeb">
+          </div>
+          <div class="pa-field full">
+            <label>Módulos contratados</label>
+            <div class="pa-modulos-row">
+              <label class="pa-check"><input type="checkbox" id="f-mod-laboratorio"> Laboratorio</label>
+              <label class="pa-check"><input type="checkbox" id="f-mod-pruebasRapidas"> Pruebas Rápidas</label>
+              <label class="pa-check"><input type="checkbox" id="f-mod-constancias"> Constancias</label>
+              <label class="pa-check"><input type="checkbox" id="f-mod-ekg"> EKG</label>
+            </div>
+            <div class="pa-hint">Expedientes, consultas y caja siempre están incluidos, no son opcionales. Marca solo lo que esta clínica contrató — lo que quede sin marcar no estará disponible.</div>
           </div>
         </div>
         <div class="pa-error" id="create-error" style="margin-top:14px"></div>
@@ -302,6 +320,8 @@ body { margin: 0; background: #F4F6FB; font-family: 'Segoe UI', Arial, sans-seri
   function clearErr(id) { var el = $(id); el.textContent = ''; el.classList.remove('is-visible'); }
 
   var _clinics = [];
+  var MODULOS_KEYS = ['laboratorio', 'pruebasRapidas', 'constancias', 'ekg'];
+  var MODULOS_LABELS = { laboratorio: 'Laboratorio', pruebasRapidas: 'Pruebas Ráp.', constancias: 'Constancias', ekg: 'EKG' };
 
   /* ── Vistas ── */
   function showView(view) {
@@ -337,15 +357,77 @@ body { margin: 0; background: #F4F6FB; font-family: 'Segoe UI', Arial, sans-seri
   $('btn-logout').addEventListener('click', function () { auth.signOut(); });
   $('btn-denied-logout').addEventListener('click', function () { auth.signOut(); });
 
-  /* ── Crear clínica: toggle panel ── */
+  /* ── Crear/editar clínica: toggle panel ──
+     _editingClinicId null = modo alta; con valor = editando esa clínica
+     (el ID queda bloqueado, no se puede mover el documento de sitio). */
   var createOpen = false;
-  $('btn-new-clinic').addEventListener('click', function () {
-    createOpen = !createOpen;
-    $('create-panel').classList.toggle('is-open', createOpen);
+  var _editingClinicId = null;
+  var FORM_FIELDS = ['f-clinicId', 'f-nombre', 'f-razonSocial', 'f-prefijo', 'f-subdominio', 'f-direccion', 'f-ciudad', 'f-telefono', 'f-whatsapp', 'f-correo', 'f-sitioWeb'];
+
+  function clearForm() {
+    FORM_FIELDS.forEach(function (id) { $(id).value = ''; });
+    setModulosForm(null);
+  }
+  function setModulosForm(modulosMap) {
+    // Sin mapa (clínica legacy o formulario en blanco) => todo marcado,
+    // que es exactamente lo que "mapa ausente" significa en las reglas.
+    MODULOS_KEYS.forEach(function (k) {
+      $('f-mod-' + k).checked = modulosMap ? modulosMap[k] === true : true;
+    });
+  }
+  function readModulosForm() {
+    var m = {};
+    MODULOS_KEYS.forEach(function (k) { m[k] = $('f-mod-' + k).checked; });
+    return m;
+  }
+
+  function openCreatePanel() {
+    _editingClinicId = null;
+    clearForm();
+    $('f-clinicId').disabled = false;
+    $('clinicId-hint').textContent = 'Minúsculas, números y guiones. No se puede cambiar después — se usa como ID interno y como base del subdominio futuro.';
+    $('create-heading').textContent = 'Nueva clínica';
+    $('btn-save-clinic').textContent = 'Crear clínica';
+    createOpen = true;
+    $('create-panel').classList.add('is-open');
     clearErr('create-error');
+  }
+  function openEditClinic(clinicId) {
+    var c = _clinics.find(function (x) { return x.id === clinicId; });
+    if (!c) return;
+    _editingClinicId = clinicId;
+    $('f-clinicId').value = c.id;
+    $('f-clinicId').disabled = true;
+    $('clinicId-hint').textContent = 'El ID de una clínica ya creada no se puede cambiar.';
+    $('f-nombre').value = c.nombre || '';
+    $('f-razonSocial').value = c.razonSocial || '';
+    $('f-prefijo').value = c.prefijoCodigoPaciente || '';
+    $('f-subdominio').value = c.subdominio || '';
+    $('f-direccion').value = c.direccion || '';
+    $('f-ciudad').value = c.ciudad || '';
+    $('f-telefono').value = c.telefono || '';
+    $('f-whatsapp').value = c.whatsapp || '';
+    $('f-correo').value = c.correo || '';
+    $('f-sitioWeb').value = c.sitioWeb || '';
+    setModulosForm(c.modulos || null);
+    $('create-heading').textContent = 'Editar ' + (c.nombre || c.id);
+    $('btn-save-clinic').textContent = 'Guardar cambios';
+    createOpen = true;
+    $('create-panel').classList.add('is-open');
+    clearErr('create-error');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+  $('btn-new-clinic').addEventListener('click', function () {
+    if (createOpen && _editingClinicId === null) {
+      createOpen = false;
+      $('create-panel').classList.remove('is-open');
+    } else {
+      openCreatePanel();
+    }
   });
   $('btn-cancel-create').addEventListener('click', function () {
     createOpen = false;
+    _editingClinicId = null;
     $('create-panel').classList.remove('is-open');
   });
 
@@ -367,6 +449,15 @@ body { margin: 0; background: #F4F6FB; font-family: 'Segoe UI', Arial, sans-seri
     $('stat-suspendidas').textContent = _clinics.filter(function (c) { return c.estado !== 'activa'; }).length;
   }
 
+  function modulosBadgesHtml(c) {
+    if (!c.modulos) return '<div class="pa-mod-badges"><span class="pa-mod-badge pa-mod-badge--all">Todos</span></div>';
+    var on = MODULOS_KEYS.filter(function (k) { return c.modulos[k] === true; });
+    if (!on.length) return '<div class="pa-mod-badges"><span class="pa-mod-badge pa-mod-badge--none">Ninguno</span></div>';
+    return '<div class="pa-mod-badges">' + on.map(function (k) {
+      return '<span class="pa-mod-badge">' + esc(MODULOS_LABELS[k]) + '</span>';
+    }).join('') + '</div>';
+  }
+
   function renderClinics() {
     if (!_clinics.length) {
       $('pa-list').innerHTML = '<div class="pa-msg">No hay clínicas todavía. Crea la primera con el botón de arriba.</div>';
@@ -378,8 +469,10 @@ body { margin: 0; background: #F4F6FB; font-family: 'Segoe UI', Arial, sans-seri
         '<td><div class="pa-clinic-name">' + esc(c.nombre || '—') + '</div><div class="pa-clinic-id">' + esc(c.id) + '</div></td>' +
         '<td>' + esc(c.prefijoCodigoPaciente || '—') + '</td>' +
         '<td>' + esc(c.subdominio || '—') + '</td>' +
+        '<td>' + modulosBadgesHtml(c) + '</td>' +
         '<td><span class="pa-status pa-status--' + esc(estado) + '">' + (estado === 'activa' ? 'Activa' : 'Suspendida') + '</span></td>' +
         '<td><div class="pa-row-actions">' +
+          '<button class="pa-act pa-act--edit" data-edit-id="' + esc(c.id) + '">Editar</button>' +
           '<button class="pa-act pa-act--admin" data-admin-id="' + esc(c.id) + '" data-admin-name="' + esc(c.nombre || c.id) + '">+ Admin</button>' +
           (estado === 'activa'
             ? '<button class="pa-act pa-act--suspend" data-toggle-id="' + esc(c.id) + '" data-toggle-to="suspendida">Suspender</button>'
@@ -388,9 +481,12 @@ body { margin: 0; background: #F4F6FB; font-family: 'Segoe UI', Arial, sans-seri
       '</tr>';
     }).join('');
     $('pa-list').innerHTML =
-      '<table class="pa-table"><thead><tr><th>Clínica</th><th>Prefijo</th><th>Subdominio</th><th>Estado</th><th>Acciones</th></tr></thead>' +
+      '<table class="pa-table"><thead><tr><th>Clínica</th><th>Prefijo</th><th>Subdominio</th><th>Módulos</th><th>Estado</th><th>Acciones</th></tr></thead>' +
       '<tbody>' + rows + '</tbody></table>';
 
+    $('pa-list').querySelectorAll('[data-edit-id]').forEach(function (btn) {
+      btn.addEventListener('click', function () { openEditClinic(btn.dataset.editId); });
+    });
     $('pa-list').querySelectorAll('[data-admin-id]').forEach(function (btn) {
       btn.addEventListener('click', function () { openAdminModal(btn.dataset.adminId, btn.dataset.adminName); });
     });
@@ -408,48 +504,65 @@ body { margin: 0; background: #F4F6FB; font-family: 'Segoe UI', Arial, sans-seri
     }).catch(function (err) { toast('Error: ' + err.message, 'err'); });
   }
 
-  /* ── Guardar clínica nueva ── */
+  /* ── Guardar clínica (alta o edición) ──
+     El mapa de modulos se escribe SIEMPRE completo (las 4 claves), nunca
+     parcial ni ausente — así el panel nunca deja una clínica en el estado
+     "todo habilitado por defecto" sin que alguien lo haya decidido a
+     propósito. Ver README "Módulos contratados". */
   $('btn-save-clinic').addEventListener('click', function () {
     clearErr('create-error');
     var clinicId = $('f-clinicId').value.trim().toLowerCase();
     var nombre = $('f-nombre').value.trim();
     var prefijo = $('f-prefijo').value.trim().toUpperCase();
+    var editing = _editingClinicId !== null;
 
     if (!/^[a-z0-9-]+$/.test(clinicId)) { showErr('create-error', 'El ID de la clínica solo puede tener minúsculas, números y guiones.'); return; }
     if (!nombre) { showErr('create-error', 'El nombre es obligatorio.'); return; }
     if (!prefijo) { showErr('create-error', 'El prefijo de código de paciente es obligatorio.'); return; }
 
     var btn = $('btn-save-clinic');
-    btn.disabled = true; btn.textContent = 'Verificando…';
+    btn.disabled = true; btn.textContent = editing ? 'Guardando…' : 'Verificando…';
 
     var docRef = db.collection('clinics').doc(clinicId);
-    docRef.get().then(function (snap) {
-      if (snap.exists) { throw new Error('Ya existe una clínica con ese ID.'); }
-      btn.textContent = 'Creando…';
-      return docRef.set({
-        nombre: nombre,
-        razonSocial: $('f-razonSocial').value.trim() || nombre,
-        prefijoCodigoPaciente: prefijo,
-        subdominio: $('f-subdominio').value.trim().toLowerCase() || clinicId,
-        direccion: $('f-direccion').value.trim(),
-        ciudad: $('f-ciudad').value.trim(),
-        telefono: $('f-telefono').value.trim(),
-        whatsapp: $('f-whatsapp').value.trim(),
-        correo: $('f-correo').value.trim(),
-        sitioWeb: $('f-sitioWeb').value.trim(),
-        estado: 'activa',
-        creadoEn: firebase.firestore.FieldValue.serverTimestamp()
+    var data = {
+      nombre: nombre,
+      razonSocial: $('f-razonSocial').value.trim() || nombre,
+      prefijoCodigoPaciente: prefijo,
+      subdominio: $('f-subdominio').value.trim().toLowerCase() || clinicId,
+      direccion: $('f-direccion').value.trim(),
+      ciudad: $('f-ciudad').value.trim(),
+      telefono: $('f-telefono').value.trim(),
+      whatsapp: $('f-whatsapp').value.trim(),
+      correo: $('f-correo').value.trim(),
+      sitioWeb: $('f-sitioWeb').value.trim(),
+      modulos: readModulosForm()
+    };
+
+    var op;
+    if (editing) {
+      data.actualizadoEn = firebase.firestore.FieldValue.serverTimestamp();
+      op = docRef.update(data);
+    } else {
+      op = docRef.get().then(function (snap) {
+        if (snap.exists) { throw new Error('Ya existe una clínica con ese ID.'); }
+        btn.textContent = 'Creando…';
+        data.estado = 'activa';
+        data.creadoEn = firebase.firestore.FieldValue.serverTimestamp();
+        return docRef.set(data);
       });
-    }).then(function () {
-      toast('✅ Clínica "' + nombre + '" creada. Ahora créale su primer usuario admin.', 'ok');
+    }
+
+    op.then(function () {
+      toast(editing ? '✅ Clínica "' + nombre + '" actualizada.' : '✅ Clínica "' + nombre + '" creada. Ahora créale su primer usuario admin.', 'ok');
       createOpen = false;
+      _editingClinicId = null;
       $('create-panel').classList.remove('is-open');
-      ['f-clinicId','f-nombre','f-razonSocial','f-prefijo','f-subdominio','f-direccion','f-ciudad','f-telefono','f-whatsapp','f-correo','f-sitioWeb'].forEach(function (id) { $(id).value = ''; });
+      clearForm();
       loadClinics();
     }).catch(function (err) {
       showErr('create-error', err.message);
     }).finally(function () {
-      btn.disabled = false; btn.textContent = 'Crear clínica';
+      btn.disabled = false; btn.textContent = editing ? 'Guardar cambios' : 'Crear clínica';
     });
   });
 
