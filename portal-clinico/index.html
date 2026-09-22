@@ -1,0 +1,357 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ancla · Software de gestión clínica</title>
+<meta name="description" content="Expedientes, caja, laboratorio y consultas en un solo sistema. Pensado en español, para clínicas de Honduras y Centroamérica.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+/* ── Tokens ───────────────────────────────────────────────
+   Identidad casi monocromática: Jet Black + Graphite + blanco.
+   El bronce aparece SOLO como detalle mínimo (puntos de 6px, el
+   filo de la banda oscura, y el hover de links). No devolverlo a
+   superficies grandes — ver README del handoff. */
+:root {
+  --jet:        #242F40;
+  --jet-deep:   #1c2534;
+  --graphite:   #363636;
+  --bronze:     #CCA43B;
+  --bg:         #F6F6F7;
+  --card:       #FFFFFF;
+  --txt-2:      #4a4a4a;
+  --txt-3:      #5a5a5a;
+  --txt-4:      #6b6b6b;
+  --line:       rgba(36,47,64,0.12);
+  --maxw:       1200px;
+  --pad:        clamp(20px,5vw,64px);
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  margin: 0;
+  font-family: 'IBM Plex Sans', system-ui, sans-serif;
+  background: var(--bg);
+  color: var(--graphite);
+  -webkit-font-smoothing: antialiased;
+}
+a { color: var(--jet); text-decoration: none; }
+a:hover { color: var(--bronze); }
+
+.wrap { max-width: var(--maxw); margin: 0 auto; padding-left: var(--pad); padding-right: var(--pad); }
+.eyebrow {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 13px; font-weight: 600; letter-spacing: 0.08em;
+  text-transform: uppercase; color: var(--txt-4); margin-bottom: 10px;
+}
+
+/* ── Botones ── */
+.btn {
+  display: inline-block; border-radius: 6px; font-weight: 600;
+  font-size: 15px; padding: 14px 26px; border: 1.5px solid transparent;
+  transition: opacity .15s, background .15s, color .15s;
+}
+.btn-primary { background: var(--jet); color: #fff; }
+.btn-primary:hover { opacity: .88; color: #fff; }
+.btn-outline { border-color: var(--jet); color: var(--jet); }
+.btn-outline:hover { background: var(--jet); color: #fff; }
+.btn-light { background: #fff; color: var(--jet); }
+.btn-light:hover { opacity: .88; color: var(--jet); }
+.btn-sm { padding: 10px 20px; font-size: 14px; }
+
+/* ── Logo ── */
+.logo { display: flex; align-items: center; gap: 10px; }
+.logo-mark { flex-shrink: 0; }
+.logo-word { font-size: 20px; font-weight: 700; color: var(--jet); letter-spacing: -0.01em; }
+
+/* ── Nav ── */
+.nav {
+  position: sticky; top: 0; z-index: 20;
+  background: rgba(246,246,247,0.92); backdrop-filter: blur(8px);
+  border-bottom: 1px solid rgba(36,47,64,0.1);
+}
+.nav-row {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 16px; flex-wrap: wrap; padding-top: 16px; padding-bottom: 16px;
+}
+.nav-links { display: flex; align-items: center; gap: 28px; flex-wrap: wrap; }
+.nav-links a { color: var(--graphite); font-size: 15px; font-weight: 500; }
+.nav-links a:hover { color: var(--bronze); }
+
+/* ── Hero ── */
+.hero {
+  display: flex; align-items: center; flex-wrap: wrap;
+  gap: clamp(32px,6vw,64px);
+  padding-top: clamp(48px,8vw,96px); padding-bottom: clamp(48px,8vw,96px);
+}
+.hero-col { flex: 1 1 380px; min-width: 0; }
+.hero h1 {
+  font-size: clamp(2.25rem,5vw,3.5rem); line-height: 1.08; font-weight: 700;
+  color: var(--jet); margin: 0 0 20px; letter-spacing: -0.01em;
+}
+.hero p {
+  font-size: clamp(1.05rem,1.3vw,1.2rem); line-height: 1.6;
+  color: var(--txt-2); margin: 0 0 32px; max-width: 520px;
+}
+.hero-ctas { display: flex; gap: 14px; flex-wrap: wrap; margin-bottom: 28px; }
+.chips { display: flex; gap: 22px; flex-wrap: wrap; }
+.chip { font-size: 13px; color: var(--txt-4); display: flex; align-items: center; gap: 6px; }
+.dot { width: 6px; height: 6px; border-radius: 50%; background: var(--bronze); flex-shrink: 0; }
+.hero-visual {
+  aspect-ratio: 4/3; border-radius: 12px; border: 1px solid rgba(36,47,64,0.15);
+  background-image: repeating-linear-gradient(135deg, rgba(36,47,64,0.05) 0, rgba(36,47,64,0.05) 2px, transparent 2px, transparent 14px);
+  display: flex; align-items: center; justify-content: center; padding: 24px;
+  font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: var(--txt-4);
+  text-align: center; letter-spacing: 0.03em; line-height: 1.7;
+}
+
+/* ── Secciones ── */
+.section { padding-top: clamp(48px,7vw,80px); padding-bottom: clamp(48px,7vw,80px); }
+.section h2 {
+  font-size: clamp(1.75rem,3.5vw,2.5rem); font-weight: 700;
+  color: var(--jet); margin: 0 0 40px; max-width: 640px;
+}
+.grid { display: grid; gap: 24px; }
+.grid-cards { grid-template-columns: repeat(auto-fit, minmax(240px,1fr)); }
+.card { border: 1px solid var(--line); border-radius: 12px; padding: 28px; background: var(--card); }
+.card h3 { font-size: 17px; font-weight: 600; color: var(--jet); margin: 0 0 8px; }
+.card p { font-size: 14.5px; line-height: 1.55; color: var(--txt-3); margin: 0; }
+.badge {
+  width: 48px; height: 48px; border-radius: 10px;
+  background: rgba(36,47,64,0.05); border: 1px solid var(--line);
+  display: flex; align-items: center; justify-content: center; margin-bottom: 18px;
+}
+
+/* ── Diferenciador ── */
+.band { background: var(--card); border-top: 1px solid rgba(36,47,64,0.1); border-bottom: 1px solid rgba(36,47,64,0.1); }
+.band-grid { grid-template-columns: repeat(auto-fit, minmax(320px,1fr)); gap: 48px; align-items: center; }
+.band h2 { font-size: clamp(1.6rem,3vw,2.1rem); margin-bottom: 18px; }
+.band p { font-size: 16px; line-height: 1.65; color: var(--txt-2); max-width: 520px; margin: 0; }
+.points { display: flex; flex-direction: column; gap: 16px; }
+.point { display: flex; align-items: baseline; gap: 12px; font-size: 15.5px; color: var(--graphite); }
+
+/* ── Misión / Visión / Valores ── */
+.grid-mv { grid-template-columns: repeat(auto-fit, minmax(320px,1fr)); margin-bottom: 48px; }
+.card-mv { padding: 32px; }
+.card-mv h3 { font-size: 19px; font-weight: 700; margin-bottom: 12px; }
+.card-mv p { font-size: 15.5px; line-height: 1.65; color: var(--txt-2); }
+.grid-values { grid-template-columns: repeat(auto-fit, minmax(220px,1fr)); }
+
+/* ── CTA de cierre ── */
+.cta {
+  background: var(--jet); border-top: 2px solid var(--bronze);
+  padding: clamp(56px,8vw,96px) var(--pad);
+}
+.cta-inner { max-width: 720px; margin: 0 auto; text-align: center; }
+.cta h2 { font-size: clamp(1.8rem,3.5vw,2.4rem); font-weight: 700; color: #fff; margin: 0 0 16px; }
+.cta p { font-size: 16px; line-height: 1.6; color: rgba(255,255,255,0.72); margin: 0 0 32px; }
+
+/* ── Footer ── */
+.footer { background: var(--jet-deep); padding: 48px var(--pad) 28px; }
+.footer-inner { max-width: var(--maxw); margin: 0 auto; }
+.footer-top { display: flex; flex-wrap: wrap; gap: 40px; justify-content: space-between; margin-bottom: 32px; }
+.footer .logo-word { color: #fff; font-size: 18px; }
+.footer-about { max-width: 320px; }
+.footer-about p { font-size: 13.5px; line-height: 1.6; color: rgba(255,255,255,0.6); margin: 14px 0 0; }
+.footer-cols { display: flex; gap: 48px; flex-wrap: wrap; }
+.footer-col-h { font-family: 'IBM Plex Mono', monospace; font-size: 12px; font-weight: 600; color: rgba(255,255,255,0.5); letter-spacing: 0.05em; margin-bottom: 14px; }
+.footer-col a { display: block; color: rgba(255,255,255,0.75); font-size: 14px; margin-bottom: 10px; }
+.footer-col a:hover { color: var(--bronze); }
+.footer-bottom {
+  border-top: 1px solid rgba(255,255,255,0.12); padding-top: 20px;
+  display: flex; justify-content: space-between; flex-wrap: wrap; gap: 10px;
+  font-size: 12.5px; color: rgba(255,255,255,0.5);
+}
+</style>
+</head>
+<body>
+
+<!-- ═══ NAV ═══ -->
+<nav class="nav">
+  <div class="wrap nav-row">
+    <a href="#top" class="logo">
+      <svg class="logo-mark" width="22" height="26" viewBox="0 0 22 26" fill="none" aria-hidden="true">
+        <circle cx="11" cy="5" r="4" stroke="#242F40" stroke-width="2"/>
+        <path d="M11 9v15M4 24h14" stroke="#242F40" stroke-width="2" stroke-linecap="round"/>
+      </svg>
+      <span class="logo-word">Ancla</span>
+    </a>
+    <div class="nav-links">
+      <a href="#modulos">Módulos</a>
+      <a href="#nosotros">Nosotros</a>
+      <a href="#contacto">Contacto</a>
+      <a href="Auth.html">Acceder</a>
+    </div>
+    <a href="#contacto" class="btn btn-primary btn-sm">Solicitar demo</a>
+  </div>
+</nav>
+
+<!-- ═══ HERO ═══ -->
+<div id="top" class="wrap hero">
+  <div class="hero-col">
+    <div class="eyebrow">Software de gestión clínica</div>
+    <h1>La base firme de tu clínica.</h1>
+    <p>Expedientes, caja, laboratorio y consultas en un solo sistema — pensado en español, para clínicas de Honduras y Centroamérica.</p>
+    <div class="hero-ctas">
+      <a href="#contacto" class="btn btn-primary">Solicitar demo</a>
+      <a href="#modulos" class="btn btn-outline">Ver módulos</a>
+    </div>
+    <div class="chips">
+      <span class="chip"><span class="dot"></span>En operación real</span>
+      <span class="chip"><span class="dot"></span>Español nativo</span>
+      <span class="chip"><span class="dot"></span>Datos aislados por clínica</span>
+    </div>
+  </div>
+  <div class="hero-col">
+    <!-- Reemplazar por captura real del panel de expedientes. -->
+    <div class="hero-visual">PANEL DE EXPEDIENTES<br>captura próximamente</div>
+  </div>
+</div>
+
+<!-- ═══ MÓDULOS ═══ -->
+<div id="modulos" class="wrap section">
+  <div class="eyebrow">Módulos</div>
+  <h2>Todo lo que tu clínica usa cada día.</h2>
+  <div class="grid grid-cards">
+    <div class="card">
+      <div class="badge">
+        <svg width="22" height="16" viewBox="0 0 22 16" fill="none" aria-hidden="true">
+          <path d="M0 1h22M0 8h15M0 15h19" stroke="#242F40" stroke-width="2"/>
+        </svg>
+      </div>
+      <h3>Expedientes</h3>
+      <p>Historial clínico completo, siempre a la mano de médicos y enfermería.</p>
+    </div>
+    <div class="card">
+      <div class="badge">
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+          <circle cx="10" cy="10" r="9" stroke="#242F40" stroke-width="2"/>
+        </svg>
+      </div>
+      <h3>Caja y cobros</h3>
+      <p>Cobros, facturación y control de caja en moneda local.</p>
+    </div>
+    <div class="card">
+      <div class="badge">
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+          <rect x="3.5" y="3.5" width="13" height="13" transform="rotate(45 10 10)" stroke="#242F40" stroke-width="2"/>
+        </svg>
+      </div>
+      <h3>Laboratorio</h3>
+      <p>Órdenes y resultados de laboratorio integrados al expediente.</p>
+    </div>
+    <div class="card">
+      <div class="badge">
+        <svg width="21" height="8" viewBox="0 0 21 8" fill="none" aria-hidden="true">
+          <circle cx="4" cy="4" r="4" fill="#242F40"/>
+          <circle cx="17" cy="4" r="4" fill="#242F40"/>
+        </svg>
+      </div>
+      <h3>Consultas</h3>
+      <p>Agenda y flujo de consulta para todo el personal, en un mismo lugar.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ DIFERENCIADOR ═══ -->
+<div class="band">
+  <div class="wrap section grid band-grid">
+    <div>
+      <h2>Hecho en español, no traducido.</h2>
+      <p>Ancla nace de un sistema que ya opera en una clínica real en Honduras — con moneda local, WhatsApp como canal, y el vocabulario clínico que se usa en el consultorio, no una traducción de un producto extranjero.</p>
+    </div>
+    <div class="points">
+      <div class="point"><span class="dot"></span><span>Moneda y formato local</span></div>
+      <div class="point"><span class="dot"></span><span>WhatsApp como canal de contacto</span></div>
+      <div class="point"><span class="dot"></span><span>Terminología clínica centroamericana</span></div>
+      <div class="point"><span class="dot"></span><span>Cada clínica, con sus datos aislados</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ MISIÓN / VISIÓN / VALORES ═══ -->
+<div id="nosotros" class="wrap section">
+  <div class="eyebrow">Misión y visión</div>
+  <div class="grid grid-mv">
+    <div class="card card-mv">
+      <h3>Misión</h3>
+      <p>Darle a las clínicas pequeñas y medianas de Centroamérica una herramienta de trabajo diario tan ordenada y confiable como el mejor consultorio, sin la complejidad ni el costo del software extranjero.</p>
+    </div>
+    <div class="card card-mv">
+      <h3>Visión</h3>
+      <p>Ser el sistema de gestión clínica de referencia en Centroamérica, presente en cada clínica que hoy trabaja con papel o con hojas de cálculo.</p>
+    </div>
+  </div>
+
+  <div class="eyebrow">Valores</div>
+  <div class="grid grid-values">
+    <div>
+      <h3 style="font-size:17px;font-weight:600;color:var(--jet);margin:0 0 6px">Precisión</h3>
+      <p style="font-size:14.5px;line-height:1.55;color:var(--txt-3);margin:0">Cada dato en su lugar, cada vez.</p>
+    </div>
+    <div>
+      <h3 style="font-size:17px;font-weight:600;color:var(--jet);margin:0 0 6px">Confianza</h3>
+      <p style="font-size:14.5px;line-height:1.55;color:var(--txt-3);margin:0">Manejamos historiales y dinero: la seriedad no es opcional.</p>
+    </div>
+    <div>
+      <h3 style="font-size:17px;font-weight:600;color:var(--jet);margin:0 0 6px">Cercanía</h3>
+      <p style="font-size:14.5px;line-height:1.55;color:var(--txt-3);margin:0">En español, con el flujo real de una clínica centroamericana.</p>
+    </div>
+    <div>
+      <h3 style="font-size:17px;font-weight:600;color:var(--jet);margin:0 0 6px">Continuidad</h3>
+      <p style="font-size:14.5px;line-height:1.55;color:var(--txt-3);margin:0">Un sistema que acompaña la operación todos los días, sin fricción.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ CTA DE CIERRE ═══ -->
+<div id="contacto" class="cta">
+  <div class="cta-inner">
+    <h2>Lleva tu clínica del papel al orden.</h2>
+    <p>Agenda una demo y ve Ancla trabajando con los flujos reales de tu clínica.</p>
+    <!-- Canal de contacto: WhatsApp de R3ads. Cambiar cuando Ancla tenga el suyo. -->
+    <a href="https://wa.me/50495652894?text=Hola%2C%20quiero%20una%20demo%20de%20Ancla%20para%20mi%20cl%C3%ADnica."
+       target="_blank" rel="noopener" class="btn btn-light">Solicitar demo</a>
+  </div>
+</div>
+
+<!-- ═══ FOOTER ═══ -->
+<footer class="footer">
+  <div class="footer-inner">
+    <div class="footer-top">
+      <div class="footer-about">
+        <div class="logo">
+          <svg class="logo-mark" width="20" height="24" viewBox="0 0 22 26" fill="none" aria-hidden="true">
+            <circle cx="11" cy="5" r="4" stroke="#ffffff" stroke-width="2"/>
+            <path d="M11 9v15M4 24h14" stroke="#ffffff" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+          <span class="logo-word">Ancla</span>
+        </div>
+        <p>Sistema de gestión clínica para clínicas pequeñas y medianas de Centroamérica.</p>
+      </div>
+      <div class="footer-cols">
+        <div class="footer-col">
+          <div class="footer-col-h">PRODUCTO</div>
+          <a href="#modulos">Módulos</a>
+          <a href="#nosotros">Nosotros</a>
+          <a href="Auth.html">Acceder</a>
+        </div>
+        <div class="footer-col">
+          <div class="footer-col-h">EMPRESA</div>
+          <a href="https://r3ads.com" target="_blank" rel="noopener">R3ads</a>
+          <a href="#contacto">Contacto</a>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2026 Ancla, un producto de R3ads. Hecho en Centroamérica.</span>
+      <span>Identidad en desarrollo.</span>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>
