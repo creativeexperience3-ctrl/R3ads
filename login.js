@@ -1,6 +1,7 @@
 /* ============================================================
    R3ADS · Acceso al panel interno
-   Punto de entrada unico: autentica y manda a admin.html.
+   Punto de entrada unico: autentica y manda a panel.html (el hub
+   con los accesos a Intakes, Ancla, etc).
    Quien protege los datos son las reglas de Firestore; esta
    pantalla solo evita mostrar un panel que no podria cargar nada.
    ============================================================ */
@@ -61,6 +62,6 @@ if (!window.r3Configurado || !window.r3Auth) {
     loginEstado.textContent = 'Entrando…';
     loginEstado.hidden = false;
     btnEntrar.hidden = true;
-    location.replace('admin.html');
+    location.replace('panel.html');
   });
 }

@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Panel interno · R3ADS</title>
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="icon" type="image/png" href="assets/logo-isotipo-aislado.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;900&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css?v=20260822a">
+</head>
+<body>
+
+  <header class="site-header">
+    <div class="wrap header-inner">
+      <a href="index.html" class="brand">
+        <img src="assets/logo-sobre-blanco.png" alt="R3ADS" class="brand-logo">
+      </a>
+      <nav class="site-nav">
+        <span class="admin-usuario" id="adminUsuario" hidden></span>
+        <button type="button" class="btn btn-outline btn-sm" id="btnSalir" hidden>Cerrar sesión</button>
+      </nav>
+    </div>
+  </header>
+
+  <main id="top">
+    <section class="admin">
+      <div class="wrap">
+
+        <!-- Mientras Firebase resuelve si hay sesión. Sin sesión, login.html. -->
+        <p class="admin-verificando" id="vistaCargando">Verificando sesión…</p>
+
+        <div class="admin-panel" id="vistaHub" hidden>
+          <p class="section-eyebrow">Acceso interno</p>
+          <h1 class="section-title">Panel interno de R3ADS</h1>
+
+          <div class="admin-lista" style="margin-top:2rem">
+            <a href="admin.html" class="admin-item">
+              <span class="admin-item-top">
+                <span class="admin-item-empresa">Intakes</span>
+              </span>
+              <span class="admin-item-meta">Formularios que enviaron los prospectos: lista, detalle y seguimiento.</span>
+            </a>
+            <a href="portal-admin.html" class="admin-item">
+              <span class="admin-item-top">
+                <span class="admin-item-empresa">Ancla · Clínicas</span>
+              </span>
+              <span class="admin-item-meta">Alta, edición y suspensión de clínicas del SaaS Ancla. Proyecto Firebase aparte, con su propio acceso.</span>
+            </a>
+          </div>
+        </div>
+
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap footer-inner">
+      <img src="assets/logo-isotipo-aislado.png" alt="R3ADS" class="footer-isotipo">
+      <p>&copy; 2026 R3ADS · Panel interno</p>
+    </div>
+  </footer>
+
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+  <script src="firebase-init.js?v=20260822a"></script>
+  <script src="panel.js?v=20260822a"></script>
+</body>
+</html>
