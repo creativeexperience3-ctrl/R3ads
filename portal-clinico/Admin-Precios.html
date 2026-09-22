@@ -170,7 +170,7 @@ body { margin: 0; background: #F4F6FB; font-family: system-ui,-apple-system,'Seg
   <div class="ap-controls">
     <input type="search" class="ap-search" id="ap-search" placeholder="Buscar ítem por nombre…">
     <button class="ap-save" id="ap-save" disabled>
-      💾 Guardar cambios <span class="ap-badge" id="ap-save-count" style="display:none">0</span>
+      Guardar cambios <span class="ap-badge" id="ap-save-count" style="display:none">0</span>
     </button>
   </div>
 
@@ -380,12 +380,12 @@ body { margin: 0; background: #F4F6FB; font-family: system-ui,-apple-system,'Seg
     batch.commit().then(function () {
       _dirty = {};
       $('ap-list').querySelectorAll('.ap-row.is-dirty').forEach(function(r){ r.classList.remove('is-dirty'); });
-      btn.innerHTML = '💾 Guardar cambios <span class="ap-badge" id="ap-save-count" style="display:none">0</span>';
+      btn.innerHTML = 'Guardar cambios <span class="ap-badge" id="ap-save-count" style="display:none">0</span>';
       updateSaveBtn();
-      toast('✅ Cambios guardados.');
+      toast('Cambios guardados.');
     }).catch(function (err) {
       btn.disabled = false;
-      btn.innerHTML = '💾 Guardar cambios <span class="ap-badge" id="ap-save-count">' + Object.keys(_dirty).length + '</span>';
+      btn.innerHTML = 'Guardar cambios <span class="ap-badge" id="ap-save-count">' + Object.keys(_dirty).length + '</span>';
       toast('Error al guardar: ' + err.message, true);
     });
   });

@@ -487,7 +487,7 @@ body { margin: 0; background: #F4F6FB; font-family: system-ui,-apple-system,'Seg
       })
       .then(function () {
         secondaryAuth.signOut().catch(function () {});
-        toast('✅ Usuario creado. Se envió un correo a ' + email + ' para establecer contraseña.', 'ok');
+        toast('Usuario creado. Se envió un correo a ' + email + ' para establecer contraseña.', 'ok');
         panelOpen = false;
         $('au-create-panel').classList.remove('is-open');
         clearForm();
@@ -511,7 +511,7 @@ body { margin: 0; background: #F4F6FB; font-family: system-ui,-apple-system,'Seg
   window.resetPwd = function (id, email) {
     if (!confirm('¿Enviar correo de restablecimiento de contraseña a ' + email + '?')) return;
     r3adsAuth.sendPasswordResetEmail(email)
-      .then(function () { toast('✅ Correo de restablecimiento enviado a ' + email, 'ok'); })
+      .then(function () { toast('Correo de restablecimiento enviado a ' + email, 'ok'); })
       .catch(function (err) { toast('Error: ' + err.message, 'err'); });
   };
 
@@ -522,7 +522,7 @@ body { margin: 0; background: #F4F6FB; font-family: system-ui,-apple-system,'Seg
     if (!confirm('¿Seguro que deseas ' + label + ' la cuenta de ' + (u ? u.nombre : id) + '?')) return;
     r3adsDb.collection('usuarios').doc(id).update({ estado: nuevoEstado })
       .then(function () {
-        toast(nuevoEstado === 'activo' ? '✅ Cuenta activada.' : '⚠️ Cuenta desactivada.', 'ok');
+        toast(nuevoEstado === 'activo' ? 'Cuenta activada.' : 'Cuenta desactivada.', 'ok');
         load();
       })
       .catch(function (err) { toast('Error: ' + err.message, 'err'); });
@@ -533,7 +533,7 @@ body { margin: 0; background: #F4F6FB; font-family: system-ui,-apple-system,'Seg
     if (!confirm('¿Eliminar a ' + nombre + ' del sistema?\n\nEsto borra el registro de Firestore. La cuenta de Firebase Auth queda inactiva pero debe eliminarse manualmente desde Firebase Console si es necesario.')) return;
     r3adsDb.collection('usuarios').doc(id).delete()
       .then(function () {
-        toast('✅ Usuario eliminado.', 'ok');
+        toast('Usuario eliminado.', 'ok');
         load();
       })
       .catch(function (err) { toast('Error al eliminar: ' + err.message, 'err'); });

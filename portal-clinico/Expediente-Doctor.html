@@ -877,7 +877,7 @@ summary.ed-meds-cat { list-style: revert; }
   <div class="ed-hero">
     <div class="ed-hero-inner">
       <div class="ed-hero-title">
-        <div class="ed-hero-eyebrow">🩺 Portal Médico · Expedientes Clínicos</div>
+        <div class="ed-hero-eyebrow">Portal Médico · Expedientes Clínicos</div>
         <h1 class="ed-hero-h1">Sistema de Historial Médico</h1>
       </div>
       <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
@@ -894,18 +894,18 @@ summary.ed-meds-cat { list-style: revert; }
 
     <!-- Tabs -->
     <div class="ed-tabs">
-      <button class="ed-tab is-active" data-tab="nuevo">📋 Nuevo</button>
-      <button class="ed-tab" data-tab="pacientes">👥 Pacientes</button>
-      <button class="ed-tab" data-tab="buscar">🔍 Buscar</button>
-      <button class="ed-tab" data-tab="consulta">📝 Pendientes</button>
-      <button class="ed-tab ed-tab-wide" data-tab="pruebas">🧪🔬 Pruebas Rápidas / Laboratorio</button>
+      <button class="ed-tab is-active" data-tab="nuevo">Nuevo</button>
+      <button class="ed-tab" data-tab="pacientes">Pacientes</button>
+      <button class="ed-tab" data-tab="buscar">Buscar</button>
+      <button class="ed-tab" data-tab="consulta">Pendientes</button>
+      <button class="ed-tab ed-tab-wide" data-tab="pruebas">Pruebas Rápidas / Laboratorio</button>
       <!-- DRM Fun-9: Caja -->
-      <button class="ed-tab" data-tab="caja">💰 Caja</button>
+      <button class="ed-tab" data-tab="caja">Caja</button>
       <!-- DRM Fun-5: Unificar -->
-      <button class="ed-tab" data-tab="unificar">🔗 Unificar</button>
+      <button class="ed-tab" data-tab="unificar">Unificar</button>
       <!-- DRM: Editar e Historial al final de la barra -->
-      <button class="ed-tab" data-tab="editar">✏️ Editar</button>
-      <button class="ed-tab" data-tab="historial">📂 Historial</button>
+      <button class="ed-tab" data-tab="editar">Editar</button>
+      <button class="ed-tab" data-tab="historial">Historial</button>
     </div>
 
     <!-- Alerts -->
@@ -914,11 +914,11 @@ summary.ed-meds-cat { list-style: revert; }
     <!-- ─── TAB: NUEVO EXPEDIENTE ─── -->
     <section id="tab-nuevo" class="ed-tab-content">
       <div class="ed-card">
-        <h2 class="ed-card-title">📋 Crear nuevo expediente clínico</h2>
+        <h2 class="ed-card-title">Crear nuevo expediente clínico</h2>
         <p class="ed-card-subtitle">Genera un código único para el paciente. Comparte este código con él para que pueda vincular su cuenta y ver su historial.</p>
 
         <!-- Datos generales -->
-        <div class="ed-section-title">👤 Datos Generales del Paciente</div>
+        <div class="ed-section-title">Datos Generales del Paciente</div>
         <div class="ed-grid ed-grid-2">
           <div class="ed-fgroup full">
             <label class="ed-label">Nombre completo *</label>
@@ -928,9 +928,9 @@ summary.ed-meds-cat { list-style: revert; }
             <label class="ed-label">Tipo de identificación *</label>
             <select class="ed-select" id="nuevo-tipoid">
               <option value="">— Seleccionar —</option>
-              <option value="dni">🪪 DNI (Hondureños)</option>
-              <option value="residencia">🟡 Carnet de Residencia</option>
-              <option value="extranjera">🌎 Identidad Extranjera</option>
+              <option value="dni">DNI (Hondureños)</option>
+              <option value="residencia">Carnet de Residencia</option>
+              <option value="extranjera">Identidad Extranjera</option>
             </select>
           </div>
           <div class="ed-fgroup">
@@ -1018,19 +1018,19 @@ summary.ed-meds-cat { list-style: revert; }
 
         <!-- Antecedentes Patológicos -->
         <div class="ed-section">
-          <div class="ed-section-title">🏥 Antecedentes Personales Patológicos</div>
+          <div class="ed-section-title">Antecedentes Personales Patológicos</div>
           <div id="nuevo-pat-container"></div>
         </div>
 
         <!-- Antecedentes No Patológicos -->
         <div class="ed-section">
-          <div class="ed-section-title">🚭 Antecedentes Personales No Patológicos</div>
+          <div class="ed-section-title">Antecedentes Personales No Patológicos</div>
           <div id="nuevo-nopat-container"></div>
         </div>
 
         <!-- Antecedentes Familiares -->
         <div class="ed-section">
-          <div class="ed-section-title">👨‍👩‍👧 Antecedentes Familiares</div>
+          <div class="ed-section-title">Antecedentes Familiares</div>
           <div class="ed-fgroup">
             <label class="ed-label">Detalle (padre, madre, hermanos, abuelos)</label>
             <textarea class="ed-textarea" id="nuevo-familiares" rows="4"></textarea>
@@ -1039,7 +1039,7 @@ summary.ed-meds-cat { list-style: revert; }
 
         <!-- DRM Fun-10: Cliente especial (Discapacidad / Pensionado / Jubilado) -->
         <div class="ed-section">
-          <div class="ed-section-title">♿ Cliente especial</div>
+          <div class="ed-section-title">Cliente especial</div>
           <div class="ed-grid ed-grid-2">
             <div class="ed-fgroup">
               <label class="ed-label">¿Es cliente especial?</label>
@@ -1082,7 +1082,7 @@ summary.ed-meds-cat { list-style: revert; }
         <div class="ed-actions">
           <button class="ed-btn ed-btn-ghost" id="btn-nuevo-limpiar">Limpiar</button>
           <button class="ed-btn ed-btn-primary" id="btn-nuevo-guardar">
-            ✓ Crear Expediente + Generar Código
+            Crear Expediente + Generar Código
           </button>
         </div>
       </div>
@@ -1093,11 +1093,11 @@ summary.ed-meds-cat { list-style: revert; }
           <div class="ed-code-label">Código del Paciente</div>
           <div class="ed-code-value" id="nuevo-codigo-generado">—</div>
           <p class="ed-code-help">Comparte este código con el paciente. Lo usará para vincular su cuenta en "Mi Historial Médico".</p>
-          <button class="ed-copy-btn" id="btn-copiar-codigo">📋 Copiar código</button>
+          <button class="ed-copy-btn" id="btn-copiar-codigo">Copiar código</button>
         </div>
         <div style="text-align:center">
           <button class="ed-btn ed-btn-yellow" id="btn-ir-consulta">
-            📝 Registrar primera consulta para este paciente →
+            Registrar primera consulta para este paciente →
           </button>
         </div>
       </div>
@@ -1106,10 +1106,10 @@ summary.ed-meds-cat { list-style: revert; }
     <!-- ─── TAB: PACIENTES ─── -->
     <section id="tab-pacientes" class="ed-tab-content" style="display:none">
       <div class="ed-card">
-        <h2 class="ed-card-title">👥 Lista de pacientes</h2>
+        <h2 class="ed-card-title">Lista de pacientes</h2>
         <p class="ed-card-subtitle">Sin buscar, muestra los expedientes más recientes. Al escribir, busca en <b>todo el sistema</b> por nombre, código o identidad (no solo entre los recientes).</p>
         <div class="ed-pt-filter">
-          <input type="text" class="ed-pt-filter-input" id="pt-filtro" placeholder="🔍 Buscar por nombre, identidad o código en todo el sistema...">
+          <input type="text" class="ed-pt-filter-input" id="pt-filtro" placeholder="Buscar por nombre, identidad o código en todo el sistema...">
           <button class="ed-btn ed-btn-primary" id="btn-pt-recargar">↺ Recargar</button>
         </div>
         <div class="ed-pt-count" id="pt-count"></div>
@@ -1121,14 +1121,14 @@ summary.ed-meds-cat { list-style: revert; }
     <!-- ─── TAB: BUSCAR ─── -->
     <section id="tab-buscar" class="ed-tab-content" style="display:none">
       <div class="ed-card">
-        <h2 class="ed-card-title">🔍 Buscar paciente</h2>
+        <h2 class="ed-card-title">Buscar paciente</h2>
         <p class="ed-card-subtitle">Busca por nombre, código de expediente, número de identidad o fecha de nacimiento.</p>
 
         <div class="ed-search-types">
-          <button class="ed-search-type-btn is-active" data-tipo="codigo">📋 Código de paciente</button>
-          <button class="ed-search-type-btn" data-tipo="identidad">🪪 N° Identidad</button>
-          <button class="ed-search-type-btn" data-tipo="nombre">👤 Nombre</button>
-          <button class="ed-search-type-btn" data-tipo="fecha">📅 Fecha nacimiento</button>
+          <button class="ed-search-type-btn is-active" data-tipo="codigo">Código de paciente</button>
+          <button class="ed-search-type-btn" data-tipo="identidad">N° Identidad</button>
+          <button class="ed-search-type-btn" data-tipo="nombre">Nombre</button>
+          <button class="ed-search-type-btn" data-tipo="fecha">Fecha nacimiento</button>
         </div>
 
         <div class="ed-search-bar">
@@ -1143,11 +1143,11 @@ summary.ed-meds-cat { list-style: revert; }
     <!-- ─── TAB: EDITAR ─── -->
     <section id="tab-editar" class="ed-tab-content" style="display:none">
       <div class="ed-card">
-        <h2 class="ed-card-title">✏️ Editar expediente clínico</h2>
+        <h2 class="ed-card-title">Editar expediente clínico</h2>
         <p class="ed-card-subtitle">Primero busca un paciente. Luego edita sus datos y guarda los cambios.</p>
         <div id="editar-contenido">
           <div class="ed-empty">
-            <div class="ed-empty-icon">🔍</div>
+            <div class="ed-empty-icon"></div>
             <p>Primero busca un paciente en la pestaña "Buscar Paciente"</p>
           </div>
         </div>
@@ -1157,11 +1157,11 @@ summary.ed-meds-cat { list-style: revert; }
     <!-- ─── TAB: NUEVA CONSULTA ─── -->
     <section id="tab-consulta" class="ed-tab-content" style="display:none">
       <div class="ed-card">
-        <h2 class="ed-card-title">📝 Registrar nueva hoja de consulta</h2>
+        <h2 class="ed-card-title">Registrar nueva hoja de consulta</h2>
         <p class="ed-card-subtitle">Primero selecciona un paciente. Cada consulta genera un PDF que se guarda en su historial.</p>
         <div id="consulta-contenido">
           <div class="ed-empty">
-            <div class="ed-empty-icon">🔍</div>
+            <div class="ed-empty-icon"></div>
             <p>Primero busca un paciente en la pestaña "Buscar Paciente"</p>
           </div>
         </div>
@@ -1173,16 +1173,16 @@ summary.ed-meds-cat { list-style: revert; }
       <div class="ed-card">
         <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:6px">
           <div>
-            <h2 class="ed-card-title" style="margin-bottom:4px">🧪 Pruebas rápidas del paciente</h2>
+            <h2 class="ed-card-title" style="margin-bottom:4px">Pruebas rápidas del paciente</h2>
             <p class="ed-card-subtitle" style="margin:0">Resultados vinculados automáticamente por número de identidad.</p>
           </div>
           <a class="ed-btn ed-btn-yellow" id="pruebas-nueva-link" href="Pruebas-Rapidas.html" target="_blank" rel="noopener">
-            🧪 Registrar nueva prueba ↗
+            Registrar nueva prueba ↗
           </a>
         </div>
         <div id="pruebas-contenido" style="margin-top:18px">
           <div class="ed-empty">
-            <div class="ed-empty-icon">🔍</div>
+            <div class="ed-empty-icon"></div>
             <p>Primero busca un paciente en la pestaña "Buscar Paciente"</p>
           </div>
         </div>
@@ -1191,16 +1191,16 @@ summary.ed-meds-cat { list-style: revert; }
       <div class="ed-card" style="margin-top:18px">
         <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:6px">
           <div>
-            <h2 class="ed-card-title" style="margin-bottom:4px">🔬 Exámenes de laboratorio</h2>
+            <h2 class="ed-card-title" style="margin-bottom:4px">Exámenes de laboratorio</h2>
             <p class="ed-card-subtitle" style="margin:0">PDFs subidos del laboratorio proveedor, vinculados por número de identidad.</p>
           </div>
           <a class="ed-btn ed-btn-yellow" id="btn-subir-examen" href="Examenes-Laboratorio.html" target="_blank" rel="noopener">
-            📤 Subir nuevo examen ↗
+            Subir nuevo examen ↗
           </a>
         </div>
         <div id="laboratorio-contenido" style="margin-top:18px">
           <div class="ed-empty">
-            <div class="ed-empty-icon">🔍</div>
+            <div class="ed-empty-icon"></div>
             <p>Primero busca un paciente en la pestaña "Buscar Paciente"</p>
           </div>
         </div>
@@ -1210,11 +1210,11 @@ summary.ed-meds-cat { list-style: revert; }
     <!-- ─── TAB: HISTORIAL ─── -->
     <section id="tab-historial" class="ed-tab-content" style="display:none">
       <div class="ed-card">
-        <h2 class="ed-card-title">📂 Ver historial del paciente</h2>
+        <h2 class="ed-card-title">Ver historial del paciente</h2>
         <p class="ed-card-subtitle">Primero busca un paciente. Aquí verás todas sus consultas previas en orden cronológico.</p>
         <div id="historial-contenido">
           <div class="ed-empty">
-            <div class="ed-empty-icon">🔍</div>
+            <div class="ed-empty-icon"></div>
             <p>Primero busca un paciente en la pestaña "Buscar Paciente"</p>
           </div>
         </div>
@@ -1224,7 +1224,7 @@ summary.ed-meds-cat { list-style: revert; }
     <!-- DRM Fun-9: TAB CAJA -->
     <section id="tab-caja" class="ed-tab-content" style="display:none">
       <div class="ed-card">
-        <h2 class="ed-card-title">💰 Pendiente de caja</h2>
+        <h2 class="ed-card-title">Pendiente de caja</h2>
         <p class="ed-card-subtitle">Consultas y servicios completados por el médico, esperando confirmación de pago en caja. El usuario administrativo confirma el pago y registra qué medicamentos / servicios se dispensaron.</p>
         <div id="caja-lista"><div class="ed-empty"><div class="ed-overlay-spinner" style="margin:0 auto"></div></div></div>
       </div>
@@ -1233,7 +1233,7 @@ summary.ed-meds-cat { list-style: revert; }
     <!-- DRM Fun-5 v2: TAB UNIFICAR (con flujo de aprobación) -->
     <section id="tab-unificar" class="ed-tab-content" style="display:none">
       <div class="ed-card">
-        <h2 class="ed-card-title">🔗 Unificar expedientes duplicados</h2>
+        <h2 class="ed-card-title">Unificar expedientes duplicados</h2>
         <p class="ed-card-subtitle" id="unif-subtitle">Si por accidente se creó un expediente con datos erróneos, puedes solicitar su unificación. Por seguridad, la unificación final requiere aprobación administrativa.</p>
         <div class="ed-grid ed-grid-2" style="gap:16px;margin-top:14px">
           <div class="ed-fgroup">
@@ -1255,14 +1255,14 @@ summary.ed-meds-cat { list-style: revert; }
         </div>
         <div id="unif-comparador" style="margin-top:18px"></div>
         <div class="ed-actions" style="margin-top:14px">
-          <button class="ed-btn ed-btn-primary" id="btn-unificar-ejecutar" disabled>🔗 Enviar solicitud</button>
+          <button class="ed-btn ed-btn-primary" id="btn-unificar-ejecutar" disabled>Enviar solicitud</button>
         </div>
         <p id="unif-warn" style="font-size:11px;color:#92400E;margin-top:8px;background:#FFFBEB;border:1px solid #FCD34D;padding:8px 10px;border-radius:6px"></p>
       </div>
 
       <!-- Solo admin: solicitudes pendientes -->
       <div class="ed-card" id="unif-pendientes-card" style="display:none;margin-top:18px">
-        <h2 class="ed-card-title">📥 Solicitudes pendientes de aprobación</h2>
+        <h2 class="ed-card-title">Solicitudes pendientes de aprobación</h2>
         <p class="ed-card-subtitle">Solicitudes de unificación enviadas por los médicos. Revisa, aprueba o rechaza.</p>
         <div id="unif-pendientes-lista" style="margin-top:14px"></div>
       </div>
@@ -1282,7 +1282,7 @@ summary.ed-meds-cat { list-style: revert; }
 <!-- Modal: Mover archivo a otro expediente -->
 <div class="ed-modal" id="modal-mover">
   <div class="ed-modal-box">
-    <h3 style="margin:0 0 6px;color:#242F40;font-size:17px">📂 Mover archivo a otro expediente</h3>
+    <h3 style="margin:0 0 6px;color:#242F40;font-size:17px">Mover archivo a otro expediente</h3>
     <p style="margin:0 0 14px;font-size:13px;color:#6B7280">Ingresa el código del expediente destino. El archivo se re-vinculará y aparecerá allí.</p>
     <input type="text" id="mover-codigo-input" class="ed-input" placeholder="XXX-XXXXXX" maxlength="20" autocomplete="off" style="text-transform:uppercase;font-family:'Courier New',monospace;letter-spacing:2px;text-align:center;font-size:15px;font-weight:700">
     <div id="mover-info" class="mover-info" style="margin-top:10px;min-height:18px;font-size:12px"></div>
@@ -1868,19 +1868,19 @@ summary.ed-meds-cat { list-style: revert; }
     var prefix = 'cajaedit-' + id;
     var esServicioConNombre = !!d.servicioNombre;
     return '<div id="' + prefix + '-panel" style="display:none;margin-top:12px;background:#F8FAFC;border:1px dashed #93A5C7;border-radius:8px;padding:12px">' +
-      '<div style="font-size:12px;font-weight:800;color:#242F40;text-transform:uppercase;letter-spacing:.4px;margin-bottom:8px">✏️ Ajustar antes de liquidar</div>' +
+      '<div style="font-size:12px;font-weight:800;color:#242F40;text-transform:uppercase;letter-spacing:.4px;margin-bottom:8px">Ajustar antes de liquidar</div>' +
       '<div class="ed-grid ed-grid-2">' +
         (esServicioConNombre ?
           '<div class="ed-fgroup"><label class="ed-label">Servicio</label><input type="text" class="ed-input" id="' + prefix + '-servicio" value="' + esc(d.servicioNombre || '') + '"></div>' +
-          '<div class="ed-fgroup" style="align-self:end"><label class="ed-meds-opt" style="background:#FEF2F2;border:1px solid #FCA5A5"><input type="checkbox" id="' + prefix + '-convertido"' + (d.convertidoConsulta ? ' checked' : '') + '> ❌ Este servicio no se realizó (se convirtió en consulta médica)</label></div>'
-        : '<div class="ed-fgroup full"><label class="ed-meds-opt" style="background:#FEF2F2;border:1px solid #FCA5A5"><input type="checkbox" id="' + prefix + '-convertidoservicio"' + (d.convertidoServicio ? ' checked' : '') + '> ❌ Esta consulta no se realizó (se convirtió en servicio)</label></div>') +
+          '<div class="ed-fgroup" style="align-self:end"><label class="ed-meds-opt" style="background:#FEF2F2;border:1px solid #FCA5A5"><input type="checkbox" id="' + prefix + '-convertido"' + (d.convertidoConsulta ? ' checked' : '') + '> Este servicio no se realizó (se convirtió en consulta médica)</label></div>'
+        : '<div class="ed-fgroup full"><label class="ed-meds-opt" style="background:#FEF2F2;border:1px solid #FCA5A5"><input type="checkbox" id="' + prefix + '-convertidoservicio"' + (d.convertidoServicio ? ' checked' : '') + '> Esta consulta no se realizó (se convirtió en servicio)</label></div>') +
         '<div class="ed-fgroup"><label class="ed-label">Medicamentos aplicados en consulta</label><input type="text" class="ed-input" id="' + prefix + '-medsvisita" value="' + esc((d.medicamentosVisita || []).join(', ')) + '" placeholder="separados por coma"></div>' +
         '<div class="ed-fgroup"><label class="ed-label">Despacho</label><input type="text" class="ed-input" id="' + prefix + '-medsdespacho" value="' + esc((d.medicamentosDespacho || []).join(', ')) + '" placeholder="separados por coma"></div>' +
         '<div class="ed-fgroup full"><label class="ed-label">Receta externa</label><textarea class="ed-textarea" id="' + prefix + '-recetaext" rows="2">' + esc(d.recetaExterna || '') + '</textarea></div>' +
       '</div>' +
       buildEmergenciaSectionHtml(prefix) +
       '<div style="display:flex;gap:8px;margin-top:10px">' +
-        '<button class="ed-btn ed-btn-primary" data-caja-guardar-ajuste="' + id + '">💾 Guardar ajuste</button>' +
+        '<button class="ed-btn ed-btn-primary" data-caja-guardar-ajuste="' + id + '">Guardar ajuste</button>' +
         '<button class="ed-btn ed-btn-ghost" data-caja-cancelar-ajuste="' + id + '">Cancelar</button>' +
       '</div>' +
     '</div>';
@@ -1909,7 +1909,7 @@ summary.ed-meds-cat { list-style: revert; }
     r3adsDb.collection('consultas').doc(id).update(update)
       .then(function(){
         hideOverlay();
-        showAlert('✓ Ajuste guardado', 'success');
+        showAlert('Ajuste guardado', 'success');
         renderCajaTab();
       })
       .catch(function(err){ hideOverlay(); showAlert('Error: ' + err.message, 'error'); });
@@ -1925,7 +1925,7 @@ summary.ed-meds-cat { list-style: revert; }
     var html =
       '<div style="background:#000a;position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px" id="caja-const-modal">' +
         '<div style="background:#fff;border-radius:12px;max-width:520px;width:100%;padding:24px;max-height:90vh;overflow:auto">' +
-          '<h3 style="margin:0 0 6px;color:#242F40">📄 Emitir constancia médica</h3>' +
+          '<h3 style="margin:0 0 6px;color:#242F40">Emitir constancia médica</h3>' +
           '<p style="margin:0 0 10px;font-size:13px;color:#6B7280">Paciente: <b>' + esc(nombrePac) + '</b> · Expediente <code style="background:#F3F4F6;padding:1px 6px;border-radius:4px">' + esc(d.codigoPaciente || '—') + '</code></p>' +
           '<p style="margin:0 0 14px;font-size:12px;color:#92400E;background:#FFFBEB;border:1px solid #FCD34D;border-radius:6px;padding:6px 8px">El registro sigue <b>pendiente de caja</b>. Emitir la constancia no lo liquida.</p>' +
           '<div class="ed-grid ed-grid-2" style="gap:10px">' +
@@ -1941,7 +1941,7 @@ summary.ed-meds-cat { list-style: revert; }
           '<div style="font-size:11px;color:#92400E;margin-top:6px">El formato sigue la plantilla "FORMATO DE CONSTANCIA (NO CAMBIAR)".</div>' +
           '<div style="display:flex;gap:10px;justify-content:flex-end;margin-top:18px">' +
             '<button class="ed-btn ed-btn-ghost" id="cajaconst-cancelar">Cancelar</button>' +
-            '<button class="ed-btn ed-btn-primary" id="cajaconst-guardar">📄 Emitir y abrir constancia</button>' +
+            '<button class="ed-btn ed-btn-primary" id="cajaconst-guardar">Emitir y abrir constancia</button>' +
           '</div>' +
         '</div>' +
       '</div>';
@@ -1974,7 +1974,7 @@ summary.ed-meds-cat { list-style: revert; }
       batch.commit().then(function(){
         hideOverlay();
         cerrar();
-        showAlert('✓ Constancia emitida. Abriendo en otra pestaña…', 'success');
+        showAlert('Constancia emitida. Abriendo en otra pestaña…', 'success');
         window.open('Constancia-Medica.html?id=' + encodeURIComponent(constanciaPrep.ref.id), '_blank', 'noopener');
         renderCajaTab();
       }).catch(function(err){ hideOverlay(); showAlert('Error: ' + err.message, 'error'); });
@@ -1991,7 +1991,7 @@ summary.ed-meds-cat { list-style: revert; }
       .limit(50).get()
       .then(function(snap){
         if (snap.empty) {
-          box.innerHTML = '<div class="ed-empty"><div class="ed-empty-icon">✅</div><p>No hay pacientes pendientes de caja.</p></div>';
+          box.innerHTML = '<div class="ed-empty"><div class="ed-empty-icon"></div><p>No hay pacientes pendientes de caja.</p></div>';
           return;
         }
         /* DRM: traer datosGenerales del expediente de cada paciente para poder
@@ -2023,7 +2023,7 @@ summary.ed-meds-cat { list-style: revert; }
           var edadPac = dgPac.fechaNacimiento ? calcEdad(dgPac.fechaNacimiento) : '';
           var datosYaloHtml =
             '<div style="margin-top:10px;background:#F0FDF4;border:1px solid #BBF7D0;border-radius:8px;padding:10px">' +
-              '<div style="font-size:11px;font-weight:800;color:#166534;letter-spacing:.4px;text-transform:uppercase;margin-bottom:6px">📋 Datos del paciente (copiar a Yalo)</div>' +
+              '<div style="font-size:11px;font-weight:800;color:#166534;letter-spacing:.4px;text-transform:uppercase;margin-bottom:6px">Datos del paciente (copiar a Yalo)</div>' +
               '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:8px;font-size:13px;color:#242F40">' +
                 '<div><b>Nombre:</b><br>' + esc(d.pacienteNombre || '—') + '</div>' +
                 '<div><b>Identidad:</b><br>' + esc(dgPac.numeroIdentidad || '— sin dato —') + '</div>' +
@@ -2032,7 +2032,7 @@ summary.ed-meds-cat { list-style: revert; }
                 '<div><b>Edad:</b><br>' + esc(edadPac || '— sin dato —') + '</div>' +
                 '<div><b>Fecha de nacimiento:</b><br>' + (dgPac.fechaNacimiento ? esc(fmtFechaCorta(dgPac.fechaNacimiento)) : '— sin dato —') + '</div>' +
               '</div>' +
-              (faltantesDatos.length ? '<div style="margin-top:8px;font-size:12px;color:#92400E;background:#FFFBEB;border:1px dashed #F59E0B;border-radius:6px;padding:6px 8px">⚠️ Faltan agregar al expediente: <b>' + esc(faltantesDatos.join(', ')) + '</b></div>' : '') +
+              (faltantesDatos.length ? '<div style="margin-top:8px;font-size:12px;color:#92400E;background:#FFFBEB;border:1px dashed #F59E0B;border-radius:6px;padding:6px 8px">Faltan agregar al expediente: <b>' + esc(faltantesDatos.join(', ')) + '</b></div>' : '') +
             '</div>';
           var meds1 = (d.medicamentosVisita||[]).join(', ') || '—';
           var meds2 = (d.medicamentosDespacho||[]).join(', ') || '—';
@@ -2058,20 +2058,20 @@ summary.ed-meds-cat { list-style: revert; }
              "cargar servicios hijos"), para que aparezca sin importar en cuál de
              los dos flujos (consulta directa o servicio anexado) se emitió. */
           var badgeConstancia = (d.tieneConstancia || d.constanciaId)
-            ? '<span style="background:#FEF3C7;color:#92400E;padding:3px 10px;border-radius:100px;font-size:11px;font-weight:700;margin-left:8px">📄 Constancia emitida</span>'
+            ? '<span style="background:#FEF3C7;color:#92400E;padding:3px 10px;border-radius:100px;font-size:11px;font-weight:700;margin-left:8px">Constancia emitida</span>'
             : '';
           var badgeConvertido = d.convertidoConsulta
-            ? '<span style="background:#FEE2E2;color:#991B1B;padding:3px 10px;border-radius:100px;font-size:11px;font-weight:700;margin-left:8px">🔄 No se realizó, se convirtió en consulta</span>'
+            ? '<span style="background:#FEE2E2;color:#991B1B;padding:3px 10px;border-radius:100px;font-size:11px;font-weight:700;margin-left:8px">No se realizó, se convirtió en consulta</span>'
             : (d.convertidoServicio
-              ? '<span style="background:#FEE2E2;color:#991B1B;padding:3px 10px;border-radius:100px;font-size:11px;font-weight:700;margin-left:8px">🔄 No se realizó, se convirtió en servicio</span>'
+              ? '<span style="background:#FEE2E2;color:#991B1B;padding:3px 10px;border-radius:100px;font-size:11px;font-weight:700;margin-left:8px">No se realizó, se convirtió en servicio</span>'
               : '');
           var tipoLabel = esPruebaStandalone
-            ? '<span style="background:#CCFBF1;color:#0F766E;padding:3px 10px;border-radius:100px;font-size:11px;font-weight:700;margin-left:8px">🧪 Prueba rápida</span>'
+            ? '<span style="background:#CCFBF1;color:#0F766E;padding:3px 10px;border-radius:100px;font-size:11px;font-weight:700;margin-left:8px">Prueba rápida</span>'
             : esLabStandalone
-              ? '<span style="background:#EDE9FE;color:#5B21B6;padding:3px 10px;border-radius:100px;font-size:11px;font-weight:700;margin-left:8px">🔬 Laboratorio</span>'
+              ? '<span style="background:#EDE9FE;color:#5B21B6;padding:3px 10px;border-radius:100px;font-size:11px;font-weight:700;margin-left:8px">Laboratorio</span>'
               : esServicioStandalone
-                ? '<span style="background:#D1FAE5;color:#065F46;padding:3px 10px;border-radius:100px;font-size:11px;font-weight:700;margin-left:8px">🛎️ Servicio</span>'
-                : '<span style="background:#DBEAFE;color:#1E40AF;padding:3px 10px;border-radius:100px;font-size:11px;font-weight:700;margin-left:8px">🩺 Consulta</span>';
+                ? '<span style="background:#D1FAE5;color:#065F46;padding:3px 10px;border-radius:100px;font-size:11px;font-weight:700;margin-left:8px">Servicio</span>'
+                : '<span style="background:#DBEAFE;color:#1E40AF;padding:3px 10px;border-radius:100px;font-size:11px;font-weight:700;margin-left:8px">Consulta</span>';
           /* DRM v3.2: mostrar NOMBRE del paciente prominente, código como subtítulo */
           var nombrePaciente = d.pacienteNombre || '— sin nombre —';
           html +=
@@ -2082,28 +2082,28 @@ summary.ed-meds-cat { list-style: revert; }
                   '<small style="color:#6B7280">Expediente: <code style="background:#F3F4F6;padding:1px 6px;border-radius:4px">' + esc(d.codigoPaciente || '—') + '</code> · Médico: ' + esc(d.doctorNombre || d.servicioRealizadoPor || '—') + ' · ' + esc(d.fechaLocal ? d.fechaLocal.slice(0,16).replace('T',' ') : '') + '</small>' +
                 '</div>' +
                 '<div style="display:flex;gap:8px;flex-wrap:wrap">' +
-                  '<button class="ed-btn ed-btn-ghost" data-caja-editar="' + doc.id + '">✏️ Editar</button>' +
+                  '<button class="ed-btn ed-btn-ghost" data-caja-editar="' + doc.id + '">Editar</button>' +
                   (d.constanciaId
-                    ? '<a class="ed-btn ed-btn-ghost" href="Constancia-Medica.html?id=' + esc(d.constanciaId) + '" target="_blank" rel="noopener">📄 Ver constancia</a>'
-                    : '<button class="ed-btn ed-btn-ghost" data-caja-constancia="' + doc.id + '"' + (esMedicoTratanteClient() ? '' : ' disabled title="Solo el médico puede emitir constancias"') + '>📄 Emitir constancia</button>') +
-                  '<button class="ed-btn ed-btn-primary" data-caja-id="' + doc.id + '">✅ Pago Liquidado en Caja</button>' +
+                    ? '<a class="ed-btn ed-btn-ghost" href="Constancia-Medica.html?id=' + esc(d.constanciaId) + '" target="_blank" rel="noopener">Ver constancia</a>'
+                    : '<button class="ed-btn ed-btn-ghost" data-caja-constancia="' + doc.id + '"' + (esMedicoTratanteClient() ? '' : ' disabled title="Solo el médico puede emitir constancias"') + '>Emitir constancia</button>') +
+                  '<button class="ed-btn ed-btn-primary" data-caja-id="' + doc.id + '">Pago Liquidado en Caja</button>' +
                 '</div>' +
               '</div>' +
               datosYaloHtml +
               '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;font-size:13px;margin-top:10px">' +
-                '<div><b>💊 Aplicado en consulta:</b><br>' + esc(meds1) + '</div>' +
-                '<div><b>📦 Despacho:</b><br>' + esc(meds2) + '</div>' +
-                '<div><b>🩺 Servicios:</b><br>' + esc(servicios) + '</div>' +
+                '<div><b>Aplicado en consulta:</b><br>' + esc(meds1) + '</div>' +
+                '<div><b>Despacho:</b><br>' + esc(meds2) + '</div>' +
+                '<div><b>Servicios:</b><br>' + esc(servicios) + '</div>' +
               '</div>' +
-              (d.servicioNotasFin ? '<div style="margin-top:10px;background:#F0F9FF;border:1px solid #E4CE96;border-radius:8px;padding:10px;font-size:13px"><b>📝 Notas de finalización:</b><br>' + esc(d.servicioNotasFin) + '</div>' : '') +
-              (recetaExt ? '<div style="margin-top:10px;background:#FFF7ED;border:1px solid #FED7AA;border-radius:8px;padding:10px;font-size:13px"><b>🏥 Receta externa (comprar en farmacia):</b><br>' + esc(recetaExt) + '</div>' : '') +
-              (resultadoSensConsulta ? '<div style="margin-top:10px;background:#FFF7ED;border:1px solid #FED7AA;border-radius:8px;padding:10px;font-size:13px"><b>🧪 Resultado prueba de sensibilidad:</b> ' + esc(resultadoSensConsulta) + '</div>' : '') +
-              (tieneEmergencia ? '<div style="margin-top:10px;background:#FEF2F2;border:1px solid #FCA5A5;border-radius:8px;padding:10px;font-size:13px"><b style="color:#991B1B">🚨 Área de Estabilización:</b>' + (emergenciaItems ? '<ul style="margin:6px 0 0 18px;padding:0">' + emergenciaItems + '</ul>' : ' se utilizó (sin horas detalladas)') + '</div>' : '') +
+              (d.servicioNotasFin ? '<div style="margin-top:10px;background:#F0F9FF;border:1px solid #E4CE96;border-radius:8px;padding:10px;font-size:13px"><b>Notas de finalización:</b><br>' + esc(d.servicioNotasFin) + '</div>' : '') +
+              (recetaExt ? '<div style="margin-top:10px;background:#FFF7ED;border:1px solid #FED7AA;border-radius:8px;padding:10px;font-size:13px"><b>Receta externa (comprar en farmacia):</b><br>' + esc(recetaExt) + '</div>' : '') +
+              (resultadoSensConsulta ? '<div style="margin-top:10px;background:#FFF7ED;border:1px solid #FED7AA;border-radius:8px;padding:10px;font-size:13px"><b>Resultado prueba de sensibilidad:</b> ' + esc(resultadoSensConsulta) + '</div>' : '') +
+              (tieneEmergencia ? '<div style="margin-top:10px;background:#FEF2F2;border:1px solid #FCA5A5;border-radius:8px;padding:10px;font-size:13px"><b style="color:#991B1B">Área de Estabilización:</b>' + (emergenciaItems ? '<ul style="margin:6px 0 0 18px;padding:0">' + emergenciaItems + '</ul>' : ' se utilizó (sin horas detalladas)') + '</div>' : '') +
               (requiereSens ? '<div style="margin-top:10px;background:#FEF2F2;border:1px solid #FCA5A5;border-radius:8px;padding:10px;font-size:13px">' +
-                '<b style="color:#991B1B">🧪 Inyección IM/IV, Prueba de sensibilidad:</b> ' + esc(ps.resultado) + ' · confirmada por ' + esc(ps.confirmadaPor || '—') +
+                '<b style="color:#991B1B">Inyección IM/IV, Prueba de sensibilidad:</b> ' + esc(ps.resultado) + ' · confirmada por ' + esc(ps.confirmadaPor || '—') +
                 '<label style="display:flex;gap:8px;align-items:center;margin-top:8px;font-weight:700;color:#991B1B;cursor:pointer"><input type="checkbox" class="caja-sens-chk" data-sens-for="' + doc.id + '"' + (ps.cajaConfirmada ? ' checked disabled' : '') + '> Verifiqué la prueba de sensibilidad antes de liquidar</label>' +
               '</div>' : '') +
-              (ps && ps.noRequiere ? '<div style="margin-top:10px;background:#F0FDF4;border:1px solid #BBF7D0;border-radius:8px;padding:8px 10px;font-size:12px;color:#166534">🧪 Inyección IM/IV, el médico indicó que <b>este medicamento no necesita prueba de sensibilidad</b>.</div>' : '') +
+              (ps && ps.noRequiere ? '<div style="margin-top:10px;background:#F0FDF4;border:1px solid #BBF7D0;border-radius:8px;padding:8px 10px;font-size:12px;color:#166534">Inyección IM/IV, el médico indicó que <b>este medicamento no necesita prueba de sensibilidad</b>.</div>' : '') +
               /* DRM v3 #6: servicios hijos vinculados a esta consulta */
               '<div data-servicios-hijos="' + doc.id + '" style="margin-top:10px"></div>' +
               buildCajaEditPanelHtml(doc.id, d) +
@@ -2144,7 +2144,7 @@ summary.ed-meds-cat { list-style: revert; }
                 });
               });
               return batch.commit();
-            }).then(function(){ showAlert('Pago liquidado ✓', 'success'); renderCajaTab(); })
+            }).then(function(){ showAlert('Pago liquidado ', 'success'); renderCajaTab(); })
               .catch(function(err){ showAlert('Error: ' + err.message, 'error'); });
           });
         });
@@ -2210,14 +2210,14 @@ summary.ed-meds-cat { list-style: revert; }
             if (hijoConConstancia) {
               var badgeSlot = $id('constancia-badge-' + doc.id);
               if (badgeSlot && !badgeSlot.innerHTML) {
-                badgeSlot.innerHTML = '<span style="background:#FEF3C7;color:#92400E;padding:3px 10px;border-radius:100px;font-size:11px;font-weight:700;margin-left:8px">📄 Constancia emitida</span>';
+                badgeSlot.innerHTML = '<span style="background:#FEF3C7;color:#92400E;padding:3px 10px;border-radius:100px;font-size:11px;font-weight:700;margin-left:8px">Constancia emitida</span>';
               }
             }
-            var lines = ['<div style="background:#F9FAFB;border:1px dashed #D1D5DB;border-radius:6px;padding:8px 10px;font-size:12px"><b style="color:#242F40">🔗 Servicios vinculados (mismo pago):</b><ul style="margin:4px 0 0 18px;padding:0">'];
+            var lines = ['<div style="background:#F9FAFB;border:1px dashed #D1D5DB;border-radius:6px;padding:8px 10px;font-size:12px"><b style="color:#242F40">Servicios vinculados (mismo pago):</b><ul style="margin:4px 0 0 18px;padding:0">'];
             hijos.forEach(function(h){
               var hd = h.data();
               lines.push('<li>' + esc(servicioLabelConCantidad(hd)) + (hd.servicioRealizadoPor ? ' <span style="color:#6B7280">· ' + esc(hd.servicioRealizadoPor) + '</span>' : '') +
-                (hd.servicioNotasFin ? '<br><span style="color:#0369A1">📝 ' + esc(hd.servicioNotasFin) + '</span>' : '') + '</li>');
+                (hd.servicioNotasFin ? '<br><span style="color:#0369A1">' + esc(hd.servicioNotasFin) + '</span>' : '') + '</li>');
             });
             lines.push('</ul></div>');
             slot.innerHTML = lines.join('');
@@ -2272,13 +2272,13 @@ summary.ed-meds-cat { list-style: revert; }
     var warn     = $id('unif-warn');
     var pendCard = $id('unif-pendientes-card');
     if (esAdminUnif()) {
-      btn.textContent = '🔗 Confirmar y unificar ahora';
+      btn.textContent = 'Confirmar y unificar ahora';
       subtitle.textContent = 'Como administrador, puedes ejecutar la unificación directamente o aprobar solicitudes enviadas por médicos.';
-      warn.innerHTML = '⚠️ La acción es irreversible: B se eliminará y sus consultas / exámenes pasarán a A.';
+      warn.innerHTML = 'La acción es irreversible: B se eliminará y sus consultas / exámenes pasarán a A.';
       pendCard.style.display = '';
       cargarSolicitudesUnificacion();
     } else {
-      btn.textContent = '📤 Enviar solicitud al administrador';
+      btn.textContent = 'Enviar solicitud al administrador';
       subtitle.textContent = 'Si por accidente se creó un expediente con datos erróneos, envía una solicitud de unificación. El administrador la revisará y aprobará.';
       warn.innerHTML = 'ℹ️ Tu solicitud quedará pendiente hasta que el administrador la apruebe. Recibirás el resultado en este mismo panel.';
       pendCard.style.display = 'none';
@@ -2310,8 +2310,8 @@ summary.ed-meds-cat { list-style: revert; }
                   '<div style="font-size:13px;color:#374151;margin-top:6px"><b>Motivo:</b> ' + esc(d.motivo || '—') + '</div>' +
                 '</div>' +
                 '<div style="display:flex;gap:6px">' +
-                  '<button class="ed-btn ed-btn-primary" data-aprobar="' + doc.id + '">✅ Aprobar y unificar</button>' +
-                  '<button class="ed-btn ed-btn-ghost" data-rechazar="' + doc.id + '">❌ Rechazar</button>' +
+                  '<button class="ed-btn ed-btn-primary" data-aprobar="' + doc.id + '">Aprobar y unificar</button>' +
+                  '<button class="ed-btn ed-btn-ghost" data-rechazar="' + doc.id + '">Rechazar</button>' +
                 '</div>' +
               '</div>' +
             '</div>';
@@ -2347,7 +2347,7 @@ summary.ed-meds-cat { list-style: revert; }
       });
     }).then(function(){
       hideOverlay();
-      showAlert('Solicitud aprobada y expedientes unificados ✓', 'success');
+      showAlert('Solicitud aprobada y expedientes unificados ', 'success');
       cargarSolicitudesUnificacion();
     }).catch(function(err){
       hideOverlay();
@@ -2417,7 +2417,7 @@ summary.ed-meds-cat { list-style: revert; }
       ejecutarUnificacionReal(seleccion)
         .then(function(){
           hideOverlay();
-          showAlert('Expedientes unificados ✓', 'success');
+          showAlert('Expedientes unificados ', 'success');
           limpiarFormUnif();
         })
         .catch(function(err){
@@ -2440,7 +2440,7 @@ summary.ed-meds-cat { list-style: revert; }
         creadaEn: firebase.firestore.FieldValue.serverTimestamp()
       }).then(function(){
         hideOverlay();
-        showAlert('✓ Solicitud enviada. El administrador la revisará.', 'success');
+        showAlert('Solicitud enviada. El administrador la revisará.', 'success');
         limpiarFormUnif();
       }).catch(function(err){
         hideOverlay();
@@ -2516,7 +2516,7 @@ summary.ed-meds-cat { list-style: revert; }
       if (!ok) {
         document.body.innerHTML =
           '<div style="display:flex;align-items:center;justify-content:center;min-height:100vh;padding:40px;text-align:center;font-family:system-ui">' +
-          '<div><h1 style="color:#991B1B">🚫 Acceso restringido</h1>' +
+          '<div><h1 style="color:#991B1B">Acceso restringido</h1>' +
           '<p style="color:#6B7280;margin:14px 0 24px">Solo el personal médico autorizado puede acceder a este portal.</p>' +
           '<a href="Auth.html" style="background:#242F40;color:#fff;padding:12px 24px;border-radius:10px;text-decoration:none;font-weight:700">Volver al inicio de sesión</a>' +
           '</div></div>';
@@ -2706,7 +2706,7 @@ summary.ed-meds-cat { list-style: revert; }
             $id('nuevo-codigo-generado').textContent = codigo;
             $id('nuevo-resultado').style.display = '';
             $id('nuevo-resultado').scrollIntoView({ behavior: 'smooth', block: 'center' });
-            showAlert('✓ Expediente creado exitosamente. Código: ' + codigo, 'success');
+            showAlert('Expediente creado exitosamente. Código: ' + codigo, 'success');
           });
       })
       .catch(function (err) {
@@ -2719,8 +2719,8 @@ summary.ed-meds-cat { list-style: revert; }
   $id('btn-copiar-codigo').addEventListener('click', function () {
     var c = $id('nuevo-codigo-generado').textContent;
     navigator.clipboard.writeText(c).then(function () {
-      $id('btn-copiar-codigo').textContent = '✓ Copiado';
-      setTimeout(function () { $id('btn-copiar-codigo').textContent = '📋 Copiar código'; }, 2000);
+      $id('btn-copiar-codigo').textContent = 'Copiado';
+      setTimeout(function () { $id('btn-copiar-codigo').textContent = 'Copiar código'; }, 2000);
     });
   });
 
@@ -2822,7 +2822,7 @@ summary.ed-meds-cat { list-style: revert; }
 
   function pintarTablaPacientes(lista, listaBusquedaSeleccion, mensajeVacio) {
     if (!lista.length) {
-      $id('pt-tabla-wrap').innerHTML = '<div class="ed-empty"><div class="ed-empty-icon">👥</div><p>' + mensajeVacio + '</p></div>';
+      $id('pt-tabla-wrap').innerHTML = '<div class="ed-empty"><div class="ed-empty-icon"></div><p>' + mensajeVacio + '</p></div>';
       return;
     }
 
@@ -2837,10 +2837,10 @@ summary.ed-meds-cat { list-style: revert; }
       var esSeleccionado = !!(pacienteActual && pacienteActual.codigoPaciente === p.codigoPaciente);
       html += '<tr data-codigo="' + esc(p.codigoPaciente) + '"' + (esSeleccionado ? ' class="is-selected"' : '') + '>' +
         '<td><strong>' + esc(dg.nombreCompleto || '—') + '</strong>' +
-          (esSeleccionado ? '<span class="ed-pt-selected-badge">✓ Actual</span>' : '') +
+          (esSeleccionado ? '<span class="ed-pt-selected-badge">Actual</span>' : '') +
           (dg.sexo ? '<br><span style="font-size:11px;color:#6B7280">' + (dg.sexo === 'M' ? 'Masculino' : dg.sexo === 'F' ? 'Femenino' : dg.sexo) + '</span>' : '') +
         '</td>' +
-        '<td>' + (dg.tipoIdentidad && dg.tipoIdentidad !== 'dni' ? '<span style="font-size:10px;font-weight:700;background:#F3F4F6;color:#374151;padding:1px 5px;border-radius:10px;margin-right:4px">' + (dg.tipoIdentidad === 'residencia' ? '🟡 RES' : '🌎 EXT') + '</span>' : '') + esc(dg.numeroIdentidad || '—') + '</td>' +
+        '<td>' + (dg.tipoIdentidad && dg.tipoIdentidad !== 'dni' ? '<span style="font-size:10px;font-weight:700;background:#F3F4F6;color:#374151;padding:1px 5px;border-radius:10px;margin-right:4px">' + (dg.tipoIdentidad === 'residencia' ? 'RES' : 'EXT') + '</span>' : '') + esc(dg.numeroIdentidad || '—') + '</td>' +
         '<td><span class="ed-pt-code-chip">' + esc(p.codigoPaciente) + '</span></td>' +
         '<td>' + (edad || '—') + '</td>' +
         '<td>' + esc(dg.telefono || '—') + '</td>' +
@@ -2923,7 +2923,7 @@ summary.ed-meds-cat { list-style: revert; }
     }
 
     if (!promesas.length) {
-      $id('pt-tabla-wrap').innerHTML = '<div class="ed-empty"><div class="ed-empty-icon">🔍</div><p>Escribe al menos 2 letras del nombre, o parte del código/identidad.</p></div>';
+      $id('pt-tabla-wrap').innerHTML = '<div class="ed-empty"><div class="ed-empty-icon"></div><p>Escribe al menos 2 letras del nombre, o parte del código/identidad.</p></div>';
       $id('pt-count').textContent = '';
       return;
     }
@@ -3123,16 +3123,16 @@ summary.ed-meds-cat { list-style: revert; }
           '<p class="ed-patient-meta">' +
             (calcEdad(dg.fechaNacimiento) ? calcEdad(dg.fechaNacimiento) + ' · ' : '') +
             esc(dg.sexo === 'M' ? 'Masculino' : (dg.sexo === 'F' ? 'Femenino' : (dg.sexo || ''))) +
-            (dg.telefono ? ' · 📞 ' + esc(dg.telefono) : '') +
+            (dg.telefono ? ' · ' + esc(dg.telefono) : '') +
           '</p>' +
         '</div>' +
         '<div class="ed-patient-code">' + esc(p.codigoPaciente) + '</div>' +
       '</div>' +
       '<div style="display:flex;gap:10px;flex-wrap:wrap">' +
-        '<button class="ed-btn ed-btn-primary" data-goto="editar">✏️ Editar expediente</button>' +
-        '<button class="ed-btn ed-btn-yellow" data-goto="consulta">📝 Nuevo servicio</button>' +
-        '<button class="ed-btn ed-btn-ghost" data-goto="historial">📂 Ver historial</button>' +
-        '<button class="ed-btn ed-btn-ghost" id="btn-solicitar-examenes-buscar">🔬 Solicitar exámenes</button>' +
+        '<button class="ed-btn ed-btn-primary" data-goto="editar">Editar expediente</button>' +
+        '<button class="ed-btn ed-btn-yellow" data-goto="consulta">Nuevo servicio</button>' +
+        '<button class="ed-btn ed-btn-ghost" data-goto="historial">Ver historial</button>' +
+        '<button class="ed-btn ed-btn-ghost" id="btn-solicitar-examenes-buscar">Solicitar exámenes</button>' +
       '</div>';
 
     document.querySelectorAll('#buscar-resultado [data-goto]').forEach(function (btn) {
@@ -3148,7 +3148,7 @@ summary.ed-meds-cat { list-style: revert; }
   function renderEditarTab() {
     var cont = $id('editar-contenido');
     if (!pacienteActual) {
-      cont.innerHTML = '<div class="ed-empty"><div class="ed-empty-icon">🔍</div><p>Primero busca un paciente en la pestaña "Buscar Paciente"</p></div>';
+      cont.innerHTML = '<div class="ed-empty"><div class="ed-empty-icon"></div><p>Primero busca un paciente en la pestaña "Buscar Paciente"</p></div>';
       return;
     }
     var p = pacienteActual;
@@ -3161,12 +3161,12 @@ summary.ed-meds-cat { list-style: revert; }
       '</div>' +
       buildEditarForm(p) +
       '<div class="ed-actions">' +
-        '<button class="ed-btn ed-btn-primary" id="btn-editar-guardar">💾 Guardar cambios</button>' +
+        '<button class="ed-btn ed-btn-primary" id="btn-editar-guardar">Guardar cambios</button>' +
       '</div>' +
       '<div class="ed-section" style="background:#FEF2F2;border:1px solid #FCA5A5">' +
-        '<div class="ed-section-title" style="color:#991B1B">⚠️ Zona de peligro</div>' +
+        '<div class="ed-section-title" style="color:#991B1B">Zona de peligro</div>' +
         '<p style="font-size:12px;color:#7F1D1D;margin:0 0 10px">Elimina permanentemente este expediente y todos sus registros vinculados (pre clínicas, servicios, consultas, pruebas rápidas, exámenes de laboratorio y constancias). Esta acción no se puede deshacer.</p>' +
-        '<button class="ed-btn" style="background:#DC2626;color:#fff" id="btn-eliminar-expediente">🗑️ Eliminar expediente</button>' +
+        '<button class="ed-btn" style="background:#DC2626;color:#fff" id="btn-eliminar-expediente">Eliminar expediente</button>' +
       '</div>';
 
     /* Render antecedentes con datos */
@@ -3202,10 +3202,10 @@ summary.ed-meds-cat { list-style: revert; }
       });
       return html + '</select>';
     }
-    return '<div class="ed-section-title">👤 Datos Generales</div>' +
+    return '<div class="ed-section-title">Datos Generales</div>' +
       '<div class="ed-grid ed-grid-2">' +
         '<div class="ed-fgroup full"><label class="ed-label">Nombre completo</label>' + inp('edit-nombre', dg.nombreCompleto) + '</div>' +
-        '<div class="ed-fgroup"><label class="ed-label">Tipo de identificación</label>' + sel('edit-tipoid', dg.tipoIdentidad, [{v:'',l:'— Seleccionar —'},{v:'dni',l:'🪪 DNI (Hondureños)'},{v:'residencia',l:'🟡 Carnet de Residencia'},{v:'extranjera',l:'🌎 Identidad Extranjera'}]) + '</div>' +
+        '<div class="ed-fgroup"><label class="ed-label">Tipo de identificación</label>' + sel('edit-tipoid', dg.tipoIdentidad, [{v:'',l:'— Seleccionar —'},{v:'dni',l:'DNI (Hondureños)'},{v:'residencia',l:'Carnet de Residencia'},{v:'extranjera',l:'Identidad Extranjera'}]) + '</div>' +
         '<div class="ed-fgroup"><label class="ed-label">Número de identificación</label>' + inp('edit-identidad', dg.numeroIdentidad) + '</div>' +
         '<div class="ed-fgroup"><label class="ed-label">Fecha nacimiento</label>' + inp('edit-fecnac', dg.fechaNacimiento, 'date') + '</div>' +
         '<div class="ed-fgroup"><label class="ed-label">Sexo</label>' + sel('edit-sexo', dg.sexo, [{v:'',l:'—'},{v:'M',l:'Masculino'},{v:'F',l:'Femenino'},{v:'O',l:'Otro'}]) + '</div>' +
@@ -3223,18 +3223,18 @@ summary.ed-meds-cat { list-style: revert; }
         '<div class="ed-fgroup full"><label class="ed-label">Alergias</label>' + inp('edit-alergias', dg.alergias) + '</div>' +
         '<div class="ed-fgroup full"><label class="ed-label">Obra social / Seguro médico</label>' + inp('edit-obra-social', dg.obraSocial) + '</div>' +
       '</div>' +
-      '<div class="ed-section"><div class="ed-section-title">📝 Notas del expediente</div>' +
+      '<div class="ed-section"><div class="ed-section-title">Notas del expediente</div>' +
         '<p style="font-size:12px;color:#6B7280;margin:0 0 8px">Notas generales del paciente (advertencias, preferencias, indicaciones a tener en cuenta), no ligadas a una consulta en particular. Visibles para médico y enfermería.</p>' +
         '<textarea class="ed-textarea" id="edit-notas" rows="4" placeholder="Ej: paciente prefiere citas por la mañana, requiere intérprete, advertencia de reacción a X medicamento...">' + esc(p.notas || '') + '</textarea>' +
       '</div>' +
-      '<div class="ed-section"><div class="ed-section-title">🏥 Antecedentes Patológicos</div><div id="edit-pat-container"></div></div>' +
-      '<div class="ed-section"><div class="ed-section-title">🚭 Antecedentes No Patológicos</div><div id="edit-nopat-container"></div></div>' +
-      '<div class="ed-section"><div class="ed-section-title">👨‍👩‍👧 Antecedentes Familiares</div>' +
+      '<div class="ed-section"><div class="ed-section-title">Antecedentes Patológicos</div><div id="edit-pat-container"></div></div>' +
+      '<div class="ed-section"><div class="ed-section-title">Antecedentes No Patológicos</div><div id="edit-nopat-container"></div></div>' +
+      '<div class="ed-section"><div class="ed-section-title">Antecedentes Familiares</div>' +
         '<textarea class="ed-textarea" id="edit-familiares" rows="4">' + esc(p.antecedentesFamiliares || '') + '</textarea>' +
       '</div>' +
       /* Doctor 365 quitado: fuera de alcance de este producto (ver plan, punto 8). */
       /* DRM Fun-10: Cliente especial (Discapacidad / Pensionado / Jubilado), editable también sobre un expediente ya creado */
-      '<div class="ed-section"><div class="ed-section-title">♿ Cliente especial</div>' +
+      '<div class="ed-section"><div class="ed-section-title">Cliente especial</div>' +
         '<div class="ed-grid ed-grid-2">' +
           '<div class="ed-fgroup"><label class="ed-label">¿Es cliente especial?</label>' +
             sel('edit-discapacidad-flag', ce.tieneDiscapacidad ? 'si' : 'no', [{v:'no',l:'No'},{v:'si',l:'Sí'}]) +
@@ -3258,7 +3258,7 @@ summary.ed-meds-cat { list-style: revert; }
               '<textarea class="ed-textarea" id="edit-discapacidad-notas" rows="2" placeholder="Apoyos requeridos, acompañante, accesibilidad…">' + esc(ce.notas || '') + '</textarea>' +
             '</div>' +
             '<div class="ed-fgroup full"><label class="ed-label">Documento de respaldo (PDF / imagen)</label>' +
-              (ce.documentoUrl ? '<div style="margin-bottom:6px;font-size:12px"><a href="' + esc(ce.documentoUrl) + '" target="_blank">📎 Ver documento actual</a></div>' : '') +
+              (ce.documentoUrl ? '<div style="margin-bottom:6px;font-size:12px"><a href="' + esc(ce.documentoUrl) + '" target="_blank">Ver documento actual</a></div>' : '') +
               '<input type="file" class="ed-input" id="edit-discapacidad-doc" accept=".pdf,image/*">' +
               '<small style="color:#6B7280">Carné de discapacidad, de jubilación o de pensión, u otro documento oficial. Sube uno nuevo solo si quieres reemplazar el actual.</small>' +
             '</div>' +
@@ -3324,7 +3324,7 @@ summary.ed-meds-cat { list-style: revert; }
       .then(function () {
         hideOverlay();
         Object.assign(pacienteActual, update);
-        showAlert('✓ Cambios guardados correctamente.', 'success');
+        showAlert('Cambios guardados correctamente.', 'success');
       })
       .catch(function (err) {
         hideOverlay();
@@ -3340,13 +3340,13 @@ summary.ed-meds-cat { list-style: revert; }
     var html =
       '<div style="background:#000a;position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px" id="ed-quick-modal">' +
         '<div style="background:#fff;border-radius:12px;max-width:480px;width:100%;padding:24px">' +
-          '<h3 style="margin:0 0 6px;color:#991B1B">🗑️ Eliminar expediente</h3>' +
+          '<h3 style="margin:0 0 6px;color:#991B1B">Eliminar expediente</h3>' +
           '<p style="margin:0 0 14px;font-size:13px;color:#374151">Vas a eliminar <b>permanentemente</b> el expediente de <b>' + esc(dg.nombreCompleto || codigo) + '</b> (<code>' + esc(codigo) + '</code>) y todos sus registros vinculados: pre clínicas, servicios, consultas médicas, pruebas rápidas, exámenes de laboratorio y constancias. Esta acción no se puede deshacer.</p>' +
           '<div class="ed-fgroup full"><label class="ed-label">Escribe el código <b>' + esc(codigo) + '</b> para confirmar</label>' +
             '<input type="text" class="ed-input" id="qm-del-confirm" autocomplete="off"></div>' +
           '<div style="display:flex;gap:10px;justify-content:flex-end;margin-top:18px">' +
             '<button class="ed-btn ed-btn-ghost" id="qm-cancelar">Cancelar</button>' +
-            '<button class="ed-btn" style="background:#DC2626;color:#fff" id="qm-del-confirmar">🗑️ Eliminar permanentemente</button>' +
+            '<button class="ed-btn" style="background:#DC2626;color:#fff" id="qm-del-confirmar">Eliminar permanentemente</button>' +
           '</div>' +
         '</div>' +
       '</div>';
@@ -3386,7 +3386,7 @@ summary.ed-meds-cat { list-style: revert; }
       })
       .then(function () {
         hideOverlay();
-        showAlert('✓ Expediente y registros vinculados eliminados.', 'success');
+        showAlert('Expediente y registros vinculados eliminados.', 'success');
         pacienteActual = null;
         switchTab('pacientes');
       })
@@ -3416,8 +3416,8 @@ summary.ed-meds-cat { list-style: revert; }
           '<div><p class="ed-patient-name">' + esc(dg.nombreCompleto) + '</p>' +
           '<p class="ed-patient-meta">' + (calcEdad(dg.fechaNacimiento) || '') +
           (dg.tipoSangre ? ' · Sangre ' + esc(dg.tipoSangre) : '') +
-          (dg.alergias ? ' · ⚠️ ' + esc(dg.alergias) : '') + '</p>' +
-          (p.notas ? '<p class="ed-patient-meta" style="color:#92400E">📝 ' + esc(p.notas) + '</p>' : '') + '</div>' +
+          (dg.alergias ? ' · ' + esc(dg.alergias) : '') + '</p>' +
+          (p.notas ? '<p class="ed-patient-meta" style="color:#92400E">' + esc(p.notas) + '</p>' : '') + '</div>' +
           '<div class="ed-patient-code">' + esc(p.codigoPaciente) + '</div>' +
         '</div>';
     }
@@ -3426,21 +3426,21 @@ summary.ed-meds-cat { list-style: revert; }
     html +=
       '<div class="ed-mode-grid">' +
         '<button class="ed-mode-card" id="btn-modo-registro"' + (pacienteActual ? '' : ' disabled style="opacity:.45;cursor:not-allowed"') + '>' +
-          '<div class="ed-mode-icon">🧾</div>' +
+          '<div class="ed-mode-icon"></div>' +
           '<div>' +
             '<p class="ed-mode-title">Etapa 1 · Registrar visita (Caja)</p>' +
             '<p class="ed-mode-desc">' + (pacienteActual ? 'Indica si el paciente necesita Consulta o un Servicio. Queda listo para enfermería.' : 'Primero busca un paciente en la pestaña "Buscar".') + '</p>' +
           '</div>' +
         '</button>' +
         '<div class="ed-mode-card is-green" style="cursor:default">' +
-          '<div class="ed-mode-icon">🩺</div>' +
+          '<div class="ed-mode-icon"></div>' +
           '<div>' +
             '<p class="ed-mode-title">Etapa 2 · Enfermería</p>' +
             '<p class="ed-mode-desc">Selecciona un registro en "Pendiente para Enfermería" para tomar signos vitales. Los servicios que no requieren médico (ej. Sueroterapias) pasan luego a "Listo para completar Enfermería".</p>' +
           '</div>' +
         '</div>' +
         '<div class="ed-mode-card is-yellow" style="cursor:default">' +
-          '<div class="ed-mode-icon">📝</div>' +
+          '<div class="ed-mode-icon"></div>' +
           '<div>' +
             '<p class="ed-mode-title">Etapa 3 · Médico / Completar</p>' +
             '<p class="ed-mode-desc">Selecciona un registro en "Pendiente para Médico" para continuar o completar la consulta médica.</p>' +
@@ -3452,42 +3452,42 @@ summary.ed-meds-cat { list-style: revert; }
     html +=
       '<div style="display:flex;align-items:center;justify-content:space-between;gap:8px">' +
         '<div class="ed-section-title" style="margin:0">⏳ Pendiente para Enfermería</div>' +
-        '<button class="ed-btn ed-btn-ghost" id="btn-refrescar-pendientes-enf" type="button" style="padding:6px 12px;font-size:12px">🔄 Refrescar</button>' +
+        '<button class="ed-btn ed-btn-ghost" id="btn-refrescar-pendientes-enf" type="button" style="padding:6px 12px;font-size:12px">Refrescar</button>' +
       '</div>' +
       '<div id="pendientes-enfermeria-lista">' +
         '<div class="ed-empty"><div class="ed-overlay-spinner" style="margin:0 auto"></div></div>' +
       '</div>' +
       '<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:22px">' +
-        '<div class="ed-section-title" style="margin:0">✅ Listo para completar Enfermería</div>' +
-        '<button class="ed-btn ed-btn-ghost" id="btn-refrescar-pendientes-completar-enf" type="button" style="padding:6px 12px;font-size:12px">🔄 Refrescar</button>' +
+        '<div class="ed-section-title" style="margin:0">Listo para completar Enfermería</div>' +
+        '<button class="ed-btn ed-btn-ghost" id="btn-refrescar-pendientes-completar-enf" type="button" style="padding:6px 12px;font-size:12px">Refrescar</button>' +
       '</div>' +
       '<div id="pendientes-completar-enf-lista">' +
         '<div class="ed-empty"><div class="ed-overlay-spinner" style="margin:0 auto"></div></div>' +
       '</div>' +
       '<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:22px">' +
-        '<div class="ed-section-title" style="margin:0">🧴 En Proceso Sueroterapia / estabilización</div>' +
-        '<button class="ed-btn ed-btn-ghost" id="btn-refrescar-en-proceso-suero" type="button" style="padding:6px 12px;font-size:12px">🔄 Refrescar</button>' +
+        '<div class="ed-section-title" style="margin:0">En Proceso Sueroterapia / estabilización</div>' +
+        '<button class="ed-btn ed-btn-ghost" id="btn-refrescar-en-proceso-suero" type="button" style="padding:6px 12px;font-size:12px">Refrescar</button>' +
       '</div>' +
       '<div id="en-proceso-suero-lista">' +
         '<div class="ed-empty"><div class="ed-overlay-spinner" style="margin:0 auto"></div></div>' +
       '</div>' +
       '<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:22px">' +
         '<div class="ed-section-title" style="margin:0">⏳ Pendiente para Médico</div>' +
-        '<button class="ed-btn ed-btn-ghost" id="btn-refrescar-pendientes-med" type="button" style="padding:6px 12px;font-size:12px">🔄 Refrescar</button>' +
+        '<button class="ed-btn ed-btn-ghost" id="btn-refrescar-pendientes-med" type="button" style="padding:6px 12px;font-size:12px">Refrescar</button>' +
       '</div>' +
       '<div id="pendientes-medico-lista">' +
         '<div class="ed-empty"><div class="ed-overlay-spinner" style="margin:0 auto"></div></div>' +
       '</div>' +
       /* DRM: Pruebas Rápidas / Laboratorio también visibles aquí, debajo de los pendientes de médico/enfermería */
-      '<div class="ed-section-title" style="margin-top:28px">🧪🔬 Pruebas Rápidas / Laboratorio</div>' +
+      '<div class="ed-section-title" style="margin-top:28px">Pruebas Rápidas / Laboratorio</div>' +
       '<div class="ed-card" style="margin-top:10px">' +
         '<div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:6px">' +
           '<div>' +
-            '<h2 class="ed-card-title" style="margin-bottom:4px">🧪 Pruebas rápidas del paciente</h2>' +
+            '<h2 class="ed-card-title" style="margin-bottom:4px">Pruebas rápidas del paciente</h2>' +
             '<p class="ed-card-subtitle" style="margin:0">Resultados vinculados automáticamente por número de identidad.</p>' +
           '</div>' +
           '<a class="ed-btn ed-btn-yellow" id="pruebas-nueva-link-consulta" href="Pruebas-Rapidas.html" target="_blank" rel="noopener">' +
-            '🧪 Registrar nueva prueba ↗' +
+            'Registrar nueva prueba ↗' +
           '</a>' +
         '</div>' +
         '<div id="pruebas-contenido-consulta" style="margin-top:18px">' +
@@ -3497,11 +3497,11 @@ summary.ed-meds-cat { list-style: revert; }
       '<div class="ed-card" style="margin-top:18px">' +
         '<div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:6px">' +
           '<div>' +
-            '<h2 class="ed-card-title" style="margin-bottom:4px">🔬 Exámenes de laboratorio</h2>' +
+            '<h2 class="ed-card-title" style="margin-bottom:4px">Exámenes de laboratorio</h2>' +
             '<p class="ed-card-subtitle" style="margin:0">PDFs subidos del laboratorio proveedor, vinculados por número de identidad.</p>' +
           '</div>' +
           '<a class="ed-btn ed-btn-yellow" id="btn-subir-examen-consulta" href="Examenes-Laboratorio.html" target="_blank" rel="noopener">' +
-            '📤 Subir nuevo examen ↗' +
+            'Subir nuevo examen ↗' +
           '</a>' +
         '</div>' +
         '<div id="laboratorio-contenido-consulta" style="margin-top:18px">' +
@@ -3548,27 +3548,27 @@ summary.ed-meds-cat { list-style: revert; }
           return tb - ta;
         });
         if (!items.length) {
-          lista.innerHTML = '<div class="ed-empty"><div class="ed-empty-icon">✅</div><p>No hay registros pendientes para enfermería.</p></div>';
+          lista.innerHTML = '<div class="ed-empty"><div class="ed-empty-icon"></div><p>No hay registros pendientes para enfermería.</p></div>';
           return;
         }
         lista.innerHTML = items.map(function (it) {
           var esServicio = it.tipo === 'servicio';
           var badge = esServicio
-            ? '<span style="background:#d1fae5;color:#065f46;font-size:11px;font-weight:700;padding:2px 7px;border-radius:20px;margin-left:6px">🛎️ Servicio</span>'
-            : '<span style="background:#dbeafe;color:#1e3a8a;font-size:11px;font-weight:700;padding:2px 7px;border-radius:20px;margin-left:6px">📝 Consulta</span>';
+            ? '<span style="background:#d1fae5;color:#065f46;font-size:11px;font-weight:700;padding:2px 7px;border-radius:20px;margin-left:6px">Servicio</span>'
+            : '<span style="background:#dbeafe;color:#1e3a8a;font-size:11px;font-weight:700;padding:2px 7px;border-radius:20px;margin-left:6px">Consulta</span>';
           var infoExtra = esServicio
-            ? '<div class="ed-pending-vitals">🛎️ ' + esc(it.servicioNombre || '—') + (it.servicioNotas ? ' · ' + esc(it.servicioNotas) : '') + '</div>'
+            ? '<div class="ed-pending-vitals">' + esc(it.servicioNombre || '—') + (it.servicioNotas ? ' · ' + esc(it.servicioNotas) : '') + '</div>'
             : (it.notasRegistro ? '<div class="ed-pending-vitals">' + esc(it.notasRegistro) + '</div>' : '');
           return '<div class="ed-pending-item">' +
             '<div class="ed-pending-info">' +
               '<p class="ed-pending-name">' + esc(it.pacienteNombre || it.codigoPaciente) + badge +
                 ' <span style="font-weight:500;color:#6B7280">· ' + esc(it.codigoPaciente) + '</span></p>' +
-              '<p class="ed-pending-meta">📅 ' + fmtDate(it.fechaRegistro) + ' · Registrado por ' + esc(it.registradoPor || '—') + '</p>' +
+              '<p class="ed-pending-meta">' + fmtDate(it.fechaRegistro) + ' · Registrado por ' + esc(it.registradoPor || '—') + '</p>' +
               infoExtra +
             '</div>' +
             '<div style="display:flex;flex-direction:column;gap:6px;align-items:stretch">' +
               '<button class="ed-btn ed-btn-yellow" data-atender="' + esc(it._id) + '">Atender →</button>' +
-              '<button class="ed-consulta-link ed-link-red" data-borrar-pendiente="' + esc(it._id) + '" style="font-size:11px;text-align:center">🗑️ Quitar</button>' +
+              '<button class="ed-consulta-link ed-link-red" data-borrar-pendiente="' + esc(it._id) + '" style="font-size:11px;text-align:center">Quitar</button>' +
             '</div>' +
           '</div>';
         }).join('');
@@ -3595,7 +3595,7 @@ summary.ed-meds-cat { list-style: revert; }
     r3adsDb.collection('consultas').doc(id).delete()
       .then(function () {
         hideOverlay();
-        showAlert('✓ Registro eliminado.', 'success');
+        showAlert('Registro eliminado.', 'success');
         if (onDone) onDone();
       })
       .catch(function (err) {
@@ -3643,7 +3643,7 @@ summary.ed-meds-cat { list-style: revert; }
           return getFecha(b) - getFecha(a);
         });
         if (!items.length) {
-          lista.innerHTML = '<div class="ed-empty"><div class="ed-empty-icon">✅</div><p>No hay registros pendientes para médico.</p></div>';
+          lista.innerHTML = '<div class="ed-empty"><div class="ed-empty-icon"></div><p>No hay registros pendientes para médico.</p></div>';
           return;
         }
         lista.innerHTML = items.map(function (it) {
@@ -3657,10 +3657,10 @@ summary.ed-meds-cat { list-style: revert; }
             if (sv.spo2) chips.push('SpO2 ' + esc(sv.spo2) + '%');
           }
           var badge = esServicio
-            ? '<span style="background:#d1fae5;color:#065f46;font-size:11px;font-weight:700;padding:2px 7px;border-radius:20px;margin-left:6px">🛎️ Servicio</span>'
-            : '<span style="background:#dbeafe;color:#1e3a8a;font-size:11px;font-weight:700;padding:2px 7px;border-radius:20px;margin-left:6px">🩺 Pre clínica</span>';
+            ? '<span style="background:#d1fae5;color:#065f46;font-size:11px;font-weight:700;padding:2px 7px;border-radius:20px;margin-left:6px">Servicio</span>'
+            : '<span style="background:#dbeafe;color:#1e3a8a;font-size:11px;font-weight:700;padding:2px 7px;border-radius:20px;margin-left:6px">Pre clínica</span>';
           var infoExtra = esServicio
-            ? '<div class="ed-pending-vitals">🛎️ ' + esc(it.servicioNombre || '—') + (it.servicioNotas ? ' · ' + esc(it.servicioNotas) : '') + '</div>'
+            ? '<div class="ed-pending-vitals">' + esc(it.servicioNombre || '—') + (it.servicioNotas ? ' · ' + esc(it.servicioNotas) : '') + '</div>'
             : (chips.length ? '<div class="ed-pending-vitals">' + chips.join(' · ') + '</div>' : '');
           /* Visualización: alguien ya abrió el formulario (Consulta o Servicio) y no lo
              ha terminado. Pasados 20 min sin completar, se marca como demorado. */
@@ -3670,7 +3670,7 @@ summary.ed-meds-cat { list-style: revert; }
             var demorado = elapsedMin >= 20;
             var enAtencionTexto = demorado
               ? '⏱️ Demorado / Sin Completar' + (elapsedMin > 0 ? ' · hace ' + elapsedMin + ' min' : '')
-              : '🩺 En consulta' + (elapsedMin > 0 ? ' · hace ' + elapsedMin + ' min' : ' · recién');
+              : 'En consulta' + (elapsedMin > 0 ? ' · hace ' + elapsedMin + ' min' : ' · recién');
             enAtencionHtml = '<div style="margin-top:4px;font-size:11px;font-weight:700;display:inline-block;padding:3px 8px;border-radius:20px;color:' +
               (demorado ? '#92400E' : '#1D4ED8') + ';background:' + (demorado ? '#FEF3C7' : '#DBEAFE') + '">' + enAtencionTexto + '</div>';
           }
@@ -3680,7 +3680,7 @@ summary.ed-meds-cat { list-style: revert; }
           var yaIniciada = esServicio ? it.servicioIniciado : it.consultaIniciada;
           var iniciadaPor = esServicio ? it.borradorServicioPor : it.borradorPor;
           var iniciadaHtml = yaIniciada
-            ? '<div style="margin-top:4px;font-size:11px;font-weight:700;display:inline-block;padding:3px 8px;border-radius:20px;color:#166534;background:#DCFCE7;margin-left:4px">📝 Iniciada' + (iniciadaPor ? ' · por ' + esc(iniciadaPor) : '') + '</div>'
+            ? '<div style="margin-top:4px;font-size:11px;font-weight:700;display:inline-block;padding:3px 8px;border-radius:20px;color:#166534;background:#DCFCE7;margin-left:4px">Iniciada' + (iniciadaPor ? ' · por ' + esc(iniciadaPor) : '') + '</div>'
             : '';
           var fechaMostrar = it.fechaPreclinica || it.fechaServicio;
           var registradoPor = it.enfermeriaAtendidoPor || it.preclinicaPor || it.servicioPor || '—';
@@ -3691,19 +3691,19 @@ summary.ed-meds-cat { list-style: revert; }
           var puedeEntrar = esMedicoTratanteClient();
           var btnHtml = puedeEntrar
             ? '<button class="ed-btn ed-btn-yellow" data-continuar="' + esc(it._id) + '">' + btnLabel + '</button>'
-            : '<span class="ed-btn" style="background:#E5E7EB;color:#6B7280;cursor:not-allowed" title="Solo médico o admin puede completar esta Consulta/Servicio">🔒 Solo médico</span>';
+            : '<span class="ed-btn" style="background:#E5E7EB;color:#6B7280;cursor:not-allowed" title="Solo médico o admin puede completar esta Consulta/Servicio">Solo médico</span>';
           return '<div class="ed-pending-item">' +
             '<div class="ed-pending-info">' +
               '<p class="ed-pending-name">' + esc(it.pacienteNombre || it.codigoPaciente) + badge +
                 ' <span style="font-weight:500;color:#6B7280">· ' + esc(it.codigoPaciente) + '</span></p>' +
-              '<p class="ed-pending-meta">📅 ' + fmtDate(fechaMostrar) + ' · Registrado por ' + esc(registradoPor) + '</p>' +
+              '<p class="ed-pending-meta">' + fmtDate(fechaMostrar) + ' · Registrado por ' + esc(registradoPor) + '</p>' +
               infoExtra +
               enAtencionHtml +
               iniciadaHtml +
             '</div>' +
             '<div style="display:flex;flex-direction:column;gap:6px;align-items:stretch">' +
               btnHtml +
-              '<button class="ed-consulta-link ed-link-red" data-borrar-pendiente="' + esc(it._id) + '" style="font-size:11px;text-align:center">🗑️ Quitar</button>' +
+              '<button class="ed-consulta-link ed-link-red" data-borrar-pendiente="' + esc(it._id) + '" style="font-size:11px;text-align:center">Quitar</button>' +
             '</div>' +
           '</div>';
         }).join('');
@@ -3731,8 +3731,8 @@ summary.ed-meds-cat { list-style: revert; }
        no tiene servicioNombre/servicioPor — usa los campos de la entrega. */
     var esEstabilizacion = it.status === 'en_estabilizacion';
     var infoExtra = esEstabilizacion
-      ? '<div class="ed-pending-vitals">🩺 Consulta entregada a Estabilización' + (it.motivoConsulta ? ' · ' + esc(it.motivoConsulta) : '') + '</div>'
-      : '<div class="ed-pending-vitals">🛎️ ' + esc(it.servicioNombre || '—') + (it.servicioNotas ? ' · ' + esc(it.servicioNotas) : '') + '</div>';
+      ? '<div class="ed-pending-vitals">Consulta entregada a Estabilización' + (it.motivoConsulta ? ' · ' + esc(it.motivoConsulta) : '') + '</div>'
+      : '<div class="ed-pending-vitals">' + esc(it.servicioNombre || '—') + (it.servicioNotas ? ' · ' + esc(it.servicioNotas) : '') + '</div>';
     var fechaMostrar = esEstabilizacion ? it.entregadoAEstabilizacionEn : it.fechaServicio;
     var registradoPorMostrar = esEstabilizacion ? it.entregadoAEstabilizacionPor : (it.enfermeriaAtendidoPor || it.servicioPor);
     var enAtencionHtml = '';
@@ -3741,27 +3741,27 @@ summary.ed-meds-cat { list-style: revert; }
       var demorado = elapsedMin >= 20;
       var enAtencionTexto = demorado
         ? '⏱️ Demorado / Sin Completar' + (elapsedMin > 0 ? ' · hace ' + elapsedMin + ' min' : '')
-        : '🩺 En atención' + (elapsedMin > 0 ? ' · hace ' + elapsedMin + ' min' : ' · recién');
+        : 'En atención' + (elapsedMin > 0 ? ' · hace ' + elapsedMin + ' min' : ' · recién');
       enAtencionHtml = '<div style="margin-top:4px;font-size:11px;font-weight:700;display:inline-block;padding:3px 8px;border-radius:20px;color:' +
         (demorado ? '#92400E' : '#1D4ED8') + ';background:' + (demorado ? '#FEF3C7' : '#DBEAFE') + '">' + enAtencionTexto + '</div>';
     }
     var yaIniciada = esEstabilizacion ? it.consultaIniciada : it.servicioIniciado;
     var borradorPorMostrar = esEstabilizacion ? it.borradorPor : it.borradorServicioPor;
     var iniciadaHtml = yaIniciada
-      ? '<div style="margin-top:4px;font-size:11px;font-weight:700;display:inline-block;padding:3px 8px;border-radius:20px;color:#166534;background:#DCFCE7;margin-left:4px">📝 Iniciada' + (borradorPorMostrar ? ' · por ' + esc(borradorPorMostrar) : '') + '</div>'
+      ? '<div style="margin-top:4px;font-size:11px;font-weight:700;display:inline-block;padding:3px 8px;border-radius:20px;color:#166534;background:#DCFCE7;margin-left:4px">Iniciada' + (borradorPorMostrar ? ' · por ' + esc(borradorPorMostrar) : '') + '</div>'
       : '';
     return '<div class="ed-pending-item">' +
       '<div class="ed-pending-info">' +
         '<p class="ed-pending-name">' + esc(it.pacienteNombre || it.codigoPaciente) +
           ' <span style="font-weight:500;color:#6B7280">· ' + esc(it.codigoPaciente) + '</span></p>' +
-        '<p class="ed-pending-meta">📅 ' + fmtDate(fechaMostrar) + ' · ' + (esEstabilizacion ? 'Entregado por ' : 'Registrado por ') + esc(registradoPorMostrar || '—') + '</p>' +
+        '<p class="ed-pending-meta">' + fmtDate(fechaMostrar) + ' · ' + (esEstabilizacion ? 'Entregado por ' : 'Registrado por ') + esc(registradoPorMostrar || '—') + '</p>' +
         infoExtra +
         enAtencionHtml +
         iniciadaHtml +
       '</div>' +
       '<div style="display:flex;flex-direction:column;gap:6px;align-items:stretch">' +
         '<button class="ed-btn ed-btn-yellow" data-completar-enf="' + esc(it._id) + '">Completar →</button>' +
-        '<button class="ed-consulta-link ed-link-red" data-borrar-pendiente="' + esc(it._id) + '" style="font-size:11px;text-align:center">🗑️ Quitar</button>' +
+        '<button class="ed-consulta-link ed-link-red" data-borrar-pendiente="' + esc(it._id) + '" style="font-size:11px;text-align:center">Quitar</button>' +
       '</div>' +
     '</div>';
   }
@@ -3788,7 +3788,7 @@ summary.ed-meds-cat { list-style: revert; }
         });
         items.sort(function (a, b) { return tsMillis(b.fechaServicio) - tsMillis(a.fechaServicio); });
         if (!items.length) {
-          lista.innerHTML = '<div class="ed-empty"><div class="ed-empty-icon">✅</div><p>No hay servicios listos para completar.</p></div>';
+          lista.innerHTML = '<div class="ed-empty"><div class="ed-empty-icon"></div><p>No hay servicios listos para completar.</p></div>';
           return;
         }
         lista.innerHTML = items.map(buildServicioPendienteItemHtml).join('');
@@ -3830,7 +3830,7 @@ summary.ed-meds-cat { list-style: revert; }
         });
         items.sort(function (a, b) { return tsMillis(b.fechaServicio || b.entregadoAEstabilizacionEn) - tsMillis(a.fechaServicio || a.entregadoAEstabilizacionEn); });
         if (!items.length) {
-          lista.innerHTML = '<div class="ed-empty"><div class="ed-empty-icon">✅</div><p>No hay sueroterapias en proceso.</p></div>';
+          lista.innerHTML = '<div class="ed-empty"><div class="ed-empty-icon"></div><p>No hay sueroterapias en proceso.</p></div>';
           return;
         }
         lista.innerHTML = items.map(buildServicioPendienteItemHtml).join('');
@@ -3874,16 +3874,16 @@ summary.ed-meds-cat { list-style: revert; }
         '<p class="ed-patient-meta">Etapa 1 · Registrar visita, queda listo para enfermería</p></div>' +
         '<div class="ed-patient-code">' + esc(p.codigoPaciente) + '</div>' +
       '</div>' +
-      '<div class="ed-section-title">🧾 ¿Qué necesita el paciente?</div>' +
+      '<div class="ed-section-title">¿Qué necesita el paciente?</div>' +
       '<div class="ed-section">' +
         '<div style="display:flex;gap:12px;margin-bottom:12px;flex-wrap:wrap">' +
-          '<label class="ed-meds-opt"><input type="radio" name="reg-tipo" value="consulta" checked> 📝 Consulta médica</label>' +
-          '<label class="ed-meds-opt"><input type="radio" name="reg-tipo" value="servicio"> 🛎️ Servicio</label>' +
+          '<label class="ed-meds-opt"><input type="radio" name="reg-tipo" value="consulta" checked> Consulta médica</label>' +
+          '<label class="ed-meds-opt"><input type="radio" name="reg-tipo" value="servicio"> Servicio</label>' +
         '</div>' +
         '<div class="ed-fgroup full" id="reg-servicio-grupo" style="display:none">' +
           '<label class="ed-label">Servicio *</label>' +
           '<div style="position:relative">' +
-            '<input type="text" class="ed-input" id="reg-serv-buscar" placeholder="🔍 Buscar servicio por nombre…" autocomplete="off">' +
+            '<input type="text" class="ed-input" id="reg-serv-buscar" placeholder="Buscar servicio por nombre…" autocomplete="off">' +
             '<input type="hidden" id="reg-serv-selector">' +
             '<div id="reg-serv-dropdown" style="display:none;position:absolute;z-index:20;top:100%;left:0;right:0;background:#fff;border:1px solid #D1D5DB;border-radius:8px;margin-top:4px;max-height:260px;overflow:auto;box-shadow:0 6px 16px rgba(0,0,0,.12)"></div>' +
           '</div>' +
@@ -3899,7 +3899,7 @@ summary.ed-meds-cat { list-style: revert; }
       '</div>' +
       buildEmergenciaSectionHtml('reg') +
       '<div class="ed-actions">' +
-        '<button class="ed-btn ed-btn-primary" id="btn-guardar-registro">💾 Registrar (queda listo para enfermería)</button>' +
+        '<button class="ed-btn ed-btn-primary" id="btn-guardar-registro">Registrar (queda listo para enfermería)</button>' +
       '</div>';
 
     $id('btn-volver-modo').addEventListener('click', renderConsultaTab);
@@ -3929,7 +3929,7 @@ summary.ed-meds-cat { list-style: revert; }
         html += '<div class="reg-serv-opt" data-value="' + esc(item.value) + '" data-label="' + esc(item.label) + '" style="padding:8px 10px;cursor:pointer">' + esc(item.label) + '</div>';
       });
       if (!huboMatch) html += '<div style="padding:10px;font-size:13px;color:#9CA3AF">Sin resultados</div>';
-      html += '<div class="reg-serv-opt" data-value="__otro__" data-label="✏️ Otro (escribir)" style="padding:8px 10px;cursor:pointer;border-top:1px solid #E5E7EB;font-weight:600;color:#242F40">✏️ Otro (escribir)</div>';
+      html += '<div class="reg-serv-opt" data-value="__otro__" data-label="Otro (escribir)" style="padding:8px 10px;cursor:pointer;border-top:1px solid #E5E7EB;font-weight:600;color:#242F40">Otro (escribir)</div>';
       dd.innerHTML = html;
       dd.querySelectorAll('.reg-serv-opt').forEach(function (op) {
         /* mousedown (no click) para que dispare antes del blur del input de búsqueda */
@@ -3973,8 +3973,8 @@ summary.ed-meds-cat { list-style: revert; }
       var selVal = esServ ? $id('reg-serv-selector').value : '';
       var sinPreclinica = esServ && SERVICIOS_SIN_PRECLINICA.indexOf(selVal) !== -1;
       $id('btn-guardar-registro').textContent = sinPreclinica
-        ? '💾 Registrar (listo para completar, sin preclínica)'
-        : '💾 Registrar (queda listo para enfermería)';
+        ? 'Registrar (listo para completar, sin preclínica)'
+        : 'Registrar (queda listo para enfermería)';
     }
     wireEmergenciaToggle('reg');
     $id('btn-guardar-registro').addEventListener('click', guardarRegistroVisita);
@@ -4031,7 +4031,7 @@ summary.ed-meds-cat { list-style: revert; }
     r3adsDb.collection('consultas').add(docData)
       .then(function () {
         hideOverlay();
-        showAlert(saltaPreclinica ? '✓ Registrado. Listo para completar por enfermería (sin preclínica).' : '✓ Registrado. Queda listo para enfermería.', 'success');
+        showAlert(saltaPreclinica ? 'Registrado. Listo para completar por enfermería (sin preclínica).' : 'Registrado. Queda listo para enfermería.', 'success');
         renderConsultaTab();
       })
       .catch(function (err) {
@@ -4054,21 +4054,21 @@ summary.ed-meds-cat { list-style: revert; }
   function buildServicioResultadoSectionHtml(servicioNombre) {
     if (servicioNombre === 'Toma de presión') {
       return '<div class="ed-section">' +
-        '<div class="ed-section-title">🩺 Resultado del servicio</div>' +
+        '<div class="ed-section-title">Resultado del servicio</div>' +
         '<div class="ed-fgroup full"><label class="ed-label">Presión arterial (mmHg) *</label>' +
           '<input type="text" class="ed-input" id="serv-resultado-ta" placeholder="120/80"></div>' +
       '</div>';
     }
     if (servicioNombre === 'Glucometría') {
       return '<div class="ed-section">' +
-        '<div class="ed-section-title">🩸 Resultado del servicio</div>' +
+        '<div class="ed-section-title">Resultado del servicio</div>' +
         '<div class="ed-fgroup full"><label class="ed-label">Glucosa (mg/dL) *</label>' +
           '<input type="text" class="ed-input" id="serv-resultado-glucosa" placeholder="90"></div>' +
       '</div>';
     }
     if (servicioNombre === 'Control de peso') {
       return '<div class="ed-section">' +
-        '<div class="ed-section-title">⚖️ Resultado del servicio</div>' +
+        '<div class="ed-section-title">Resultado del servicio</div>' +
         '<div class="ed-fgroup full"><label class="ed-label">Peso (kg) *</label>' +
           '<input type="text" class="ed-input" id="serv-resultado-peso" placeholder="70"></div>' +
       '</div>';
@@ -4082,7 +4082,7 @@ summary.ed-meds-cat { list-style: revert; }
   /* ─── Electrocardiograma: sección completa con los campos del formato "Informe Electrocardiograma" ─── */
   function buildEkgSectionHtml() {
     return '<div class="ed-section" id="serv-ekg-section">' +
-      '<div class="ed-section-title">📈 Informe de electrocardiograma</div>' +
+      '<div class="ed-section-title">Informe de electrocardiograma</div>' +
       '<div class="ed-grid ed-grid-2">' +
         '<div class="ed-fgroup"><label class="ed-label">Frecuencia cardíaca</label><input type="text" class="ed-input" id="ekg-fc"></div>' +
         '<div class="ed-fgroup"><label class="ed-label">Ritmo</label><input type="text" class="ed-input" id="ekg-ritmo"></div>' +
@@ -4160,12 +4160,12 @@ summary.ed-meds-cat { list-style: revert; }
       '<button class="ed-back-link" id="btn-volver-modo">← Volver</button>' +
       '<div class="ed-patient-summary">' +
         '<div><p class="ed-patient-name">' + esc(dg.nombreCompleto) + '</p>' +
-        '<p class="ed-patient-meta">Etapa 2 · Enfermería · ' + (esServicio ? '🛎️ ' + esc(it.servicioNombre || '—') : '📝 Consulta médica') + '</p></div>' +
+        '<p class="ed-patient-meta">Etapa 2 · Enfermería · ' + (esServicio ? '' + esc(it.servicioNombre || '—') : 'Consulta médica') + '</p></div>' +
         '<div class="ed-patient-code">' + esc(p.codigoPaciente) + '</div>' +
       '</div>' +
       (it.notasRegistro ? '<div style="font-size:12px;color:#374151;background:#F9FAFB;border:1px solid #E5E7EB;border-radius:8px;padding:10px 12px;margin-bottom:12px"><strong>Notas de registro (Caja):</strong> ' + esc(it.notasRegistro) + '</div>' : '') +
-      '<div class="ed-section-title">📊 Signos vitales' + (vitalesObligatorios ? ' *' : ' (opcional para este servicio)') + '</div>' +
-      (esSuero ? '<p style="font-size:12px;color:#92400E;background:#FFF7ED;border:1px solid #FED7AA;border-radius:8px;padding:8px 12px;margin:0 0 10px">🩸 La glucometría es obligatoria para sueroterapias y no se puede avanzar a médico sin registrarla.</p>' : '') +
+      '<div class="ed-section-title">Signos vitales' + (vitalesObligatorios ? ' *' : ' (opcional para este servicio)') + '</div>' +
+      (esSuero ? '<p style="font-size:12px;color:#92400E;background:#FFF7ED;border:1px solid #FED7AA;border-radius:8px;padding:8px 12px;margin:0 0 10px">La glucometría es obligatoria para sueroterapias y no se puede avanzar a médico sin registrarla.</p>' : '') +
       '<div class="ed-vitals">' +
         '<div class="ed-vital"><div class="ed-vital-label">FC (lpm)</div><input id="enf-fc"></div>' +
         '<div class="ed-vital"><div class="ed-vital-label">SpO2 (%)</div><input id="enf-spo2"></div>' +
@@ -4178,7 +4178,7 @@ summary.ed-meds-cat { list-style: revert; }
       '</div>' +
       (!esServicio
         ? '<div class="ed-section">' +
-            '<div class="ed-section-title">🧪 Prueba de sensibilidad</div>' +
+            '<div class="ed-section-title">Prueba de sensibilidad</div>' +
             '<p style="font-size:12px;color:#6B7280;margin:0 0 8px">Para detectar alergias antes de aplicar un medicamento que lo requiera.</p>' +
             '<div style="display:flex;gap:12px;margin-bottom:8px;flex-wrap:wrap">' +
               '<label class="ed-meds-opt"><input type="radio" name="enf-sens" value="no" checked> No se realizó</label>' +
@@ -4201,7 +4201,7 @@ summary.ed-meds-cat { list-style: revert; }
           '</div>'
         : (esInyeccion
           ? '<div class="ed-section" style="background:#FFF7ED;border:1px solid #FED7AA">' +
-              '<div class="ed-section-title">🧪 Prueba de sensibilidad requerida</div>' +
+              '<div class="ed-section-title">Prueba de sensibilidad requerida</div>' +
               '<p style="font-size:12px;color:#92400E;margin:0 0 8px">Las inyecciones IM/IV requieren confirmar la prueba de sensibilidad para descartar alergias antes de aplicar.</p>' +
               '<label class="ed-meds-opt" style="margin-bottom:10px;display:flex;gap:8px;align-items:center;background:#fff;border:1px dashed #F59E0B"><input type="checkbox" id="enf-sens-norequiere"> Este medicamento no necesita prueba de sensibilidad</label>' +
               '<div id="enf-sens-detalle">' +
@@ -4225,8 +4225,8 @@ summary.ed-meds-cat { list-style: revert; }
           '<textarea class="ed-textarea" id="enf-notas" rows="2" placeholder="Observaciones relevantes"></textarea></div>' +
       '</div>' +
       '<div class="ed-actions">' +
-        '<button class="ed-btn ed-btn-primary" id="btn-completar-enfermeria">' + (esServicio ? '✅ Continuar (listo para completar por Enfermería)' : '✅ Completar y enviar a médico') + '</button>' +
-        '<button class="ed-btn ed-btn-danger" id="btn-cancelar-registro">🗑️ Cancelar este registro</button>' +
+        '<button class="ed-btn ed-btn-primary" id="btn-completar-enfermeria">' + (esServicio ? 'Continuar (listo para completar por Enfermería)' : 'Completar y enviar a médico') + '</button>' +
+        '<button class="ed-btn ed-btn-danger" id="btn-cancelar-registro">Cancelar este registro</button>' +
       '</div>';
 
     $id('btn-volver-modo').addEventListener('click', renderConsultaTab);
@@ -4355,7 +4355,7 @@ summary.ed-meds-cat { list-style: revert; }
     r3adsDb.collection('consultas').doc(it._id).update(updateData)
       .then(function () {
         hideOverlay();
-        showAlert(esServicio ? '✓ Listo para completar por Enfermería.' : '✓ Enviado a la siguiente etapa (Médico).', 'success');
+        showAlert(esServicio ? 'Listo para completar por Enfermería.' : 'Enviado a la siguiente etapa (Médico).', 'success');
         consultaPendienteCargada = null;
         renderConsultaTab();
       })
@@ -4367,10 +4367,10 @@ summary.ed-meds-cat { list-style: revert; }
 
   /* ─── Catálogos de medicamentos, compartidos entre Consulta y Completar servicio ─── */
   var MEDS_VISITA_CATS = [
-    { titulo: '🧪 Prueba de sensibilidad', items: [
+    { titulo: 'Prueba de sensibilidad', items: [
       'Prueba de sensibilidad'
     ] },
-    { titulo: '💉 Inyectable', items: [
+    { titulo: 'Inyectable', items: [
       'Alergil', 'Amikacina', 'Antigripal - Antiviral IM', 'Astriaxona 1g', 'Bixicort',
       'Citicolina 500mg', 'Clevium', 'Complejo B', 'Dexametasona 8 mg', 'Dexketoprofeno',
       'Diazepam', 'Diclofenac Sodico', 'DICLO-NEURAXIN', 'Diclosona', 'Dipirona',
@@ -4381,34 +4381,34 @@ summary.ed-meds-cat { list-style: revert; }
       'Ranitidina', 'Rofemed 1g', 'Sertal Compuesto', 'Sulfato de Magnesio 10%', 'Tiamina',
       'TONVAL (Pantoprazol 40mg)', 'Tramadol', 'Ultra-Neuraxin', 'Vitamina K'
     ] },
-    { titulo: '🧴 Insumos (Sueros)', items: [
+    { titulo: 'Insumos (Sueros)', items: [
       'Suero Solución Salina 1000 ml', 'Suero Solución Salina 500 ml', 'Suero Solución Salina 250 ml', 'Suero Solución Salina 100 ml',
       'Suero Hartman 1000 ml', 'Suero Hartman 500 ml', 'Suero Hartman 250 ml', 'Suero Hartman 100 ml',
       'Suero Mixto 1000 ml', 'Suero Mixto 500 ml', 'Suero Mixto 250 ml', 'Suero Mixto 100 ml',
       'Suero Dextrosa 1000 ml', 'Suero Dextrosa 500 ml', 'Suero Dextrosa 250 ml', 'Suero Dextrosa 100 ml'
     ] },
-    { titulo: '🏥 Sueroterapia (En Consultorio)', items: [
+    { titulo: 'Sueroterapia (En Consultorio)', items: [
       'Suero de Glucosa'
     ] },
-    { titulo: '💧 Gotas / Otros', items: [
+    { titulo: 'Gotas / Otros', items: [
       'Budoxigen'
     ] }
   ];
   var MEDS_DESPACHO_CATS = [
-    { titulo: '🥤 Suspensión', items: [
+    { titulo: 'Suspensión', items: [
       'Acetaminofen', 'Acla-Med', 'Desloratadina 2.5 mg', 'Dilabrom HH', 'Kold-Grip',
       'Sales de Rehidratacion Oral', 'Tusivanz', 'VISCOF-D', 'CORIVIT'
     ] },
-    { titulo: '💊 Tableta / Cápsula', items: [
+    { titulo: 'Tableta / Cápsula', items: [
       'Acetaminofen 500 mg', 'Amoxicilina + Acido Clavulonico 875 mg / 125 mg (Caja de 14 unidades)', 'Azitromicina 500mg', 'Cetirizina 10 MG', 'Ciprofloxacina 500 MG',
       'Demoxil 500 mg', 'Desloratadina 5 MG', 'Difenac 75mg', 'DolFix (Diclofenaco Potásico 100 mg)', 'Fluconazol 150 mg', 'Gastrolev',
       'Hidrocloratiazida 25 MG', 'Hioscina 10 MG', 'Ibuprofeno 600 MG', 'KoldGrip', 'Levofloxacino 750 mg (Calox)',
       'Loratadina 10 MG (Lorat)', 'Paracetamol 750 MG', 'Rhinolar 5mg', 'Ultifenol Plus+'
     ] },
-    { titulo: '🧴 Tópico', items: [
+    { titulo: 'Tópico', items: [
       'Ketoconazol 2%', 'Septidex', 'Sulfadiazina de Plata', 'Ultifenol Gel'
     ] },
-    { titulo: '💧 Gotas', items: [
+    { titulo: 'Gotas', items: [
       'Otan', 'Budoxigen'
     ] }
   ];
@@ -4466,7 +4466,7 @@ summary.ed-meds-cat { list-style: revert; }
   }
   function buildSensResultadoHtml(prefix) {
     return '<div class="ed-fgroup full" id="' + prefix + '-sens-wrap" style="display:none;grid-column:1/-1;background:#FFF7ED;border:1px solid #FED7AA;border-radius:8px;padding:12px;margin:2px 0 6px">' +
-        '<label class="ed-label">🧪 Resultado de la prueba de sensibilidad *</label>' +
+        '<label class="ed-label">Resultado de la prueba de sensibilidad *</label>' +
         '<input type="text" class="ed-input" id="' + prefix + '-sens-resultado">' +
       '</div>';
   }
@@ -4523,7 +4523,7 @@ summary.ed-meds-cat { list-style: revert; }
   /* ─── Constancia médica (incapacidad), compartida entre Consulta y Completar servicio ─── */
   function buildIncapSectionHtml(prefix) {
     return '<div class="ed-section" id="' + prefix + '-incap-section">' +
-      '<div class="ed-section-title">📄 ¿Necesita incapacidad?</div>' +
+      '<div class="ed-section-title">¿Necesita incapacidad?</div>' +
       '<div style="display:flex;gap:12px;margin-bottom:8px">' +
         '<label class="ed-meds-opt"><input type="radio" name="' + prefix + '-incap" value="no" checked> No</label>' +
         '<label class="ed-meds-opt"><input type="radio" name="' + prefix + '-incap" value="si"> Sí</label>' +
@@ -4571,7 +4571,7 @@ summary.ed-meds-cat { list-style: revert; }
      Servicio (registro y completar) — una emergencia puede surgir en cualquier etapa. ─── */
   function buildEmergenciaSectionHtml(prefix) {
     return '<div class="ed-section" id="' + prefix + '-emergencia-section">' +
-      '<label class="ed-meds-opt" style="background:#FEF2F2;border:1px solid #FCA5A5"><input type="checkbox" id="' + prefix + '-emergencia-check"> 🚨 Área de Estabilización</label>' +
+      '<label class="ed-meds-opt" style="background:#FEF2F2;border:1px solid #FCA5A5"><input type="checkbox" id="' + prefix + '-emergencia-check"> Área de Estabilización</label>' +
       '<div id="' + prefix + '-emergencia-form" style="display:none;background:#FEF2F2;border:1px solid #FCA5A5;border-radius:8px;padding:12px;margin-top:8px">' +
         '<div class="ed-grid ed-grid-2">' +
           '<div class="ed-fgroup"><label class="ed-label">Uso de área de estabilización (horas)</label>' +
@@ -4654,7 +4654,7 @@ summary.ed-meds-cat { list-style: revert; }
     cont.innerHTML =
       '<button class="ed-back-link" id="btn-volver-modo">← Volver</button>' +
       (srv.servicioIniciado ?
-        '<div class="ed-alert ed-alert-success is-visible" id="serv-borrador-aviso" style="margin-bottom:12px">📝 Se recuperó el progreso guardado automáticamente' + (srv.borradorServicioPor ? ' (' + esc(srv.borradorServicioPor) + ')' : '') + '. Revisa los campos antes de finalizar.</div>'
+        '<div class="ed-alert ed-alert-success is-visible" id="serv-borrador-aviso" style="margin-bottom:12px">Se recuperó el progreso guardado automáticamente' + (srv.borradorServicioPor ? ' (' + esc(srv.borradorServicioPor) + ')' : '') + '. Revisa los campos antes de finalizar.</div>'
         : '') +
       '<div class="ed-patient-summary">' +
         '<div><p class="ed-patient-name">' + esc(dg.nombreCompleto) + '</p>' +
@@ -4662,19 +4662,19 @@ summary.ed-meds-cat { list-style: revert; }
         '<div class="ed-patient-code">' + esc(p.codigoPaciente) + '</div>' +
       '</div>' +
       '<div class="ed-vitals-readonly">' +
-        '<div class="ed-vitals-readonly-title">🛎️ Servicio: ' + esc(srv.servicioNombre || '—') +
+        '<div class="ed-vitals-readonly-title">Servicio: ' + esc(srv.servicioNombre || '—') +
           ' · ' + fmtDate(srv.fechaServicio) + ' · Registrado por ' + esc(srv.enfermeriaAtendidoPor || srv.servicioPor || '—') + '</div>' +
         (srv.servicioNotas ? '<div style="margin-top:8px;font-size:12px;color:#374151"><strong>Notas de registro:</strong> ' + esc(srv.servicioNotas) + '</div>' : '') +
-        (srv.pruebaSensibilidadServicio && srv.pruebaSensibilidadServicio.requerida ? '<div style="margin-top:8px;font-size:12px;background:#FFF7ED;border:1px solid #FED7AA;border-radius:6px;padding:8px"><strong>🧪 Prueba de sensibilidad:</strong> ' + esc(srv.pruebaSensibilidadServicio.resultado) + ' · confirmada por ' + esc(srv.pruebaSensibilidadServicio.confirmadaPor || '—') + '</div>' : '') +
-        (srv.pruebaSensibilidadServicio && srv.pruebaSensibilidadServicio.noRequiere ? '<div style="margin-top:8px;font-size:12px;background:#F0FDF4;border:1px solid #BBF7D0;border-radius:6px;padding:8px;color:#166534"><strong>🧪 Prueba de sensibilidad:</strong> no necesaria para este medicamento.</div>' : '') +
-        (srv.signosVitales && buildVitalsChipsHtml(srv.signosVitales) ? '<div style="margin-top:8px"><div style="font-size:12px;font-weight:700;color:#242F40;margin-bottom:4px">📊 Signos vitales</div><div class="ed-vitals-chips">' + buildVitalsChipsHtml(srv.signosVitales) + '</div></div>' : '') +
+        (srv.pruebaSensibilidadServicio && srv.pruebaSensibilidadServicio.requerida ? '<div style="margin-top:8px;font-size:12px;background:#FFF7ED;border:1px solid #FED7AA;border-radius:6px;padding:8px"><strong>Prueba de sensibilidad:</strong> ' + esc(srv.pruebaSensibilidadServicio.resultado) + ' · confirmada por ' + esc(srv.pruebaSensibilidadServicio.confirmadaPor || '—') + '</div>' : '') +
+        (srv.pruebaSensibilidadServicio && srv.pruebaSensibilidadServicio.noRequiere ? '<div style="margin-top:8px;font-size:12px;background:#F0FDF4;border:1px solid #BBF7D0;border-radius:6px;padding:8px;color:#166534"><strong>Prueba de sensibilidad:</strong> no necesaria para este medicamento.</div>' : '') +
+        (srv.signosVitales && buildVitalsChipsHtml(srv.signosVitales) ? '<div style="margin-top:8px"><div style="font-size:12px;font-weight:700;color:#242F40;margin-bottom:4px">Signos vitales</div><div class="ed-vitals-chips">' + buildVitalsChipsHtml(srv.signosVitales) + '</div></div>' : '') +
       '</div>' +
       buildServicioResultadoSectionHtml(srv.servicioNombre) +
       '<div class="ed-section">' +
-        '<label class="ed-meds-opt" style="background:#FEF2F2;border:1px solid #FCA5A5"><input type="checkbox" id="serv-convertido-consulta"> ❌ Este servicio no se realizó (se convirtió en consulta médica)</label>' +
+        '<label class="ed-meds-opt" style="background:#FEF2F2;border:1px solid #FCA5A5"><input type="checkbox" id="serv-convertido-consulta"> Este servicio no se realizó (se convirtió en consulta médica)</label>' +
         (srv.servicioNombre === 'Cauterización lunar/verruga' ?
           '<div class="ed-fgroup full" id="serv-cantidad-grupo" style="margin-top:10px">' +
-            '<label class="ed-label">🔥 Cauterización · cantidad por subtipo</label>' +
+            '<label class="ed-label">Cauterización · cantidad por subtipo</label>' +
             '<div style="display:flex;gap:12px;flex-wrap:wrap;background:#FFF7ED;border:1px solid #FDBA74;border-radius:8px;padding:8px 10px">' +
               CAUTERIZACION_SUBTIPOS.map(function(c){
                 return '<div style="display:flex;flex-direction:column;gap:2px">' +
@@ -4691,19 +4691,19 @@ summary.ed-meds-cat { list-style: revert; }
       '</div>' +
       '<div class="ed-section" id="serv-meds-section">' +
         '<div class="ed-grid ed-grid-2">' +
-          '<div class="ed-fgroup full"><label class="ed-label">💊 Medicamentos aplicados en consulta</label>' +
-            '<input type="text" id="serv-meds-visita-buscar" class="ed-input" placeholder="🔍 Buscar medicamento..." style="margin-bottom:6px">' +
+          '<div class="ed-fgroup full"><label class="ed-label">Medicamentos aplicados en consulta</label>' +
+            '<input type="text" id="serv-meds-visita-buscar" class="ed-input" placeholder="Buscar medicamento..." style="margin-bottom:6px">' +
             '<div id="serv-meds-visita-list" class="ed-meds-list" data-meds-group="visita">' +
-              buildMedsCatsHtml(MEDS_VISITA_CATS, { titulo: '🧪 Prueba de sensibilidad', html: buildSensResultadoHtml('serv') }) +
-              '<label class="ed-meds-opt" style="background:#FEF3C7;border:1px dashed #F59E0B"><input type="checkbox" value="__ninguno__" data-meds-ninguno="1"> ⛔ Ninguno (no se aplicó ningún medicamento)</label>' +
+              buildMedsCatsHtml(MEDS_VISITA_CATS, { titulo: 'Prueba de sensibilidad', html: buildSensResultadoHtml('serv') }) +
+              '<label class="ed-meds-opt" style="background:#FEF3C7;border:1px dashed #F59E0B"><input type="checkbox" value="__ninguno__" data-meds-ninguno="1"> Ninguno (no se aplicó ningún medicamento)</label>' +
             '</div></div>' +
-          '<div class="ed-fgroup full"><label class="ed-label">📦 Medicamentos de despacho</label>' +
-            '<input type="text" id="serv-meds-despacho-buscar" class="ed-input" placeholder="🔍 Buscar medicamento..." style="margin-bottom:6px">' +
+          '<div class="ed-fgroup full"><label class="ed-label">Medicamentos de despacho</label>' +
+            '<input type="text" id="serv-meds-despacho-buscar" class="ed-input" placeholder="Buscar medicamento..." style="margin-bottom:6px">' +
             '<div id="serv-meds-despacho-list" class="ed-meds-list" data-meds-group="despacho">' +
               buildMedsCatsHtml(MEDS_DESPACHO_CATS) +
-              '<label class="ed-meds-opt" style="background:#FEF3C7;border:1px dashed #F59E0B"><input type="checkbox" value="__ninguno__" data-meds-ninguno="1"> ⛔ Ninguno (no se despachan medicamentos)</label>' +
+              '<label class="ed-meds-opt" style="background:#FEF3C7;border:1px dashed #F59E0B"><input type="checkbox" value="__ninguno__" data-meds-ninguno="1"> Ninguno (no se despachan medicamentos)</label>' +
             '</div></div>' +
-          '<div class="ed-fgroup full"><label class="ed-label">🏥 Receta externa (medicamentos a comprar en farmacia)</label>' +
+          '<div class="ed-fgroup full"><label class="ed-label">Receta externa (medicamentos a comprar en farmacia)</label>' +
             '<textarea class="ed-textarea" id="serv-receta-externa" rows="3" placeholder="Medicamentos que el paciente debe comprar en una farmacia externa (no los vendemos). Indica nombre, dosis, vía y frecuencia."></textarea></div>' +
         '</div>' +
       '</div>' +
@@ -4723,8 +4723,8 @@ summary.ed-meds-cat { list-style: revert; }
       buildEmergenciaSectionHtml('servfin') +
       '<div id="serv-autoguardado-estado" style="font-size:12px;color:#6B7280;margin:0 0 8px;text-align:right"></div>' +
       '<div class="ed-actions">' +
-        '<button class="ed-btn ed-btn-primary" id="btn-completar-servicio">✅ Marcar servicio como completado</button>' +
-        '<button class="ed-btn ed-btn-danger" id="btn-cancelar-registro">🗑️ Cancelar este registro</button>' +
+        '<button class="ed-btn ed-btn-primary" id="btn-completar-servicio">Marcar servicio como completado</button>' +
+        '<button class="ed-btn ed-btn-danger" id="btn-cancelar-registro">Cancelar este registro</button>' +
       '</div>';
 
     $id('btn-volver-modo').addEventListener('click', function () {
@@ -4838,7 +4838,7 @@ summary.ed-meds-cat { list-style: revert; }
       consultaPendienteCargada.borradorServicio = borrador;
       consultaPendienteCargada.servicioIniciado = true;
       var estado = $id('serv-autoguardado-estado');
-      if (estado) estado.textContent = '✓ Progreso guardado automáticamente · ' + new Date().toLocaleTimeString('es-HN', { hour: '2-digit', minute: '2-digit' });
+      if (estado) estado.textContent = 'Progreso guardado automáticamente · ' + new Date().toLocaleTimeString('es-HN', { hour: '2-digit', minute: '2-digit' });
     }).catch(function (err) {
       console.error('[Portal Clínico] Error autoguardando borrador de servicio:', err);
     });
@@ -4990,12 +4990,12 @@ summary.ed-meds-cat { list-style: revert; }
         .then(function () {
           hideOverlay();
           if (constanciaPrep) {
-            showAlert('✓ Servicio completado. Abriendo constancia médica en otra pestaña…', 'success');
+            showAlert('Servicio completado. Abriendo constancia médica en otra pestaña…', 'success');
             window.open('Constancia-Medica.html?id=' + encodeURIComponent(constanciaPrep.ref.id), '_blank', 'noopener');
           } else if (esVinculado) {
-            showAlert('✓ Servicio completado y vinculado al pago de la consulta padre.', 'success');
+            showAlert('Servicio completado y vinculado al pago de la consulta padre.', 'success');
           } else {
-            showAlert('✓ Servicio completado. Generó pendiente de pago en Caja.', 'success');
+            showAlert('Servicio completado. Generó pendiente de pago en Caja.', 'success');
           }
           consultaPendienteCargada = null;
           renderConsultaTab();
@@ -5052,7 +5052,7 @@ summary.ed-meds-cat { list-style: revert; }
       })
       .then(function () {
         hideOverlay();
-        showAlert('✓ Servicio completado. Abriendo hoja de resultados…', 'success');
+        showAlert('Servicio completado. Abriendo hoja de resultados…', 'success');
         window.open('Resultado-EKG.html?id=' + encodeURIComponent(ekgRef.id), '_blank', 'noopener');
         consultaPendienteCargada = null;
         renderConsultaTab();
@@ -5158,7 +5158,7 @@ summary.ed-meds-cat { list-style: revert; }
     cont.innerHTML =
       '<button class="ed-back-link" id="btn-volver-modo">← Volver</button>' +
       (pre.consultaIniciada ?
-        '<div class="ed-alert ed-alert-success is-visible" id="cons-borrador-aviso" style="margin-bottom:12px">📝 Se recuperó el progreso guardado automáticamente' + (pre.borradorPor ? ' (' + esc(pre.borradorPor) + ')' : '') + '. Revisa los campos antes de finalizar.</div>'
+        '<div class="ed-alert ed-alert-success is-visible" id="cons-borrador-aviso" style="margin-bottom:12px">Se recuperó el progreso guardado automáticamente' + (pre.borradorPor ? ' (' + esc(pre.borradorPor) + ')' : '') + '. Revisa los campos antes de finalizar.</div>'
         : '') +
       '<div class="ed-patient-summary">' +
         '<div><p class="ed-patient-name">' + esc(dg.nombreCompleto) + '</p>' +
@@ -5167,10 +5167,10 @@ summary.ed-meds-cat { list-style: revert; }
       '</div>' +
 
       '<div class="ed-vitals-readonly">' +
-        '<div class="ed-vitals-readonly-title">📊 Signos vitales (Pre clínica · ' + fmtDate(pre.fechaPreclinica) + ' · por ' + esc(pre.enfermeriaAtendidoPor || pre.preclinicaPor || '—') + ')</div>' +
+        '<div class="ed-vitals-readonly-title">Signos vitales (Pre clínica · ' + fmtDate(pre.fechaPreclinica) + ' · por ' + esc(pre.enfermeriaAtendidoPor || pre.preclinicaPor || '—') + ')</div>' +
         (chips.length ? '<div class="ed-vitals-chips">' + chips.join('') + '</div>' : '<div style="font-size:13px;color:#6B7280">Sin signos vitales registrados</div>') +
         (pre.notasPreclinica ? '<div style="margin-top:8px;font-size:12px;color:#374151"><strong>Notas:</strong> ' + esc(pre.notasPreclinica) + '</div>' : '') +
-        (pre.pruebaSensibilidad && pre.pruebaSensibilidad.realizada ? '<div style="margin-top:8px;font-size:12px;background:#FFF7ED;border:1px solid #FED7AA;border-radius:6px;padding:8px"><strong>🧪 Prueba de sensibilidad:</strong> ' + esc(pre.pruebaSensibilidad.medicamento) + ' → <strong>' + esc(pre.pruebaSensibilidad.resultado) + '</strong>' + (pre.pruebaSensibilidad.observaciones ? ' · ' + esc(pre.pruebaSensibilidad.observaciones) : '') + '</div>' : '') +
+        (pre.pruebaSensibilidad && pre.pruebaSensibilidad.realizada ? '<div style="margin-top:8px;font-size:12px;background:#FFF7ED;border:1px solid #FED7AA;border-radius:6px;padding:8px"><strong>Prueba de sensibilidad:</strong> ' + esc(pre.pruebaSensibilidad.medicamento) + ' → <strong>' + esc(pre.pruebaSensibilidad.resultado) + '</strong>' + (pre.pruebaSensibilidad.observaciones ? ' · ' + esc(pre.pruebaSensibilidad.observaciones) : '') + '</div>' : '') +
       '</div>' +
 
       /* DRM Fun-2/3/8/11: campos requeridos + médico tratante + meds visita/despacho + incapacidad */
@@ -5185,19 +5185,19 @@ summary.ed-meds-cat { list-style: revert; }
           '<div class="ed-fgroup full"><label class="ed-label">Diagnóstico *</label>' +
             '<textarea class="ed-textarea" id="cons-diagnostico" rows="2" placeholder="Diagnóstico principal y diferenciales" required></textarea></div>' +
           /* DRM Fun-8 + v3.6: Plan/Tratamiento dividido + opción explícita "Ninguno" */
-          '<div class="ed-fgroup full"><label class="ed-label">💊 Medicamentos aplicados en la visita *</label>' +
-            '<input type="text" id="cons-meds-visita-buscar" class="ed-input" placeholder="🔍 Buscar medicamento..." style="margin-bottom:6px">' +
+          '<div class="ed-fgroup full"><label class="ed-label">Medicamentos aplicados en la visita *</label>' +
+            '<input type="text" id="cons-meds-visita-buscar" class="ed-input" placeholder="Buscar medicamento..." style="margin-bottom:6px">' +
             '<div id="cons-meds-visita-list" class="ed-meds-list" data-meds-group="visita">' +
-              buildMedsCatsHtml(MEDS_VISITA_CATS, { titulo: '🧪 Prueba de sensibilidad', html: buildSensResultadoHtml('cons') }) +
-              '<label class="ed-meds-opt" style="background:#FEF3C7;border:1px dashed #F59E0B"><input type="checkbox" value="__ninguno__" data-meds-ninguno="1"> ⛔ Ninguno (no se aplicó ningún medicamento en la visita)</label>' +
+              buildMedsCatsHtml(MEDS_VISITA_CATS, { titulo: 'Prueba de sensibilidad', html: buildSensResultadoHtml('cons') }) +
+              '<label class="ed-meds-opt" style="background:#FEF3C7;border:1px dashed #F59E0B"><input type="checkbox" value="__ninguno__" data-meds-ninguno="1"> Ninguno (no se aplicó ningún medicamento en la visita)</label>' +
             '</div></div>' +
-          '<div class="ed-fgroup full"><label class="ed-label">📦 Medicamentos de despacho *</label>' +
-            '<input type="text" id="cons-meds-despacho-buscar" class="ed-input" placeholder="🔍 Buscar medicamento..." style="margin-bottom:6px">' +
+          '<div class="ed-fgroup full"><label class="ed-label">Medicamentos de despacho *</label>' +
+            '<input type="text" id="cons-meds-despacho-buscar" class="ed-input" placeholder="Buscar medicamento..." style="margin-bottom:6px">' +
             '<div id="cons-meds-despacho-list" class="ed-meds-list" data-meds-group="despacho">' +
               buildMedsCatsHtml(MEDS_DESPACHO_CATS) +
-              '<label class="ed-meds-opt" style="background:#FEF3C7;border:1px dashed #F59E0B"><input type="checkbox" value="__ninguno__" data-meds-ninguno="1"> ⛔ Ninguno (no se despachan medicamentos)</label>' +
+              '<label class="ed-meds-opt" style="background:#FEF3C7;border:1px dashed #F59E0B"><input type="checkbox" value="__ninguno__" data-meds-ninguno="1"> Ninguno (no se despachan medicamentos)</label>' +
             '</div></div>' +
-          '<div class="ed-fgroup full"><label class="ed-label">🏥 Receta externa (medicamentos a comprar en farmacia) *</label>' +
+          '<div class="ed-fgroup full"><label class="ed-label">Receta externa (medicamentos a comprar en farmacia) *</label>' +
             '<textarea class="ed-textarea" id="cons-receta-externa" rows="3" placeholder="Medicamentos que el paciente debe comprar en una farmacia externa (no los vendemos). Indica nombre, dosis, vía y frecuencia. Ej: Omeprazol 20 mg, 1 cápsula en ayunas por 14 días. Si no aplica, escribe: Ninguna." required></textarea>' +
             '<small style="color:#6B7280;display:block;margin-top:4px">Texto libre. Aparecerá en el PDF de la consulta como indicación de compra externa.</small></div>' +
           '<div class="ed-fgroup full"><label class="ed-label">Indicaciones al paciente *</label>' +
@@ -5217,30 +5217,30 @@ summary.ed-meds-cat { list-style: revert; }
       buildEmergenciaSectionHtml('cons') +
       /* DRM v3 #3: acciones rápidas desde la consulta */
       '<div class="ed-section">' +
-        '<div class="ed-section-title">⚡ Acciones rápidas durante la consulta</div>' +
+        '<div class="ed-section-title">Acciones rápidas durante la consulta</div>' +
         '<p style="font-size:12px;color:#6B7280;margin:0 0 10px">Estas acciones generan registros adicionales asociados al paciente actual. No reemplazan la consulta, la complementan.</p>' +
         '<div style="display:flex;gap:10px;flex-wrap:wrap">' +
-          '<button class="ed-btn ed-btn-ghost" id="btn-acc-prueba">🧪 Crear Prueba Rápida</button>' +
-          '<button class="ed-btn ed-btn-ghost" id="btn-acc-lab">🔬 Solicitar Exámenes</button>' +
-          '<button class="ed-btn ed-btn-ghost" id="btn-acc-servicio">🛎️ Realizar servicio</button>' +
+          '<button class="ed-btn ed-btn-ghost" id="btn-acc-prueba">Crear Prueba Rápida</button>' +
+          '<button class="ed-btn ed-btn-ghost" id="btn-acc-lab">Solicitar Exámenes</button>' +
+          '<button class="ed-btn ed-btn-ghost" id="btn-acc-servicio">Realizar servicio</button>' +
         '</div>' +
       '</div>' +
       '<div class="ed-section">' +
-        '<label class="ed-meds-opt" style="background:#FEF2F2;border:1px solid #FCA5A5"><input type="checkbox" id="cons-convertido-servicio"> ❌ Esta consulta no se realizó (se convirtió en servicio)</label>' +
+        '<label class="ed-meds-opt" style="background:#FEF2F2;border:1px solid #FCA5A5"><input type="checkbox" id="cons-convertido-servicio"> Esta consulta no se realizó (se convirtió en servicio)</label>' +
         '<p style="font-size:12px;color:#6B7280;margin:6px 0 0">Márcalo cuando el paciente vino pidiendo consulta pero lo que en realidad se hizo fue un servicio/procedimiento (ej. extracción de uña). Queda como etiqueta visible para Caja al liquidar.</p>' +
       '</div>' +
       '<div id="cons-autoguardado-estado" style="font-size:12px;color:#6B7280;margin:0 0 8px;text-align:right"></div>' +
       '<div class="ed-actions">' +
-        '<button class="ed-btn ed-btn-primary" id="btn-cons-guardar">💾 Finalizar consulta + Generar PDF</button>' +
+        '<button class="ed-btn ed-btn-primary" id="btn-cons-guardar">Finalizar consulta + Generar PDF</button>' +
         /* DRM: si el paciente pasa a área de procedimientos/estabilización, el
            médico entrega el manejo a enfermería sin tener que llenar y finalizar
            la consulta completa todavía — ver entregarAEstabilizacion(). Al
            reabrirla desde "En Proceso Sueroterapia / Estabilización" ya no tiene
            sentido volver a entregarla, así que se oculta. */
         (pre.status !== 'en_estabilizacion'
-          ? '<button class="ed-btn ed-btn-ghost" id="btn-cons-estabilizacion">🔄 Entregar a estabilización</button>'
+          ? '<button class="ed-btn ed-btn-ghost" id="btn-cons-estabilizacion">Entregar a estabilización</button>'
           : '') +
-        '<button class="ed-btn ed-btn-danger" id="btn-cancelar-registro">🗑️ Cancelar este registro</button>' +
+        '<button class="ed-btn ed-btn-danger" id="btn-cancelar-registro">Cancelar este registro</button>' +
       '</div>';
 
     $id('btn-volver-modo').addEventListener('click', function () {
@@ -5360,7 +5360,7 @@ summary.ed-meds-cat { list-style: revert; }
       consultaPendienteCargada.borrador = borrador;
       consultaPendienteCargada.consultaIniciada = true;
       var estado = $id('cons-autoguardado-estado');
-      if (estado) estado.textContent = '✓ Progreso guardado automáticamente · ' + new Date().toLocaleTimeString('es-HN', { hour: '2-digit', minute: '2-digit' });
+      if (estado) estado.textContent = 'Progreso guardado automáticamente · ' + new Date().toLocaleTimeString('es-HN', { hour: '2-digit', minute: '2-digit' });
     }).catch(function (err) {
       console.error('[Portal Clínico] Error autoguardando borrador de consulta:', err);
     });
@@ -5460,9 +5460,9 @@ summary.ed-meds-cat { list-style: revert; }
     var html =
       '<div style="background:#000a;position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px" id="ed-quick-modal">' +
         '<div style="background:#fff;border-radius:12px;max-width:760px;width:100%;padding:24px;max-height:92vh;overflow:auto;display:flex;flex-direction:column">' +
-          '<h3 style="margin:0 0 6px;color:#242F40">🔬 Solicitar exámenes de laboratorio</h3>' +
+          '<h3 style="margin:0 0 6px;color:#242F40">Solicitar exámenes de laboratorio</h3>' +
           '<p style="margin:0 0 14px;font-size:13px;color:#6B7280">Catálogo: <b>' + totalItems + ' exámenes</b> disponibles. Marca los que necesitás (uno o varios). El PDF del resultado se sube después.</p>' +
-          '<input type="text" id="qm-lab-buscar" class="ed-input" placeholder="🔍 Buscar examen (escribe parte del nombre)..." style="margin-bottom:8px">' +
+          '<input type="text" id="qm-lab-buscar" class="ed-input" placeholder="Buscar examen (escribe parte del nombre)..." style="margin-bottom:8px">' +
           '<div style="display:flex;gap:8px;font-size:12px;margin-bottom:8px">' +
             '<button class="ed-btn ed-btn-ghost" id="qm-lab-marcados" style="padding:4px 10px;font-size:11px">Ver solo marcados (<span id="qm-lab-count">0</span>)</button>' +
             '<button class="ed-btn ed-btn-ghost" id="qm-lab-todos" style="padding:4px 10px;font-size:11px">Ver todos</button>' +
@@ -5495,7 +5495,7 @@ summary.ed-meds-cat { list-style: revert; }
             '<textarea class="ed-textarea" id="qm-lab-notas" rows="2"></textarea></div>' +
           '<div style="display:flex;gap:10px;justify-content:flex-end;margin-top:18px">' +
             '<button class="ed-btn ed-btn-ghost" id="qm-cancelar">Cancelar</button>' +
-            '<button class="ed-btn ed-btn-primary" id="qm-guardar">📤 Crear orden</button>' +
+            '<button class="ed-btn ed-btn-primary" id="qm-guardar">Crear orden</button>' +
           '</div>' +
         '</div>' +
       '</div>';
@@ -5570,7 +5570,7 @@ summary.ed-meds-cat { list-style: revert; }
         pdfUrl         : null
       }).then(function(labDocRef){
         document.getElementById('ed-quick-modal').remove();
-        showAlert('✓ Orden de laboratorio creada (' + seleccionados.length + ' examen' + (seleccionados.length>1?'es':'') + '). Aparece en pestaña Laboratorio como pendiente.', 'success');
+        showAlert('Orden de laboratorio creada (' + seleccionados.length + ' examen' + (seleccionados.length>1?'es':'') + '). Aparece en pestaña Laboratorio como pendiente.', 'success');
         /* Orden externa (sin consulta padre): crear liquidación pendiente en Caja */
         if (!consultaPadreId) {
           var now = new Date();
@@ -5641,7 +5641,7 @@ summary.ed-meds-cat { list-style: revert; }
     var html =
       '<div style="background:#000a;position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px" id="ed-quick-modal">' +
         '<div style="background:#fff;border-radius:12px;max-width:480px;width:100%;padding:24px">' +
-          '<h3 style="margin:0 0 6px;color:#242F40">📤 Subir resultado a la orden</h3>' +
+          '<h3 style="margin:0 0 6px;color:#242F40">Subir resultado a la orden</h3>' +
           '<p style="margin:0 0 14px;font-size:13px;color:#6B7280">' + (multiple ? 'El PDF se vincula a la orden. Se confirma cuando todos los exámenes queden marcados.' : 'El PDF se vincula a la orden y la marca como confirmada.') + '</p>' +
           checklistHtml +
           '<input type="file" id="qm-up-pdf" accept="application/pdf" class="ed-input" style="margin-top:10px">' +
@@ -5649,7 +5649,7 @@ summary.ed-meds-cat { list-style: revert; }
             '<textarea class="ed-textarea" id="qm-up-notas" rows="2" placeholder="Hallazgos importantes…"></textarea></div>' +
           '<div style="display:flex;gap:10px;justify-content:flex-end;margin-top:18px">' +
             '<button class="ed-btn ed-btn-ghost" id="qm-cancelar">Cancelar</button>' +
-            '<button class="ed-btn ed-btn-primary" id="qm-guardar">📤 Subir y confirmar</button>' +
+            '<button class="ed-btn ed-btn-primary" id="qm-guardar">Subir y confirmar</button>' +
           '</div>' +
         '</div>' +
       '</div>';
@@ -5708,8 +5708,8 @@ summary.ed-meds-cat { list-style: revert; }
           hideOverlay();
           document.getElementById('ed-quick-modal').remove();
           showAlert(multiple && !todosMarcados
-            ? '✓ PDF actualizado. Aún faltan exámenes por marcar para confirmar la orden.'
-            : '✓ Resultado subido y orden confirmada', 'success');
+            ? 'PDF actualizado. Aún faltan exámenes por marcar para confirmar la orden.'
+            : 'Resultado subido y orden confirmada', 'success');
           renderLaboratorioTab();
         }).catch(function(err){
           hideOverlay();
@@ -5737,7 +5737,7 @@ summary.ed-meds-cat { list-style: revert; }
             grp.items.map(function(s){
               if (s === 'Cauterización lunar/verruga') {
                 return '<label class="ed-meds-opt" style="display:flex;flex-direction:column;align-items:stretch;gap:6px;grid-column:1/-1">' +
-                  '<span><input type="checkbox" value="' + esc(s) + '" class="qm-srv-chk" id="qm-caut-chk"> 🔥 ' + esc(s) + '</span>' +
+                  '<span><input type="checkbox" value="' + esc(s) + '" class="qm-srv-chk" id="qm-caut-chk"> ' + esc(s) + '</span>' +
                   '<div class="qm-caut-box" style="display:none;flex-wrap:wrap;gap:12px;background:#FFF7ED;border:1px solid #FDBA74;border-radius:8px;padding:8px 10px">' +
                     CAUTERIZACION_SUBTIPOS.map(function(c){
                       return '<div style="display:flex;flex-direction:column;gap:2px">' +
@@ -5760,7 +5760,7 @@ summary.ed-meds-cat { list-style: revert; }
     var html =
       '<div style="background:#000a;position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px" id="ed-quick-modal">' +
         '<div style="background:#fff;border-radius:12px;max-width:680px;width:100%;padding:24px;max-height:90vh;overflow:auto">' +
-          '<h3 style="margin:0 0 6px;color:#242F40">🛎️ Realizar servicio(s)</h3>' +
+          '<h3 style="margin:0 0 6px;color:#242F40">Realizar servicio(s)</h3>' +
           '<p style="margin:0 0 14px;font-size:13px;color:#6B7280">Marca uno o varios servicios del catálogo. Se vinculan automáticamente al pago de esta consulta.</p>' +
           '<div style="max-height:340px;overflow:auto;border:1px solid #E5E7EB;border-radius:8px;padding:10px 12px;background:#FAFBFF">' +
             checkboxesHtml +
@@ -5768,19 +5768,19 @@ summary.ed-meds-cat { list-style: revert; }
           /* "Otro" como bloque aparte */
           '<div class="ed-fgroup full" style="margin-top:12px;background:#FFFBEB;border:1px solid #FCD34D;border-radius:8px;padding:10px 12px">' +
             '<label class="ed-meds-opt" style="font-weight:600">' +
-              '<input type="checkbox" id="qm-srv-otro-chk"> ✏️ Otro (procedimiento poco común)' +
+              '<input type="checkbox" id="qm-srv-otro-chk"> Otro (procedimiento poco común)' +
             '</label>' +
             '<div id="qm-srv-otro-grupo" style="display:none;margin-top:8px">' +
               '<label class="ed-label">Especifica el procedimiento *</label>' +
               '<input type="text" class="ed-input" id="qm-srv-otro" placeholder="Describe el procedimiento nuevo o poco común">' +
-              '<small style="color:#92400E;display:block;margin-top:4px">⚠️ Si usás "Otro" más de una vez con el mismo nombre, pedile al admin que lo añada al catálogo.</small>' +
+              '<small style="color:#92400E;display:block;margin-top:4px">Si usás "Otro" más de una vez con el mismo nombre, pedile al admin que lo añada al catálogo.</small>' +
             '</div>' +
           '</div>' +
           '<div class="ed-fgroup full" style="margin-top:10px"><label class="ed-label">Notas (aplica a todos los servicios marcados)</label>' +
             '<textarea class="ed-textarea" id="qm-srv-notas" rows="2" placeholder="Detalles, cantidad, observaciones para el personal"></textarea></div>' +
           '<div style="display:flex;gap:10px;justify-content:flex-end;margin-top:18px">' +
             '<button class="ed-btn ed-btn-ghost" id="qm-cancelar">Cancelar</button>' +
-            '<button class="ed-btn ed-btn-primary" id="qm-guardar">📤 Crear servicios vinculados</button>' +
+            '<button class="ed-btn ed-btn-primary" id="qm-guardar">Crear servicios vinculados</button>' +
           '</div>' +
         '</div>' +
       '</div>';
@@ -5854,7 +5854,7 @@ summary.ed-meds-cat { list-style: revert; }
       Promise.all(promesas).then(function(){
         hideOverlay();
         document.getElementById('ed-quick-modal').remove();
-        showAlert('✓ ' + seleccionados.length + ' servicio(s) creados y vinculados.', 'success');
+        showAlert('' + seleccionados.length + ' servicio(s) creados y vinculados.', 'success');
       }).catch(function(err){
         hideOverlay();
         showAlert('Error: ' + err.message, 'error');
@@ -5890,7 +5890,7 @@ summary.ed-meds-cat { list-style: revert; }
       enAtencionDesde: firebase.firestore.FieldValue.delete()
     }).then(function () {
       hideOverlay();
-      showAlert('✓ Paciente entregado a Estabilización. Enfermería puede completar la consulta desde "En Proceso Sueroterapia / Estabilización".', 'success');
+      showAlert('Paciente entregado a Estabilización. Enfermería puede completar la consulta desde "En Proceso Sueroterapia / Estabilización".', 'success');
       if (_consultaAutosaveTimer) { clearTimeout(_consultaAutosaveTimer); _consultaAutosaveTimer = null; }
       consultaPendienteCargada = null;
       renderConsultaTab();
@@ -6020,10 +6020,10 @@ summary.ed-meds-cat { list-style: revert; }
       .then(function () {
         hideOverlay();
         if (constanciaPrep) {
-          showAlert('✓ Consulta finalizada. Abriendo constancia médica en otra pestaña…', 'success');
+          showAlert('Consulta finalizada. Abriendo constancia médica en otra pestaña…', 'success');
           window.open('Constancia-Medica.html?id=' + encodeURIComponent(constanciaPrep.ref.id), '_blank', 'noopener');
         } else {
-          showAlert('✓ Consulta finalizada exitosamente. PDF generado.', 'success');
+          showAlert('Consulta finalizada exitosamente. PDF generado.', 'success');
         }
         consultaPendienteCargada = null;
         renderConsultaTab();
@@ -6234,10 +6234,10 @@ summary.ed-meds-cat { list-style: revert; }
      pruebas rápidas y laboratorios, todo en la misma línea de tiempo.
      ════════════════════════════════════════════════════════════ */
   var LABELS_PRUEBA_TIPO = {
-    embarazo: '🤰 Prueba de Embarazo',
-    dengue:   '🦟 Prueba de Dengue',
-    duo:      '🧪 Prueba Dúo (COVID/Influenza)',
-    antigeno: '🩹 Prueba de Antígeno COVID'
+    embarazo: 'Prueba de Embarazo',
+    dengue:   'Prueba de Dengue',
+    duo:      'Prueba Dúo (COVID/Influenza)',
+    antigeno: 'Prueba de Antígeno COVID'
   };
   var LABELS_PRUEBA_CAMPO = {
     'res-embarazo': 'Embarazo', 'res-igg': 'IgG', 'res-igm': 'IgM', 'res-ns1': 'NS1',
@@ -6245,9 +6245,9 @@ summary.ed-meds-cat { list-style: revert; }
     'res-antigeno': 'Antígeno'
   };
   var LABELS_LAB_STATUS = {
-    pendiente: { txt: '🕐 Pendiente', bg: '#FEF3C7', fg: '#92400E' },
+    pendiente: { txt: 'Pendiente', bg: '#FEF3C7', fg: '#92400E' },
     procesando: { txt: '⏳ Procesando', bg: '#DBEAFE', fg: '#1E40AF' },
-    confirmado: { txt: '✅ Confirmado', bg: '#D1FAE5', fg: '#065F46' }
+    confirmado: { txt: 'Confirmado', bg: '#D1FAE5', fg: '#065F46' }
   };
 
   /* Timestamp comparable para ordenar cualquier tipo de registro del historial */
@@ -6266,7 +6266,7 @@ summary.ed-meds-cat { list-style: revert; }
   function renderHistorialTab() {
     var cont = $id('historial-contenido');
     if (!pacienteActual) {
-      cont.innerHTML = '<div class="ed-empty"><div class="ed-empty-icon">🔍</div><p>Primero busca un paciente en la pestaña "Buscar Paciente"</p></div>';
+      cont.innerHTML = '<div class="ed-empty"><div class="ed-empty-icon"></div><p>Primero busca un paciente en la pestaña "Buscar Paciente"</p></div>';
       return;
     }
     var p = pacienteActual;
@@ -6278,7 +6278,7 @@ summary.ed-meds-cat { list-style: revert; }
         '<div class="ed-patient-code">' + esc(p.codigoPaciente) + '</div>' +
       '</div>' +
       '<div style="margin-bottom:16px;display:flex;gap:10px;flex-wrap:wrap">' +
-        '<button class="ed-btn ed-btn-yellow" id="btn-gen-word">📄 Generar Word del expediente principal</button>' +
+        '<button class="ed-btn ed-btn-yellow" id="btn-gen-word">Generar Word del expediente principal</button>' +
       '</div>' +
       '<div id="historial-lista"><div class="ed-empty"><div class="ed-overlay-spinner" style="margin:0 auto"></div></div></div>';
 
@@ -6319,7 +6319,7 @@ summary.ed-meds-cat { list-style: revert; }
   function renderHistorialUnificado(items) {
     var lista = $id('historial-lista');
     if (!items.length) {
-      lista.innerHTML = '<div class="ed-empty"><div class="ed-empty-icon">📋</div><p>Aún no hay registros para este paciente.</p></div>';
+      lista.innerHTML = '<div class="ed-empty"><div class="ed-empty-icon"></div><p>Aún no hay registros para este paciente.</p></div>';
       return;
     }
     lista.innerHTML = items.map(function (c) {
@@ -6369,14 +6369,14 @@ summary.ed-meds-cat { list-style: revert; }
     var prefix = 'histedit-' + c._id;
     var esServicio = c._kind === 'servicio';
     return '<div id="' + prefix + '-panel" style="display:none;margin-top:12px;background:#F8FAFC;border:1px dashed #93A5C7;border-radius:8px;padding:12px">' +
-      '<div style="font-size:12px;font-weight:800;color:#242F40;text-transform:uppercase;letter-spacing:.4px;margin-bottom:8px">✏️ Editar registro (Administración)</div>' +
+      '<div style="font-size:12px;font-weight:800;color:#242F40;text-transform:uppercase;letter-spacing:.4px;margin-bottom:8px">Editar registro (Administración)</div>' +
       '<div class="ed-grid ed-grid-2">' +
         (esServicio
           ? '<div class="ed-fgroup"><label class="ed-label">Servicio</label><input type="text" class="ed-input" id="' + prefix + '-servicio" value="' + esc(c.servicioNombre || '') + '"></div>' +
-            '<div class="ed-fgroup" style="align-self:end"><label class="ed-meds-opt" style="background:#FEF2F2;border:1px solid #FCA5A5"><input type="checkbox" id="' + prefix + '-convertido"' + (c.convertidoConsulta ? ' checked' : '') + '> ❌ Este servicio no se realizó (se convirtió en consulta médica)</label></div>'
+            '<div class="ed-fgroup" style="align-self:end"><label class="ed-meds-opt" style="background:#FEF2F2;border:1px solid #FCA5A5"><input type="checkbox" id="' + prefix + '-convertido"' + (c.convertidoConsulta ? ' checked' : '') + '> Este servicio no se realizó (se convirtió en consulta médica)</label></div>'
           : '<div class="ed-fgroup full"><label class="ed-label">Motivo de consulta</label><textarea class="ed-textarea" id="' + prefix + '-motivo" rows="2">' + esc(c.motivoConsulta || '') + '</textarea></div>' +
             '<div class="ed-fgroup full"><label class="ed-label">Diagnóstico</label><textarea class="ed-textarea" id="' + prefix + '-diagnostico" rows="2">' + esc(c.diagnostico || '') + '</textarea></div>' +
-            '<div class="ed-fgroup full"><label class="ed-meds-opt" style="background:#FEF2F2;border:1px solid #FCA5A5"><input type="checkbox" id="' + prefix + '-convertidoservicio"' + (c.convertidoServicio ? ' checked' : '') + '> ❌ Esta consulta no se realizó (se convirtió en servicio)</label></div>') +
+            '<div class="ed-fgroup full"><label class="ed-meds-opt" style="background:#FEF2F2;border:1px solid #FCA5A5"><input type="checkbox" id="' + prefix + '-convertidoservicio"' + (c.convertidoServicio ? ' checked' : '') + '> Esta consulta no se realizó (se convirtió en servicio)</label></div>') +
         '<div class="ed-fgroup"><label class="ed-label">Medicamentos aplicados en consulta</label><input type="text" class="ed-input" id="' + prefix + '-medsvisita" value="' + esc((c.medicamentosVisita || []).join(', ')) + '" placeholder="separados por coma"></div>' +
         '<div class="ed-fgroup"><label class="ed-label">Despacho</label><input type="text" class="ed-input" id="' + prefix + '-medsdespacho" value="' + esc((c.medicamentosDespacho || []).join(', ')) + '" placeholder="separados por coma"></div>' +
         '<div class="ed-fgroup full"><label class="ed-label">Receta externa</label><textarea class="ed-textarea" id="' + prefix + '-recetaext" rows="2">' + esc(c.recetaExterna || '') + '</textarea></div>' +
@@ -6384,7 +6384,7 @@ summary.ed-meds-cat { list-style: revert; }
         (esServicio ? '<div class="ed-fgroup full"><label class="ed-label">Notas de finalización</label><textarea class="ed-textarea" id="' + prefix + '-notasfin" rows="2">' + esc(c.servicioNotasFin || '') + '</textarea></div>' : '') +
       '</div>' +
       '<div style="display:flex;gap:8px;margin-top:10px">' +
-        '<button class="ed-btn ed-btn-primary" data-historial-guardar-ajuste="' + esc(c._id) + '">💾 Guardar cambios</button>' +
+        '<button class="ed-btn ed-btn-primary" data-historial-guardar-ajuste="' + esc(c._id) + '">Guardar cambios</button>' +
         '<button class="ed-btn ed-btn-ghost" data-historial-cancelar-ajuste="' + esc(c._id) + '">Cancelar</button>' +
       '</div>' +
     '</div>';
@@ -6416,7 +6416,7 @@ summary.ed-meds-cat { list-style: revert; }
     r3adsDb.collection('consultas').doc(id).update(update)
       .then(function(){
         hideOverlay();
-        showAlert('✓ Registro actualizado', 'success');
+        showAlert('Registro actualizado', 'success');
         renderHistorialTab();
       })
       .catch(function(err){ hideOverlay(); showAlert('Error: ' + err.message, 'error'); });
@@ -6432,7 +6432,7 @@ summary.ed-meds-cat { list-style: revert; }
     batch.commit()
       .then(function () {
         hideOverlay();
-        showAlert('✓ Registro borrado', 'success');
+        showAlert('Registro borrado', 'success');
         renderHistorialTab();
       })
       .catch(function (err) { hideOverlay(); showAlert('Error: ' + err.message, 'error'); });
@@ -6447,11 +6447,11 @@ summary.ed-meds-cat { list-style: revert; }
     /* Si el servicio se marcó como "no realizado, se convirtió en consulta", esa
        etiqueta manda: no tiene sentido mostrar "Procedimiento completado" al lado
        cuando en realidad el procedimiento NUNCA se hizo. */
-    var badge = '<span style="background:#DBEAFE;color:#1E40AF;font-size:11px;font-weight:700;padding:1px 7px;border-radius:20px;margin-left:4px">🩺 Consulta</span>';
-    if (esServicioCompleto)  badge = ' <span style="background:#d1fae5;color:#065f46;font-size:11px;font-weight:700;padding:1px 7px;border-radius:20px;margin-left:4px">🛎️ Procedimiento completado</span>';
-    if (esServicioPendiente) badge = ' <span style="background:#FEF3C7;color:#92400E;font-size:11px;font-weight:700;padding:1px 7px;border-radius:20px;margin-left:4px">🕐 Procedimiento pendiente</span>';
-    if (c.convertidoConsulta) badge = ' <span style="background:#FEE2E2;color:#991B1B;font-size:11px;font-weight:700;padding:1px 7px;border-radius:20px;margin-left:4px">❌ Servicio NO realizado · convertido en consulta</span>';
-    if (!esServicio && c.convertidoServicio) badge = ' <span style="background:#FEE2E2;color:#991B1B;font-size:11px;font-weight:700;padding:1px 7px;border-radius:20px;margin-left:4px">❌ Consulta NO realizada · convertida en servicio</span>';
+    var badge = '<span style="background:#DBEAFE;color:#1E40AF;font-size:11px;font-weight:700;padding:1px 7px;border-radius:20px;margin-left:4px">Consulta</span>';
+    if (esServicioCompleto)  badge = ' <span style="background:#d1fae5;color:#065f46;font-size:11px;font-weight:700;padding:1px 7px;border-radius:20px;margin-left:4px">Procedimiento completado</span>';
+    if (esServicioPendiente) badge = ' <span style="background:#FEF3C7;color:#92400E;font-size:11px;font-weight:700;padding:1px 7px;border-radius:20px;margin-left:4px">Procedimiento pendiente</span>';
+    if (c.convertidoConsulta) badge = ' <span style="background:#FEE2E2;color:#991B1B;font-size:11px;font-weight:700;padding:1px 7px;border-radius:20px;margin-left:4px">Servicio NO realizado · convertido en consulta</span>';
+    if (!esServicio && c.convertidoServicio) badge = ' <span style="background:#FEE2E2;color:#991B1B;font-size:11px;font-weight:700;padding:1px 7px;border-radius:20px;margin-left:4px">Consulta NO realizada · convertida en servicio</span>';
 
     /* DRM: sin cortar texto — el historial debe mostrar la información completa */
     var titulo = esServicio
@@ -6470,20 +6470,20 @@ summary.ed-meds-cat { list-style: revert; }
        registros antiguos, anteriores a que se pidiera el nombre. */
     var cuentaEnfermeria = c.enfermeriaPor || c.preclinicaPor;
     var enfermeriaNombre = c.enfermeriaAtendidoPor || cuentaEnfermeria;
-    if (enfermeriaNombre) atendioPartes.push('👩‍⚕️ Enfermería: ' + esc(enfermeriaNombre));
+    if (enfermeriaNombre) atendioPartes.push('Enfermería: ' + esc(enfermeriaNombre));
 
     /* Quién completó la atención: en un Servicio es el "Atendido por" del formulario
        de completar (servicioRealizadoPor); en una Consulta, el médico tratante. */
     var completoNombre = c.servicioRealizadoPor || c.doctorNombre;
-    if (!esServicio && completoNombre) atendioPartes.push('🩺 Médico: ' + esc(completoNombre));
+    if (!esServicio && completoNombre) atendioPartes.push('Médico: ' + esc(completoNombre));
     if (esServicio && completoNombre && completoNombre !== enfermeriaNombre) {
-      atendioPartes.push('🛎️ Atendido por: ' + esc(completoNombre));
+      atendioPartes.push('Atendido por: ' + esc(completoNombre));
     }
     /* Quién dejó registrado el servicio (Caja/Enfermería), solo si no es ninguno
        de los anteriores — si no, se repetiría la misma persona tres veces. */
     if (esServicio && c.servicioPor && c.servicioPor !== cuentaEnfermeria
         && c.servicioPor !== enfermeriaNombre && c.servicioPor !== completoNombre) {
-      atendioPartes.push('📝 Registrado por: ' + esc(c.servicioPor));
+      atendioPartes.push('Registrado por: ' + esc(c.servicioPor));
     }
     var atendioLinea = atendioPartes.length
       ? '<div class="ed-consulta-motivo" style="color:#374151">' + atendioPartes.join(' · ') + '</div>'
@@ -6491,14 +6491,14 @@ summary.ed-meds-cat { list-style: revert; }
 
     var vitalsChips = buildVitalsChipsHtml(c.signosVitales);
     var vitalsHtml = vitalsChips
-      ? '<div style="margin-top:6px"><div style="font-size:12px;font-weight:700;color:#242F40;margin-bottom:4px">📊 Signos vitales</div><div class="ed-vitals-chips">' + vitalsChips + '</div></div>'
+      ? '<div style="margin-top:6px"><div style="font-size:12px;font-weight:700;color:#242F40;margin-bottom:4px">Signos vitales</div><div class="ed-vitals-chips">' + vitalsChips + '</div></div>'
       : '';
 
     /* DRM v3 #5: badge constancia + permitir editar si < 24h */
     var constanciaBadge = '';
     var puedeEditarConstancia = false;
     if (c.constanciaId) {
-      constanciaBadge = ' <span style="background:#FEF3C7;color:#92400E;font-size:11px;font-weight:700;padding:1px 7px;border-radius:20px;margin-left:4px">📄 Con constancia</span>';
+      constanciaBadge = ' <span style="background:#FEF3C7;color:#92400E;font-size:11px;font-weight:700;padding:1px 7px;border-radius:20px;margin-left:4px">Con constancia</span>';
       var fechaConsulta = (c.fecha && c.fecha.toMillis) ? c.fecha.toMillis()
                         : (c.fechaLocal ? new Date(c.fechaLocal).getTime() : 0);
       if (fechaConsulta && (Date.now() - fechaConsulta) < (24 * 60 * 60 * 1000)) {
@@ -6508,23 +6508,23 @@ summary.ed-meds-cat { list-style: revert; }
 
     /* DRM: si caja ajustó este registro antes de liquidar, dejarlo visible en el historial */
     var ajusteLinea = (c.ajustadoEnCaja && c.ajustadoEnCaja.por)
-      ? '<div class="ed-consulta-motivo" style="color:#7C3AED"><strong>✏️ Ajustado en caja por:</strong> ' + esc(c.ajustadoEnCaja.por) + ' · ' + fmtDate(c.ajustadoEnCaja.en) + '</div>'
+      ? '<div class="ed-consulta-motivo" style="color:#7C3AED"><strong>Ajustado en caja por:</strong> ' + esc(c.ajustadoEnCaja.por) + ' · ' + fmtDate(c.ajustadoEnCaja.en) + '</div>'
       : '';
     /* DRM: si un admin corrigió este registro después (ej. el doctor olvidó marcar
        "convertido en consulta/servicio"), dejarlo visible para trazabilidad. */
     var edicionLinea = (c.editadoEnHistorial && c.editadoEnHistorial.por)
-      ? '<div class="ed-consulta-motivo" style="color:#7C3AED"><strong>✏️ Editado por Administración:</strong> ' + esc(c.editadoEnHistorial.por) + ' · ' + fmtDate(c.editadoEnHistorial.en) + '</div>'
+      ? '<div class="ed-consulta-motivo" style="color:#7C3AED"><strong>Editado por Administración:</strong> ' + esc(c.editadoEnHistorial.por) + ' · ' + fmtDate(c.editadoEnHistorial.en) + '</div>'
       : '';
 
     return '<div class="ed-consulta-item">' +
       '<div>' +
-        '<div class="ed-consulta-fecha">📅 ' + fmtDate(getFechaDisplay(c)) + badge + constanciaBadge + '</div>' +
+        '<div class="ed-consulta-fecha">' + fmtDate(getFechaDisplay(c)) + badge + constanciaBadge + '</div>' +
         '<div class="ed-consulta-motivo">' + titulo + '</div>' +
         atendioLinea +
         (!esServicio && c.diagnostico ? '<div class="ed-consulta-motivo"><strong>Dx:</strong> ' + esc(c.diagnostico) + '</div>' : '') +
-        (medsVisita.length ? '<div class="ed-consulta-motivo" style="color:#374151"><strong>💊 Aplicado en consulta:</strong> ' + esc(medsVisita.join(', ')) + '</div>' : '') +
-        (medsDespacho.length ? '<div class="ed-consulta-motivo" style="color:#374151"><strong>📦 Despacho:</strong> ' + esc(medsDespacho.join(', ')) + '</div>' : '') +
-        (c.recetaExterna && c.recetaExterna.trim() ? '<div class="ed-consulta-motivo" style="color:#9A3412"><strong>🏥 Receta externa:</strong> ' + esc(c.recetaExterna) + '</div>' : '') +
+        (medsVisita.length ? '<div class="ed-consulta-motivo" style="color:#374151"><strong>Aplicado en consulta:</strong> ' + esc(medsVisita.join(', ')) + '</div>' : '') +
+        (medsDespacho.length ? '<div class="ed-consulta-motivo" style="color:#374151"><strong>Despacho:</strong> ' + esc(medsDespacho.join(', ')) + '</div>' : '') +
+        (c.recetaExterna && c.recetaExterna.trim() ? '<div class="ed-consulta-motivo" style="color:#9A3412"><strong>Receta externa:</strong> ' + esc(c.recetaExterna) + '</div>' : '') +
         (esServicio && c.servicioNotas ? '<div class="ed-consulta-motivo" style="color:#6B7280"><strong>Notas:</strong> ' + esc(c.servicioNotas) + '</div>' : '') +
         (esServicio && c.servicioNotasFin ? '<div class="ed-consulta-motivo" style="color:#6B7280"><strong>Notas de finalización:</strong> ' + esc(c.servicioNotasFin) + '</div>' : '') +
         vitalsHtml +
@@ -6533,15 +6533,15 @@ summary.ed-meds-cat { list-style: revert; }
         (esServicio ? '<div class="ed-consulta-motivo" style="color:#9CA3AF;font-size:11px;font-family:monospace">id: ' + esc(c._id) + ' · status: ' + esc(c.status) + ' · tipoRegistro: ' + esc(c.tipoRegistro || '—') + ' · convertidoConsulta: ' + String(!!c.convertidoConsulta) + '</div>' : '') +
       '</div>' +
       '<div class="ed-consulta-actions">' +
-        (c.pdfUrl ? '<a class="ed-consulta-link" href="' + esc(c.pdfUrl) + '" target="_blank">📄 Ver PDF</a>' : '') +
-        (c.constanciaId ? '<a class="ed-consulta-link" href="Constancia-Medica.html?id=' + esc(c.constanciaId) + '" target="_blank">📄 Ver constancia</a>' : '') +
-        (puedeEditarConstancia ? '<button class="ed-consulta-link ed-link-blue" data-editar-constancia="' + esc(c.constanciaId) + '">✏️ Editar constancia</button>' : '') +
+        (c.pdfUrl ? '<a class="ed-consulta-link" href="' + esc(c.pdfUrl) + '" target="_blank">Ver PDF</a>' : '') +
+        (c.constanciaId ? '<a class="ed-consulta-link" href="Constancia-Medica.html?id=' + esc(c.constanciaId) + '" target="_blank">Ver constancia</a>' : '') +
+        (puedeEditarConstancia ? '<button class="ed-consulta-link ed-link-blue" data-editar-constancia="' + esc(c.constanciaId) + '">Editar constancia</button>' : '') +
         /* DRM: editar campos visibles del registro (ej. corregir "convertido en
            consulta/servicio" que el doctor olvidó marcar) es solo para Administración,
            y solo corrige el expediente — no toca lo ya cobrado en Caja. */
-        (esAdminUnif() ? '<button class="ed-consulta-link ed-link-blue" data-editar-historial="' + esc(c._id) + '">✏️ Editar</button>' : '') +
+        (esAdminUnif() ? '<button class="ed-consulta-link ed-link-blue" data-editar-historial="' + esc(c._id) + '">Editar</button>' : '') +
         /* DRM: borrar registros del historial es solo para Administración */
-        (esAdminUnif() ? '<button class="ed-consulta-link ed-link-red" data-borrar-consulta="' + esc(c._id) + '" data-constancia-id="' + esc(c.constanciaId || '') + '">🗑️ Borrar</button>' : '') +
+        (esAdminUnif() ? '<button class="ed-consulta-link ed-link-red" data-borrar-consulta="' + esc(c._id) + '" data-constancia-id="' + esc(c.constanciaId || '') + '">Borrar</button>' : '') +
       '</div>' +
       (esAdminUnif() ? buildHistorialEditPanelHtml(c) : '') +
     '</div>';
@@ -6549,11 +6549,11 @@ summary.ed-meds-cat { list-style: revert; }
 
   /* ─── Item: Prueba rápida (colección resultadosPruebas) ─── */
   function renderHistorialItemPrueba(c) {
-    var titulo = LABELS_PRUEBA_TIPO[c.tipo] || ('🧪 Prueba rápida: ' + (c.tipo || '—'));
+    var titulo = LABELS_PRUEBA_TIPO[c.tipo] || ('Prueba rápida: ' + (c.tipo || '—'));
     var esPendiente = c.status === 'pendiente_resultado';
     var badge = esPendiente
-      ? ' <span style="background:#FEF3C7;color:#92400E;font-size:11px;font-weight:700;padding:1px 7px;border-radius:20px;margin-left:4px">🕐 Resultado pendiente</span>'
-      : ' <span style="background:#EDE9FE;color:#5B21B6;font-size:11px;font-weight:700;padding:1px 7px;border-radius:20px;margin-left:4px">🧪 Prueba rápida</span>';
+      ? ' <span style="background:#FEF3C7;color:#92400E;font-size:11px;font-weight:700;padding:1px 7px;border-radius:20px;margin-left:4px">Resultado pendiente</span>'
+      : ' <span style="background:#EDE9FE;color:#5B21B6;font-size:11px;font-weight:700;padding:1px 7px;border-radius:20px;margin-left:4px">Prueba rápida</span>';
 
     var resultados = c.resultados || {};
     var resumen = Object.keys(resultados).map(function (k) {
@@ -6566,12 +6566,12 @@ summary.ed-meds-cat { list-style: revert; }
 
     return '<div class="ed-consulta-item">' +
       '<div>' +
-        '<div class="ed-consulta-fecha">📅 ' + fmtDate(getFechaDisplay(c)) + badge + '</div>' +
+        '<div class="ed-consulta-fecha">' + fmtDate(getFechaDisplay(c)) + badge + '</div>' +
         '<div class="ed-consulta-motivo">' + esc(titulo) + '</div>' +
         (resumen ? '<div class="ed-consulta-motivo">' + resumen + '</div>' : '') +
       '</div>' +
       '<div class="ed-consulta-actions">' +
-        '<a class="ed-consulta-link" href="Ver-Prueba.html?id=' + esc(c._id) + '" target="_blank">📄 Ver resultado</a>' +
+        '<a class="ed-consulta-link" href="Ver-Prueba.html?id=' + esc(c._id) + '" target="_blank">Ver resultado</a>' +
       '</div>' +
     '</div>';
   }
@@ -6584,13 +6584,13 @@ summary.ed-meds-cat { list-style: revert; }
 
     return '<div class="ed-consulta-item">' +
       '<div>' +
-        '<div class="ed-consulta-fecha">📅 ' + fmtDate(getFechaDisplay(c)) + ' <span style="background:#F3F4F6;color:#374151;font-size:11px;font-weight:700;padding:1px 7px;border-radius:20px;margin-left:4px">🔬 Laboratorio</span>' + badge + '</div>' +
+        '<div class="ed-consulta-fecha">' + fmtDate(getFechaDisplay(c)) + ' <span style="background:#F3F4F6;color:#374151;font-size:11px;font-weight:700;padding:1px 7px;border-radius:20px;margin-left:4px">Laboratorio</span>' + badge + '</div>' +
         '<div class="ed-consulta-motivo">' + esc(titulo) + '</div>' +
         (c.proveedor ? '<div class="ed-consulta-motivo" style="color:#6B7280"><strong>Proveedor:</strong> ' + esc(c.proveedor) + '</div>' : '') +
         (c.notas ? '<div class="ed-consulta-motivo" style="color:#6B7280"><strong>Notas:</strong> ' + esc(c.notas).slice(0, 100) + '</div>' : '') +
       '</div>' +
       '<div class="ed-consulta-actions">' +
-        (c.pdfUrl ? '<a class="ed-consulta-link" href="' + esc(c.pdfUrl) + '" target="_blank">📄 Ver resultado</a>' : '') +
+        (c.pdfUrl ? '<a class="ed-consulta-link" href="' + esc(c.pdfUrl) + '" target="_blank">Ver resultado</a>' : '') +
       '</div>' +
     '</div>';
   }
@@ -6605,12 +6605,12 @@ summary.ed-meds-cat { list-style: revert; }
       var html =
         '<div style="background:#000a;position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px" id="ed-quick-modal">' +
           '<div style="background:#fff;border-radius:12px;max-width:560px;width:100%;padding:24px;max-height:90vh;overflow:auto">' +
-            '<h3 style="margin:0 0 6px;color:#242F40">✏️ Editar constancia ' + esc(d.numero || '') + '</h3>' +
+            '<h3 style="margin:0 0 6px;color:#242F40">Editar constancia ' + esc(d.numero || '') + '</h3>' +
             '<p style="margin:0 0 14px;font-size:13px;color:#6B7280">Solo editable durante las primeras 24h. Los cambios quedan auditados con autor y timestamp.</p>' +
             '<div class="ed-grid ed-grid-2" style="gap:10px">' +
               /* DRM v3.7: datos del paciente editables (corrige errores de tipeo sin recrear consulta) */
               '<div class="ed-fgroup full" style="background:#EFF6FF;border:1px solid #BFDBFE;border-radius:8px;padding:10px 12px">' +
-                '<div style="font-weight:700;font-size:12px;color:#1E40AF;margin-bottom:6px">👤 Datos del paciente (corregir si hay error)</div>' +
+                '<div style="font-weight:700;font-size:12px;color:#1E40AF;margin-bottom:6px">Datos del paciente (corregir si hay error)</div>' +
                 '<div class="ed-grid ed-grid-2" style="gap:8px">' +
                   '<div class="ed-fgroup"><label class="ed-label">Nombre del paciente *</label>' +
                     '<input type="text" class="ed-input" id="qm-cm-nombre" value="' + esc(d.pacienteNombre || '') + '"></div>' +
@@ -6644,7 +6644,7 @@ summary.ed-meds-cat { list-style: revert; }
             '</div>' +
             '<div style="display:flex;gap:10px;justify-content:flex-end;margin-top:18px">' +
               '<button class="ed-btn ed-btn-ghost" id="qm-cancelar">Cancelar</button>' +
-              '<button class="ed-btn ed-btn-primary" id="qm-guardar">💾 Guardar cambios</button>' +
+              '<button class="ed-btn ed-btn-primary" id="qm-guardar">Guardar cambios</button>' +
             '</div>' +
           '</div>' +
         '</div>';
@@ -6693,7 +6693,7 @@ summary.ed-meds-cat { list-style: revert; }
           ultimaEdicionEn : firebase.firestore.FieldValue.serverTimestamp()
         }).then(function(){
           document.getElementById('ed-quick-modal').remove();
-          showAlert('Constancia actualizada ✓', 'success');
+          showAlert('Constancia actualizada ', 'success');
           renderHistorialTab();
         }).catch(function(err){ showAlert('Error: ' + err.message, 'error'); });
       };
@@ -6739,7 +6739,7 @@ summary.ed-meds-cat { list-style: revert; }
           '<div class="ed-patient-code">' + esc(p.codigoPaciente) + '</div>' +
         '</div>'
       : '<div style="background:#F9FAFB;border:1px dashed #D1D5DB;border-radius:10px;padding:14px 18px;margin-bottom:16px;font-size:13px;color:#6B7280">' +
-          '<b style="color:#242F40">📋 Vista global de pruebas rápidas.</b> Las pruebas pendientes de resultado aparecen sin importar qué paciente esté seleccionado. Para ver las pruebas de un paciente, primero buscalo en la pestaña Buscar.' +
+          '<b style="color:#242F40">Vista global de pruebas rápidas.</b> Las pruebas pendientes de resultado aparecen sin importar qué paciente esté seleccionado. Para ver las pruebas de un paciente, primero buscalo en la pestaña Buscar.' +
         '</div>';
 
     cont.innerHTML =
@@ -6748,7 +6748,7 @@ summary.ed-meds-cat { list-style: revert; }
       '<div class="ed-section-title">⏳ Pruebas pendientes de resultado (todos los pacientes)</div>' +
       '<div id="pruebas-pendientes' + sufijo + '"><div style="font-size:13px;color:#9CA3AF;padding:8px 0">Cargando…</div></div>' +
       (p
-        ? '<div class="ed-section-title" style="margin-top:18px">🧪 Pruebas de ' + esc(dg.nombreCompleto || '—') + '</div>' +
+        ? '<div class="ed-section-title" style="margin-top:18px">Pruebas de ' + esc(dg.nombreCompleto || '—') + '</div>' +
           '<div id="pruebas-lista' + sufijo + '"><div class="ed-empty"><div class="ed-overlay-spinner" style="margin:0 auto"></div></div></div>'
         : '');
 
@@ -6817,7 +6817,7 @@ summary.ed-meds-cat { list-style: revert; }
       .get()
       .then(function(snap){
         if (snap.empty) {
-          box.innerHTML = '<div class="ed-empty" style="padding:24px"><div class="ed-empty-icon">✅</div><p>No hay pruebas pendientes de resultado.</p></div>';
+          box.innerHTML = '<div class="ed-empty" style="padding:24px"><div class="ed-empty-icon"></div><p>No hay pruebas pendientes de resultado.</p></div>';
           return;
         }
         var arr = [];
@@ -6833,10 +6833,10 @@ summary.ed-meds-cat { list-style: revert; }
           return '<div style="background:#FEF3C7;border:1px solid #F59E0B;border-radius:10px;padding:12px;margin-bottom:8px">' +
             '<div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px">' +
               '<div style="flex:1;min-width:0">' +
-                '<div style="font-weight:700;color:#242F40;font-size:15px">👤 ' + esc(nombrePaciente) +
+                '<div style="font-weight:700;color:#242F40;font-size:15px">' + esc(nombrePaciente) +
                   (pr.codigoPaciente ? ' <code style="background:#fff;padding:1px 6px;border-radius:4px;font-size:11px;font-weight:400">' + esc(pr.codigoPaciente) + '</code>' : '') +
                 '</div>' +
-                '<div style="font-weight:600;color:#374151;margin-top:4px">' + (LABELS_PRUEBA_TIPO[pr.tipo] || '🧪 ' + esc(pr.tipo)) + ' <span style="background:#F59E0B;color:#fff;font-size:10px;padding:2px 8px;border-radius:100px;margin-left:6px">Pendiente</span></div>' +
+                '<div style="font-weight:600;color:#374151;margin-top:4px">' + (LABELS_PRUEBA_TIPO[pr.tipo] || '' + esc(pr.tipo)) + ' <span style="background:#F59E0B;color:#fff;font-size:10px;padding:2px 8px;border-radius:100px;margin-left:6px">Pendiente</span></div>' +
                 '<div style="font-size:12px;color:#6B7280;margin-top:2px">Abierta por: ' + esc(pr.creadoPorNombre || pr.creadoPor || '—') + ' · ' + esc(fecha) + '</div>' +
               '</div>' +
               '<div style="display:flex;gap:6px;flex-wrap:wrap;align-items:start">' +
@@ -6856,18 +6856,18 @@ summary.ed-meds-cat { list-style: revert; }
     var lista = $id('pruebas-lista' + sufijo);
     if (!lista) return;
     if (!pruebas.length) {
-      lista.innerHTML = '<div class="ed-empty"><div class="ed-empty-icon">🧪</div><p>Este paciente aún no tiene pruebas rápidas registradas.</p><p style="font-size:13px;color:#9CA3AF;margin-top:6px">Las pruebas se vinculan automáticamente cuando el DNI coincide.</p></div>';
+      lista.innerHTML = '<div class="ed-empty"><div class="ed-empty-icon"></div><p>Este paciente aún no tiene pruebas rápidas registradas.</p><p style="font-size:13px;color:#9CA3AF;margin-top:6px">Las pruebas se vinculan automáticamente cuando el DNI coincide.</p></div>';
       return;
     }
     var bannerVinc = '';
     if (vinculadasAhora) {
-      bannerVinc = '<div style="background:#D1FAE5;border:1px solid #6EE7B7;border-radius:8px;padding:10px 14px;margin-bottom:12px;font-size:13px;color:#065F46">✓ ' + vinculadasAhora + ' prueba' + (vinculadasAhora > 1 ? 's vinculadas' : ' vinculada') + ' automáticamente al expediente por coincidencia de DNI.</div>';
+      bannerVinc = '<div style="background:#D1FAE5;border:1px solid #6EE7B7;border-radius:8px;padding:10px 14px;margin-bottom:12px;font-size:13px;color:#065F46">' + vinculadasAhora + ' prueba' + (vinculadasAhora > 1 ? 's vinculadas' : ' vinculada') + ' automáticamente al expediente por coincidencia de DNI.</div>';
     }
     var labels = {
-      embarazo: '🤰 Embarazo',
-      dengue: '🦟 Dengue NS1',
-      duo: '🧬 DUO (COVID-Influenza)',
-      antigeno: '🧪 Antígeno COVID-19'
+      embarazo: 'Embarazo',
+      dengue: 'Dengue NS1',
+      duo: 'DUO (COVID-Influenza)',
+      antigeno: 'Antígeno COVID-19'
     };
     lista.innerHTML = bannerVinc + pruebas.map(function (pr) {
       var resumen = '';
@@ -6879,14 +6879,14 @@ summary.ed-meds-cat { list-style: revert; }
       var fechaTxt = fmtFechaCorta(pr.fecha) || (pr.createdAt && pr.createdAt.toMillis ? new Date(pr.createdAt.toMillis()).toLocaleDateString('es-HN') : '—');
       return '<div class="ed-consulta-item">' +
         '<div style="flex:1;min-width:0">' +
-          '<div class="ed-consulta-fecha">' + (labels[pr.tipo] || '🧪 ' + esc(pr.tipo)) + ' · 📅 ' + esc(fechaTxt) + (pr.horaToma ? ' ' + esc(pr.horaToma) : '') + '</div>' +
+          '<div class="ed-consulta-fecha">' + (labels[pr.tipo] || '' + esc(pr.tipo)) + ' · ' + esc(fechaTxt) + (pr.horaToma ? ' ' + esc(pr.horaToma) : '') + '</div>' +
           '<div class="ed-consulta-motivo">' + resumen + '</div>' +
           '<div style="font-size:11px;color:#9CA3AF;margin-top:4px">Registrado por ' + esc(pr.creadoPorNombre || pr.creadoPor || '—') + '</div>' +
         '</div>' +
         '<div class="ed-consulta-actions">' +
-          '<a class="ed-consulta-link" href="Ver-Prueba.html?id=' + esc(pr._id) + '" target="_blank" rel="noopener">📄 Ver</a>' +
-          '<button class="ed-consulta-link ed-link-blue" data-mover-prueba="' + esc(pr._id) + '" data-tipo-nombre="' + esc(pr.tipo) + '">📂 Mover</button>' +
-          '<button class="ed-consulta-link ed-link-red" data-borrar-prueba="' + esc(pr._id) + '">🗑️ Borrar</button>' +
+          '<a class="ed-consulta-link" href="Ver-Prueba.html?id=' + esc(pr._id) + '" target="_blank" rel="noopener">Ver</a>' +
+          '<button class="ed-consulta-link ed-link-blue" data-mover-prueba="' + esc(pr._id) + '" data-tipo-nombre="' + esc(pr.tipo) + '">Mover</button>' +
+          '<button class="ed-consulta-link ed-link-red" data-borrar-prueba="' + esc(pr._id) + '">Borrar</button>' +
         '</div>' +
       '</div>';
     }).join('');
@@ -6929,7 +6929,7 @@ summary.ed-meds-cat { list-style: revert; }
           '<div class="ed-patient-code">' + esc(p.codigoPaciente) + '</div>' +
         '</div>'
       : '<div style="background:#F9FAFB;border:1px dashed #D1D5DB;border-radius:10px;padding:14px 18px;margin-bottom:16px;font-size:13px;color:#6B7280">' +
-          '<b style="color:#242F40">📋 Vista global de laboratorio.</b> Las órdenes pendientes/procesando aparecen sin importar qué paciente esté seleccionado. Para crear órdenes nuevas o ver exámenes confirmados de un paciente, primero buscalo en la pestaña Buscar.' +
+          '<b style="color:#242F40">Vista global de laboratorio.</b> Las órdenes pendientes/procesando aparecen sin importar qué paciente esté seleccionado. Para crear órdenes nuevas o ver exámenes confirmados de un paciente, primero buscalo en la pestaña Buscar.' +
         '</div>';
 
     cont.innerHTML =
@@ -6937,14 +6937,14 @@ summary.ed-meds-cat { list-style: revert; }
       /* DRM v3 #1: botón para crear orden de laboratorio (requiere paciente) */
       (p
         ? '<div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px">' +
-            '<button class="ed-btn ed-btn-yellow" id="btn-crear-orden-lab' + sufijo + '">📝 Crear orden de laboratorio</button>' +
+            '<button class="ed-btn ed-btn-yellow" id="btn-crear-orden-lab' + sufijo + '">Crear orden de laboratorio</button>' +
           '</div>'
         : '') +
       /* DRM v3 #2 + v3.4: sección GLOBAL de pendientes/procesando */
       '<div class="ed-section-title">⏳ Órdenes pendientes / procesando (todos los pacientes)</div>' +
       '<div id="laboratorio-pendientes' + sufijo + '"><div style="font-size:13px;color:#9CA3AF;padding:8px 0">Cargando…</div></div>' +
       (p
-        ? '<div class="ed-section-title" style="margin-top:18px">📄 Exámenes confirmados de ' + esc(dg.nombreCompleto || '—') + '</div>' +
+        ? '<div class="ed-section-title" style="margin-top:18px">Exámenes confirmados de ' + esc(dg.nombreCompleto || '—') + '</div>' +
           '<div id="laboratorio-lista' + sufijo + '"><div class="ed-empty"><div class="ed-overlay-spinner" style="margin:0 auto"></div></div></div>'
         : '');
 
@@ -7018,7 +7018,7 @@ summary.ed-meds-cat { list-style: revert; }
       .get()
       .then(function(snap){
         if (snap.empty) {
-          box.innerHTML = '<div class="ed-empty" style="padding:24px"><div class="ed-empty-icon">✅</div><p>No hay órdenes pendientes ni en procesamiento.</p></div>';
+          box.innerHTML = '<div class="ed-empty" style="padding:24px"><div class="ed-empty-icon"></div><p>No hay órdenes pendientes ni en procesamiento.</p></div>';
           return;
         }
         var arr = [];
@@ -7076,7 +7076,7 @@ summary.ed-meds-cat { list-style: revert; }
             ? '<div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:4px">' +
                 listaExamenes.map(function(nombre){
                   var hecho = resultadosMap[nombre] === 'confirmado';
-                  return '<span style="font-size:10px;padding:2px 8px;border-radius:100px;background:' + (hecho ? '#D1FAE5' : '#FEE2E2') + ';color:' + (hecho ? '#065F46' : '#991B1B') + '">' + (hecho ? '✓ ' : '⏳ ') + esc(nombre) + '</span>';
+                  return '<span style="font-size:10px;padding:2px 8px;border-radius:100px;background:' + (hecho ? '#D1FAE5' : '#FEE2E2') + ';color:' + (hecho ? '#065F46' : '#991B1B') + '">' + (hecho ? '' : '⏳ ') + esc(nombre) + '</span>';
                 }).join('') +
               '</div>'
             : '';
@@ -7084,31 +7084,31 @@ summary.ed-meds-cat { list-style: revert; }
             '<div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px">' +
               '<div style="flex:1;min-width:0">' +
                 /* Paciente prominente */
-                '<div style="font-weight:700;color:#242F40;font-size:15px">👤 ' + esc(nombrePaciente) +
+                '<div style="font-weight:700;color:#242F40;font-size:15px">' + esc(nombrePaciente) +
                   (ex.codigoPaciente ? ' <code style="background:#fff;padding:1px 6px;border-radius:4px;font-size:11px;font-weight:400">' + esc(ex.codigoPaciente) + '</code>' : '') +
                 '</div>' +
                 '<div style="font-size:12px;color:#6B7280;margin-top:2px">' +
-                  '🪪 ' + (ex.dni ? esc(ex.dni) : 'Sin DNI') +
-                  ' · 🎂 ' + (ex.fechaNacimiento ? esc(fmtFechaCorta(ex.fechaNacimiento)) : 'Sin fecha de nacimiento') +
+                  '' + (ex.dni ? esc(ex.dni) : 'Sin DNI') +
+                  ' · ' + (ex.fechaNacimiento ? esc(fmtFechaCorta(ex.fechaNacimiento)) : 'Sin fecha de nacimiento') +
                   (edadTxt ? ' (' + esc(edadTxt) + ')' : '') +
                 '</div>' +
-                '<div style="font-weight:600;color:#374151;margin-top:4px">🔬 ' + esc(ex.examenesSolicitados || ex.tipoNombre || '—') + ' <span style="background:' + col + ';color:#fff;font-size:10px;padding:2px 8px;border-radius:100px;margin-left:6px">' + st + '</span></div>' +
+                '<div style="font-weight:600;color:#374151;margin-top:4px">' + esc(ex.examenesSolicitados || ex.tipoNombre || '—') + ' <span style="background:' + col + ';color:#fff;font-size:10px;padding:2px 8px;border-radius:100px;margin-left:6px">' + st + '</span></div>' +
                 desgloseExamenes +
-                '<div style="font-size:12px;color:#6B7280;margin-top:2px">🏥 Enviado a: <b>' + esc(ex.proveedor || 'Sin especificar') + '</b></div>' +
-                (ex.medicoSolicitante ? '<div style="font-size:12px;color:#6B7280;margin-top:2px">🩺 Médico solicitante: <b>' + esc(ex.medicoSolicitante) + '</b></div>' : '') +
-                '<div style="font-size:12px;color:#6B7280;margin-top:2px">Registrado por: ' + esc(ex.solicitadoPorNombre || ex.solicitadoPor || '—') + ' · ' + esc(fecha) + (ex.prioridad === 'urgente' ? ' · 🚨 URGENTE' : '') + '</div>' +
+                '<div style="font-size:12px;color:#6B7280;margin-top:2px">Enviado a: <b>' + esc(ex.proveedor || 'Sin especificar') + '</b></div>' +
+                (ex.medicoSolicitante ? '<div style="font-size:12px;color:#6B7280;margin-top:2px">Médico solicitante: <b>' + esc(ex.medicoSolicitante) + '</b></div>' : '') +
+                '<div style="font-size:12px;color:#6B7280;margin-top:2px">Registrado por: ' + esc(ex.solicitadoPorNombre || ex.solicitadoPor || '—') + ' · ' + esc(fecha) + (ex.prioridad === 'urgente' ? ' · URGENTE' : '') + '</div>' +
                 (ex.notas ? '<div style="font-size:12px;color:#374151;margin-top:4px"><b>Notas:</b> ' + esc(ex.notas) + '</div>' : '') +
               '</div>' +
               '<div style="display:flex;gap:6px;flex-wrap:wrap;align-items:start">' +
                 (ex.status === 'pendiente_muestra'
-                  ? '<button class="ed-btn ed-btn-ghost" data-muestra-tomada="' + esc(ex._id) + '">🩸 Muestra tomada</button>'
+                  ? '<button class="ed-btn ed-btn-ghost" data-muestra-tomada="' + esc(ex._id) + '">Muestra tomada</button>'
                   : '') +
                 (ex.status === 'pendiente'
                   ? '<button class="ed-btn ed-btn-ghost" data-procesar="' + esc(ex._id) + '">▶ Retirado por Laboratorio</button>'
                   : '') +
                 /* DRM v3.5: la confirmación solo ocurre al subir el PDF (auditable y operativamente seguro) */
-                '<button class="ed-btn ed-btn-primary" data-subir-orden="' + esc(ex._id) + '">📤 Subir resultado y confirmar</button>' +
-                '<button class="ed-btn ed-btn-ghost" data-eliminar-orden="' + esc(ex._id) + '" style="color:#B91C1C;border-color:#FCA5A5">🗑️ Eliminar</button>' +
+                '<button class="ed-btn ed-btn-primary" data-subir-orden="' + esc(ex._id) + '">Subir resultado y confirmar</button>' +
+                '<button class="ed-btn ed-btn-ghost" data-eliminar-orden="' + esc(ex._id) + '" style="color:#B91C1C;border-color:#FCA5A5">Eliminar</button>' +
               '</div>' +
             '</div>' +
           '</div>';
@@ -7117,7 +7117,7 @@ summary.ed-meds-cat { list-style: revert; }
         box.querySelectorAll('[data-muestra-tomada]').forEach(function(b){
           b.addEventListener('click', function(){
             r3adsDb.collection('examenesLaboratorio').doc(this.getAttribute('data-muestra-tomada')).update({ status: 'pendiente' })
-              .then(function(){ showAlert('✓ Muestra tomada. Lista para retiro de laboratorio.', 'success'); cargarLaboratorioPendientesGlobal(); });
+              .then(function(){ showAlert('Muestra tomada. Lista para retiro de laboratorio.', 'success'); cargarLaboratorioPendientesGlobal(); });
           });
         });
         box.querySelectorAll('[data-procesar]').forEach(function(b){
@@ -7134,7 +7134,7 @@ summary.ed-meds-cat { list-style: revert; }
             var id = this.getAttribute('data-eliminar-orden');
             if (!confirm('¿Eliminar esta orden pendiente? Esta acción no se puede deshacer (útil si se repitió por accidente).')) return;
             r3adsDb.collection('examenesLaboratorio').doc(id).delete()
-              .then(function(){ showAlert('✓ Orden eliminada', 'success'); cargarLaboratorioPendientesGlobal(); })
+              .then(function(){ showAlert('Orden eliminada', 'success'); cargarLaboratorioPendientesGlobal(); })
               .catch(function(err){ showAlert('Error: ' + err.message, 'error'); });
           });
         });
@@ -7151,12 +7151,12 @@ summary.ed-meds-cat { list-style: revert; }
     var lista = $id('laboratorio-lista' + sufijo);
     if (!lista) return;
     if (!confirmados.length) {
-      lista.innerHTML = '<div class="ed-empty"><div class="ed-empty-icon">🔬</div><p>Este paciente aún no tiene exámenes confirmados.</p><p style="font-size:13px;color:#9CA3AF;margin-top:6px">Crea una orden o sube un PDF de resultado para empezar.</p></div>';
+      lista.innerHTML = '<div class="ed-empty"><div class="ed-empty-icon"></div><p>Este paciente aún no tiene exámenes confirmados.</p><p style="font-size:13px;color:#9CA3AF;margin-top:6px">Crea una orden o sube un PDF de resultado para empezar.</p></div>';
       return;
     }
     var banner = '';
     if (vinculadasAhora) {
-      banner = '<div style="background:#D1FAE5;border:1px solid #6EE7B7;border-radius:8px;padding:10px 14px;margin-bottom:12px;font-size:13px;color:#065F46">✓ ' + vinculadasAhora + ' examen' + (vinculadasAhora > 1 ? 'es vinculados' : ' vinculado') + ' automáticamente al expediente por coincidencia de DNI.</div>';
+      banner = '<div style="background:#D1FAE5;border:1px solid #6EE7B7;border-radius:8px;padding:10px 14px;margin-bottom:12px;font-size:13px;color:#065F46">' + vinculadasAhora + ' examen' + (vinculadasAhora > 1 ? 'es vinculados' : ' vinculado') + ' automáticamente al expediente por coincidencia de DNI.</div>';
     }
     /* Teléfono/nombre del paciente actualmente seleccionado, para el botón
        "Enviar por WhatsApp" de cada examen confirmado. */
@@ -7167,28 +7167,28 @@ summary.ed-meds-cat { list-style: revert; }
       var fecha = ex.fechaExamen || (ex.createdAt && ex.createdAt.toMillis ? new Date(ex.createdAt.toMillis()).toLocaleDateString('es-HN') : '—');
       var size = ex.fileSize ? ' · ' + (ex.fileSize / 1024 / 1024).toFixed(2) + ' MB' : '';
       var origen = ex.subidoPorPaciente
-        ? '<span style="background:#DBEAFE;color:#1E40AF;padding:2px 8px;border-radius:100px;font-size:10px;font-weight:700;margin-left:6px">👤 Subido por paciente</span>'
-        : '<span style="background:#FEF3C7;color:#92400E;padding:2px 8px;border-radius:100px;font-size:10px;font-weight:700;margin-left:6px">🏥 Subido por la clínica</span>';
+        ? '<span style="background:#DBEAFE;color:#1E40AF;padding:2px 8px;border-radius:100px;font-size:10px;font-weight:700;margin-left:6px">Subido por paciente</span>'
+        : '<span style="background:#FEF3C7;color:#92400E;padding:2px 8px;border-radius:100px;font-size:10px;font-weight:700;margin-left:6px">Subido por la clínica</span>';
       return '<div class="ed-consulta-item">' +
         '<div style="flex:1;min-width:0">' +
-          '<div class="ed-consulta-fecha">🔬 ' + esc(ex.tipoNombre || ex.tipo) + ' · 📅 ' + esc(fecha) + origen + '</div>' +
+          '<div class="ed-consulta-fecha">' + esc(ex.tipoNombre || ex.tipo) + ' · ' + esc(fecha) + origen + '</div>' +
           (ex.proveedor ? '<div class="ed-consulta-motivo">Proveedor: ' + esc(ex.proveedor) + '</div>' : '') +
           (ex.notas ? '<div class="ed-consulta-motivo">' + esc(ex.notas) + '</div>' : '') +
           '<div style="font-size:11px;color:#9CA3AF;margin-top:4px">Subido por ' + esc(ex.subidoPorNombre || ex.subidoPor || '—') + size + '</div>' +
         '</div>' +
         '<div class="ed-consulta-actions">' +
           (ex.pdfUrl
-            ? '<a class="ed-consulta-link" href="' + esc(ex.pdfUrl) + '" target="_blank" rel="noopener">📄 Ver PDF</a>'
-            : '<button class="ed-consulta-link ed-link-blue" data-subir-orden="' + esc(ex._id) + '">📤 Subir PDF</button>') +
+            ? '<a class="ed-consulta-link" href="' + esc(ex.pdfUrl) + '" target="_blank" rel="noopener">Ver PDF</a>'
+            : '<button class="ed-consulta-link ed-link-blue" data-subir-orden="' + esc(ex._id) + '">Subir PDF</button>') +
           /* Solo en laboratorio, y solo cuando el examen ya está subido y confirmado
              (ex.pdfUrl presente). Usa el teléfono del expediente del paciente. */
           (ex.pdfUrl
             ? (waLinkTel
-                ? '<a class="ed-consulta-link" style="background:#DCFCE7 !important;border-color:#86EFAC !important;color:#166534 !important" href="' + esc(waLinkExamen(waLinkTel, waLinkNombre, ex.tipoNombre || ex.tipo, ex.pdfUrl)) + '" target="_blank" rel="noopener">📱 Enviar por WhatsApp</a>'
-                : '<span class="ed-consulta-link" style="opacity:.5;cursor:not-allowed" title="El paciente no tiene teléfono registrado en el expediente">📱 Enviar por WhatsApp</span>')
+                ? '<a class="ed-consulta-link" style="background:#DCFCE7 !important;border-color:#86EFAC !important;color:#166534 !important" href="' + esc(waLinkExamen(waLinkTel, waLinkNombre, ex.tipoNombre || ex.tipo, ex.pdfUrl)) + '" target="_blank" rel="noopener">Enviar por WhatsApp</a>'
+                : '<span class="ed-consulta-link" style="opacity:.5;cursor:not-allowed" title="El paciente no tiene teléfono registrado en el expediente">Enviar por WhatsApp</span>')
             : '') +
-          '<button class="ed-consulta-link ed-link-blue" data-mover-examen="' + esc(ex._id) + '">📂 Mover</button>' +
-          '<button class="ed-consulta-link ed-link-red" data-borrar-examen="' + esc(ex._id) + '" data-storage-path="' + esc(ex.storagePath || '') + '">🗑️ Borrar</button>' +
+          '<button class="ed-consulta-link ed-link-blue" data-mover-examen="' + esc(ex._id) + '">Mover</button>' +
+          '<button class="ed-consulta-link ed-link-red" data-borrar-examen="' + esc(ex._id) + '" data-storage-path="' + esc(ex.storagePath || '') + '">Borrar</button>' +
         '</div>' +
       '</div>';
     }).join('');
@@ -7217,7 +7217,7 @@ summary.ed-meds-cat { list-style: revert; }
     r3adsDb.collection('resultadosPruebas').doc(id).delete()
       .then(function () {
         hideOverlay();
-        showAlert('✓ Prueba borrada', 'success');
+        showAlert('Prueba borrada', 'success');
         renderPruebasTab();
       })
       .catch(function (err) { hideOverlay(); showAlert('Error: ' + err.message, 'error'); });
@@ -7234,7 +7234,7 @@ summary.ed-meds-cat { list-style: revert; }
       .then(function () { return r3adsDb.collection('examenesLaboratorio').doc(id).delete(); })
       .then(function () {
         hideOverlay();
-        showAlert('✓ Examen borrado', 'success');
+        showAlert('Examen borrado', 'success');
         renderLaboratorioTab();
       })
       .catch(function (err) { hideOverlay(); showAlert('Error: ' + err.message, 'error'); });
@@ -7268,11 +7268,11 @@ summary.ed-meds-cat { list-style: revert; }
     r3adsDb.collection('expedientes').doc(v).get().then(function (snap) {
       if (snap.exists) {
         var dg = (snap.data() || {}).datosGenerales || {};
-        info.textContent = '✓ ' + (dg.nombreCompleto || '(sin nombre)') + ' · ' + (dg.numeroIdentidad || 'sin DNI');
+        info.textContent = '' + (dg.nombreCompleto || '(sin nombre)') + ' · ' + (dg.numeroIdentidad || 'sin DNI');
         info.className = 'mover-info mover-info-ok';
         $id('mover-confirmar').disabled = false;
       } else {
-        info.textContent = '✗ No existe expediente ' + v;
+        info.textContent = 'No existe expediente ' + v;
         info.className = 'mover-info mover-info-err';
         $id('mover-confirmar').disabled = true;
       }
@@ -7313,7 +7313,7 @@ summary.ed-meds-cat { list-style: revert; }
       .then(function () {
         hideOverlay();
         $id('modal-mover').classList.remove('is-open');
-        showAlert('✓ Archivo movido a ' + nuevoCodigo, 'success');
+        showAlert('Archivo movido a ' + nuevoCodigo, 'success');
         moverContexto = null;
         /* Re-render el tab actual */
         if (colName === 'examenesLaboratorio') renderLaboratorioTab();
@@ -7454,7 +7454,7 @@ summary.ed-meds-cat { list-style: revert; }
         updatedAt: firebase.firestore.FieldValue.serverTimestamp()
       }).then(function () {
         hideOverlay();
-        showAlert('✓ Word del expediente generado y guardado.', 'success');
+        showAlert('Word del expediente generado y guardado.', 'success');
         window.open(url, '_blank');
       });
     }).catch(function (err) {

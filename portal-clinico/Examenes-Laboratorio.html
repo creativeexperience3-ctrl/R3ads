@@ -220,7 +220,7 @@ body { margin: 0; background: #F4F6FB; font-family: 'Segoe UI', Arial, sans-seri
 <div class="el-header">
   <div class="el-header-left">
     <div>
-      <div class="el-header-title">🔬 Exámenes de Laboratorio</div>
+      <div class="el-header-title">Exámenes de Laboratorio</div>
       <div class="el-header-subtitle">Subir y vincular resultados externos al expediente</div>
     </div>
   </div>
@@ -235,7 +235,7 @@ body { margin: 0; background: #F4F6FB; font-family: 'Segoe UI', Arial, sans-seri
 
   <!-- Upload card -->
   <div class="el-card">
-    <h2 class="el-card-title">📤 Subir nuevo examen</h2>
+    <h2 class="el-card-title">Subir nuevo examen</h2>
     <p class="el-card-subtitle">Sube el PDF que recibiste del laboratorio. Se vinculará automáticamente al expediente del paciente por número de identidad.</p>
 
     <div class="el-grid">
@@ -440,7 +440,7 @@ body { margin: 0; background: #F4F6FB; font-family: 'Segoe UI', Arial, sans-seri
         <label class="el-label">Archivo PDF *</label>
         <label class="el-file-drop" id="el-file-drop">
           <input type="file" id="f-pdf" accept="application/pdf">
-          <div class="el-file-icon">📄</div>
+          <div class="el-file-icon"></div>
           <div class="el-file-text">Haz click para seleccionar el PDF del examen</div>
           <div class="el-file-name" id="el-file-name" style="display:none"></div>
         </label>
@@ -449,13 +449,13 @@ body { margin: 0; background: #F4F6FB; font-family: 'Segoe UI', Arial, sans-seri
 
     <div class="el-actions">
       <button class="el-btn el-btn-ghost" id="btn-limpiar">Limpiar</button>
-      <button class="el-btn el-btn-primary" id="btn-subir" disabled>📤 Subir examen</button>
+      <button class="el-btn el-btn-primary" id="btn-subir" disabled>Subir examen</button>
     </div>
   </div>
 
   <!-- History -->
   <div class="el-card">
-    <h2 class="el-card-title">📋 Exámenes subidos recientemente</h2>
+    <h2 class="el-card-title">Exámenes subidos recientemente</h2>
     <p class="el-card-subtitle">Últimos 20 exámenes cargados al sistema.</p>
     <div id="el-history-list">
       <div class="el-empty">Cargando...</div>
@@ -467,7 +467,7 @@ body { margin: 0; background: #F4F6FB; font-family: 'Segoe UI', Arial, sans-seri
 <!-- Modal: crear expediente rápido -->
 <div class="el-modal" id="modal-expediente">
   <div class="el-modal-box">
-    <h3 class="el-modal-title">⚠️ No existe expediente para este DNI</h3>
+    <h3 class="el-modal-title">No existe expediente para este DNI</h3>
     <p class="el-modal-text">El paciente no está en el sistema. Crea un expediente rápido para vincular el examen.</p>
     <div class="el-grid">
       <div class="el-fgroup full">
@@ -498,7 +498,7 @@ body { margin: 0; background: #F4F6FB; font-family: 'Segoe UI', Arial, sans-seri
     </div>
     <div class="el-actions">
       <button class="el-btn el-btn-ghost" id="m-saltar">Subir sin vincular</button>
-      <button class="el-btn el-btn-primary" id="m-crear">✓ Crear expediente y subir</button>
+      <button class="el-btn el-btn-primary" id="m-crear">Crear expediente y subir</button>
     </div>
   </div>
 </div>
@@ -650,13 +650,13 @@ body { margin: 0; background: #F4F6FB; font-family: 'Segoe UI', Arial, sans-seri
       if (found) {
         matchedExpediente = found;
         info.className = 'el-match-info el-match-ok';
-        info.innerHTML = '✓ Expediente encontrado: <strong>' + esc(found.codigoPaciente) + '</strong> · ' + esc(found.nombre);
+        info.innerHTML = 'Expediente encontrado: <strong>' + esc(found.codigoPaciente) + '</strong> · ' + esc(found.nombre);
         /* Auto-llenar nombre si está vacío */
         if (!$id('f-nombre').value && found.nombre) $id('f-nombre').value = found.nombre;
       } else {
         matchedExpediente = null;
         info.className = 'el-match-info el-match-fail';
-        info.textContent = '⚠ No existe expediente con este DNI. Al subir se ofrecerá crear uno rápido.';
+        info.textContent = 'No existe expediente con este DNI. Al subir se ofrecerá crear uno rápido.';
       }
       updateSubmitBtn();
     }).catch(function (err) {
@@ -681,7 +681,7 @@ body { margin: 0; background: #F4F6FB; font-family: 'Segoe UI', Arial, sans-seri
     }
     selectedPdf = file;
     $id('el-file-name').style.display = '';
-    $id('el-file-name').textContent = '✓ ' + file.name + ' (' + (file.size / 1024 / 1024).toFixed(2) + ' MB)';
+    $id('el-file-name').textContent = '' + file.name + ' (' + (file.size / 1024 / 1024).toFixed(2) + ' MB)';
     $id('el-file-drop').classList.add('has-file');
     updateSubmitBtn();
   });
@@ -819,9 +819,9 @@ body { margin: 0; background: #F4F6FB; font-family: 'Segoe UI', Arial, sans-seri
       .then(function () {
         hideOverlay();
         if (codigo) {
-          toast('✓ Examen subido y vinculado a ' + codigo);
+          toast('Examen subido y vinculado a ' + codigo);
         } else {
-          toast('✓ Examen subido (sin vincular a expediente)');
+          toast('Examen subido (sin vincular a expediente)');
         }
         $id('btn-limpiar').click();
         loadHistory();
@@ -858,10 +858,10 @@ body { margin: 0; background: #F4F6FB; font-family: 'Segoe UI', Arial, sans-seri
             : '<span class="el-history-pending">Sin vincular</span>';
           html += '<div class="el-history-item">' +
             '<div class="el-history-info">' +
-              '<p class="el-history-title">🔬 ' + esc(d.tipoNombre || d.tipo) + vinculado + '</p>' +
-              '<p class="el-history-meta">' + esc(d.pacienteNombre || '—') + ' · DNI ' + esc(d.dni || '—') + ' · 📅 ' + esc(fecha) + '</p>' +
+              '<p class="el-history-title">' + esc(d.tipoNombre || d.tipo) + vinculado + '</p>' +
+              '<p class="el-history-meta">' + esc(d.pacienteNombre || '—') + ' · DNI ' + esc(d.dni || '—') + ' · ' + esc(fecha) + '</p>' +
             '</div>' +
-            '<a class="el-history-btn" href="' + esc(d.pdfUrl) + '" target="_blank" rel="noopener">📄 Ver PDF</a>' +
+            '<a class="el-history-btn" href="' + esc(d.pdfUrl) + '" target="_blank" rel="noopener">Ver PDF</a>' +
           '</div>';
         });
         cont.innerHTML = html;
