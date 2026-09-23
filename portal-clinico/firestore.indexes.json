@@ -1,6 +1,14 @@
 {
   "indexes": [
     {
+      "collectionGroup": "expedientes",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "clinicId", "order": "ASCENDING" },
+        { "fieldPath": "createdAt", "order": "DESCENDING" }
+      ]
+    },
+    {
       "collectionGroup": "usuarios",
       "queryScope": "COLLECTION",
       "fields": [
