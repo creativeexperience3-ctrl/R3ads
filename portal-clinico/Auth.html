@@ -565,32 +565,23 @@
     return map[code] || 'Ocurrió un error. Intenta de nuevo.';
   }
 
-  /* ── Paso 1: correo → decide si sigue a contraseña, o avisa que no existe ── */
+  /* ── Paso 1: correo → pasa a contraseña ──
+     Nota: NO se usa fetchSignInMethodsForEmail para chequear de antemano
+     si la cuenta existe — con la protección de enumeración de correos que
+     Firebase activa por defecto en proyectos nuevos, ese método siempre
+     devuelve un array vacío (para que nadie pueda usarlo para adivinar
+     qué correos están registrados), así que "no existe cuenta" saldría
+     SIEMPRE, incluso para cuentas reales. El error real (no existe /
+     contraseña incorrecta) lo da signInWithEmailAndPassword en el paso 2. */
   document.getElementById('view-email').addEventListener('submit', function (e) {
     e.preventDefault();
     var email = document.getElementById('step-email').value.trim();
     if (!email) { showError('Ingresa tu correo electrónico.'); return; }
-    setLoading('btn-next', true);
-    r3adsAuth.fetchSignInMethodsForEmail(email)
-      .then(function (metodos) {
-        setLoading('btn-next', false);
-        if (!metodos.length) {
-          showError('No existe una cuenta con ese correo.');
-          return;
-        }
-        if (metodos.indexOf('password') === -1) {
-          showError('Esa cuenta inicia sesión con Google, no con contraseña — usa "Continuar con Google".');
-          return;
-        }
-        currentEmail = email;
-        document.getElementById('pw-email-display').textContent = email;
-        document.getElementById('step-pass').value = '';
-        switchView('password');
-      })
-      .catch(function (err) {
-        setLoading('btn-next', false);
-        showError(errMsg(err.code));
-      });
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { showError('El correo electrónico no es válido.'); return; }
+    currentEmail = email;
+    document.getElementById('pw-email-display').textContent = email;
+    document.getElementById('step-pass').value = '';
+    switchView('password');
   });
   document.getElementById('btn-change-email').addEventListener('click', function () {
     switchView('email');
