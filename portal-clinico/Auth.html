@@ -39,22 +39,24 @@
 .auth-page {
   min-height: 100vh;
   display: flex;
+  flex-direction: column;
+  background: var(--bg);
 }
 
-/* ── Columna izquierda: fondo claro + tarjeta de marca ── */
-.auth-brand {
-  width: 42%;
-  max-width: 560px;
-  flex-shrink: 0;
-  background: var(--bg);
+/* ── Fila central: tarjeta de marca + formulario, juntos y centrados ── */
+.auth-center {
+  flex: 1;
   display: flex;
   align-items: center;
-  justify-content: flex-end;
-  padding: 40px;
+  justify-content: center;
+  gap: 56px;
+  padding: 24px 40px 48px;
+  flex-wrap: wrap;
 }
+
+.auth-brand { display: flex; }
 .auth-promo-card {
-  width: 100%;
-  max-width: 420px;
+  width: 380px;
   background: var(--jet);
   border-radius: 22px;
   padding: 40px 36px;
@@ -109,21 +111,14 @@
   flex-shrink: 0;
 }
 
-/* ── Columna derecha: blanca, sin tarjeta ── */
-.auth-main {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  background: var(--card);
-  padding: 28px 24px;
-}
+/* ── Barra superior: fuera de la fila centrada, ancho completo ── */
 .auth-topbar {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 16px;
   flex-wrap: wrap;
-  margin-bottom: 40px;
+  padding: 24px 40px 0;
 }
 .auth-back {
   display: inline-flex;
@@ -139,15 +134,14 @@
 .auth-signup-hint a { color: var(--jet); font-weight: 700; text-decoration: none; margin-left: 4px; }
 .auth-signup-hint a:hover { color: var(--bronze); }
 
-.auth-form-wrap {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
+.auth-form-wrap { display: flex; }
 .auth-box {
-  width: 100%;
-  max-width: 400px;
+  width: 380px;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 22px;
+  box-shadow: 0 24px 48px -20px rgba(36,47,64,.18);
+  padding: 40px 36px;
 }
 
 /* ── Vistas (correo → contraseña, o registro) ── */
@@ -342,8 +336,9 @@
   .auth-brand { display: none; }
 }
 @media (max-width: 480px) {
-  .auth-main { padding: 20px 16px; }
-  .auth-box { padding-top: 24px; }
+  .auth-topbar { padding: 20px 16px 0; }
+  .auth-center { padding: 16px 16px 32px; }
+  .auth-box { width: 100%; padding: 28px 20px; }
   .auth-view h1 { font-size: 24px; }
 }
 </style>
@@ -357,7 +352,19 @@
 
 <div class="auth-page">
 
-  <!-- ── Columna izquierda: tarjeta de marca ── -->
+  <div class="auth-topbar">
+    <a class="auth-back" href="index.html">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="15 18 9 12 15 6"/></svg>
+      Volver al sitio
+    </a>
+    <div class="auth-signup-hint" id="signup-hint">
+      ¿Es nuevo en Ancla? <a href="#" data-view="register">Regístrese gratis</a>
+    </div>
+  </div>
+
+  <div class="auth-center">
+
+  <!-- ── Tarjeta de marca ── -->
   <div class="auth-brand">
     <div class="auth-promo-card">
       <div class="auth-promo-mark">
@@ -376,18 +383,8 @@
     </div>
   </div>
 
-  <!-- ── Columna derecha: formulario ── -->
+  <!-- ── Formulario ── -->
   <div class="auth-main">
-    <div class="auth-topbar">
-      <a class="auth-back" href="index.html">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="15 18 9 12 15 6"/></svg>
-        Volver al sitio
-      </a>
-      <div class="auth-signup-hint" id="signup-hint">
-        ¿Es nuevo en Ancla? <a href="#" data-view="register">Regístrese gratis</a>
-      </div>
-    </div>
-
     <div class="auth-form-wrap">
       <div class="auth-box">
 
@@ -475,6 +472,8 @@
 
       </div>
     </div>
+  </div>
+
   </div>
 
 </div>
