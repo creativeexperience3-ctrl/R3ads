@@ -356,7 +356,7 @@ body { margin: 0; background: #F4F6FB; font-family: system-ui,-apple-system,'Seg
   $('ap-save').addEventListener('click', function () {
     var keys = Object.keys(_dirty);
     if (!keys.length) return;
-    var btn = $('ap-save'); btn.disabled = true; btn.textContent = '⏳ Guardando…';
+    var btn = $('ap-save'); btn.disabled = true; btn.textContent = 'Guardando…';
 
     var catalogoRef = r3adsDb.collection('clinics').doc(CLINIC_ID).collection('catalogoConfig');
     var batch = r3adsDb.batch();

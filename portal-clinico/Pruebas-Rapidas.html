@@ -635,7 +635,7 @@
 
     <!-- DRM Fun-6: Pruebas pendientes (sin resultado confirmado) -->
     <div class="pr-card" id="pr-pending-card">
-      <h3 class="pr-card-title">⏳ Pruebas pendientes de resultado</h3>
+      <h3 class="pr-card-title">Pruebas pendientes de resultado</h3>
       <p style="font-size:13px;color:#6B7280;margin-top:-6px">Reanuda una prueba para confirmar el resultado e imprimirla.</p>
       <div id="pr-pending-list"><div style="font-size:13px;color:#9CA3AF">Cargando…</div></div>
     </div>
@@ -1167,7 +1167,7 @@
           html += '<div style="display:flex;justify-content:space-between;align-items:center;background:#FFFBEB;border:1px solid #FCD34D;border-radius:8px;padding:10px 12px">' +
             '<div><b>' + esc(d.nombre || '—') + '</b><br><small style="color:#6B7280">' + esc(d.tipo) + ' · ' + esc(d.fecha) + (d.horaToma ? ' · Toma: ' + esc(d.horaToma) : '') + '</small></div>' +
             '<div style="display:flex;gap:8px">' +
-              '<button class="pr-btn pr-btn-primary" data-pending-id="' + doc.id + '">▶ Reanudar</button>' +
+              '<button class="pr-btn pr-btn-primary" data-pending-id="' + doc.id + '">Reanudar</button>' +
               '<button class="pr-btn pr-btn-ghost" data-eliminar-id="' + doc.id + '" style="color:#B91C1C;border-color:#FCA5A5">Eliminar</button>' +
             '</div>' +
           '</div>';
