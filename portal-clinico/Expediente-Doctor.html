@@ -846,11 +846,156 @@ summary.ed-meds-cat { list-style: revert; }
   padding: 0;
 }
 
+/* ── Historial: calendario de atenciones ── */
+.ed-cal-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+.ed-cal-nav { display: flex; align-items: center; gap: 10px; }
+.ed-cal-nav-btn {
+  width: 36px; height: 36px;
+  border-radius: 8px;
+  border: 1.5px solid #E5E7EB;
+  background: #fff;
+  color: #242F40;
+  font-size: 16px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all .15s;
+}
+.ed-cal-nav-btn:hover { border-color: #242F40; background: #F4F6FB; }
+.ed-cal-month-label {
+  font-size: 15px;
+  font-weight: 800;
+  color: #242F40;
+  text-transform: capitalize;
+  min-width: 160px;
+  text-align: center;
+}
+.ed-cal-search {
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+  flex-wrap: wrap;
+  background: #F9FAFB;
+  border: 1px solid #E5E7EB;
+  border-radius: 10px;
+  padding: 14px;
+  margin-bottom: 20px;
+}
+.ed-cal-search .ed-fgroup { flex: 0 0 auto; min-width: 160px; }
+.ed-cal-search .ed-btn { height: 42px; }
+.ed-cal-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 6px;
+}
+.ed-cal-dow {
+  text-align: center;
+  font-size: 11px;
+  font-weight: 700;
+  color: #9CA3AF;
+  text-transform: uppercase;
+  letter-spacing: .3px;
+  padding-bottom: 6px;
+}
+.ed-cal-day {
+  aspect-ratio: 1;
+  border-radius: 10px;
+  border: 1.5px solid transparent;
+  background: #F9FAFB;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  color: #1F2937;
+  transition: all .15s;
+}
+.ed-cal-day:hover { border-color: #242F40; }
+.ed-cal-day.is-empty { visibility: hidden; cursor: default; }
+.ed-cal-day.is-today { border-color: #CCA43B; }
+.ed-cal-day.is-selected { background: #242F40; color: #fff; border-color: #242F40; }
+.ed-cal-day-dot { width: 5px; height: 5px; border-radius: 50%; background: #242F40; }
+.ed-cal-day.is-selected .ed-cal-day-dot { background: #CCA43B; }
+.ed-cal-lista-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+}
+.ed-cal-lista-header h3 {
+  font-size: 15px;
+  font-weight: 800;
+  color: #242F40;
+  margin: 0;
+  text-transform: capitalize;
+}
+.ed-cal-lista-header span { font-size: 12px; color: #6B7280; font-weight: 600; }
+.ed-cal-pac-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  background: #F9FAFB;
+  border-left: 4px solid #242F40;
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin-bottom: 8px;
+  font-family: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: background .15s;
+}
+.ed-cal-pac-item:hover { background: #F4F6FB; }
+.ed-cal-pac-hora {
+  font-size: 12px;
+  font-weight: 800;
+  color: #242F40;
+  background: #fff;
+  border: 1px solid #E5E7EB;
+  border-radius: 6px;
+  padding: 4px 8px;
+  flex: 0 0 auto;
+}
+.ed-cal-pac-nombre { flex: 1; font-size: 14px; font-weight: 700; color: #1F2937; }
+.ed-cal-pac-tipo { font-size: 12px; color: #6B7280; flex: 0 0 auto; }
+.ed-cal-rango-dias { display: flex; flex-direction: column; gap: 8px; }
+.ed-cal-rango-dia {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  background: #F9FAFB;
+  border: 1.5px solid #E5E7EB;
+  border-radius: 8px;
+  padding: 12px 16px;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all .15s;
+}
+.ed-cal-rango-dia:hover { border-color: #242F40; }
+.ed-cal-rango-fecha { font-size: 14px; font-weight: 700; color: #242F40; text-transform: capitalize; }
+.ed-cal-rango-count { font-size: 12px; color: #6B7280; font-weight: 600; }
+
 @media (max-width: 640px) {
   .ed-ant-row { grid-template-columns: 1fr; gap: 6px; }
   .ed-ant-name { font-size: 13px; }
   .ed-card { padding: 20px; }
   .ed-code-value { font-size: 26px; letter-spacing: 2px; }
+  .ed-cal-month-label { min-width: 0; font-size: 13px; }
+  .ed-cal-dow { font-size: 9px; }
+  .ed-cal-day { font-size: 11px; border-radius: 8px; }
 }
 </style>
 <!-- Analytics por clínica: pendiente (ver nota en Auth.html). -->
@@ -1211,12 +1356,11 @@ summary.ed-meds-cat { list-style: revert; }
     <!-- ─── TAB: HISTORIAL ─── -->
     <section id="tab-historial" class="ed-tab-content" style="display:none">
       <div class="ed-card">
-        <h2 class="ed-card-title">Ver historial del paciente</h2>
-        <p class="ed-card-subtitle">Primero busca un paciente. Aquí verás todas sus consultas previas en orden cronológico.</p>
+        <h2 class="ed-card-title">Historial</h2>
+        <p class="ed-card-subtitle">Selecciona un día en el calendario para ver los pacientes atendidos, o abre el historial completo de un paciente desde la pestaña Buscar.</p>
         <div id="historial-contenido">
           <div class="ed-empty">
-            <div class="ed-empty-icon"></div>
-            <p>Primero busca un paciente en la pestaña "Buscar Paciente"</p>
+            <div class="ed-overlay-spinner" style="margin:0 auto"></div>
           </div>
         </div>
       </div>
@@ -1644,6 +1788,12 @@ summary.ed-meds-cat { list-style: revert; }
 
   /* Almacena el estado del paciente actualmente cargado */
   var pacienteActual = null;
+
+  /* Historial: calendario de atenciones vs. vista de un paciente puntual */
+  var historialVista = 'calendario'; // 'calendario' | 'paciente'
+  var calMesActual = new Date();     // mes que muestra la grilla (día irrelevante)
+  var calDiaSeleccionado = null;     // 'YYYY-MM-DD' del día activo, o null
+  var calDatosMes = {};              // { 'YYYY-MM-DD': [items ordenados cronológicamente] }
 
   /* ════════════════════════════════════════════════════════════
      HELPERS
@@ -2536,7 +2686,12 @@ summary.ed-meds-cat { list-style: revert; }
       });
   }
   document.querySelectorAll('.ed-tab').forEach(function (t) {
-    t.addEventListener('click', function () { switchTab(t.dataset.tab); });
+    t.addEventListener('click', function () {
+      /* Entrar al Historial desde la barra superior siempre parte del calendario;
+         la vista de un paciente puntual solo se activa desde "Ver historial". */
+      if (t.dataset.tab === 'historial') historialVista = 'calendario';
+      switchTab(t.dataset.tab);
+    });
   });
 
   /* ════════════════════════════════════════════════════════════
@@ -3193,7 +3348,10 @@ summary.ed-meds-cat { list-style: revert; }
       '</div>';
 
     document.querySelectorAll('#buscar-resultado [data-goto]').forEach(function (btn) {
-      btn.addEventListener('click', function () { switchTab(btn.dataset.goto); });
+      btn.addEventListener('click', function () {
+        if (btn.dataset.goto === 'historial') historialVista = 'paciente';
+        switchTab(btn.dataset.goto);
+      });
     });
     var btnExBuscar = $id('btn-solicitar-examenes-buscar');
     if (btnExBuscar) btnExBuscar.addEventListener('click', function () { abrirSolicitudExamenesModal(null); });
@@ -6341,13 +6499,18 @@ summary.ed-meds-cat { list-style: revert; }
 
   function renderHistorialTab() {
     var cont = $id('historial-contenido');
-    if (!pacienteActual) {
-      cont.innerHTML = '<div class="ed-empty"><div class="ed-empty-icon"></div><p>Primero busca un paciente en la pestaña "Buscar Paciente"</p></div>';
-      return;
+    if (historialVista === 'paciente' && pacienteActual) {
+      renderHistorialPacienteView(cont);
+    } else {
+      renderHistorialCalendarioView(cont);
     }
+  }
+
+  function renderHistorialPacienteView(cont) {
     var p = pacienteActual;
     var dg = p.datosGenerales || {};
     cont.innerHTML =
+      '<button type="button" class="ed-btn ed-btn-ghost" id="btn-volver-calendario" style="margin-bottom:16px;height:38px;padding:0 16px;font-size:12px">← Volver al calendario</button>' +
       '<div class="ed-patient-summary">' +
         '<div><p class="ed-patient-name">' + esc(dg.nombreCompleto) + '</p>' +
         '<p class="ed-patient-meta">Historial completo: consultas, procedimientos, pruebas rápidas y laboratorios</p></div>' +
@@ -6358,6 +6521,10 @@ summary.ed-meds-cat { list-style: revert; }
       '</div>' +
       '<div id="historial-lista"><div class="ed-empty"><div class="ed-overlay-spinner" style="margin:0 auto"></div></div></div>';
 
+    $id('btn-volver-calendario').addEventListener('click', function () {
+      historialVista = 'calendario';
+      renderHistorialTab();
+    });
     $id('btn-gen-word').addEventListener('click', generarWordExpediente);
 
     var codigo = p.codigoPaciente;
@@ -6389,6 +6556,266 @@ summary.ed-meds-cat { list-style: revert; }
       renderHistorialUnificado(items);
     }).catch(function (err) {
       $id('historial-lista').innerHTML = '<div class="ed-alert ed-alert-error is-visible">Error al cargar historial: ' + esc(err.message) + '</div>';
+    });
+  }
+
+  /* ════════════════════════════════════════════════════════════
+     HISTORIAL — calendario de atenciones. Vista por defecto de la
+     pestaña: un mes navegable donde cada día muestra si hubo
+     atenciones (consultas/servicios completados) de ESTA clínica; al
+     seleccionar un día se listan los pacientes atendidos ese día en
+     orden cronológico, y al elegir uno se abre su historial completo
+     (renderHistorialPacienteView, arriba). Incluye además un
+     buscador independiente por fecha exacta o por rango.
+     ════════════════════════════════════════════════════════════ */
+  function pad2(n) { return String(n).padStart(2, '0'); }
+  function fechaLocalStr(d) { return d.getFullYear() + '-' + pad2(d.getMonth() + 1) + '-' + pad2(d.getDate()); }
+  function fmtDateOnly(key) {
+    return new Date(key + 'T00:00:00').toLocaleDateString('es-HN', { day: '2-digit', month: 'short', year: 'numeric' });
+  }
+  /* Excluye del calendario lo mismo que ya excluye el historial de un paciente:
+     pre clínicas pendientes y los "stub" de facturación duplicados. */
+  function esRegistroAtencionValido(data) {
+    if (data.status === 'preclinica') return false;
+    if (data.tipoRegistro === 'prueba-standalone' || data.tipoRegistro === 'lab-standalone') return false;
+    return true;
+  }
+
+  function renderHistorialCalendarioView(cont) {
+    cont.innerHTML =
+      '<div class="ed-cal-wrap">' +
+        '<div class="ed-cal-toolbar">' +
+          '<div class="ed-cal-nav">' +
+            '<button type="button" class="ed-cal-nav-btn" id="cal-prev" aria-label="Mes anterior">‹</button>' +
+            '<span class="ed-cal-month-label" id="cal-month-label">—</span>' +
+            '<button type="button" class="ed-cal-nav-btn" id="cal-next" aria-label="Mes siguiente">›</button>' +
+          '</div>' +
+          '<button type="button" class="ed-btn ed-btn-ghost" id="cal-hoy" style="height:36px;padding:0 16px;font-size:12px">Hoy</button>' +
+        '</div>' +
+        '<div class="ed-cal-search">' +
+          '<div class="ed-fgroup"><label class="ed-label">Desde</label><input type="date" class="ed-input" id="cal-buscar-desde"></div>' +
+          '<div class="ed-fgroup"><label class="ed-label">Hasta (rango opcional)</label><input type="date" class="ed-input" id="cal-buscar-hasta"></div>' +
+          '<button type="button" class="ed-btn ed-btn-primary" id="cal-buscar-btn">Buscar</button>' +
+        '</div>' +
+        '<div class="ed-cal-grid" id="cal-grid"><div class="ed-empty" style="grid-column:1/-1;padding:30px"><div class="ed-overlay-spinner" style="margin:0 auto"></div></div></div>' +
+        '<div class="ed-cal-lista" id="cal-lista-dia" style="margin-top:22px">' +
+          '<div class="ed-empty"><div class="ed-empty-icon"></div><p>Selecciona un día en el calendario, o busca por fecha, para ver los pacientes atendidos.</p></div>' +
+        '</div>' +
+      '</div>';
+
+    $id('cal-prev').addEventListener('click', function () {
+      calMesActual = new Date(calMesActual.getFullYear(), calMesActual.getMonth() - 1, 1);
+      cargarMesCalendario(calMesActual);
+    });
+    $id('cal-next').addEventListener('click', function () {
+      calMesActual = new Date(calMesActual.getFullYear(), calMesActual.getMonth() + 1, 1);
+      cargarMesCalendario(calMesActual);
+    });
+    $id('cal-hoy').addEventListener('click', function () {
+      var hoy = fechaHoyLocal();
+      calMesActual = new Date();
+      cargarMesCalendario(calMesActual).then(function () { seleccionarDiaCalendario(hoy); });
+    });
+    $id('cal-buscar-btn').addEventListener('click', buscarPorFechaCalendario);
+
+    if (calDiaSeleccionado) $id('cal-buscar-desde').value = calDiaSeleccionado;
+
+    cargarMesCalendario(calMesActual);
+  }
+
+  /* Trae en una sola consulta todas las atenciones (consultas/servicios completados)
+     del mes visible PARA ESTA CLÍNICA, agrupadas por día — así un click en un día del
+     mismo mes no dispara una consulta nueva a Firestore. */
+  function cargarMesCalendario(ref) {
+    var year = ref.getFullYear(), month = ref.getMonth();
+    var inicio = new Date(year, month, 1, 0, 0, 0, 0);
+    var fin = new Date(year, month + 1, 1, 0, 0, 0, 0);
+    return r3adsDb.collection('consultas')
+      .where('clinicId', '==', CLINIC_ID)
+      .where('fecha', '>=', inicio)
+      .where('fecha', '<', fin)
+      .get()
+      .then(function (snap) {
+        var porDia = {};
+        snap.forEach(function (doc) {
+          var data = doc.data();
+          if (!esRegistroAtencionValido(data)) return;
+          var ms = getFechaMs(data);
+          if (!ms) return;
+          var key = fechaLocalStr(new Date(ms));
+          (porDia[key] = porDia[key] || []).push(Object.assign({ _id: doc.id }, data));
+        });
+        Object.keys(porDia).forEach(function (k) {
+          porDia[k].sort(function (a, b) { return getFechaMs(a) - getFechaMs(b); });
+        });
+        calDatosMes = porDia;
+        renderCalGrid();
+        if (calDiaSeleccionado && calDatosMes[calDiaSeleccionado]) renderListaDia(calDiaSeleccionado);
+      })
+      .catch(function (err) {
+        var g = $id('cal-grid');
+        if (g) g.innerHTML = '<div class="ed-alert ed-alert-error is-visible" style="grid-column:1/-1">Error al cargar el calendario: ' + esc(err.message) + '</div>';
+      });
+  }
+
+  function renderCalGrid() {
+    var ref = calMesActual;
+    var year = ref.getFullYear(), month = ref.getMonth();
+    var primerDia = new Date(year, month, 1);
+    var ultimoDia = new Date(year, month + 1, 0);
+    var startOffset = primerDia.getDay();
+    var totalDias = ultimoDia.getDate();
+    var hoy = fechaHoyLocal();
+
+    var celdas = [];
+    for (var i = 0; i < startOffset; i++) celdas.push(null);
+    for (var d = 1; d <= totalDias; d++) celdas.push(d);
+    while (celdas.length % 7 !== 0) celdas.push(null);
+
+    var dow = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
+    var html = dow.map(function (l) { return '<div class="ed-cal-dow">' + l + '</div>'; }).join('');
+    html += celdas.map(function (d) {
+      if (d === null) return '<div class="ed-cal-day is-empty"></div>';
+      var key = year + '-' + pad2(month + 1) + '-' + pad2(d);
+      var count = (calDatosMes[key] || []).length;
+      var cls = 'ed-cal-day';
+      if (key === hoy) cls += ' is-today';
+      if (key === calDiaSeleccionado) cls += ' is-selected';
+      return '<button type="button" class="' + cls + '" data-cal-day="' + key + '">' +
+        '<span>' + d + '</span>' +
+        (count ? '<span class="ed-cal-day-dot" title="' + count + ' atención(es)"></span>' : '') +
+      '</button>';
+    }).join('');
+
+    var grid = $id('cal-grid');
+    grid.innerHTML = html;
+    grid.querySelectorAll('[data-cal-day]').forEach(function (btn) {
+      btn.addEventListener('click', function () { seleccionarDiaCalendario(this.getAttribute('data-cal-day')); });
+    });
+
+    var label = ref.toLocaleDateString('es-HN', { month: 'long', year: 'numeric' });
+    $id('cal-month-label').textContent = label;
+  }
+
+  function seleccionarDiaCalendario(key) {
+    calDiaSeleccionado = key;
+    var desdeInput = $id('cal-buscar-desde');
+    if (desdeInput) desdeInput.value = key;
+    renderCalGrid();
+    renderListaDia(key);
+  }
+
+  function renderListaDia(key) {
+    var items = calDatosMes[key] || [];
+    var titulo = new Date(key + 'T00:00:00').toLocaleDateString('es-HN', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+    var cont = $id('cal-lista-dia');
+    var html = '<div class="ed-cal-lista-header"><h3>' + esc(titulo) + '</h3><span>' + items.length + ' paciente(s) atendido(s)</span></div>';
+    if (!items.length) {
+      html += '<div class="ed-empty"><div class="ed-empty-icon"></div><p>No hay pacientes atendidos este día.</p></div>';
+      cont.innerHTML = html;
+      return;
+    }
+    html += items.map(function (it) {
+      var ms = getFechaMs(it);
+      var hora = ms ? new Date(ms).toLocaleTimeString('es-HN', { hour: '2-digit', minute: '2-digit' }) : '—';
+      var esServicio = it.status === 'servicio' || it.status === 'servicio-completo' ||
+        it.tipoRegistro === 'servicio-standalone' || it.tipoRegistro === 'servicio-vinculado';
+      var tipoLabel = esServicio ? 'Procedimiento' : 'Consulta';
+      return '<button type="button" class="ed-cal-pac-item" data-cal-pac="' + esc(it.codigoPaciente || '') + '">' +
+        '<span class="ed-cal-pac-hora">' + hora + '</span>' +
+        '<span class="ed-cal-pac-nombre">' + esc(it.pacienteNombre || '—') + '</span>' +
+        '<span class="ed-cal-pac-tipo">' + tipoLabel + '</span>' +
+      '</button>';
+    }).join('');
+    cont.innerHTML = html;
+    cont.querySelectorAll('[data-cal-pac]').forEach(function (btn) {
+      btn.addEventListener('click', function () { abrirHistorialDesdeCalendario(this.getAttribute('data-cal-pac')); });
+    });
+  }
+
+  /* Navega el calendario al mes del día pedido (cargando sus datos si hace
+     falta) y lo selecciona — usado por "Hoy" y por los resultados de rango. */
+  function irADia(key) {
+    var partes = key.split('-');
+    var y = parseInt(partes[0], 10), m = parseInt(partes[1], 10) - 1;
+    calMesActual = new Date(y, m, 1);
+    cargarMesCalendario(calMesActual).then(function () { seleccionarDiaCalendario(key); });
+  }
+
+  function abrirHistorialDesdeCalendario(codigo) {
+    if (!codigo) return;
+    showOverlay('Cargando expediente...');
+    r3adsDb.collection('expedientes').doc(codigo).get().then(function (snap) {
+      hideOverlay();
+      if (!snap.exists) { showAlert('No se encontró el expediente de este paciente.', 'error'); return; }
+      pacienteActual = Object.assign({ codigoPaciente: snap.id }, snap.data());
+      historialVista = 'paciente';
+      renderHistorialTab();
+    }).catch(function (err) {
+      hideOverlay();
+      showAlert('Error al abrir el expediente: ' + err.message, 'error');
+    });
+  }
+
+  /* Buscador independiente: una fecha exacta salta directo al día; un rango
+     (máx. 93 días) trae los días con atenciones dentro del rango para elegir uno. */
+  function buscarPorFechaCalendario() {
+    var desde = $val('cal-buscar-desde');
+    var hasta = $val('cal-buscar-hasta') || desde;
+    if (!desde) { showAlert('Elige al menos una fecha.', 'error'); return; }
+    if (hasta < desde) { showAlert('La fecha "hasta" no puede ser anterior a "desde".', 'error'); return; }
+
+    if (desde === hasta) { irADia(desde); return; }
+
+    var dIni = new Date(desde + 'T00:00:00');
+    var dFin = new Date(hasta + 'T00:00:00');
+    var dias = Math.round((dFin - dIni) / 86400000) + 1;
+    if (dias > 93) { showAlert('El rango máximo de búsqueda es de 93 días. Acorta el rango.', 'error'); return; }
+
+    var inicio = dIni;
+    var fin = new Date(dFin.getFullYear(), dFin.getMonth(), dFin.getDate() + 1, 0, 0, 0, 0);
+    showOverlay('Buscando...');
+    r3adsDb.collection('consultas').where('clinicId', '==', CLINIC_ID).where('fecha', '>=', inicio).where('fecha', '<', fin).get()
+      .then(function (snap) {
+        hideOverlay();
+        var porDia = {};
+        snap.forEach(function (doc) {
+          var data = doc.data();
+          if (!esRegistroAtencionValido(data)) return;
+          var ms = getFechaMs(data);
+          if (!ms) return;
+          var key = fechaLocalStr(new Date(ms));
+          (porDia[key] = porDia[key] || 0);
+          porDia[key]++;
+        });
+        renderResultadoRangoCalendario(porDia, desde, hasta);
+      }).catch(function (err) {
+        hideOverlay();
+        showAlert('Error al buscar: ' + err.message, 'error');
+      });
+  }
+
+  function renderResultadoRangoCalendario(porDia, desde, hasta) {
+    var keys = Object.keys(porDia).sort();
+    var cont = $id('cal-lista-dia');
+    var titulo = 'Resultados del ' + fmtDateOnly(desde) + ' al ' + fmtDateOnly(hasta);
+    if (!keys.length) {
+      cont.innerHTML = '<div class="ed-cal-lista-header"><h3>' + esc(titulo) + '</h3></div>' +
+        '<div class="ed-empty"><div class="ed-empty-icon"></div><p>No hay pacientes atendidos en ese rango de fechas.</p></div>';
+      return;
+    }
+    var html = '<div class="ed-cal-lista-header"><h3>' + esc(titulo) + '</h3><span>' + keys.length + ' día(s) con atenciones</span></div>' +
+      '<div class="ed-cal-rango-dias">' +
+      keys.map(function (k) {
+        return '<button type="button" class="ed-cal-rango-dia" data-ir-dia="' + k + '">' +
+          '<span class="ed-cal-rango-fecha">' + fmtDateOnly(k) + '</span>' +
+          '<span class="ed-cal-rango-count">' + porDia[k] + ' paciente(s)</span>' +
+        '</button>';
+      }).join('') +
+      '</div>';
+    cont.innerHTML = html;
+    cont.querySelectorAll('[data-ir-dia]').forEach(function (btn) {
+      btn.addEventListener('click', function () { irADia(this.getAttribute('data-ir-dia')); });
     });
   }
 
