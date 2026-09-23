@@ -1451,8 +1451,9 @@ summary.ed-meds-cat { list-style: revert; }
       .replace(/á/g, 'a').replace(/é/g, 'e').replace(/í/g, 'i').replace(/ó/g, 'o').replace(/ú/g, 'u').replace(/ü/g, 'u').replace(/ñ/g, 'n')
       .replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
   }
-  var _servicioKeyPorNombre = {};   // nombreEs (exacto) -> servicioKey, calculado desde catalogo-servicios.js
+  var _servicioKeyPorNombre = {};   // nombreEs (exacto) -> servicioKey, calculado desde catalogo-servicios.js + servicios propios
   var _catalogoConfigCache = {};    // servicioKey -> { enfermeriaCompletable, ... } de ESTA clínica
+  var _serviciosCustomNombres = []; // nombres de servicios/productos propios de esta clínica (cfg.custom === true)
   function computeServicioKey(servicioNombre) {
     return _servicioKeyPorNombre[servicioNombre] || null;
   }
@@ -1484,6 +1485,19 @@ summary.ed-meds-cat { list-style: revert; }
              catálogo actual, verificado al portar este archivo). */
           if (!byName[nameEs]) byName[nameEs] = key;
         });
+      });
+      /* Servicios/productos propios de esta clínica (cfg.custom === true,
+         dados de alta desde Admin-Precios.html) — no viven en
+         catalogo-servicios.js, solo en catalogoConfig. Se registran acá
+         mismo en byName para que computeServicioKey() los resuelva gratis,
+         igual que a cualquier ítem del catálogo compartido. */
+      _serviciosCustomNombres = [];
+      Object.keys(_catalogoConfigCache).forEach(function (key) {
+        var c = _catalogoConfigCache[key];
+        if (c && c.custom === true && c.nombreEs) {
+          byName[c.nombreEs] = key;
+          _serviciosCustomNombres.push(c.nombreEs);
+        }
       });
       _servicioKeyPorNombre = byName;
       /* Si la pestaña Consulta ya estaba abierta antes de que esto cargara,
@@ -3909,6 +3923,8 @@ summary.ed-meds-cat { list-style: revert; }
     CATALOGO_SERVICIOS.forEach(function (grp) {
       grp.items.forEach(function (s) { serviciosFlat.push({ value: s, label: s, group: grp.label }); });
     });
+    /* Servicios/productos propios de esta clínica (Admin-Precios.html) */
+    _serviciosCustomNombres.forEach(function (s) { serviciosFlat.push({ value: s, label: s, group: 'Tus servicios' }); });
     /* Oculta servicios que esta clínica desactivó desde Admin-Precios.html
        (activo === false en catalogoConfig). Fail-open: sin servicioKey o sin
        override, el servicio se sigue mostrando — ver nota en
@@ -5780,7 +5796,10 @@ summary.ed-meds-cat { list-style: revert; }
        'Cauterización lunar/verruga' es un caso especial: en vez de una sola
        cantidad, muestra cantidad numérica por subtipo (Normal / Párpado-Cara / Lesión Grande). */
     var checkboxesHtml = '';
-    CATALOGO_SERVICIOS.forEach(function(grp){
+    var gruposConCustom = CATALOGO_SERVICIOS.concat(
+      _serviciosCustomNombres.length ? [{ label: 'Tus servicios', items: _serviciosCustomNombres }] : []
+    );
+    gruposConCustom.forEach(function(grp){
       /* Mismo filtro de activo que renderRegistroVisitaForm() — ver ahí. */
       var itemsActivos = grp.items.filter(function (s) {
         var key = computeServicioKey(s);

@@ -272,15 +272,43 @@ body { margin: 0; background: #F4F6FB; font-family: system-ui,-apple-system,'Seg
       });
       if (items.length) _cats.push({ cat: cat, catTitle: catDef.catTitle || cat, items: items });
     });
+    parseServiciosCustom();
+  }
+
+  /* Servicios/productos propios de ESTA clínica — no viven en
+     catalogo-servicios.js (compartido por todas), sino solo en
+     catalogoConfig (cfg.custom === true). Categoría aparte, siempre
+     presente (aunque esté vacía) porque ahí vive el botón de alta. */
+  function parseServiciosCustom() {
+    var items = [];
+    Object.keys(_cfg).forEach(function (key) {
+      var cfg = _cfg[key];
+      if (cfg && cfg.custom === true) {
+        items.push({ key: key, cat: 'custom', nameEs: cfg.nombreEs || key, nameEn: '', defPrice: 0 });
+      }
+    });
+    _cats.push({ cat: 'custom', catTitle: 'Tus servicios', items: items });
   }
 
   /* ── Render ── */
   function render() {
     var html = _cats.map(function (c) {
       var rows = c.items.map(function (it) { return rowHtml(it); }).join('');
+      var isCustom = c.cat === 'custom';
+      var headerRight = isCustom
+        ? '<button type="button" class="ap-reset" id="ap-add-custom-btn" style="text-decoration:none;font-weight:800;color:#242F40">+ Agregar servicio</button>'
+        : '<span class="ap-cat-count">' + c.items.length + ' ítems</span>';
+      var addForm = isCustom
+        ? '<div class="ap-row" id="ap-add-custom-form" style="display:none;grid-template-columns:1fr auto">' +
+            '<input type="text" class="ap-input" id="ap-add-custom-input" placeholder="Nombre del servicio o producto…">' +
+            '<button type="button" class="ap-save" id="ap-add-custom-submit" style="height:38px;padding:0 16px">Crear</button>' +
+          '</div>'
+        : '';
       return '<div class="ap-cat" data-cat="' + esc(c.cat) + '">' +
-        '<div class="ap-cat-h"><h3>' + esc(c.catTitle) + '</h3><span class="ap-cat-count">' + c.items.length + ' ítems</span></div>' +
-        '<div class="ap-cat-body">' + rows + '</div>' +
+        '<div class="ap-cat-h"><h3>' + esc(c.catTitle) + '</h3>' + headerRight + '</div>' +
+        '<div class="ap-cat-body">' + addForm + rows +
+          (isCustom && !c.items.length ? '<div class="ap-msg" style="padding:20px">Todavía no agregaste ningún servicio propio.</div>' : '') +
+        '</div>' +
       '</div>';
     }).join('');
     $('ap-list').innerHTML = html;
@@ -290,13 +318,14 @@ body { margin: 0; background: #F4F6FB; font-family: system-ui,-apple-system,'Seg
 
   function rowHtml(it) {
     var cfg = _cfg[it.key] || {};
+    var isCustom = it.cat === 'custom';
     var price = (cfg.precio !== undefined && cfg.precio !== null) ? cfg.precio : it.defPrice;
     var priceInput =
       '<div class="ap-field"><span class="ap-field-label">Precio público</span>' +
         '<div class="ap-input-wrap has-prefix"><span class="ap-prefix">L</span>' +
           '<input type="number" min="0" step="0.01" class="ap-input" data-key="' + esc(it.key) + '" data-field="precio" value="' + esc(price) + '">' +
         '</div>' +
-        '<div class="ap-row-def">Catálogo: L' + fmtN(it.defPrice) + '</div>' +
+        (isCustom ? '' : '<div class="ap-row-def">Catálogo: L' + fmtN(it.defPrice) + '</div>') +
       '</div>';
 
     // Enfermería-completable: usado por firestore.rules (esServicioEnfermeria)
@@ -317,6 +346,7 @@ body { margin: 0; background: #F4F6FB; font-family: system-ui,-apple-system,'Seg
     var activoCol = '<div class="ap-field ap-excl">' +
       '<label class="ap-excl-switch"><input type="checkbox" data-key="' + esc(it.key) + '" data-field="activo"' + (activo ? ' checked' : '') + '>' +
         '<span class="ap-excl-track"><span class="ap-excl-thumb"></span></span> Ofrece este servicio</label>' +
+      (isCustom ? '<button type="button" class="ap-reset ap-delete-custom" data-key="' + esc(it.key) + '" style="color:#B91C1C">Eliminar</button>' : '') +
     '</div>';
 
     return '<div class="ap-row' + (activo ? '' : ' is-inactive') + '" data-key="' + esc(it.key) + '" data-name="' + esc((it.nameEs + ' ' + it.nameEn).toLowerCase()) + '">' +
@@ -352,13 +382,72 @@ body { margin: 0; background: #F4F6FB; font-family: system-ui,-apple-system,'Seg
       });
     });
     /* Restablecer */
-    $('ap-list').querySelectorAll('.ap-reset').forEach(function (btn) {
+    $('ap-list').querySelectorAll('.ap-reset:not(#ap-add-custom-btn):not(.ap-delete-custom)').forEach(function (btn) {
       btn.addEventListener('click', function () { resetRow(btn.dataset.key); });
+    });
+    /* Eliminar servicio propio */
+    $('ap-list').querySelectorAll('.ap-delete-custom').forEach(function (btn) {
+      btn.addEventListener('click', function (e) { e.stopPropagation(); eliminarServicioCustom(btn.dataset.key); });
     });
     /* Acordeón categorías */
     $('ap-list').querySelectorAll('.ap-cat-h').forEach(function (h) {
-      h.addEventListener('click', function () { h.parentElement.classList.toggle('is-collapsed'); });
+      h.addEventListener('click', function (e) {
+        if (e.target.id === 'ap-add-custom-btn') return;
+        h.parentElement.classList.toggle('is-collapsed');
+      });
     });
+    /* Alta de servicio propio */
+    var addBtn = $('ap-add-custom-btn');
+    if (addBtn) {
+      addBtn.addEventListener('click', function (e) {
+        e.stopPropagation();
+        var form = $('ap-add-custom-form');
+        form.style.display = form.style.display === 'none' ? 'grid' : 'none';
+        if (form.style.display === 'grid') $('ap-add-custom-input').focus();
+      });
+    }
+    var addSubmit = $('ap-add-custom-submit');
+    if (addSubmit) {
+      addSubmit.addEventListener('click', function () { agregarServicioCustom($('ap-add-custom-input').value); });
+    }
+    var addInput = $('ap-add-custom-input');
+    if (addInput) {
+      addInput.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter') { e.preventDefault(); agregarServicioCustom(addInput.value); }
+      });
+    }
+  }
+
+  /* ── Alta / baja de servicios propios ── */
+  function agregarServicioCustom(nombreEs) {
+    nombreEs = (nombreEs || '').trim();
+    if (!nombreEs) return;
+    var customCat = _cats.filter(function (c) { return c.cat === 'custom'; })[0];
+    if (!customCat) { customCat = { cat: 'custom', catTitle: 'Tus servicios', items: [] }; _cats.push(customCat); }
+    var base = 'custom__' + slug(nombreEs);
+    var existentes = {}; customCat.items.forEach(function (it) { existentes[it.key] = true; });
+    var key = base, n = 1;
+    while (existentes[key]) { n++; key = base + '--' + n; }
+    customCat.items.push({ key: key, cat: 'custom', nameEs: nombreEs, nameEn: '', defPrice: 0 });
+    render();
+    markDirty(key);
+    toast('Servicio agregado — no olvides "Guardar cambios".');
+  }
+
+  function eliminarServicioCustom(key) {
+    if (!confirm('¿Eliminar este servicio? No se puede deshacer.')) return;
+    r3adsDb.collection('clinics').doc(CLINIC_ID).collection('catalogoConfig').doc(key).delete()
+      .then(function () {
+        _cats.forEach(function (c) {
+          if (c.cat === 'custom') c.items = c.items.filter(function (it) { return it.key !== key; });
+        });
+        delete _cfg[key];
+        delete _dirty[key];
+        render();
+        toast('Servicio eliminado.');
+      }).catch(function (err) {
+        toast('Error al eliminar: ' + err.message, true);
+      });
   }
 
   function cssEsc(s){ return String(s).replace(/["\\]/g, '\\$&'); }
@@ -412,6 +501,7 @@ body { margin: 0; background: #F4F6FB; font-family: system-ui,-apple-system,'Seg
         precio   : priceInp ? (parseFloat(priceInp.value) || 0) : it.defPrice,
         enfermeriaCompletable: enfChk ? !!enfChk.checked : false,
         activo   : activoChk ? !!activoChk.checked : true,
+        custom   : it.cat === 'custom',
         actualizado: firebase.firestore.FieldValue.serverTimestamp()
       };
       batch.set(catalogoRef.doc(key), payload, { merge: true });
