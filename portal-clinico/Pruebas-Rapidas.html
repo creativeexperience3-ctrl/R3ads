@@ -743,11 +743,12 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <script src="firebase-init.js"></script>
+<script src="r3ads-staff.js"></script>
 <script src="clinic-modules.js"></script>
 
 <script>
 (function () {
-  var CLINIC_ID = window.R3ADS_CLINIC_ID;
+  var CLINIC_ID = null; // se resuelve por sesión en el AUTH GUARD (r3adsStaff.resolveClinicId)
   var CLINIC = window.R3ADS_CLINIC_FALLBACK || {};
   /* ════════════════════════════════════════════════════════════
      HELPERS
@@ -831,9 +832,13 @@
       window.location.href = 'Auth.html?returnTo=Pruebas-Rapidas.html';
       return;
     }
-    r3adsModulos.cargar(CLINIC_ID).then(function () {
-      if (!r3adsModulos.exigir('pruebasRapidas', 'Pruebas Rápidas')) return;
-      arrancar(user);
+    r3adsStaff.resolveClinicId(user, function (clinicId) {
+      if (!clinicId) { window.location.href = 'Auth.html?returnTo=Pruebas-Rapidas.html'; return; }
+      CLINIC_ID = clinicId;
+      r3adsModulos.cargar(CLINIC_ID).then(function () {
+        if (!r3adsModulos.exigir('pruebasRapidas', 'Pruebas Rápidas')) return;
+        arrancar(user);
+      });
     });
   });
 

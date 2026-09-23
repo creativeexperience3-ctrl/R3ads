@@ -1319,7 +1319,7 @@ summary.ed-meds-cat { list-style: revert; }
   /* ════════════════════════════════════════════════════════════
      CONFIGURACIÓN
      ════════════════════════════════════════════════════════════ */
-  var CLINIC_ID = window.R3ADS_CLINIC_ID;
+  var CLINIC_ID = null; // se resuelve por sesión en el AUTH GUARD (r3adsStaff.resolveClinicId)
   var CLINIC = window.R3ADS_CLINIC_FALLBACK || {};
   /* El acceso al portal se resuelve vía r3adsStaff.checkDoctor (r3ads-staff.js):
      rol medico | enf | admin en /usuarios de ESTA clínica (CLINIC_ID), sin
@@ -2513,37 +2513,40 @@ summary.ed-meds-cat { list-style: revert; }
       window.location.href = 'Auth.html?returnTo=Expediente-Doctor.html';
       return;
     }
-    r3adsStaff.checkDoctor(user, CLINIC_ID, function (ok) {
-      if (!ok) {
-        document.body.innerHTML =
-          '<div style="display:flex;align-items:center;justify-content:center;min-height:100vh;padding:40px;text-align:center;font-family:system-ui">' +
-          '<div><h1 style="color:#991B1B">Acceso restringido</h1>' +
-          '<p style="color:#6B7280;margin:14px 0 24px">Solo el personal médico autorizado puede acceder a este portal.</p>' +
-          '<a href="Auth.html" style="background:#242F40;color:#fff;padding:12px 24px;border-radius:10px;text-decoration:none;font-weight:700">Volver al inicio de sesión</a>' +
-          '</div></div>';
-        return;
-      }
-      /* Cachea si es admin, para esAdminUnif() (uso síncrono en la pestaña Unificar) */
-      r3adsStaff.checkAdmin(user, CLINIC_ID, function (isAdm) { _isAdminUnifCache = isAdm; });
-      /* Cachea si es médico tratante, para esMedicoTratanteClient() (uso síncrono
-         en la pestaña Consulta: oculta/bloquea la Consulta médica a enfermería) */
-      r3adsStaff.checkMedico(user, CLINIC_ID, function (isMed) {
-        _isMedicoTratanteCache = isMed;
-        if ($id('tab-consulta').style.display !== 'none') renderConsultaTab();
+    r3adsStaff.resolveClinicId(user, function (clinicId) {
+      CLINIC_ID = clinicId;
+      r3adsStaff.checkDoctor(user, CLINIC_ID, function (ok) {
+        if (!ok) {
+          document.body.innerHTML =
+            '<div style="display:flex;align-items:center;justify-content:center;min-height:100vh;padding:40px;text-align:center;font-family:system-ui">' +
+            '<div><h1 style="color:#991B1B">Acceso restringido</h1>' +
+            '<p style="color:#6B7280;margin:14px 0 24px">Solo el personal médico autorizado puede acceder a este portal.</p>' +
+            '<a href="Auth.html" style="background:#242F40;color:#fff;padding:12px 24px;border-radius:10px;text-decoration:none;font-weight:700">Volver al inicio de sesión</a>' +
+            '</div></div>';
+          return;
+        }
+        /* Cachea si es admin, para esAdminUnif() (uso síncrono en la pestaña Unificar) */
+        r3adsStaff.checkAdmin(user, CLINIC_ID, function (isAdm) { _isAdminUnifCache = isAdm; });
+        /* Cachea si es médico tratante, para esMedicoTratanteClient() (uso síncrono
+           en la pestaña Consulta: oculta/bloquea la Consulta médica a enfermería) */
+        r3adsStaff.checkMedico(user, CLINIC_ID, function (isMed) {
+          _isMedicoTratanteCache = isMed;
+          if ($id('tab-consulta').style.display !== 'none') renderConsultaTab();
+        });
+        /* Precarga del catálogo (enfermeriaCompletable) de ESTA clínica — ver
+           cargarCatalogoEnfermeria() y puedeEnfermeriaCompletarServicio() más abajo. */
+        cargarCatalogoEnfermeria();
+        /* Módulos contratados: saca del DOM lo que esta clínica no pagó
+           (ver clinic-modules.js). El portal en sí y la pestaña Caja son
+           núcleo, no se tocan. */
+        r3adsModulos.cargar(CLINIC_ID).then(aplicarModulos);
+        /* Mostrar nombre del doctor */
+        $id('ed-user-chip').style.display = '';
+        var _edN = user.displayName || user.email.split('@')[0]; $id('ed-user-name').textContent = _edN;
+        /* Inicializar antecedentes */
+        renderAntecedentes('nuevo-pat-container', ANTECEDENTES_PATOLOGICOS, 'nvopat');
+        renderAntecedentes('nuevo-nopat-container', ANTECEDENTES_NO_PATOLOGICOS, 'nvonopat');
       });
-      /* Precarga del catálogo (enfermeriaCompletable) de ESTA clínica — ver
-         cargarCatalogoEnfermeria() y puedeEnfermeriaCompletarServicio() más abajo. */
-      cargarCatalogoEnfermeria();
-      /* Módulos contratados: saca del DOM lo que esta clínica no pagó
-         (ver clinic-modules.js). El portal en sí y la pestaña Caja son
-         núcleo, no se tocan. */
-      r3adsModulos.cargar(CLINIC_ID).then(aplicarModulos);
-      /* Mostrar nombre del doctor */
-      $id('ed-user-chip').style.display = '';
-      var _edN = user.displayName || user.email.split('@')[0]; $id('ed-user-name').textContent = _edN;
-      /* Inicializar antecedentes */
-      renderAntecedentes('nuevo-pat-container', ANTECEDENTES_PATOLOGICOS, 'nvopat');
-      renderAntecedentes('nuevo-nopat-container', ANTECEDENTES_NO_PATOLOGICOS, 'nvonopat');
     });
   });
 

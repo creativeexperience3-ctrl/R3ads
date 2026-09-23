@@ -320,7 +320,7 @@ body { margin: 0; background: #F4F6FB; font-family: system-ui,-apple-system,'Seg
   // clinicId de esta instancia (ver clinic-config.js, Fase 5). Toda lectura/
   // escritura de /usuarios queda acotada a esta clínica — sin esto, un admin
   // vería el personal de TODAS las clínicas del proyecto Firebase.
-  var CLINIC_ID = window.R3ADS_CLINIC_ID;
+  var CLINIC_ID = null; // se resuelve por sesión en el AUTH GUARD (r3adsStaff.resolveClinicId)
 
   var ROL_LABELS = { caja: 'Caja', enf: 'Caja · Enfermería', medico: 'Médico', admin: 'Administrador' };
   var _users = [];
@@ -342,10 +342,13 @@ body { margin: 0; background: #F4F6FB; font-family: system-ui,-apple-system,'Seg
   /* ── Auth guard ── */
   r3adsAuth.onAuthStateChanged(function (user) {
     if (!user) { window.location.href = 'Auth.html?returnTo=Admin-Usuarios.html'; return; }
-    r3adsStaff.checkAdmin(user, CLINIC_ID, function (ok) {
-      if (!ok) { window.location.href = 'Auth.html'; return; }
-      $('au-email').textContent = user.email;
-      load();
+    r3adsStaff.resolveClinicId(user, function (clinicId) {
+      CLINIC_ID = clinicId;
+      r3adsStaff.checkAdmin(user, CLINIC_ID, function (ok) {
+        if (!ok) { window.location.href = 'Auth.html'; return; }
+        $('au-email').textContent = user.email;
+        load();
+      });
     });
   });
   $('au-logout').onclick = function () {

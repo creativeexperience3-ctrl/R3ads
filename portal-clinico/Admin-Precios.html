@@ -184,7 +184,7 @@ body { margin: 0; background: #F4F6FB; font-family: system-ui,-apple-system,'Seg
 
 <script>
 (function () {
-  var CLINIC_ID = window.R3ADS_CLINIC_ID;
+  var CLINIC_ID = null; // se resuelve por sesión en el AUTH GUARD (r3adsStaff.resolveClinicId)
   var _cats  = [];           /* [{cat, catTitle, items:[...]}] */
   var _cfg   = {};           /* overrides por key */
   var _dirty = {};           /* key -> true */
@@ -210,10 +210,13 @@ body { margin: 0; background: #F4F6FB; font-family: system-ui,-apple-system,'Seg
   /* ── Auth ── */
   r3adsAuth.onAuthStateChanged(function (user) {
     if (!user) { window.location.href = 'Auth.html?returnTo=Admin-Precios.html'; return; }
-    r3adsStaff.checkAdmin(user, CLINIC_ID, function (ok) {
-      if (!ok) { window.location.href = 'Auth.html'; return; }
-      $('ap-user-email').textContent = user.email;
-      boot();
+    r3adsStaff.resolveClinicId(user, function (clinicId) {
+      CLINIC_ID = clinicId;
+      r3adsStaff.checkAdmin(user, CLINIC_ID, function (ok) {
+        if (!ok) { window.location.href = 'Auth.html'; return; }
+        $('ap-user-email').textContent = user.email;
+        boot();
+      });
     });
   });
   $('ap-logout').addEventListener('click', function (e) {

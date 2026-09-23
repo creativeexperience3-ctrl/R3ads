@@ -101,6 +101,17 @@
       user.getIdTokenResult()
         .then(function (token) { cb(token.claims.superadmin === true); })
         .catch(function () { cb(false); });
+    },
+    // resolveClinicId: clinicId de la SESIÓN (custom claim del token) —
+    // fuente de verdad de qué clínica ve cada página. Reemplaza al viejo
+    // window.R3ADS_CLINIC_ID estático (clinic-config.js), que solo servía
+    // mientras existía una sola clínica desplegada. Mismo claim que ya
+    // validan firestore.rules (myClinic() = request.auth.token.clinicId).
+    resolveClinicId: function (user, cb) {
+      if (!user) { cb(null); return; }
+      user.getIdTokenResult()
+        .then(function (token) { cb(token.claims.clinicId || null); })
+        .catch(function () { cb(null); });
     }
   };
 })(window);
