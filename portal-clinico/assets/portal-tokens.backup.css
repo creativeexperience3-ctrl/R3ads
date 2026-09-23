@@ -1,0 +1,247 @@
+/* =============================================================
+   R3ads Portal Clínico — design tokens
+   Origen: copia genericizada de assets/cmg-tokens.css (CMG-Website),
+   con la paleta de marca (2026-09-21): Graphite / Jet Black /
+   Golden Bronze. Sin logo todavía ("haremos uno profesional luego") —
+   solo color. Nada del layout depende del nombre "cmg".
+   ============================================================= */
+
+:root {
+  /* ── Paleta de marca ────────────────────────────────────── */
+  --graphite:        #363636;
+  --jet-black:        #242F40;
+  --golden-bronze:    #CCA43B;
+
+  --brand-primary:        #242F40;   /* jet-black — superficie/header principal */
+  --brand-primary-tint:   #3B4D68;   /* variante más clara (derivada) */
+  --brand-primary-deep:   #161D27;   /* hover/press del primario (derivada) */
+  --brand-accent:         #CCA43B;   /* golden-bronze — acento CLARO: texto sobre
+                                         fondo oscuro, o fondo con texto oscuro
+                                         encima (mismo doble rol que el amarillo) */
+  --brand-accent-deep:    #A2802A;   /* golden-bronze oscurecido (hover, derivada) */
+  --brand-accent-2:       #363636;   /* graphite — acento secundario OSCURO:
+                                         fondo con texto blanco encima (pills,
+                                         bordes, mismo rol que el rojo) */
+  --brand-accent-2-deep:  #212121;   /* graphite oscurecido (hover, derivada) */
+  --brand-teal:           #5B8A9E;
+  --brand-teal-light:     #C3D8E0;
+  --wa-green:             #25D366;   /* WhatsApp icon */
+  --wa-green-deep:        #1FB257;
+
+  --white:           #FFFFFF;
+  --black:           #0A0F1F;
+
+  /* ── Neutrals (sparingly used) ─────────────────────────── */
+  --neutral-100: #F6F7FB;
+  --neutral-200: #E6E9F2;
+  --neutral-300: #C8CEE0;
+  --neutral-400: #8C95B1;
+  --neutral-500: #5A6485;
+  --neutral-600: #38415F;
+  --neutral-700: #232A44;
+
+  /* ── Semantic foregrounds / surfaces ───────────────────── */
+  --fg-1:        var(--white);                /* primary on dark */
+  --fg-2:        rgba(255,255,255,.78);       /* secondary on dark */
+  --fg-3:        rgba(255,255,255,.54);
+  --fg-on-light: var(--brand-primary);        /* primary on white */
+  --fg-on-light-2: var(--neutral-500);
+  --surface-1:   var(--brand-primary);        /* brand surface */
+  --surface-2:   var(--brand-primary-tint);
+  --surface-light: var(--white);
+  --surface-light-2: var(--neutral-100);
+  --accent:      var(--brand-accent);
+  --accent-2:    var(--brand-accent-2);
+  --link:        var(--brand-accent);
+  --divider:     rgba(255,255,255,.18);
+  --divider-on-light: var(--neutral-200);
+
+  /* ── Type families ──────────────────────────────────────
+     Genéricas del sistema — sin fuentes licenciadas de ningún
+     cliente. Nada de mayúsculas forzadas ni script decorativo:
+     ese "voice" queda para cuando exista una marca real. */
+  --font-display: system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-body:    system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-sub:     system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-script:  cursive;
+  --font-mono:    ui-monospace, 'SF Mono', 'JetBrains Mono', Menlo, monospace;
+
+  /* ── Type ramp (display / headline) ────────────────────── */
+  --h1-size:     clamp(40px, 6vw, 72px);
+  --h1-weight:   800;
+  --h1-tracking: -0.01em;
+  --h1-lh:       1.05;
+
+  --h2-size:     clamp(30px, 4.5vw, 48px);
+  --h2-weight:   800;
+  --h2-tracking: -0.01em;
+  --h2-lh:       1.08;
+
+  --h3-size:     clamp(22px, 3vw, 30px);
+  --h3-weight:   700;
+  --h3-tracking: 0;
+  --h3-lh:       1.15;
+
+  --eyebrow-size:    13px;
+  --eyebrow-weight:  700;
+  --eyebrow-tracking:.12em;
+
+  --price-size:  clamp(48px, 8vw, 96px);
+  --price-weight: 800;
+
+  --script-size: clamp(24px, 3.5vw, 44px);
+
+  --body-size:   16px;
+  --body-lh:     1.5;
+  --body-weight: 400;
+
+  --small-size:  13px;
+  --small-lh:    1.4;
+
+  /* ── Spacing scale (4-point) ───────────────────────────── */
+  --s-0:  0;
+  --s-1:  4px;
+  --s-2:  8px;
+  --s-3:  12px;
+  --s-4:  16px;
+  --s-5:  24px;
+  --s-6:  32px;
+  --s-7:  48px;
+  --s-8:  64px;
+  --s-9:  96px;
+  --s-10: 128px;
+
+  /* ── Radius ────────────────────────────────────────────── */
+  --r-sm:   4px;
+  --r-md:   8px;
+  --r-lg:   16px;
+  --r-xl:   24px;
+  --r-pill: 9999px;
+
+  /* ── Elevation / shadow ────────────────────────────────── */
+  --shadow-1: 0 1px 2px rgba(10,15,31,.10);
+  --shadow-2: 0 4px 12px rgba(10,15,31,.14);
+  --shadow-3: 0 10px 28px rgba(10,15,31,.20);
+  --shadow-cutout: 0 8px 24px rgba(0,0,0,.35);
+
+  /* ── Misc ──────────────────────────────────────────────── */
+  --icon-stroke: 1.75;
+  --easing-decel: cubic-bezier(.22,1,.36,1);
+  --easing-snap:  cubic-bezier(.4,0,.2,1);
+  --dur-fast:    160ms;
+  --dur-base:    240ms;
+  --dur-slow:    420ms;
+}
+
+/* ============================================================
+   Semantic element styles — apply directly to HTML tags so a
+   blank page that imports this file already looks consistent.
+   ============================================================ */
+
+html, body {
+  font-family: var(--font-body);
+  font-size: var(--body-size);
+  line-height: var(--body-lh);
+  color: var(--fg-on-light);
+  background: var(--surface-light);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+h1 {
+  font-family: var(--font-display);
+  font-size: var(--h1-size);
+  font-weight: var(--h1-weight);
+  letter-spacing: var(--h1-tracking);
+  line-height: var(--h1-lh);
+  margin: 0 0 var(--s-5);
+}
+
+h2 {
+  font-family: var(--font-display);
+  font-size: var(--h2-size);
+  font-weight: var(--h2-weight);
+  line-height: var(--h2-lh);
+  margin: 0 0 var(--s-4);
+}
+
+h3 {
+  font-family: var(--font-display);
+  font-size: var(--h3-size);
+  font-weight: var(--h3-weight);
+  line-height: var(--h3-lh);
+  margin: 0 0 var(--s-3);
+}
+
+h4, h5, h6 {
+  font-family: var(--font-body);
+  font-weight: 700;
+  margin: 0 0 var(--s-3);
+}
+
+p {
+  margin: 0 0 var(--s-4);
+  text-wrap: pretty;
+}
+
+a {
+  color: var(--link);
+  text-decoration: none;
+}
+a:hover { filter: brightness(.92); }
+
+small, .small { font-size: var(--small-size); line-height: var(--small-lh); }
+
+/* Utility classes — opt-in flavors, generic */
+
+.cmg-eyebrow {
+  font-family: var(--font-body);
+  font-size: var(--eyebrow-size);
+  font-weight: var(--eyebrow-weight);
+  letter-spacing: var(--eyebrow-tracking);
+  text-transform: uppercase;
+  color: var(--brand-accent);
+}
+
+.cmg-script {
+  font-family: var(--font-script);
+  font-size: var(--script-size);
+  color: var(--brand-accent-2);
+  line-height: 1;
+  font-weight: 400;
+}
+
+.cmg-price {
+  font-family: var(--font-display);
+  font-size: var(--price-size);
+  font-weight: var(--price-weight);
+  color: var(--brand-accent);
+  line-height: .9;
+  letter-spacing: -0.02em;
+}
+
+.cmg-on-navy   { background: var(--brand-primary); color: var(--fg-1); }
+.cmg-on-yellow { background: var(--brand-accent); color: var(--white); }
+
+/* Pill button — phone, WhatsApp, generic CTA */
+.cmg-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-2);
+  padding: var(--s-3) var(--s-5);
+  border-radius: var(--r-pill);
+  background: var(--white);
+  color: var(--brand-primary);
+  font-family: var(--font-body);
+  font-weight: 700;
+  border: 0;
+  cursor: pointer;
+  transition: filter var(--dur-fast) var(--easing-snap),
+              transform var(--dur-fast) var(--easing-snap);
+}
+.cmg-pill:hover  { filter: brightness(.95); }
+.cmg-pill:active { transform: translateY(1px) scale(.98); filter: brightness(.88); }
+
+.cmg-pill--yellow { background: var(--brand-accent);   color: var(--white); }
+.cmg-pill--red    { background: var(--brand-accent-2); color: var(--white); }
+.cmg-pill--wa     { background: var(--wa-green);       color: var(--white); }
