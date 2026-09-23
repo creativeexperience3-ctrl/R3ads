@@ -327,8 +327,20 @@ body { margin: 0; background: #F4F6FB; font-family: system-ui,-apple-system,'Seg
 
   function $(id) { return document.getElementById(id); }
 
-  var clinicName = (window.R3ADS_CLINIC_FALLBACK && window.R3ADS_CLINIC_FALLBACK.nombre) || 'tu clínica';
-  $('au-clinic-name').innerHTML = 'Gestión de Usuarios<small>Panel Administrativo · ' + clinicName + '</small>';
+  /* Se pinta una vez de entrada (fallback estático de clinic-config.js) y
+     otra vez cuando el AUTH GUARD trae el doc real de /clinics/{CLINIC_ID}
+     — ver cargarBrandingReal() más abajo. */
+  function pintarBranding(nombre) {
+    var clinicName = nombre || (window.R3ADS_CLINIC_FALLBACK && window.R3ADS_CLINIC_FALLBACK.nombre) || 'tu clínica';
+    $('au-clinic-name').innerHTML = 'Gestión de Usuarios<small>Panel Administrativo · ' + clinicName + '</small>';
+  }
+  pintarBranding();
+  function cargarBrandingReal() {
+    if (!CLINIC_ID) return;
+    r3adsDb.collection('clinics').doc(CLINIC_ID).get().then(function (snap) {
+      if (snap.exists && snap.data().nombre) pintarBranding(snap.data().nombre);
+    }).catch(function () {});
+  }
 
   /* ── Toast ── */
   var toastEl = $('au-toast'), toastT;
@@ -344,6 +356,7 @@ body { margin: 0; background: #F4F6FB; font-family: system-ui,-apple-system,'Seg
     if (!user) { window.location.href = 'Auth.html?returnTo=Admin-Usuarios.html'; return; }
     r3adsStaff.resolveClinicId(user, function (clinicId) {
       CLINIC_ID = clinicId;
+      cargarBrandingReal();
       r3adsStaff.checkAdmin(user, CLINIC_ID, function (ok) {
         if (!ok) { window.location.href = 'Auth.html'; return; }
         $('au-email').textContent = user.email;

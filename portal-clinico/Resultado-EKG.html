@@ -343,14 +343,28 @@ body { margin: 0; background: #F4F6FB; font-family: 'Segoe UI', Arial, sans-seri
   var CLINIC = window.R3ADS_CLINIC_FALLBACK || {};
   function $(id){ return document.getElementById(id); }
 
-  /* ── Encabezado/pie con los datos de la clínica (no de CMG) ── */
-  $('ek-h-name').textContent = (CLINIC.razonSocial || CLINIC.nombre || '—').toUpperCase();
-  $('ek-h-sub').textContent = [CLINIC.direccion, CLINIC.telefono].filter(Boolean).join(' · ') || '—';
-  $('ek-medico-sub').textContent = 'Médico General · ' + (CLINIC.nombre || 'la clínica');
-  $('ek-foot-razon').textContent = CLINIC.razonSocial || CLINIC.nombre || '—';
-  $('ek-foot-correo').textContent = CLINIC.correo || '—';
-  $('ek-foot-web').textContent = CLINIC.sitioWeb || '—';
-  $('ek-foot-direccion').textContent = [CLINIC.direccion, CLINIC.telefono ? ('Tel. ' + CLINIC.telefono) : null].filter(Boolean).join(' · ') || '—';
+  /* ── Encabezado/pie con los datos de la clínica (no de CMG) ──
+     Se pinta una vez de entrada (fallback estático de clinic-config.js) y
+     otra vez cuando el AUTH GUARD trae el doc real de /clinics/{CLINIC_ID}
+     — ver cargarBrandingReal() más abajo. */
+  function pintarBranding() {
+    $('ek-h-name').textContent = (CLINIC.razonSocial || CLINIC.nombre || '—').toUpperCase();
+    $('ek-h-sub').textContent = [CLINIC.direccion, CLINIC.telefono].filter(Boolean).join(' · ') || '—';
+    $('ek-medico-sub').textContent = 'Médico General · ' + (CLINIC.nombre || 'la clínica');
+    $('ek-foot-razon').textContent = CLINIC.razonSocial || CLINIC.nombre || '—';
+    $('ek-foot-correo').textContent = CLINIC.correo || '—';
+    $('ek-foot-web').textContent = CLINIC.sitioWeb || '—';
+    $('ek-foot-direccion').textContent = [CLINIC.direccion, CLINIC.telefono ? ('Tel. ' + CLINIC.telefono) : null].filter(Boolean).join(' · ') || '—';
+  }
+  pintarBranding();
+  function cargarBrandingReal() {
+    if (!CLINIC_ID) return;
+    r3adsDb.collection('clinics').doc(CLINIC_ID).get().then(function (snap) {
+      if (!snap.exists) return;
+      Object.assign(CLINIC, snap.data());
+      pintarBranding();
+    }).catch(function () {});
+  }
   function esc(s){ return (s||'').toString().replace(/[&<>]/g, function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;'}[c];}); }
   function fmtFechaHora(ts){
     if (!ts) return '—';
@@ -420,6 +434,7 @@ body { margin: 0; background: #F4F6FB; font-family: 'Segoe UI', Arial, sans-seri
     r3adsStaff.resolveClinicId(user, function (clinicId) {
       if (!clinicId) { showError('Sesión requerida. Inicia sesión.'); return; }
       CLINIC_ID = clinicId;
+      cargarBrandingReal();
       r3adsModulos.cargar(CLINIC_ID).then(function () {
         if (!r3adsModulos.exigir('ekg', 'Electrocardiogramas')) return;
         cargarEkg();

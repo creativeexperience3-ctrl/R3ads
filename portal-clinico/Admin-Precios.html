@@ -195,8 +195,20 @@ body { margin: 0; background: #F4F6FB; font-family: system-ui,-apple-system,'Seg
   function slug(s){ return String(s||'').toLowerCase().replace(/á/g,'a').replace(/é/g,'e').replace(/í/g,'i').replace(/ó/g,'o').replace(/ú/g,'u').replace(/ü/g,'u').replace(/ñ/g,'n').replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,''); }
   function fmtN(n){ return Number.isInteger(n) ? n.toLocaleString('en-US') : n.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}); }
 
-  var clinicName = (window.R3ADS_CLINIC_FALLBACK && window.R3ADS_CLINIC_FALLBACK.nombre) || 'tu clínica';
-  $('ap-clinic-name').innerHTML = 'Gestión de Precios<small>Catálogo de servicios · ' + clinicName + '</small>';
+  /* Se pinta una vez de entrada (fallback estático de clinic-config.js) y
+     otra vez cuando el AUTH GUARD trae el doc real de /clinics/{CLINIC_ID}
+     — ver cargarBrandingReal() más abajo. */
+  function pintarBranding(nombre) {
+    var clinicName = nombre || (window.R3ADS_CLINIC_FALLBACK && window.R3ADS_CLINIC_FALLBACK.nombre) || 'tu clínica';
+    $('ap-clinic-name').innerHTML = 'Gestión de Precios<small>Catálogo de servicios · ' + clinicName + '</small>';
+  }
+  pintarBranding();
+  function cargarBrandingReal() {
+    if (!CLINIC_ID) return;
+    r3adsDb.collection('clinics').doc(CLINIC_ID).get().then(function (snap) {
+      if (snap.exists && snap.data().nombre) pintarBranding(snap.data().nombre);
+    }).catch(function () {});
+  }
 
   var toastEl = $('ap-toast'), toastTimer;
   function toast(msg, isErr) {
@@ -212,6 +224,7 @@ body { margin: 0; background: #F4F6FB; font-family: system-ui,-apple-system,'Seg
     if (!user) { window.location.href = 'Auth.html?returnTo=Admin-Precios.html'; return; }
     r3adsStaff.resolveClinicId(user, function (clinicId) {
       CLINIC_ID = clinicId;
+      cargarBrandingReal();
       r3adsStaff.checkAdmin(user, CLINIC_ID, function (ok) {
         if (!ok) { window.location.href = 'Auth.html'; return; }
         $('ap-user-email').textContent = user.email;

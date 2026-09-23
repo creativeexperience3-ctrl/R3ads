@@ -319,13 +319,27 @@ body { margin: 0; background: #F4F6FB; font-family: 'Segoe UI', Arial, sans-seri
   var CLINIC = window.R3ADS_CLINIC_FALLBACK || {};
   function $(id){ return document.getElementById(id); }
 
-  $('cm-h-name').textContent = (CLINIC.razonSocial || CLINIC.nombre || '—').toUpperCase();
-  $('cm-h-sub').textContent = [CLINIC.direccion, CLINIC.telefono].filter(Boolean).join(' · ') || '—';
-  $('cm-ciudad').textContent = CLINIC.ciudad || '—';
-  $('cm-medico-sub').textContent = 'Médico tratante · ' + (CLINIC.nombre || 'la clínica');
-  $('cm-foot-razon').textContent = CLINIC.razonSocial || CLINIC.nombre || '—';
-  $('cm-foot-correo').textContent = CLINIC.correo || '—';
-  $('cm-foot-web').textContent = CLINIC.sitioWeb || '—';
+  /* Se pinta una vez de entrada (fallback estático de clinic-config.js) y
+     otra vez cuando el AUTH GUARD trae el doc real de /clinics/{CLINIC_ID}
+     — ver cargarBrandingReal() más abajo. */
+  function pintarBranding() {
+    $('cm-h-name').textContent = (CLINIC.razonSocial || CLINIC.nombre || '—').toUpperCase();
+    $('cm-h-sub').textContent = [CLINIC.direccion, CLINIC.telefono].filter(Boolean).join(' · ') || '—';
+    $('cm-ciudad').textContent = CLINIC.ciudad || '—';
+    $('cm-medico-sub').textContent = 'Médico tratante · ' + (CLINIC.nombre || 'la clínica');
+    $('cm-foot-razon').textContent = CLINIC.razonSocial || CLINIC.nombre || '—';
+    $('cm-foot-correo').textContent = CLINIC.correo || '—';
+    $('cm-foot-web').textContent = CLINIC.sitioWeb || '—';
+  }
+  pintarBranding();
+  function cargarBrandingReal() {
+    if (!CLINIC_ID) return;
+    r3adsDb.collection('clinics').doc(CLINIC_ID).get().then(function (snap) {
+      if (!snap.exists) return;
+      Object.assign(CLINIC, snap.data());
+      pintarBranding();
+    }).catch(function () {});
+  }
   function esc(s){ return (s||'').toString().replace(/[&<>]/g, function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;'}[c];}); }
   function fmtFecha(s){
     if (!s) return '—';
@@ -414,6 +428,7 @@ body { margin: 0; background: #F4F6FB; font-family: 'Segoe UI', Arial, sans-seri
     r3adsStaff.resolveClinicId(user, function (clinicId) {
       if (!clinicId) { showError('Sesión requerida. Inicia sesión.'); return; }
       CLINIC_ID = clinicId;
+      cargarBrandingReal();
       r3adsModulos.cargar(CLINIC_ID).then(function () {
         if (!r3adsModulos.exigir('constancias', 'Constancias Médicas')) return;
         cargarConstancia();

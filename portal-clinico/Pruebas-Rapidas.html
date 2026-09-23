@@ -800,16 +800,30 @@
   }
 
   /* ── Branding de la clínica ── */
-  $id('pr-brand-name').textContent = CLINIC.nombre || '—';
-  $id('rs-h-name').textContent = (CLINIC.razonSocial || CLINIC.nombre || '—').toUpperCase();
-  $id('rs-h-sub').textContent = CLINIC.nombre || '';
-  $id('rs-stamp-text').innerHTML = 'TOMA Y RECEPCIÓN DE MUESTRAS<br>' + (CLINIC.nombre || '').toUpperCase();
-  $id('rs-footer').innerHTML =
-    esc(CLINIC.direccion || '') + '<br>' +
-    'Correo-e: <a href="mailto:' + esc(CLINIC.correo || '') + '">' + esc(CLINIC.correo || '') + '</a><br>' +
-    'Teléfonos: ' + esc(CLINIC.telefono || '');
-  var waLink = $id('pr-float-wa');
-  if (waLink) waLink.href = 'https://wa.me/' + (CLINIC.whatsapp || '');
+  /* Se pinta una vez de entrada (fallback estático de clinic-config.js) y
+     otra vez cuando el AUTH GUARD trae el doc real de /clinics/{CLINIC_ID}
+     — ver cargarBrandingReal() más abajo. */
+  function pintarBranding() {
+    $id('pr-brand-name').textContent = CLINIC.nombre || '—';
+    $id('rs-h-name').textContent = (CLINIC.razonSocial || CLINIC.nombre || '—').toUpperCase();
+    $id('rs-h-sub').textContent = CLINIC.nombre || '';
+    $id('rs-stamp-text').innerHTML = 'TOMA Y RECEPCIÓN DE MUESTRAS<br>' + (CLINIC.nombre || '').toUpperCase();
+    $id('rs-footer').innerHTML =
+      esc(CLINIC.direccion || '') + '<br>' +
+      'Correo-e: <a href="mailto:' + esc(CLINIC.correo || '') + '">' + esc(CLINIC.correo || '') + '</a><br>' +
+      'Teléfonos: ' + esc(CLINIC.telefono || '');
+    var waLink = $id('pr-float-wa');
+    if (waLink) waLink.href = 'https://wa.me/' + (CLINIC.whatsapp || '');
+  }
+  pintarBranding();
+  function cargarBrandingReal() {
+    if (!CLINIC_ID) return;
+    r3adsDb.collection('clinics').doc(CLINIC_ID).get().then(function (snap) {
+      if (!snap.exists) return;
+      Object.assign(CLINIC, snap.data());
+      pintarBranding();
+    }).catch(function () {});
+  }
 
   var header = document.querySelector('.site-header');
   if (header) {
@@ -835,6 +849,7 @@
     r3adsStaff.resolveClinicId(user, function (clinicId) {
       if (!clinicId) { window.location.href = 'Auth.html?returnTo=Pruebas-Rapidas.html'; return; }
       CLINIC_ID = clinicId;
+      cargarBrandingReal();
       r3adsModulos.cargar(CLINIC_ID).then(function () {
         if (!r3adsModulos.exigir('pruebasRapidas', 'Pruebas Rápidas')) return;
         arrancar(user);

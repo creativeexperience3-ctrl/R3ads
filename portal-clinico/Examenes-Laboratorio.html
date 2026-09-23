@@ -551,6 +551,15 @@ body { margin: 0; background: #F4F6FB; font-family: 'Segoe UI', Arial, sans-seri
   function hideOverlay() { $id('el-overlay').classList.remove('is-open'); }
   function normDNI(v) { return (v || '').replace(/\D/g, ''); }
   function todayStr() { return new Date().toISOString().slice(0, 10); }
+  /* Trae el doc real de /clinics/{CLINIC_ID} y actualiza CLINIC (branding:
+     usado solo por generarCodigo() más abajo, que se llama bajo demanda —
+     no hace falta repintar nada del DOM acá). */
+  function cargarBrandingReal() {
+    if (!CLINIC_ID) return;
+    r3adsDb.collection('clinics').doc(CLINIC_ID).get().then(function (snap) {
+      if (snap.exists) Object.assign(CLINIC, snap.data());
+    }).catch(function () {});
+  }
   function generarCodigo() {
     var letras = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
     var s = '';
@@ -578,6 +587,7 @@ body { margin: 0; background: #F4F6FB; font-family: 'Segoe UI', Arial, sans-seri
     r3adsStaff.resolveClinicId(user, function (clinicId) {
       if (!clinicId) { window.location.href = 'Auth.html?returnTo=Examenes-Laboratorio.html'; return; }
       CLINIC_ID = clinicId;
+      cargarBrandingReal();
       r3adsModulos.cargar(CLINIC_ID).then(function () {
         if (!r3adsModulos.exigir('laboratorio', 'Laboratorio')) return;
         arrancar(user);

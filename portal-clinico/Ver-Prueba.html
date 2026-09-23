@@ -298,17 +298,31 @@ body { margin: 0; background: #F4F6FB; font-family: 'Segoe UI', Arial, sans-seri
   var CLINIC = window.R3ADS_CLINIC_FALLBACK || {};
   function $id(id) { return document.getElementById(id); }
 
-  $id('rs-h-name').textContent = (CLINIC.razonSocial || CLINIC.nombre || '—').toUpperCase();
-  $id('rs-h-sub').textContent = CLINIC.nombre || '';
-  $id('rs-stamp-text').innerHTML = 'TOMA Y RECEPCIÓN DE MUESTRAS<br>' + (CLINIC.nombre || '').toUpperCase();
-  $id('rs-footer').innerHTML =
-    esc(CLINIC.direccion || '') + '<br>' +
-    'Correo-e: <a href="mailto:' + esc(CLINIC.correo || '') + '">' + esc(CLINIC.correo || '') + '</a><br>' +
-    'Teléfonos: ' + esc(CLINIC.telefono || '');
   function esc(s) {
     return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
       return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
     });
+  }
+  /* Se pinta una vez de entrada (fallback estático de clinic-config.js) y
+     otra vez cuando el AUTH GUARD trae el doc real de /clinics/{CLINIC_ID}
+     — ver cargarBrandingReal() más abajo. */
+  function pintarBranding() {
+    $id('rs-h-name').textContent = (CLINIC.razonSocial || CLINIC.nombre || '—').toUpperCase();
+    $id('rs-h-sub').textContent = CLINIC.nombre || '';
+    $id('rs-stamp-text').innerHTML = 'TOMA Y RECEPCIÓN DE MUESTRAS<br>' + (CLINIC.nombre || '').toUpperCase();
+    $id('rs-footer').innerHTML =
+      esc(CLINIC.direccion || '') + '<br>' +
+      'Correo-e: <a href="mailto:' + esc(CLINIC.correo || '') + '">' + esc(CLINIC.correo || '') + '</a><br>' +
+      'Teléfonos: ' + esc(CLINIC.telefono || '');
+  }
+  pintarBranding();
+  function cargarBrandingReal() {
+    if (!CLINIC_ID) return;
+    r3adsDb.collection('clinics').doc(CLINIC_ID).get().then(function (snap) {
+      if (!snap.exists) return;
+      Object.assign(CLINIC, snap.data());
+      pintarBranding();
+    }).catch(function () {});
   }
   function formatDateLong(dateStr) {
     if (!dateStr) return '—';
@@ -354,6 +368,7 @@ body { margin: 0; background: #F4F6FB; font-family: 'Segoe UI', Arial, sans-seri
         return;
       }
       CLINIC_ID = clinicId;
+      cargarBrandingReal();
       r3adsModulos.cargar(CLINIC_ID).then(function () {
         if (!r3adsModulos.exigir('pruebasRapidas', 'Pruebas Rápidas')) return;
         loadResultado();

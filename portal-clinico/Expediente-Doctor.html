@@ -1324,7 +1324,11 @@ summary.ed-meds-cat { list-style: revert; }
   /* El acceso al portal se resuelve vía r3adsStaff.checkDoctor (r3ads-staff.js):
      rol medico | enf | admin en /usuarios de ESTA clínica (CLINIC_ID), sin
      listas de correos hardcodeadas — ver AUTH GUARD más abajo. */
-  (function () {
+  /* Pinta el branding de CLINIC en el DOM. Se llama una vez de entrada (con
+     el fallback estático de clinic-config.js, para no dejar la página en
+     blanco) y otra vez cuando el AUTH GUARD trae el doc real de
+     /clinics/{CLINIC_ID} — ver cargarBrandingReal() más abajo. */
+  function pintarBranding() {
     var waLink = document.getElementById('ed-float-wa');
     if (waLink) waLink.href = 'https://wa.me/' + (CLINIC.whatsapp || '');
     /* Placeholders "CMG-XXXXXX" → prefijo real de código de paciente de esta
@@ -1336,7 +1340,22 @@ summary.ed-meds-cat { list-style: revert; }
     });
     var moverInput = document.getElementById('mover-codigo-input');
     if (moverInput) moverInput.placeholder = prefijoPlaceholder;
-  })();
+    var brandEl = $id('ed-brand-name'); if (brandEl) brandEl.textContent = CLINIC.nombre || 'Portal Clínico';
+  }
+  pintarBranding();
+  /* Trae el doc real de la clínica (nombre, dirección, prefijo de código de
+     paciente, etc. — ver clinic-config.example.js) para reemplazar el
+     fallback estático apenas se resuelve CLINIC_ID. Solo campos de
+     branding: clinicId real y módulos siguen viniendo de CLINIC_ID/
+     r3adsModulos, esto no toca nada de seguridad. */
+  function cargarBrandingReal() {
+    if (!CLINIC_ID) return;
+    r3adsDb.collection('clinics').doc(CLINIC_ID).get().then(function (snap) {
+      if (!snap.exists) return;
+      Object.assign(CLINIC, snap.data());
+      pintarBranding();
+    }).catch(function () {});
+  }
 
   /* ─── DRM v3.1: catálogos compartidos para evitar errores de tipeo ─── */
   var CATALOGO_SERVICIOS = [
@@ -2515,6 +2534,7 @@ summary.ed-meds-cat { list-style: revert; }
     }
     r3adsStaff.resolveClinicId(user, function (clinicId) {
       CLINIC_ID = clinicId;
+      cargarBrandingReal();
       r3adsStaff.checkDoctor(user, CLINIC_ID, function (ok) {
         if (!ok) {
           document.body.innerHTML =
@@ -2571,8 +2591,6 @@ summary.ed-meds-cat { list-style: revert; }
     r3adsAuth.signOut().then(function () { window.location.href = 'Auth.html'; });
   });
 
-  /* Nombre de la clínica en el header (ver clinic-config.js) */
-  var brandEl = $id('ed-brand-name'); if (brandEl) brandEl.textContent = CLINIC.nombre || 'Portal Clínico';
   var header = document.querySelector('.site-header');
   if (header) {
     var onScroll = function () { header.classList.toggle('is-scrolled', window.scrollY > 8); };
