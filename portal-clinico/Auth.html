@@ -11,10 +11,12 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
 <style>
-/* ── Auth page ───────────────────────────────────────────────
-   Mismos tokens de marca que index.html (Jet Black / Graphite /
-   Golden Bronze, IBM Plex) para que el login se sienta parte del
-   mismo producto y no una pantalla genérica aparte. ── */
+/* ── Auth page — look "correo primero, luego contraseña" (referencia:
+   pantalla de login de Zoom) ─────────────────────────────────────────
+   Columna izquierda clara con una tarjeta de marca flotando encima (no
+   un panel oscuro de borde a borde); columna derecha blanca, sin
+   tarjeta/borde, con el formulario centrado — mismos tokens de marca
+   que index.html (Jet Black / Golden Bronze, IBM Plex). ── */
 *, *::before, *::after { box-sizing: border-box; }
 
 :root {
@@ -39,108 +41,90 @@
   display: flex;
 }
 
-/* ── Branding lateral ── */
+/* ── Columna izquierda: fondo claro + tarjeta de marca ── */
 .auth-brand {
-  width: 440px;
+  width: 42%;
+  max-width: 560px;
   flex-shrink: 0;
-  background: var(--jet);
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: flex-start;
-  padding: 64px 56px;
-  position: relative;
-  overflow: hidden;
-}
-.auth-brand::after {
-  content: '';
-  position: absolute;
-  bottom: 0; left: 0; right: 0;
-  height: 3px;
-  background: var(--bronze);
-}
-.auth-brand-glow {
-  position: absolute; width: 480px; height: 480px; border-radius: 50%;
-  background: radial-gradient(circle at 35% 35%, rgba(204,164,59,0.14), transparent 70%);
-  top: -200px; right: -200px; pointer-events: none;
-}
-.auth-brand-watermark {
-  position: absolute;
-  bottom: -40px; right: -30px;
-  font-size: 200px;
-  font-weight: 900;
-  color: rgba(255,255,255,.04);
-  letter-spacing: -.04em;
-  line-height: 1;
-  pointer-events: none;
-  user-select: none;
-}
-.auth-brand-mark {
-  display: flex; align-items: center; gap: 10px;
-  margin-bottom: 48px; position: relative;
-}
-.auth-brand-mark span {
-  font-size: 18px; font-weight: 700; color: #fff; letter-spacing: -0.01em;
-}
-.auth-brand h1 {
-  font-size: 34px;
-  font-weight: 700;
-  color: #fff;
-  line-height: 1.16;
-  letter-spacing: -0.01em;
-  margin: 0 0 16px;
-  position: relative;
-}
-.auth-brand h1 span { color: var(--bronze); }
-.auth-brand p {
-  color: rgba(255,255,255,.62);
-  font-size: 15px;
-  line-height: 1.65;
-  margin: 0;
-  max-width: 320px;
-  position: relative;
-}
-.auth-benefits {
-  margin-top: 40px;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  position: relative;
-}
-.auth-benefit {
+  background: var(--bg);
   display: flex;
   align-items: center;
-  gap: 12px;
+  justify-content: center;
+  padding: 40px;
+}
+.auth-promo-card {
+  width: 100%;
+  max-width: 420px;
+  background: var(--jet);
+  border-radius: 22px;
+  padding: 40px 36px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 24px 48px -20px rgba(36,47,64,.45);
+}
+.auth-promo-card::after {
+  content: '';
+  position: absolute;
+  width: 260px; height: 260px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(204,164,59,.22), transparent 70%);
+  top: -110px; right: -90px; pointer-events: none;
+}
+.auth-promo-mark {
+  display: flex; align-items: center; gap: 9px;
+  margin-bottom: 32px; position: relative;
+}
+.auth-promo-mark span { font-size: 16px; font-weight: 700; color: #fff; letter-spacing: -0.01em; }
+.auth-promo-card h2 {
+  font-size: 26px;
+  font-weight: 700;
+  color: #fff;
+  line-height: 1.22;
+  letter-spacing: -0.01em;
+  margin: 0 0 22px;
+  position: relative;
+}
+.auth-promo-card h2 span { color: var(--bronze); }
+.auth-promo-benefits {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  position: relative;
+}
+.auth-promo-benefits li {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
   color: rgba(255,255,255,.82);
   font-size: 14px;
+  line-height: 1.4;
 }
-.auth-benefit-dot {
-  width: 7px; height: 7px;
+.auth-promo-benefits li::before {
+  content: '';
+  width: 6px; height: 6px; margin-top: 6px;
   border-radius: 50%;
   background: var(--bronze);
   flex-shrink: 0;
 }
 
-/* ── Panel formulario ── */
+/* ── Columna derecha: blanca, sin tarjeta ── */
 .auth-main {
   flex: 1;
   display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 40px 24px;
-  background: var(--bg);
-}
-
-.auth-box {
+  flex-direction: column;
   background: var(--card);
-  border: 1px solid var(--line);
-  border-radius: 16px;
-  box-shadow: 0 28px 56px -18px rgba(36,47,64,0.22), 0 4px 16px rgba(36,47,64,0.06);
-  width: 100%;
-  max-width: 440px;
-  padding: 40px;
+  padding: 28px 24px;
 }
-
+.auth-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 40px;
+}
 .auth-back {
   display: inline-flex;
   align-items: center;
@@ -148,45 +132,35 @@
   font-size: 13px;
   color: #6B7280;
   text-decoration: none;
-  margin-bottom: 28px;
   transition: color .18s;
 }
 .auth-back:hover { color: var(--jet); }
+.auth-signup-hint { font-size: 13px; color: #6B7280; }
+.auth-signup-hint a { color: var(--jet); font-weight: 700; text-decoration: none; margin-left: 4px; }
+.auth-signup-hint a:hover { color: var(--bronze); }
 
-/* ── Tabs ── */
-.auth-tabs {
-  display: flex;
-  background: var(--bg);
-  border-radius: 10px;
-  padding: 4px;
-  margin-bottom: 28px;
-}
-.auth-tab {
+.auth-form-wrap {
   flex: 1;
-  padding: 10px 8px;
-  border: none;
-  border-radius: 8px;
-  background: transparent;
-  font-family: inherit;
-  font-size: 14px;
-  font-weight: 600;
-  color: #6B7280;
-  cursor: pointer;
-  transition: all .18s;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
 }
-.auth-tab.is-active {
-  background: #fff;
-  color: var(--jet);
-  box-shadow: 0 2px 8px rgba(36,47,64,.12);
+.auth-box {
+  width: 100%;
+  max-width: 400px;
+  padding-top: 40px;
 }
 
-/* ── Formularios ── */
-.auth-form {
-  display: none;
-  flex-direction: column;
-  gap: 18px;
+/* ── Vistas (correo → contraseña, o registro) ── */
+.auth-view { display: none; flex-direction: column; gap: 18px; }
+.auth-view.is-active { display: flex; }
+.auth-view h1 {
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--jet);
+  margin: 0;
+  letter-spacing: -0.01em;
 }
-.auth-form.is-active { display: flex; }
 
 .auth-fgroup {
   display: flex;
@@ -199,7 +173,7 @@
   color: #374151;
 }
 .auth-input {
-  height: 46px;
+  height: 48px;
   border: 1.5px solid #E5E7EB;
   border-radius: 10px;
   padding: 0 14px;
@@ -212,7 +186,35 @@
 }
 .auth-input:focus { border-color: var(--jet); box-shadow: 0 0 0 3px rgba(36,47,64,.10); }
 
-/* ── Error ── */
+/* Chip de correo confirmado en el paso de contraseña */
+.auth-email-chip {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  background: var(--bg);
+  border: 1.5px solid var(--line);
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-size: 14px;
+  color: var(--jet);
+  font-weight: 600;
+}
+.auth-email-chip button {
+  background: none;
+  border: none;
+  color: var(--jet);
+  font-weight: 700;
+  font-size: 13px;
+  text-decoration: underline;
+  cursor: pointer;
+  font-family: inherit;
+  padding: 0;
+  flex-shrink: 0;
+}
+.auth-email-chip button:hover { color: var(--bronze); }
+
+/* ── Error / aviso ── */
 .auth-error {
   background: #FEF2F2;
   border: 1px solid #FCA5A5;
@@ -223,6 +225,16 @@
   display: none;
 }
 .auth-error.is-visible { display: block; }
+.auth-notice {
+  background: #EFF6FF;
+  border: 1px solid #BFDBFE;
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-size: 13px;
+  color: #1E40AF;
+  display: none;
+}
+.auth-notice.is-visible { display: block; }
 
 /* ── Botón submit ── */
 .auth-submit {
@@ -261,7 +273,15 @@
 .auth-submit.is-loading .auth-btn-text { display: none; }
 @keyframes auth-spin { to { transform: rotate(360deg); } }
 
-/* ── Switch link ── */
+/* ── Links auxiliares (olvidé mi contraseña, cambiar de cuenta) ── */
+.auth-aux-link {
+  text-align: center;
+  font-size: 13px;
+  color: var(--jet);
+  text-decoration: none;
+  font-weight: 600;
+}
+.auth-aux-link:hover { color: var(--bronze); }
 .auth-switch {
   text-align: center;
   font-size: 14px;
@@ -319,10 +339,13 @@
 .auth-google:disabled { opacity: .6; cursor: wait; }
 
 /* ── Responsive ── */
-@media (max-width: 768px) {
+@media (max-width: 900px) {
   .auth-brand { display: none; }
-  .auth-page { background: var(--bg); }
-  .auth-box { padding: 28px 20px; box-shadow: none; border: none; }
+}
+@media (max-width: 480px) {
+  .auth-main { padding: 20px 16px; }
+  .auth-box { padding-top: 24px; }
+  .auth-view h1 { font-size: 24px; }
 }
 </style>
 <!-- Analytics: el original tenía aquí el Google tag de CMG (G-9HH25BNVW0)
@@ -335,114 +358,123 @@
 
 <div class="auth-page">
 
-  <!-- ── Branding izquierdo ── -->
+  <!-- ── Columna izquierda: tarjeta de marca ── -->
   <div class="auth-brand">
-    <div class="auth-brand-glow" aria-hidden="true"></div>
-    <div class="auth-brand-watermark" id="auth-brand-watermark"></div>
-    <!-- Logo por clínica: pendiente (Fase 5). Mientras tanto se muestra el
-         nombre de la clínica como texto (ver clinic-config.js), con la
-         marca de Ancla como identidad base del portal. -->
-    <div class="auth-brand-mark">
-      <svg width="20" height="24" viewBox="0 0 22 26" fill="none" aria-hidden="true">
-        <circle cx="11" cy="5" r="4" stroke="#ffffff" stroke-width="2"/>
-        <path d="M11 9v15M4 24h14" stroke="#ffffff" stroke-width="2" stroke-linecap="round"/>
-      </svg>
-      <span>Ancla</span>
-    </div>
-    <h1 id="auth-brand-title">Tu clínica,<br>en <span>un solo lugar</span></h1>
-    <p id="auth-brand-copy">Accede a tu cuenta para gestionar el portal clínico.</p>
-    <div class="auth-benefits">
-      <div class="auth-benefit">
-        <div class="auth-benefit-dot"></div>
-        Expedientes, caja y pacientes en un solo panel
+    <div class="auth-promo-card">
+      <div class="auth-promo-mark">
+        <svg width="18" height="22" viewBox="0 0 22 26" fill="none" aria-hidden="true">
+          <circle cx="11" cy="5" r="4" stroke="#ffffff" stroke-width="2"/>
+          <path d="M11 9v15M4 24h14" stroke="#ffffff" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+        <span>Ancla</span>
       </div>
-      <div class="auth-benefit">
-        <div class="auth-benefit-dot"></div>
-        Accede desde cualquier dispositivo
-      </div>
-      <div class="auth-benefit">
-        <div class="auth-benefit-dot"></div>
-        Roles y permisos por clínica
-      </div>
+      <h2 id="auth-brand-title">Tu clínica,<br>en <span>un solo lugar</span></h2>
+      <ul class="auth-promo-benefits">
+        <li>Expedientes, caja y pacientes en un solo panel</li>
+        <li>Accede desde cualquier dispositivo</li>
+        <li>Roles y permisos por clínica</li>
+      </ul>
     </div>
   </div>
 
-  <!-- ── Formulario derecho ── -->
+  <!-- ── Columna derecha: formulario ── -->
   <div class="auth-main">
-    <div class="auth-box">
-
+    <div class="auth-topbar">
       <a class="auth-back" href="index.html">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="15 18 9 12 15 6"/></svg>
         Volver al sitio
       </a>
-
-      <!-- Tabs -->
-      <div class="auth-tabs">
-        <button class="auth-tab is-active" data-tab="login" type="button">Iniciar Sesión</button>
-        <button class="auth-tab" data-tab="register" type="button">Crear Cuenta</button>
+      <div class="auth-signup-hint" id="signup-hint">
+        ¿Es nuevo en Ancla? <a href="#" data-view="register">Regístrese gratis</a>
       </div>
+    </div>
 
-      <!-- Error global -->
-      <div id="auth-error" class="auth-error"></div>
+    <div class="auth-form-wrap">
+      <div class="auth-box">
 
-      <!-- ── Login ── -->
-      <form id="form-login" class="auth-form is-active" novalidate>
-        <div class="auth-fgroup">
-          <label class="auth-label" for="login-email">Correo electrónico</label>
-          <input type="email" id="login-email" class="auth-input"
-            placeholder="tu@correo.com" autocomplete="email" inputmode="email">
-        </div>
-        <div class="auth-fgroup">
-          <label class="auth-label" for="login-pass">Contraseña</label>
-          <input type="password" id="login-pass" class="auth-input"
-            placeholder="••••••••" autocomplete="current-password">
-        </div>
-        <button type="submit" class="auth-submit" id="btn-login">
-          <div class="auth-spinner"></div>
-          <span class="auth-btn-text">Iniciar Sesión</span>
-        </button>
-        <div class="auth-switch">
-          ¿No tienes cuenta? <a href="#" data-switch="register">Crear cuenta gratis</a>
-        </div>
-      </form>
+        <div id="auth-error" class="auth-error"></div>
+        <div id="auth-notice" class="auth-notice"></div>
 
-      <!-- ── Registro ── -->
-      <form id="form-register" class="auth-form" novalidate>
-        <div class="auth-fgroup">
-          <label class="auth-label" for="reg-name">Nombre completo</label>
-          <input type="text" id="reg-name" class="auth-input" autocomplete="name">
-        </div>
-        <div class="auth-fgroup">
-          <label class="auth-label" for="reg-email">Correo electrónico</label>
-          <input type="email" id="reg-email" class="auth-input"
-            placeholder="tu@correo.com" autocomplete="email" inputmode="email">
-        </div>
-        <div class="auth-fgroup">
-          <label class="auth-label" for="reg-pass">Contraseña</label>
-          <input type="password" id="reg-pass" class="auth-input"
-            placeholder="Mínimo 6 caracteres" autocomplete="new-password">
-        </div>
-        <button type="submit" class="auth-submit" id="btn-register">
-          <div class="auth-spinner"></div>
-          <span class="auth-btn-text">Crear Cuenta</span>
-        </button>
-        <div class="auth-switch">
-          ¿Ya tienes cuenta? <a href="#" data-switch="login">Iniciar sesión</a>
-        </div>
-      </form>
+        <!-- ── Paso 1: correo ── -->
+        <form id="view-email" class="auth-view is-active" novalidate>
+          <h1>Iniciar sesión</h1>
+          <div class="auth-fgroup">
+            <label class="auth-label" for="step-email">Correo electrónico</label>
+            <input type="email" id="step-email" class="auth-input"
+              placeholder="tu@correo.com" autocomplete="email" inputmode="email" autofocus>
+          </div>
+          <button type="submit" class="auth-submit" id="btn-next">
+            <div class="auth-spinner"></div>
+            <span class="auth-btn-text">Siguiente</span>
+          </button>
+          <div class="auth-divider">o inicia sesión con</div>
+          <button type="button" class="auth-google" id="btn-google-1">
+            <svg width="20" height="20" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+              <path fill="#4285F4" d="M44.5 20H24v8.5h11.8C34.7 33.9 29.9 37 24 37c-7.2 0-13-5.8-13-13s5.8-13 13-13c3.1 0 5.9 1.1 8.1 2.9l6.4-6.4C34.6 5.1 29.6 3 24 3 12.4 3 3 12.4 3 24s9.4 21 21 21c10.9 0 20-7.9 20-21 0-1.3-.2-2.7-.5-4z"/>
+              <path fill="#34A853" d="M6.3 14.7l7 5.1C15.1 16 19.3 13 24 13c3.1 0 5.9 1.1 8.1 2.9l6.4-6.4C34.6 5.1 29.6 3 24 3c-7.7 0-14.3 4.4-17.7 10.7z"/>
+              <path fill="#FBBC05" d="M24 45c5.8 0 10.8-1.9 14.5-5.2l-6.7-5.5C29.8 35.9 27 37 24 37c-5.8 0-10.7-3.9-12.4-9.2l-7 5.4C8 39.1 15.4 45 24 45z"/>
+              <path fill="#EA4335" d="M44.5 20H24v8.5h11.8c-.9 2.8-2.7 5.1-5.1 6.8l6.7 5.5C41.8 37 45 31 45 24c0-1.3-.2-2.7-.5-4z"/>
+            </svg>
+            Continuar con Google
+          </button>
+        </form>
 
-      <!-- ── Google Sign-In (común a login y registro) ── -->
-      <div class="auth-divider">o continúa con</div>
-      <button type="button" class="auth-google" id="btn-google">
-        <svg width="20" height="20" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
-          <path fill="#4285F4" d="M44.5 20H24v8.5h11.8C34.7 33.9 29.9 37 24 37c-7.2 0-13-5.8-13-13s5.8-13 13-13c3.1 0 5.9 1.1 8.1 2.9l6.4-6.4C34.6 5.1 29.6 3 24 3 12.4 3 3 12.4 3 24s9.4 21 21 21c10.9 0 20-7.9 20-21 0-1.3-.2-2.7-.5-4z"/>
-          <path fill="#34A853" d="M6.3 14.7l7 5.1C15.1 16 19.3 13 24 13c3.1 0 5.9 1.1 8.1 2.9l6.4-6.4C34.6 5.1 29.6 3 24 3c-7.7 0-14.3 4.4-17.7 10.7z"/>
-          <path fill="#FBBC05" d="M24 45c5.8 0 10.8-1.9 14.5-5.2l-6.7-5.5C29.8 35.9 27 37 24 37c-5.8 0-10.7-3.9-12.4-9.2l-7 5.4C8 39.1 15.4 45 24 45z"/>
-          <path fill="#EA4335" d="M44.5 20H24v8.5h11.8c-.9 2.8-2.7 5.1-5.1 6.8l6.7 5.5C41.8 37 45 31 45 24c0-1.3-.2-2.7-.5-4z"/>
-        </svg>
-        Continuar con Google
-      </button>
+        <!-- ── Paso 2: contraseña ── -->
+        <form id="view-password" class="auth-view" novalidate>
+          <h1>Iniciar sesión</h1>
+          <div class="auth-email-chip">
+            <span id="pw-email-display"></span>
+            <button type="button" id="btn-change-email">Cambiar</button>
+          </div>
+          <div class="auth-fgroup">
+            <label class="auth-label" for="step-pass">Contraseña</label>
+            <input type="password" id="step-pass" class="auth-input"
+              placeholder="••••••••" autocomplete="current-password" autofocus>
+          </div>
+          <button type="submit" class="auth-submit" id="btn-login">
+            <div class="auth-spinner"></div>
+            <span class="auth-btn-text">Iniciar Sesión</span>
+          </button>
+          <a href="#" class="auth-aux-link" id="link-forgot">¿Olvidaste tu contraseña?</a>
+        </form>
 
+        <!-- ── Registro ── -->
+        <form id="view-register" class="auth-view" novalidate>
+          <h1>Crear cuenta</h1>
+          <div class="auth-fgroup">
+            <label class="auth-label" for="reg-name">Nombre completo</label>
+            <input type="text" id="reg-name" class="auth-input" autocomplete="name">
+          </div>
+          <div class="auth-fgroup">
+            <label class="auth-label" for="reg-email">Correo electrónico</label>
+            <input type="email" id="reg-email" class="auth-input"
+              placeholder="tu@correo.com" autocomplete="email" inputmode="email">
+          </div>
+          <div class="auth-fgroup">
+            <label class="auth-label" for="reg-pass">Contraseña</label>
+            <input type="password" id="reg-pass" class="auth-input"
+              placeholder="Mínimo 6 caracteres" autocomplete="new-password">
+          </div>
+          <button type="submit" class="auth-submit" id="btn-register">
+            <div class="auth-spinner"></div>
+            <span class="auth-btn-text">Crear Cuenta</span>
+          </button>
+          <div class="auth-divider">o continúa con</div>
+          <button type="button" class="auth-google" id="btn-google-2">
+            <svg width="20" height="20" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+              <path fill="#4285F4" d="M44.5 20H24v8.5h11.8C34.7 33.9 29.9 37 24 37c-7.2 0-13-5.8-13-13s5.8-13 13-13c3.1 0 5.9 1.1 8.1 2.9l6.4-6.4C34.6 5.1 29.6 3 24 3 12.4 3 3 12.4 3 24s9.4 21 21 21c10.9 0 20-7.9 20-21 0-1.3-.2-2.7-.5-4z"/>
+              <path fill="#34A853" d="M6.3 14.7l7 5.1C15.1 16 19.3 13 24 13c3.1 0 5.9 1.1 8.1 2.9l6.4-6.4C34.6 5.1 29.6 3 24 3c-7.7 0-14.3 4.4-17.7 10.7z"/>
+              <path fill="#FBBC05" d="M24 45c5.8 0 10.8-1.9 14.5-5.2l-6.7-5.5C29.8 35.9 27 37 24 37c-5.8 0-10.7-3.9-12.4-9.2l-7 5.4C8 39.1 15.4 45 24 45z"/>
+              <path fill="#EA4335" d="M44.5 20H24v8.5h11.8c-.9 2.8-2.7 5.1-5.1 6.8l6.7 5.5C41.8 37 45 31 45 24c0-1.3-.2-2.7-.5-4z"/>
+            </svg>
+            Continuar con Google
+          </button>
+          <div class="auth-switch">
+            ¿Ya tienes cuenta? <a href="#" data-view="email">Iniciar sesión</a>
+          </div>
+        </form>
+
+      </div>
     </div>
   </div>
 
@@ -462,51 +494,50 @@
   /* ── Branding de la clínica (fallback mientras no hay logo dinámico) ── */
   var clinicName = (window.R3ADS_CLINIC_FALLBACK && window.R3ADS_CLINIC_FALLBACK.nombre) || 'tu clínica';
   document.getElementById('page-title').textContent = 'Mi Cuenta · ' + clinicName;
-  document.getElementById('auth-brand-watermark').textContent = clinicName;
-  document.getElementById('auth-brand-copy').textContent =
-    'Accede a tu cuenta para gestionar el portal clínico de ' + clinicName + '.';
 
   /* ── Destino tras login ── */
   var params    = new URLSearchParams(window.location.search);
   var returnTo  = params.get('returnTo') || 'Inicio.html';
+  var currentEmail = ''; // recordado entre el paso de correo y el de contraseña
 
   /* ── Si ya está logueado, redirigir ── */
   r3adsAuth.onAuthStateChanged(function (user) {
     if (user) window.location.href = returnTo;
   });
 
-  /* ── Tabs ── */
-  function switchTab(name) {
-    document.querySelectorAll('.auth-tab').forEach(function (t) {
-      t.classList.toggle('is-active', t.dataset.tab === name);
+  /* ── Vistas: view-email (paso 1) → view-password (paso 2), o view-register ── */
+  function switchView(name) {
+    document.querySelectorAll('.auth-view').forEach(function (v) {
+      v.classList.toggle('is-active', v.id === 'view-' + name);
     });
-    document.querySelectorAll('.auth-form').forEach(function (f) {
-      f.classList.remove('is-active');
-    });
-    var form = document.getElementById('form-' + name);
-    if (form) form.classList.add('is-active');
-    clearError();
+    document.getElementById('signup-hint').style.display = (name === 'register') ? 'none' : '';
+    clearMessages();
   }
-  document.querySelectorAll('.auth-tab').forEach(function (tab) {
-    tab.addEventListener('click', function () { switchTab(tab.dataset.tab); });
-  });
-  document.querySelectorAll('[data-switch]').forEach(function (a) {
+  document.querySelectorAll('[data-view]').forEach(function (a) {
     a.addEventListener('click', function (e) {
       e.preventDefault();
-      switchTab(a.dataset.switch);
+      switchView(a.dataset.view);
     });
   });
 
-  /* ── Error ── */
+  /* ── Mensajes ── */
   function showError(msg) {
+    clearMessages();
     var el = document.getElementById('auth-error');
     el.textContent = msg;
     el.classList.add('is-visible');
   }
-  function clearError() {
-    var el = document.getElementById('auth-error');
-    el.textContent = '';
-    el.classList.remove('is-visible');
+  function showNotice(msg) {
+    clearMessages();
+    var el = document.getElementById('auth-notice');
+    el.textContent = msg;
+    el.classList.add('is-visible');
+  }
+  function clearMessages() {
+    var err = document.getElementById('auth-error');
+    err.textContent = ''; err.classList.remove('is-visible');
+    var notice = document.getElementById('auth-notice');
+    notice.textContent = ''; notice.classList.remove('is-visible');
   }
 
   /* ── Loading ── */
@@ -534,15 +565,45 @@
     return map[code] || 'Ocurrió un error. Intenta de nuevo.';
   }
 
-  /* ── Login ── */
-  document.getElementById('form-login').addEventListener('submit', function (e) {
+  /* ── Paso 1: correo → decide si sigue a contraseña, o avisa que no existe ── */
+  document.getElementById('view-email').addEventListener('submit', function (e) {
     e.preventDefault();
-    clearError();
-    var email = document.getElementById('login-email').value.trim();
-    var pass  = document.getElementById('login-pass').value;
-    if (!email || !pass) { showError('Por favor completa todos los campos.'); return; }
+    var email = document.getElementById('step-email').value.trim();
+    if (!email) { showError('Ingresa tu correo electrónico.'); return; }
+    setLoading('btn-next', true);
+    r3adsAuth.fetchSignInMethodsForEmail(email)
+      .then(function (metodos) {
+        setLoading('btn-next', false);
+        if (!metodos.length) {
+          showError('No existe una cuenta con ese correo.');
+          return;
+        }
+        if (metodos.indexOf('password') === -1) {
+          showError('Esa cuenta inicia sesión con Google, no con contraseña — usa "Continuar con Google".');
+          return;
+        }
+        currentEmail = email;
+        document.getElementById('pw-email-display').textContent = email;
+        document.getElementById('step-pass').value = '';
+        switchView('password');
+      })
+      .catch(function (err) {
+        setLoading('btn-next', false);
+        showError(errMsg(err.code));
+      });
+  });
+  document.getElementById('btn-change-email').addEventListener('click', function () {
+    switchView('email');
+  });
+
+  /* ── Paso 2: contraseña ── */
+  document.getElementById('view-password').addEventListener('submit', function (e) {
+    e.preventDefault();
+    clearMessages();
+    var pass = document.getElementById('step-pass').value;
+    if (!pass) { showError('Ingresa tu contraseña.'); return; }
     setLoading('btn-login', true);
-    r3adsAuth.signInWithEmailAndPassword(email, pass)
+    r3adsAuth.signInWithEmailAndPassword(currentEmail, pass)
       .then(function () { window.location.href = returnTo; })
       .catch(function (err) {
         setLoading('btn-login', false);
@@ -550,10 +611,18 @@
       });
   });
 
-  /* ── Google Sign-In ── */
-  document.getElementById('btn-google').addEventListener('click', function () {
-    clearError();
-    var btn = this;
+  /* ── ¿Olvidaste tu contraseña? ── */
+  document.getElementById('link-forgot').addEventListener('click', function (e) {
+    e.preventDefault();
+    if (!currentEmail) return;
+    r3adsAuth.sendPasswordResetEmail(currentEmail)
+      .then(function () { showNotice('Te enviamos un correo a ' + currentEmail + ' para restablecer tu contraseña.'); })
+      .catch(function (err) { showError(errMsg(err.code)); });
+  });
+
+  /* ── Google Sign-In (compartido entre el paso de correo y el registro) ── */
+  function handleGoogleSignIn(btn) {
+    clearMessages();
     btn.disabled = true;
     var provider = new firebase.auth.GoogleAuthProvider();
     r3adsAuth.signInWithPopup(provider)
@@ -564,12 +633,14 @@
           showError(errMsg(err.code));
         }
       });
-  });
+  }
+  document.getElementById('btn-google-1').addEventListener('click', function () { handleGoogleSignIn(this); });
+  document.getElementById('btn-google-2').addEventListener('click', function () { handleGoogleSignIn(this); });
 
   /* ── Registro ── */
-  document.getElementById('form-register').addEventListener('submit', function (e) {
+  document.getElementById('view-register').addEventListener('submit', function (e) {
     e.preventDefault();
-    clearError();
+    clearMessages();
     var name  = document.getElementById('reg-name').value.trim();
     var email = document.getElementById('reg-email').value.trim();
     var pass  = document.getElementById('reg-pass').value;
