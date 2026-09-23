@@ -10,6 +10,14 @@
       "*.md",
       "firestore.indexes.json",
       "clinic-config.example.js"
+    ],
+    "headers": [
+      {
+        "source": "**/*.html",
+        "headers": [
+          { "key": "Cache-Control", "value": "no-cache, must-revalidate" }
+        ]
+      }
     ]
   },
   "firestore": {
