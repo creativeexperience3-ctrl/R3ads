@@ -80,13 +80,15 @@ body { margin: 0; background: #F4F6FB; font-family: system-ui,-apple-system,'Seg
 /* ── Row ── */
 .ap-row {
   display: grid;
-  grid-template-columns: 1fr 150px 180px;
+  grid-template-columns: 1fr 150px 180px 150px;
   gap: 14px; align-items: center;
   padding: 12px 20px; border-bottom: 1px solid #F3F4F6;
 }
 .ap-row:last-child { border-bottom: none; }
 .ap-row.is-hidden { display: none; }
 .ap-row.is-dirty { background: #FFFDF4; }
+.ap-row.is-inactive { opacity: .5; }
+.ap-row.is-inactive:hover { opacity: .8; }
 
 .ap-row-name b { font-size: 14px; color: #1F2937; display: block; }
 .ap-row-name small { font-size: 11.5px; color: #9CA3AF; }
@@ -156,6 +158,7 @@ body { margin: 0; background: #F4F6FB; font-family: system-ui,-apple-system,'Seg
   </div>
   <div class="ap-top-right">
     <span class="ap-email" id="ap-user-email">—</span>
+    <a class="ap-link ghost" href="Inicio.html">Inicio</a>
     <a class="ap-link ghost" href="Admin-Usuarios.html">Usuarios</a>
     <a class="ap-link ghost" href="#" id="ap-logout">Salir</a>
   </div>
@@ -306,9 +309,19 @@ body { margin: 0; background: #F4F6FB; font-family: system-ui,-apple-system,'Seg
       '<button type="button" class="ap-reset" data-key="' + esc(it.key) + '">Restablecer</button>' +
     '</div>';
 
-    return '<div class="ap-row" data-key="' + esc(it.key) + '" data-name="' + esc((it.nameEs + ' ' + it.nameEn).toLowerCase()) + '">' +
+    // Activo: por defecto SÍ (fail-open, cfg.activo !== false) — a diferencia
+    // de enfermeriaCompletable, acá el default seguro es "ofrecido", no
+    // "apagado". Apagarlo lo saca del buscador/checklist de servicios en
+    // Expediente-Doctor.html (ver computeServicioKey + _catalogoConfigCache).
+    var activo = cfg.activo !== false;
+    var activoCol = '<div class="ap-field ap-excl">' +
+      '<label class="ap-excl-switch"><input type="checkbox" data-key="' + esc(it.key) + '" data-field="activo"' + (activo ? ' checked' : '') + '>' +
+        '<span class="ap-excl-track"><span class="ap-excl-thumb"></span></span> Ofrece este servicio</label>' +
+    '</div>';
+
+    return '<div class="ap-row' + (activo ? '' : ' is-inactive') + '" data-key="' + esc(it.key) + '" data-name="' + esc((it.nameEs + ' ' + it.nameEn).toLowerCase()) + '">' +
       '<div class="ap-row-name"><b>' + esc(it.nameEs) + '</b><small>' + esc(it.nameEn) + '</small></div>' +
-      priceInput + enfCol +
+      priceInput + enfCol + activoCol +
     '</div>';
   }
 
@@ -329,6 +342,14 @@ body { margin: 0; background: #F4F6FB; font-family: system-ui,-apple-system,'Seg
     /* Toggle enfermería */
     $('ap-list').querySelectorAll('input[data-field="enfermeriaCompletable"]').forEach(function (chk) {
       chk.addEventListener('change', function () { markDirty(chk.dataset.key); });
+    });
+    /* Toggle activo (ofrece este servicio) */
+    $('ap-list').querySelectorAll('input[data-field="activo"]').forEach(function (chk) {
+      chk.addEventListener('change', function () {
+        var r = rowEl(chk.dataset.key);
+        if (r) r.classList.toggle('is-inactive', !chk.checked);
+        markDirty(chk.dataset.key);
+      });
     });
     /* Restablecer */
     $('ap-list').querySelectorAll('.ap-reset').forEach(function (btn) {
@@ -355,8 +376,10 @@ body { margin: 0; background: #F4F6FB; font-family: system-ui,-apple-system,'Seg
     var r = rowEl(key); if (!r) return;
     var priceInp = r.querySelector('input[data-field="precio"]');
     var enfChk   = r.querySelector('input[data-field="enfermeriaCompletable"]');
+    var activoChk = r.querySelector('input[data-field="activo"]');
     if (priceInp) priceInp.value = it.defPrice;
     if (enfChk)   enfChk.checked = false;
+    if (activoChk) { activoChk.checked = true; r.classList.remove('is-inactive'); }
     markDirty(key);
   }
 
@@ -381,12 +404,14 @@ body { margin: 0; background: #F4F6FB; font-family: system-ui,-apple-system,'Seg
       var r = rowEl(key); if (!r) return;
       var priceInp = r.querySelector('input[data-field="precio"]');
       var enfChk   = r.querySelector('input[data-field="enfermeriaCompletable"]');
+      var activoChk = r.querySelector('input[data-field="activo"]');
 
       var payload = {
         cat      : it.cat,
         nombreEs : it.nameEs,
         precio   : priceInp ? (parseFloat(priceInp.value) || 0) : it.defPrice,
         enfermeriaCompletable: enfChk ? !!enfChk.checked : false,
+        activo   : activoChk ? !!activoChk.checked : true,
         actualizado: firebase.firestore.FieldValue.serverTimestamp()
       };
       batch.set(catalogoRef.doc(key), payload, { merge: true });

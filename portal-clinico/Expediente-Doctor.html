@@ -864,6 +864,7 @@ summary.ed-meds-cat { list-style: revert; }
   <div class="container header-row">
     <div class="brand-lockup" id="ed-brand-name" style="color:#fff;font-weight:900;font-size:18px">—</div>
     <nav class="site-nav" aria-label="Principal">
+      <a href="Inicio.html">Inicio</a>
       <a href="Pruebas-Rapidas.html" data-modulo="pruebasRapidas">Pruebas Rápidas</a>
       <a href="Examenes-Laboratorio.html" data-modulo="laboratorio">Laboratorio</a>
     </nav>
@@ -3908,6 +3909,14 @@ summary.ed-meds-cat { list-style: revert; }
     CATALOGO_SERVICIOS.forEach(function (grp) {
       grp.items.forEach(function (s) { serviciosFlat.push({ value: s, label: s, group: grp.label }); });
     });
+    /* Oculta servicios que esta clínica desactivó desde Admin-Precios.html
+       (activo === false en catalogoConfig). Fail-open: sin servicioKey o sin
+       override, el servicio se sigue mostrando — ver nota en
+       cargarCatalogoEnfermeria() sobre nombres sin match exacto. */
+    serviciosFlat = serviciosFlat.filter(function (s) {
+      var key = computeServicioKey(s.value);
+      return !key || !_catalogoConfigCache[key] || _catalogoConfigCache[key].activo !== false;
+    });
 
     cont.innerHTML =
       '<button class="ed-back-link" id="btn-volver-modo">← Volver</button>' +
@@ -5772,11 +5781,17 @@ summary.ed-meds-cat { list-style: revert; }
        cantidad, muestra cantidad numérica por subtipo (Normal / Párpado-Cara / Lesión Grande). */
     var checkboxesHtml = '';
     CATALOGO_SERVICIOS.forEach(function(grp){
+      /* Mismo filtro de activo que renderRegistroVisitaForm() — ver ahí. */
+      var itemsActivos = grp.items.filter(function (s) {
+        var key = computeServicioKey(s);
+        return !key || !_catalogoConfigCache[key] || _catalogoConfigCache[key].activo !== false;
+      });
+      if (!itemsActivos.length) return;
       checkboxesHtml +=
         '<div style="margin-top:10px">' +
           '<div style="font-size:11px;font-weight:800;color:#6B7280;letter-spacing:.4px;text-transform:uppercase;margin-bottom:4px">' + esc(grp.label) + '</div>' +
           '<div class="ed-meds-list">' +
-            grp.items.map(function(s){
+            itemsActivos.map(function(s){
               if (s === 'Cauterización lunar/verruga') {
                 return '<label class="ed-meds-opt" style="display:flex;flex-direction:column;align-items:stretch;gap:6px;grid-column:1/-1">' +
                   '<span><input type="checkbox" value="' + esc(s) + '" class="qm-srv-chk" id="qm-caut-chk"> ' + esc(s) + '</span>' +

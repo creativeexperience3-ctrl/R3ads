@@ -468,7 +468,7 @@
 
   /* ── Destino tras login ── */
   var params    = new URLSearchParams(window.location.search);
-  var returnTo  = params.get('returnTo') || 'Expediente-Doctor.html';
+  var returnTo  = params.get('returnTo') || 'Inicio.html';
 
   /* ── Si ya está logueado, redirigir ── */
   r3adsAuth.onAuthStateChanged(function (user) {

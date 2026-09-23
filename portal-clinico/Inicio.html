@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Inicio · Portal Clínico</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 22 26'%3E%3Ccircle cx='11' cy='5' r='4' fill='none' stroke='%23242F40' stroke-width='2.4'/%3E%3Cpath d='M11 9v15M4 24h14' stroke='%23242F40' stroke-width='2.4' stroke-linecap='round'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="assets/portal-tokens.css">
+<style>
+body {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── Topbar ── */
+.in-top {
+  background: var(--ink); color: #fff;
+  padding: 16px 24px;
+  display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap;
+}
+.in-top-title { font-family: var(--font-display); font-weight: 700; font-size: 17px; letter-spacing: .2px; }
+.in-top-right { display: flex; align-items: center; gap: 14px; font-size: 13px; flex-wrap: wrap; }
+.in-email { color: rgba(255,255,255,.7); }
+.in-logout {
+  background: transparent; color: #fff; border: 1px solid rgba(255,255,255,.3);
+  padding: 7px 14px; border-radius: var(--r-sm); font-family: inherit; font-size: 13px; font-weight: 700;
+  cursor: pointer;
+}
+.in-logout:hover { background: rgba(255,255,255,.12); }
+
+/* ── Main ── */
+.in-main { flex: 1; display: flex; align-items: center; justify-content: center; padding: 40px 24px; }
+.in-wrap { max-width: 980px; width: 100%; }
+.in-heading { text-align: center; margin-bottom: 36px; }
+.in-eyebrow { font-size: 12.5px; font-weight: 700; letter-spacing: .5px; text-transform: uppercase; color: var(--gold-ink); margin-bottom: 8px; }
+.in-h1 { font-family: var(--font-display); font-size: clamp(24px, 4vw, 32px); font-weight: 700; color: var(--ink); margin: 0; }
+
+.in-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 18px;
+}
+.in-card {
+  display: block; text-decoration: none;
+  background: #fff; border: 1px solid var(--line); border-radius: var(--r-lg);
+  box-shadow: var(--shadow-2);
+  padding: 28px 24px;
+  transition: transform .15s ease, box-shadow .15s ease;
+}
+.in-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-3); }
+.in-card-icon {
+  width: 44px; height: 44px; border-radius: var(--r-md);
+  background: var(--gold-wash); color: var(--gold-ink);
+  display: flex; align-items: center; justify-content: center;
+  margin-bottom: 16px;
+}
+.in-card-title { font-family: var(--font-display); font-size: 18px; font-weight: 700; color: var(--ink); margin: 0 0 6px; }
+.in-card-sub { font-size: 13.5px; color: var(--ink-500); line-height: 1.5; margin: 0; }
+
+/* ── Estados ── */
+.in-msg { text-align: center; padding: 80px 20px; color: var(--ink-500); }
+.in-spinner { width: 30px; height: 30px; border: 3px solid var(--line-2); border-top-color: var(--ink); border-radius: 50%; animation: inspin .7s linear infinite; margin: 0 auto 14px; }
+@keyframes inspin { to { transform: rotate(360deg); } }
+</style>
+</head>
+<body>
+
+<div class="in-top">
+  <div class="in-top-title" id="in-clinic-name">Portal Clínico</div>
+  <div class="in-top-right">
+    <span class="in-email" id="in-email">—</span>
+    <button class="in-logout" id="in-logout">Cerrar sesión</button>
+  </div>
+</div>
+
+<main class="in-main">
+  <div class="in-wrap" id="in-content">
+    <div class="in-msg"><div class="in-spinner"></div>Cargando…</div>
+  </div>
+</main>
+
+<!-- Firebase compat SDK -->
+<script src="clinic-config.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="firebase-init.js"></script>
+<script src="r3ads-staff.js"></script>
+
+<script>
+(function () {
+  var CLINIC_ID = null; // se resuelve por sesión en el AUTH GUARD (r3adsStaff.resolveClinicId)
+  var CLINIC = window.R3ADS_CLINIC_FALLBACK || {};
+
+  function $(id) { return document.getElementById(id); }
+
+  function pintarBranding() {
+    $('in-clinic-name').textContent = CLINIC.nombre || 'Portal Clínico';
+  }
+  pintarBranding();
+  function cargarBrandingReal() {
+    if (!CLINIC_ID) return;
+    r3adsDb.collection('clinics').doc(CLINIC_ID).get().then(function (snap) {
+      if (!snap.exists) return;
+      Object.assign(CLINIC, snap.data());
+      pintarBranding();
+    }).catch(function () {});
+  }
+
+  var TARJETAS = [
+    {
+      href: 'Expediente-Doctor.html',
+      title: 'Portal Clínico',
+      sub: 'Expedientes, consultas, caja, pacientes y pendientes.',
+      icon: '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="15" y2="17"/></svg>'
+    },
+    {
+      href: 'Admin-Precios.html',
+      title: 'Precios y Productos',
+      sub: 'Precios, descuentos y qué servicios ofrece tu clínica.',
+      icon: '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>'
+    },
+    {
+      href: 'Admin-Usuarios.html',
+      title: 'Administración de Usuarios',
+      sub: 'Alta, baja y roles del personal de tu clínica.',
+      icon: '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>'
+    }
+  ];
+
+  function renderHub() {
+    var html = '<div class="in-heading">' +
+        '<div class="in-eyebrow">Portal Clínico</div>' +
+        '<h1 class="in-h1">¿A dónde querés entrar?</h1>' +
+      '</div>' +
+      '<div class="in-grid">' +
+      TARJETAS.map(function (t) {
+        return '<a class="in-card" href="' + t.href + '">' +
+          '<div class="in-card-icon">' + t.icon + '</div>' +
+          '<h2 class="in-card-title">' + t.title + '</h2>' +
+          '<p class="in-card-sub">' + t.sub + '</p>' +
+        '</a>';
+      }).join('') +
+      '</div>';
+    $('in-content').innerHTML = html;
+  }
+
+  function mostrarRestringido() {
+    $('in-content').innerHTML =
+      '<div class="in-msg"><h1 style="color:#991B1B;font-family:var(--font-display);font-size:22px;margin:0 0 12px">Acceso restringido</h1>' +
+      '<p style="margin:0 0 24px">Solo el personal autorizado puede acceder a este portal.</p>' +
+      '<a href="Auth.html" style="background:var(--ink);color:#fff;padding:12px 24px;border-radius:10px;text-decoration:none;font-weight:700">Volver al inicio de sesión</a></div>';
+  }
+
+  /* ════════════════════════════════════════════════════════════
+     AUTH GUARD
+     ════════════════════════════════════════════════════════════ */
+  r3adsAuth.onAuthStateChanged(function (user) {
+    if (!user) { window.location.href = 'Auth.html?returnTo=Inicio.html'; return; }
+    r3adsStaff.resolveClinicId(user, function (clinicId) {
+      CLINIC_ID = clinicId;
+      cargarBrandingReal();
+      r3adsStaff.checkStaff(user, CLINIC_ID, function (ok) {
+        if (!ok) { mostrarRestringido(); return; }
+        $('in-email').textContent = user.email;
+        renderHub();
+      });
+    });
+  });
+  $('in-logout').addEventListener('click', function () {
+    r3adsAuth.signOut().then(function () { window.location.href = 'Auth.html'; });
+  });
+})();
+</script>
+</body>
+</html>
