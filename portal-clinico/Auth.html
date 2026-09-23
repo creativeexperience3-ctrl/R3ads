@@ -7,9 +7,32 @@
 <!-- Favicon: pendiente por clínica (Fase 5 del plan — branding dinámico). -->
 <link rel="stylesheet" href="assets/portal-tokens.css">
 <link rel="stylesheet" href="styles.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
 <style>
-/* ── Auth page ───────────────────────────────────────────── */
+/* ── Auth page ───────────────────────────────────────────────
+   Mismos tokens de marca que index.html (Jet Black / Graphite /
+   Golden Bronze, IBM Plex) para que el login se sienta parte del
+   mismo producto y no una pantalla genérica aparte. ── */
 *, *::before, *::after { box-sizing: border-box; }
+
+:root {
+  --jet:      #242F40;
+  --jet-deep: #1c2534;
+  --graphite: #363636;
+  --bronze:   #CCA43B;
+  --bg:       #F6F6F7;
+  --card:     #FFFFFF;
+  --line:     rgba(36,47,64,0.12);
+  --ease-decel: cubic-bezier(.22,1,.36,1);
+}
+
+.auth-page,
+.auth-page input,
+.auth-page button {
+  font-family: 'IBM Plex Sans', system-ui, sans-serif;
+}
 
 .auth-page {
   min-height: 100vh;
@@ -18,14 +41,14 @@
 
 /* ── Branding lateral ── */
 .auth-brand {
-  width: 420px;
+  width: 440px;
   flex-shrink: 0;
-  background: #242F40;
+  background: var(--jet);
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: flex-start;
-  padding: 64px 52px;
+  padding: 64px 56px;
   position: relative;
   overflow: hidden;
 }
@@ -33,8 +56,13 @@
   content: '';
   position: absolute;
   bottom: 0; left: 0; right: 0;
-  height: 4px;
-  background: #CCA43B;
+  height: 3px;
+  background: var(--bronze);
+}
+.auth-brand-glow {
+  position: absolute; width: 480px; height: 480px; border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, rgba(204,164,59,0.14), transparent 70%);
+  top: -200px; right: -200px; pointer-events: none;
 }
 .auth-brand-watermark {
   position: absolute;
@@ -47,41 +75,49 @@
   pointer-events: none;
   user-select: none;
 }
-.auth-brand-logo {
-  width: 72px;
-  margin-bottom: 40px;
+.auth-brand-mark {
+  display: flex; align-items: center; gap: 10px;
+  margin-bottom: 48px; position: relative;
+}
+.auth-brand-mark span {
+  font-size: 18px; font-weight: 700; color: #fff; letter-spacing: -0.01em;
 }
 .auth-brand h1 {
-  font-size: 32px;
-  font-weight: 900;
+  font-size: 34px;
+  font-weight: 700;
   color: #fff;
-  line-height: 1.15;
+  line-height: 1.16;
+  letter-spacing: -0.01em;
   margin: 0 0 16px;
+  position: relative;
 }
-.auth-brand h1 span { color: #CCA43B; }
+.auth-brand h1 span { color: var(--bronze); }
 .auth-brand p {
-  color: rgba(255,255,255,.65);
+  color: rgba(255,255,255,.62);
   font-size: 15px;
   line-height: 1.65;
   margin: 0;
+  max-width: 320px;
+  position: relative;
 }
 .auth-benefits {
   margin-top: 40px;
   display: flex;
   flex-direction: column;
   gap: 16px;
+  position: relative;
 }
 .auth-benefit {
   display: flex;
   align-items: center;
   gap: 12px;
-  color: rgba(255,255,255,.8);
+  color: rgba(255,255,255,.82);
   font-size: 14px;
 }
 .auth-benefit-dot {
-  width: 8px; height: 8px;
+  width: 7px; height: 7px;
   border-radius: 50%;
-  background: #CCA43B;
+  background: var(--bronze);
   flex-shrink: 0;
 }
 
@@ -92,13 +128,14 @@
   align-items: center;
   justify-content: center;
   padding: 40px 24px;
-  background: #F4F6FB;
+  background: var(--bg);
 }
 
 .auth-box {
-  background: #fff;
-  border-radius: 20px;
-  box-shadow: 0 8px 40px rgba(33,60,125,.13);
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  box-shadow: 0 28px 56px -18px rgba(36,47,64,0.22), 0 4px 16px rgba(36,47,64,0.06);
   width: 100%;
   max-width: 440px;
   padding: 40px;
@@ -114,12 +151,12 @@
   margin-bottom: 28px;
   transition: color .18s;
 }
-.auth-back:hover { color: #242F40; }
+.auth-back:hover { color: var(--jet); }
 
 /* ── Tabs ── */
 .auth-tabs {
   display: flex;
-  background: #F4F6FB;
+  background: var(--bg);
   border-radius: 10px;
   padding: 4px;
   margin-bottom: 28px;
@@ -139,8 +176,8 @@
 }
 .auth-tab.is-active {
   background: #fff;
-  color: #242F40;
-  box-shadow: 0 2px 8px rgba(33,60,125,.12);
+  color: var(--jet);
+  box-shadow: 0 2px 8px rgba(36,47,64,.12);
 }
 
 /* ── Formularios ── */
@@ -170,16 +207,16 @@
   font-size: 15px;
   color: #1F2937;
   outline: none;
-  transition: border-color .18s;
+  transition: border-color .18s, box-shadow .18s;
   width: 100%;
 }
-.auth-input:focus { border-color: #242F40; }
+.auth-input:focus { border-color: var(--jet); box-shadow: 0 0 0 3px rgba(36,47,64,.10); }
 
 /* ── Error ── */
 .auth-error {
-  background: #FEE2E2;
-  border: 1px solid #FECACA;
-  border-radius: 8px;
+  background: #FEF2F2;
+  border: 1px solid #FCA5A5;
+  border-radius: 10px;
   padding: 10px 14px;
   font-size: 13px;
   color: #991B1B;
@@ -192,22 +229,23 @@
   height: 50px;
   border: none;
   border-radius: 10px;
-  background: #242F40;
+  background: var(--jet);
   color: #fff;
   font-family: inherit;
   font-size: 15px;
   font-weight: 700;
   cursor: pointer;
-  transition: opacity .18s, transform .1s;
+  transition: background-color .18s, transform .1s, box-shadow .2s;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
   position: relative;
   overflow: hidden;
+  box-shadow: 0 1px 2px rgba(36,47,64,.18);
 }
-.auth-submit:hover { opacity: .9; }
-.auth-submit:active { transform: scale(.98); }
+.auth-submit:hover:not(:disabled) { background: var(--jet-deep); box-shadow: 0 10px 22px rgba(36,47,64,.28); }
+.auth-submit:active:not(:disabled) { transform: scale(.98); }
 .auth-submit:disabled { opacity: .6; cursor: wait; }
 
 /* ── Loading spinner ── */
@@ -230,11 +268,11 @@
   color: #6B7280;
 }
 .auth-switch a {
-  color: #242F40;
+  color: var(--jet);
   font-weight: 600;
   text-decoration: none;
 }
-.auth-switch a:hover { text-decoration: underline; }
+.auth-switch a:hover { color: var(--bronze); }
 
 /* ── Divisor "o continúa con" ── */
 .auth-divider {
@@ -283,8 +321,8 @@
 /* ── Responsive ── */
 @media (max-width: 768px) {
   .auth-brand { display: none; }
-  .auth-page { background: #F4F6FB; }
-  .auth-box { padding: 28px 20px; }
+  .auth-page { background: var(--bg); }
+  .auth-box { padding: 28px 20px; box-shadow: none; border: none; }
 }
 </style>
 <!-- Analytics: el original tenía aquí el Google tag de CMG (G-9HH25BNVW0)
@@ -299,9 +337,18 @@
 
   <!-- ── Branding izquierdo ── -->
   <div class="auth-brand">
+    <div class="auth-brand-glow" aria-hidden="true"></div>
     <div class="auth-brand-watermark" id="auth-brand-watermark"></div>
     <!-- Logo por clínica: pendiente (Fase 5). Mientras tanto se muestra el
-         nombre de la clínica como texto (ver clinic-config.js). -->
+         nombre de la clínica como texto (ver clinic-config.js), con la
+         marca de Ancla como identidad base del portal. -->
+    <div class="auth-brand-mark">
+      <svg width="20" height="24" viewBox="0 0 22 26" fill="none" aria-hidden="true">
+        <circle cx="11" cy="5" r="4" stroke="#ffffff" stroke-width="2"/>
+        <path d="M11 9v15M4 24h14" stroke="#ffffff" stroke-width="2" stroke-linecap="round"/>
+      </svg>
+      <span>Ancla</span>
+    </div>
     <h1 id="auth-brand-title">Tu clínica,<br>en <span>un solo lugar</span></h1>
     <p id="auth-brand-copy">Accede a tu cuenta para gestionar el portal clínico.</p>
     <div class="auth-benefits">
@@ -324,7 +371,7 @@
   <div class="auth-main">
     <div class="auth-box">
 
-      <a class="auth-back" href="Inicio.html">
+      <a class="auth-back" href="index.html">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="15 18 9 12 15 6"/></svg>
         Volver al sitio
       </a>

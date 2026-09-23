@@ -1,0 +1,646 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Precios · Ancla</title>
+<meta name="description" content="Planes y herramientas de Ancla: expedientes, caja, laboratorio, pruebas rápidas, constancias y EKG en un solo sistema. Precios claros en lempiras, sin costo de instalación.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Precios · Ancla">
+<meta property="og:description" content="Planes y herramientas de Ancla para clínicas de Honduras y Centroamérica.">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 22 26'%3E%3Ccircle cx='11' cy='5' r='4' fill='none' stroke='%23242F40' stroke-width='2.4'/%3E%3Cpath d='M11 9v15M4 24h14' stroke='%23242F40' stroke-width='2.4' stroke-linecap='round'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --jet:        #242F40;
+  --jet-deep:   #1c2534;
+  --graphite:   #363636;
+  --bronze:     #CCA43B;
+  --bg:         #F6F6F7;
+  --card:       #FFFFFF;
+  --txt-2:      #4a4a4a;
+  --txt-3:      #5a5a5a;
+  --txt-4:      #6b6b6b;
+  --line:       rgba(36,47,64,0.12);
+  --maxw:       1200px;
+  --pad:        clamp(20px,5vw,64px);
+  --ease-decel: cubic-bezier(.22,1,.36,1);
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  margin: 0;
+  font-family: 'IBM Plex Sans', system-ui, sans-serif;
+  background: var(--bg);
+  color: var(--graphite);
+  -webkit-font-smoothing: antialiased;
+}
+a { color: var(--jet); text-decoration: none; }
+a:hover { color: var(--bronze); }
+a:focus-visible, .btn:focus-visible, .auth-tab:focus-visible { outline: 2px solid var(--bronze); outline-offset: 3px; border-radius: 4px; }
+
+.skip-link {
+  position: absolute; left: 12px; top: -60px; z-index: 50;
+  background: var(--jet); color: #fff; padding: 10px 16px; border-radius: 10px;
+  font-size: 14px; font-weight: 600; transition: top .2s ease;
+}
+.skip-link:focus { top: 12px; color: #fff; }
+
+.reveal {
+  opacity: 0; transform: translateY(16px);
+  transition: opacity .6s var(--ease-decel), transform .6s var(--ease-decel);
+}
+.reveal.is-visible { opacity: 1; transform: translateY(0); }
+@media (prefers-reduced-motion: reduce) {
+  .reveal { opacity: 1; transform: none; transition: none; }
+}
+
+.wrap { max-width: var(--maxw); margin: 0 auto; padding-left: var(--pad); padding-right: var(--pad); }
+.eyebrow {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 13px; font-weight: 600; letter-spacing: 0.08em;
+  text-transform: uppercase; color: var(--txt-4); margin-bottom: 10px;
+}
+
+/* ── Botones ── */
+.btn {
+  display: inline-block; border-radius: 10px; font-weight: 600;
+  font-size: 15px; padding: 14px 26px; border: 1.5px solid transparent;
+  transition: background-color .15s ease, color .15s ease, border-color .15s ease,
+              transform .15s ease, box-shadow .2s ease; cursor: pointer;
+}
+.btn-primary { background: var(--jet); color: #fff; box-shadow: 0 1px 2px rgba(36,47,64,.18); }
+.btn-primary:hover { background: var(--jet-deep); color: #fff; transform: translateY(-1px); box-shadow: 0 10px 22px rgba(36,47,64,.28); }
+.btn-primary:active { transform: translateY(0); box-shadow: 0 3px 8px rgba(36,47,64,.24); }
+.btn-outline { border-color: var(--jet); color: var(--jet); background: transparent; }
+.btn-outline:hover { background: var(--jet); color: #fff; transform: translateY(-1px); }
+.btn-outline:active { transform: translateY(0); }
+.btn-light { background: #fff; color: var(--jet); box-shadow: 0 1px 2px rgba(0,0,0,.1); }
+.btn-light:hover { color: var(--jet); transform: translateY(-1px); box-shadow: 0 10px 24px rgba(0,0,0,.22); }
+.btn-sm { padding: 10px 20px; font-size: 14px; }
+.btn-block { width: 100%; text-align: center; }
+
+/* ── Logo ── */
+.logo { display: flex; align-items: center; gap: 10px; }
+.logo-mark { flex-shrink: 0; }
+.logo-word { font-size: 20px; font-weight: 700; color: var(--jet); letter-spacing: -0.01em; }
+
+/* ── Nav ── */
+.nav {
+  position: sticky; top: 0; z-index: 20;
+  background: rgba(246,246,247,0.92); backdrop-filter: blur(8px);
+  border-bottom: 1px solid rgba(36,47,64,0.1);
+}
+.nav-row {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 16px; flex-wrap: wrap; padding-top: 16px; padding-bottom: 16px;
+}
+.nav-links { display: flex; align-items: center; gap: 28px; flex-wrap: wrap; }
+.nav-links a { color: var(--graphite); font-size: 15px; font-weight: 500; }
+.nav-links a:hover { color: var(--bronze); }
+.nav-links a.is-active { color: var(--jet); font-weight: 700; }
+
+/* ── Header de página ── */
+.page-header {
+  text-align: center; max-width: 640px; margin: 0 auto;
+  padding-top: clamp(56px,8vw,88px); padding-bottom: clamp(32px,5vw,48px);
+}
+.page-header .eyebrow { justify-content: center; }
+.page-header h1 {
+  font-size: clamp(2rem,4.5vw,3rem); line-height: 1.1; font-weight: 700;
+  color: var(--jet); margin: 0 0 16px; letter-spacing: -0.01em;
+}
+.page-header p {
+  font-size: clamp(1.02rem,1.2vw,1.15rem); line-height: 1.6;
+  color: var(--txt-2); margin: 0;
+}
+
+/* ── Toggle mensual / anual ── */
+.billing-toggle {
+  display: inline-flex; align-items: center; gap: 4px;
+  background: var(--card); border: 1px solid var(--line); border-radius: 999px;
+  padding: 4px; margin: 28px auto 0;
+}
+.billing-btn {
+  border: none; background: transparent; font-family: inherit;
+  font-size: 14px; font-weight: 600; color: var(--txt-4);
+  padding: 9px 18px; border-radius: 999px; cursor: pointer;
+  transition: background-color .18s ease, color .18s ease;
+}
+.billing-btn.is-active { background: var(--jet); color: #fff; }
+.billing-save {
+  font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; font-weight: 600;
+  color: var(--bronze); background: rgba(204,164,59,0.14);
+  padding: 2px 7px; border-radius: 999px; margin-left: 6px;
+}
+
+/* ── Tarjetas de precio ── */
+.pricing-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px;
+  align-items: stretch; padding-top: 48px;
+}
+.price-card {
+  border: 1px solid var(--line); border-radius: 16px; background: var(--card);
+  padding: 32px; display: flex; flex-direction: column;
+  transition: transform .25s var(--ease-decel), box-shadow .25s ease;
+}
+.price-card--featured {
+  background: var(--jet); border-color: var(--jet);
+  box-shadow: 0 28px 56px -14px rgba(36,47,64,0.34);
+  transform: translateY(-8px);
+}
+.price-tag {
+  align-self: flex-start;
+  font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; font-weight: 600;
+  letter-spacing: 0.04em; color: var(--jet); background: rgba(204,164,59,0.16);
+  padding: 3px 9px; border-radius: 999px; margin-bottom: 14px;
+}
+.price-card--featured .price-tag { color: var(--jet); background: var(--bronze); }
+.price-name { font-size: 17px; font-weight: 700; color: var(--jet); margin: 0 0 6px; }
+.price-card--featured .price-name { color: #fff; }
+.price-desc { font-size: 14px; color: var(--txt-3); margin: 0 0 22px; line-height: 1.5; min-height: 42px; }
+.price-card--featured .price-desc { color: rgba(255,255,255,0.68); }
+.price-amount { display: flex; align-items: baseline; gap: 6px; margin-bottom: 4px; }
+.price-num { font-size: 38px; font-weight: 700; color: var(--jet); letter-spacing: -0.01em; }
+.price-card--featured .price-num { color: #fff; }
+.price-period { font-size: 14px; color: var(--txt-4); }
+.price-card--featured .price-period { color: rgba(255,255,255,0.6); }
+.price-note { font-size: 12.5px; color: var(--txt-4); margin: 0 0 24px; }
+.price-card--featured .price-note { color: rgba(255,255,255,0.5); }
+.price-list { list-style: none; margin: 0 0 28px; padding: 0; display: flex; flex-direction: column; gap: 12px; flex: 1; }
+.price-list li { display: flex; align-items: flex-start; gap: 10px; font-size: 14.5px; color: var(--graphite); line-height: 1.4; }
+.price-card--featured .price-list li { color: rgba(255,255,255,0.85); }
+.price-check { flex-shrink: 0; margin-top: 2px; stroke: var(--bronze); }
+
+/* ── Franja de confianza ── */
+.trust-strip { border-bottom: 1px solid rgba(36,47,64,0.08); background: rgba(36,47,64,0.02); margin-top: 48px; }
+.trust-strip-inner { display: flex; gap: 22px; flex-wrap: wrap; padding-top: 16px; padding-bottom: 16px; justify-content: center; }
+.chip {
+  font-size: 13px; color: var(--txt-4); display: flex; align-items: center; gap: 7px;
+  padding: 6px 12px 6px 10px; border-radius: 999px;
+  background: rgba(36,47,64,0.04); border: 1px solid rgba(36,47,64,0.08);
+}
+.dot { width: 6px; height: 6px; border-radius: 50%; background: var(--bronze); flex-shrink: 0; }
+
+/* ── Secciones ── */
+.section { padding-top: clamp(56px,7vw,88px); padding-bottom: clamp(56px,7vw,88px); }
+.section-head { max-width: 640px; margin: 0 auto 44px; text-align: center; }
+.section-head h2 {
+  font-size: clamp(1.75rem,3.5vw,2.4rem); font-weight: 700;
+  color: var(--jet); margin: 0 0 12px;
+}
+.section-head p { font-size: 16px; line-height: 1.6; color: var(--txt-2); margin: 0; }
+
+/* ── Herramientas, agrupadas por categoría ── */
+.tool-group { margin-bottom: 40px; }
+.tool-group:last-child { margin-bottom: 0; }
+.tool-group-h {
+  display: flex; align-items: baseline; justify-content: space-between; gap: 12px;
+  border-bottom: 1px solid var(--line); padding-bottom: 12px; margin-bottom: 20px;
+}
+.tool-group-h h3 { font-size: 18px; font-weight: 700; color: var(--jet); margin: 0; }
+.tool-group-h span { font-size: 13px; color: var(--txt-4); }
+.tool-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px,1fr)); gap: 20px; }
+.tool-card {
+  border: 1px solid var(--line); border-radius: 16px; padding: 22px; background: var(--card);
+  display: flex; flex-direction: column; gap: 12px;
+  transition: transform .25s var(--ease-decel), box-shadow .25s ease, border-color .25s ease;
+}
+.tool-card:hover { transform: translateY(-3px); box-shadow: 0 16px 32px -10px rgba(36,47,64,0.14); border-color: rgba(36,47,64,0.22); }
+.tool-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; }
+.tool-badge {
+  width: 42px; height: 42px; border-radius: 10px; flex-shrink: 0;
+  background: rgba(36,47,64,0.05); border: 1px solid var(--line);
+  display: flex; align-items: center; justify-content: center;
+}
+.tool-badge svg { stroke: var(--jet); }
+.tool-card:hover .tool-badge { background: rgba(204,164,59,0.08); border-color: rgba(204,164,59,0.35); }
+.tool-card:hover .tool-badge svg { stroke: var(--bronze); }
+.tool-avail {
+  font-family: 'IBM Plex Mono', monospace; font-size: 10px; font-weight: 600;
+  letter-spacing: 0.03em; text-transform: uppercase; color: var(--txt-4);
+  background: rgba(36,47,64,0.05); padding: 4px 8px; border-radius: 999px; white-space: nowrap;
+}
+.tool-avail--all { color: #2f6f4e; background: rgba(47,111,78,0.1); }
+.tool-avail--pro { color: var(--jet); background: rgba(204,164,59,0.18); }
+.tool-card h4 { font-size: 15.5px; font-weight: 600; color: var(--jet); margin: 0; }
+.tool-card p { font-size: 13.5px; line-height: 1.5; color: var(--txt-3); margin: 0; }
+
+/* ── FAQ ── */
+.faq-list { max-width: 760px; margin: 0 auto; display: flex; flex-direction: column; gap: 12px; }
+.faq-item {
+  border: 1px solid var(--line); border-radius: 12px; background: var(--card);
+  padding: 4px 22px;
+}
+.faq-item summary {
+  cursor: pointer; list-style: none; padding: 18px 0;
+  font-size: 15.5px; font-weight: 600; color: var(--jet);
+  display: flex; align-items: center; justify-content: space-between; gap: 16px;
+}
+.faq-item summary::-webkit-details-marker { display: none; }
+.faq-icon { flex-shrink: 0; stroke: var(--txt-4); transition: transform .2s ease; }
+.faq-item[open] .faq-icon { transform: rotate(45deg); stroke: var(--bronze); }
+.faq-item p { font-size: 14.5px; line-height: 1.6; color: var(--txt-3); margin: 0 0 20px; }
+
+/* ── CTA de cierre ── */
+.cta {
+  position: relative; overflow: hidden;
+  background: var(--jet); border-top: 2px solid var(--bronze);
+  padding: clamp(56px,8vw,96px) var(--pad);
+}
+.cta::before, .footer::before {
+  content: ""; position: absolute; inset: 0; z-index: 0;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  opacity: 0.05; mix-blend-mode: overlay; pointer-events: none;
+}
+.cta-inner { position: relative; z-index: 1; max-width: 720px; margin: 0 auto; text-align: center; }
+.cta h2 { font-size: clamp(1.8rem,3.5vw,2.4rem); font-weight: 700; color: #fff; margin: 0 0 16px; }
+.cta p { font-size: 16px; line-height: 1.6; color: rgba(255,255,255,0.72); margin: 0 0 32px; }
+
+/* ── Footer ── */
+.footer { position: relative; overflow: hidden; background: var(--jet-deep); padding: 48px var(--pad) 28px; }
+.footer-inner { position: relative; z-index: 1; max-width: var(--maxw); margin: 0 auto; }
+.footer-top { display: flex; flex-wrap: wrap; gap: 40px; justify-content: space-between; margin-bottom: 32px; }
+.footer .logo-word { color: #fff; font-size: 18px; }
+.footer-about { max-width: 320px; }
+.footer-about p { font-size: 13.5px; line-height: 1.6; color: rgba(255,255,255,0.6); margin: 14px 0 0; }
+.footer-cols { display: flex; gap: 48px; flex-wrap: wrap; }
+.footer-col-h { font-family: 'IBM Plex Mono', monospace; font-size: 12px; font-weight: 600; color: rgba(255,255,255,0.5); letter-spacing: 0.05em; margin-bottom: 14px; }
+.footer-col a { display: block; color: rgba(255,255,255,0.75); font-size: 14px; margin-bottom: 10px; }
+.footer-col a:hover { color: var(--bronze); }
+.footer-bottom {
+  border-top: 1px solid rgba(255,255,255,0.12); padding-top: 20px;
+  display: flex; justify-content: space-between; flex-wrap: wrap; gap: 10px;
+  font-size: 12.5px; color: rgba(255,255,255,0.5);
+}
+
+@media (max-width: 900px) {
+  .pricing-grid { grid-template-columns: 1fr; }
+  .price-card--featured { transform: none; }
+}
+</style>
+</head>
+<body>
+
+<a class="skip-link" href="#main">Saltar al contenido</a>
+
+<!-- ═══ NAV ═══ -->
+<nav class="nav">
+  <div class="wrap nav-row">
+    <a href="index.html" class="logo">
+      <svg class="logo-mark" width="22" height="26" viewBox="0 0 22 26" fill="none" aria-hidden="true">
+        <circle cx="11" cy="5" r="4" stroke="#242F40" stroke-width="2"/>
+        <path d="M11 9v15M4 24h14" stroke="#242F40" stroke-width="2" stroke-linecap="round"/>
+      </svg>
+      <span class="logo-word">Ancla</span>
+    </a>
+    <div class="nav-links">
+      <a href="index.html#modulos">Módulos</a>
+      <a href="Precios.html" class="is-active">Precios</a>
+      <a href="index.html#nosotros">Nosotros</a>
+      <a href="index.html#contacto">Contacto</a>
+      <a href="Auth.html">Acceder</a>
+    </div>
+    <a href="https://wa.me/50495652894?text=Hola%2C%20quiero%20una%20demo%20de%20Ancla%20para%20mi%20cl%C3%ADnica."
+       target="_blank" rel="noopener" class="btn btn-primary btn-sm">Solicitar demo</a>
+  </div>
+</nav>
+
+<main id="main">
+
+<!-- ═══ HEADER ═══ -->
+<div class="wrap">
+  <div class="page-header reveal">
+    <div class="eyebrow">Precios</div>
+    <h1>Un precio por lo que tu clínica usa.</h1>
+    <p>Sin costo de instalación, sin letra pequeña. Cambia de plan cuando tu clínica crezca.</p>
+    <div class="billing-toggle" role="group" aria-label="Ciclo de facturación">
+      <button type="button" class="billing-btn is-active" data-period="monthly">Mensual</button>
+      <button type="button" class="billing-btn" data-period="annual">Anual <span class="billing-save">2 meses gratis</span></button>
+    </div>
+  </div>
+
+  <!-- ═══ TARJETAS DE PRECIO ═══ -->
+  <div class="pricing-grid">
+    <div class="price-card reveal">
+      <span class="price-tag">ESENCIAL</span>
+      <h3 class="price-name">Un consultorio</h3>
+      <p class="price-desc">Lo necesario para llevar la clínica en orden desde el primer día.</p>
+      <div class="price-amount">
+        <span class="price-num" data-monthly="L 1,900" data-annual="L 1,583">L 1,900</span>
+        <span class="price-period">/mes</span>
+      </div>
+      <p class="price-note" data-monthly-note="Facturado mensual." data-annual-note="L 19,000 al año, facturado una vez.">Facturado mensual.</p>
+      <ul class="price-list">
+        <li><svg class="price-check" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8.5l3 3 7-7"/></svg>Expedientes clínicos completos</li>
+        <li><svg class="price-check" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8.5l3 3 7-7"/></svg>Consultas y agenda del día</li>
+        <li><svg class="price-check" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8.5l3 3 7-7"/></svg>Caja y cobros en lempiras</li>
+        <li><svg class="price-check" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8.5l3 3 7-7"/></svg>Búsqueda e historial de pacientes</li>
+        <li><svg class="price-check" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8.5l3 3 7-7"/></svg>Hasta 4 usuarios de staff</li>
+      </ul>
+      <a href="https://wa.me/50495652894?text=Hola%2C%20quiero%20una%20demo%20de%20Ancla%20plan%20Esencial."
+         target="_blank" rel="noopener" class="btn btn-outline btn-block">Solicitar demo</a>
+    </div>
+
+    <div class="price-card price-card--featured reveal" style="transition-delay:.08s">
+      <span class="price-tag">Más elegida</span>
+      <h3 class="price-name">Profesional</h3>
+      <p class="price-desc">Todo el circuito clínico, incluyendo laboratorio y estudios.</p>
+      <div class="price-amount">
+        <span class="price-num" data-monthly="L 3,400" data-annual="L 2,833">L 3,400</span>
+        <span class="price-period">/mes</span>
+      </div>
+      <p class="price-note" data-monthly-note="Facturado mensual." data-annual-note="L 34,000 al año, facturado una vez.">Facturado mensual.</p>
+      <ul class="price-list">
+        <li><svg class="price-check" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8.5l3 3 7-7"/></svg>Todo lo de Esencial</li>
+        <li><svg class="price-check" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8.5l3 3 7-7"/></svg>Laboratorio y pruebas rápidas</li>
+        <li><svg class="price-check" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8.5l3 3 7-7"/></svg>Constancias médicas y EKG</li>
+        <li><svg class="price-check" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8.5l3 3 7-7"/></svg>Catálogo de precios con descuentos</li>
+        <li><svg class="price-check" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8.5l3 3 7-7"/></svg>Hasta 12 usuarios de staff</li>
+      </ul>
+      <a href="https://wa.me/50495652894?text=Hola%2C%20quiero%20una%20demo%20de%20Ancla%20plan%20Profesional."
+         target="_blank" rel="noopener" class="btn btn-light btn-block">Solicitar demo</a>
+    </div>
+
+    <div class="price-card reveal" style="transition-delay:.16s">
+      <span class="price-tag">CLÍNICA+</span>
+      <h3 class="price-name">Varias sedes</h3>
+      <p class="price-desc">Para clínicas con más de un consultorio o grupos médicos.</p>
+      <div class="price-amount">
+        <span class="price-num">A medida</span>
+      </div>
+      <p class="price-note">Se cotiza según número de sedes.</p>
+      <ul class="price-list">
+        <li><svg class="price-check" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8.5l3 3 7-7"/></svg>Todo lo de Profesional</li>
+        <li><svg class="price-check" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8.5l3 3 7-7"/></svg>Múltiples consultorios o sedes</li>
+        <li><svg class="price-check" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8.5l3 3 7-7"/></svg>Roles y permisos avanzados</li>
+        <li><svg class="price-check" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8.5l3 3 7-7"/></svg>Soporte prioritario por WhatsApp</li>
+        <li><svg class="price-check" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8.5l3 3 7-7"/></svg>Usuarios de staff ilimitados</li>
+      </ul>
+      <a href="https://wa.me/50495652894?text=Hola%2C%20quiero%20cotizar%20Ancla%20Cl%C3%ADnica%2B%20para%20varias%20sedes."
+         target="_blank" rel="noopener" class="btn btn-outline btn-block">Solicitar demo</a>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ FRANJA DE CONFIANZA ═══ -->
+<div class="trust-strip">
+  <div class="wrap trust-strip-inner">
+    <span class="chip"><span class="dot"></span>Cambia de plan cuando quieras</span>
+    <span class="chip"><span class="dot"></span>Sin costo de instalación</span>
+    <span class="chip"><span class="dot"></span>Tus datos, aislados por clínica</span>
+  </div>
+</div>
+
+<!-- ═══ TODAS LAS HERRAMIENTAS ═══ -->
+<div class="wrap section">
+  <div class="section-head reveal">
+    <h2>Todas las herramientas, explicadas.</h2>
+    <p>Lo que trae cada módulo del sistema, agrupado por lo que resuelve en el día a día de la clínica.</p>
+  </div>
+
+  <div class="tool-group reveal">
+    <div class="tool-group-h">
+      <h3>Núcleo clínico</h3>
+      <span>Incluido en todos los planes</span>
+    </div>
+    <div class="tool-grid">
+      <div class="tool-card">
+        <div class="tool-top">
+          <div class="tool-badge">
+            <svg width="20" height="16" viewBox="0 0 22 16" fill="none" aria-hidden="true"><path d="M0 1h22M0 8h15M0 15h19" stroke-width="2"/></svg>
+          </div>
+          <span class="tool-avail tool-avail--all">Todos los planes</span>
+        </div>
+        <h4>Expedientes</h4>
+        <p>Historial clínico completo por paciente, con acceso ordenado para médicos y enfermería.</p>
+      </div>
+      <div class="tool-card">
+        <div class="tool-top">
+          <div class="tool-badge">
+            <svg width="18" height="18" viewBox="0 0 20 20" fill="none" aria-hidden="true"><circle cx="10" cy="10" r="7" stroke-width="2"/><path d="M10 6v4l3 2" stroke-width="2" stroke-linecap="round"/></svg>
+          </div>
+          <span class="tool-avail tool-avail--all">Todos los planes</span>
+        </div>
+        <h4>Consultas y pendientes</h4>
+        <p>Flujo de la consulta de principio a fin: de sala de espera a caja, sin papel suelto.</p>
+      </div>
+      <div class="tool-card">
+        <div class="tool-top">
+          <div class="tool-badge">
+            <svg width="18" height="18" viewBox="0 0 20 20" fill="none" aria-hidden="true"><circle cx="10" cy="10" r="9" stroke-width="2"/></svg>
+          </div>
+          <span class="tool-avail tool-avail--all">Todos los planes</span>
+        </div>
+        <h4>Caja y cobros</h4>
+        <p>Cobros, corte de caja y facturación en moneda local, ligados a cada consulta.</p>
+      </div>
+      <div class="tool-card">
+        <div class="tool-top">
+          <div class="tool-badge">
+            <svg width="18" height="18" viewBox="0 0 20 20" fill="none" aria-hidden="true"><circle cx="8.5" cy="8.5" r="6" stroke-width="2"/><path d="M13 13l5 5" stroke-width="2" stroke-linecap="round"/></svg>
+          </div>
+          <span class="tool-avail tool-avail--all">Todos los planes</span>
+        </div>
+        <h4>Búsqueda y unificación</h4>
+        <p>Encuentra a un paciente por nombre, código o teléfono, y une expedientes duplicados.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="tool-group reveal">
+    <div class="tool-group-h">
+      <h3>Estudios y constancias</h3>
+      <span>Desde el plan Profesional</span>
+    </div>
+    <div class="tool-grid">
+      <div class="tool-card">
+        <div class="tool-top">
+          <div class="tool-badge">
+            <svg width="18" height="18" viewBox="0 0 20 20" fill="none" aria-hidden="true"><rect x="3.5" y="3.5" width="13" height="13" transform="rotate(45 10 10)" stroke-width="2"/></svg>
+          </div>
+          <span class="tool-avail tool-avail--pro">Profesional+</span>
+        </div>
+        <h4>Laboratorio</h4>
+        <p>Órdenes y resultados de laboratorio integrados directo al expediente del paciente.</p>
+      </div>
+      <div class="tool-card">
+        <div class="tool-top">
+          <div class="tool-badge">
+            <svg width="18" height="18" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M4 10h4l2-6 4 12 2-6h4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <span class="tool-avail tool-avail--pro">Profesional+</span>
+        </div>
+        <h4>Pruebas rápidas</h4>
+        <p>Registro y resultado de pruebas rápidas de enfermería, sin pasar por laboratorio.</p>
+      </div>
+      <div class="tool-card">
+        <div class="tool-top">
+          <div class="tool-badge">
+            <svg width="18" height="18" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M4 3h9l3 3v11a1 1 0 01-1 1H4a1 1 0 01-1-1V4a1 1 0 011-1z" stroke-width="2"/><path d="M7 9h6M7 13h6" stroke-width="2" stroke-linecap="round"/></svg>
+          </div>
+          <span class="tool-avail tool-avail--pro">Profesional+</span>
+        </div>
+        <h4>Constancias médicas</h4>
+        <p>Genera y firma constancias en segundos, con el membrete de tu clínica.</p>
+      </div>
+      <div class="tool-card">
+        <div class="tool-top">
+          <div class="tool-badge">
+            <svg width="18" height="18" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M2 10h3l2-5 3 10 2-7 2 4h4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <span class="tool-avail tool-avail--pro">Profesional+</span>
+        </div>
+        <h4>Electrocardiograma</h4>
+        <p>Carga el trazo de EKG y guárdalo junto al resto de resultados del paciente.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="tool-group reveal">
+    <div class="tool-group-h">
+      <h3>Administración</h3>
+      <span>Incluido en todos los planes</span>
+    </div>
+    <div class="tool-grid">
+      <div class="tool-card">
+        <div class="tool-top">
+          <div class="tool-badge">
+            <svg width="20" height="14" viewBox="0 0 21 14" fill="none" aria-hidden="true"><circle cx="5" cy="5" r="4" stroke-width="2"/><circle cx="16" cy="5" r="4" stroke-width="2"/></svg>
+          </div>
+          <span class="tool-avail tool-avail--all">Todos los planes</span>
+        </div>
+        <h4>Usuarios y roles</h4>
+        <p>Da de alta a médicos, enfermería y caja, cada uno con permisos según su función.</p>
+      </div>
+      <div class="tool-card">
+        <div class="tool-top">
+          <div class="tool-badge">
+            <svg width="18" height="18" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M10 2v16M4 6h9a3 3 0 010 6H6a3 3 0 000 6h10" stroke-width="2" stroke-linecap="round"/></svg>
+          </div>
+          <span class="tool-avail tool-avail--all">Todos los planes</span>
+        </div>
+        <h4>Catálogo y precios</h4>
+        <p>Controla el precio público y los descuentos de cada servicio desde un solo panel.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ FAQ ═══ -->
+<div class="wrap section">
+  <div class="section-head reveal">
+    <h2>Preguntas frecuentes.</h2>
+  </div>
+  <div class="faq-list reveal">
+    <details class="faq-item">
+      <summary>¿Puedo cambiar de plan más adelante?<svg class="faq-icon" width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 3v12M3 9h12"/></svg></summary>
+      <p>Sí. Puedes subir de Esencial a Profesional, o agregar sedes en Clínica+, cuando tu clínica lo necesite. El cambio aplica desde el siguiente corte de facturación.</p>
+    </details>
+    <details class="faq-item">
+      <summary>¿Los datos de mi clínica se mezclan con los de otras?<svg class="faq-icon" width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 3v12M3 9h12"/></svg></summary>
+      <p>No. Cada clínica tiene sus datos aislados: expedientes, caja y usuarios de una clínica nunca son visibles para otra, aunque compartan el mismo sistema.</p>
+    </details>
+    <details class="faq-item">
+      <summary>¿Qué pasa si dejo de pagar un módulo opcional?<svg class="faq-icon" width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 3v12M3 9h12"/></svg></summary>
+      <p>Dejas de poder registrar cosas nuevas en ese módulo, pero conservas acceso a todo lo que ya habías guardado. Son datos clínicos de tus pacientes, no se ocultan por una decisión de facturación.</p>
+    </details>
+    <details class="faq-item">
+      <summary>¿Necesito instalar algo en la clínica?<svg class="faq-icon" width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 3v12M3 9h12"/></svg></summary>
+      <p>No. Ancla funciona desde el navegador, en computadora, tablet o teléfono. Solo necesitas una cuenta y conexión a internet.</p>
+    </details>
+    <details class="faq-item">
+      <summary>¿Cómo empiezo?<svg class="faq-icon" width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 3v12M3 9h12"/></svg></summary>
+      <p>Escríbenos por WhatsApp y agendamos una demo con los flujos reales de tu clínica antes de decidir el plan.</p>
+    </details>
+  </div>
+</div>
+
+<!-- ═══ CTA DE CIERRE ═══ -->
+<div id="contacto" class="cta">
+  <div class="cta-inner reveal">
+    <h2>Lleva tu clínica del papel al orden.</h2>
+    <p>Agenda una demo y ve Ancla trabajando con los flujos reales de tu clínica.</p>
+    <a href="https://wa.me/50495652894?text=Hola%2C%20quiero%20una%20demo%20de%20Ancla%20para%20mi%20cl%C3%ADnica."
+       target="_blank" rel="noopener" class="btn btn-light">Solicitar demo</a>
+  </div>
+</div>
+
+</main>
+
+<!-- ═══ FOOTER ═══ -->
+<footer class="footer">
+  <div class="footer-inner">
+    <div class="footer-top">
+      <div class="footer-about">
+        <div class="logo">
+          <svg class="logo-mark" width="20" height="24" viewBox="0 0 22 26" fill="none" aria-hidden="true">
+            <circle cx="11" cy="5" r="4" stroke="#ffffff" stroke-width="2"/>
+            <path d="M11 9v15M4 24h14" stroke="#ffffff" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+          <span class="logo-word">Ancla</span>
+        </div>
+        <p>Sistema de gestión clínica para clínicas pequeñas y medianas de Centroamérica.</p>
+      </div>
+      <div class="footer-cols">
+        <div class="footer-col">
+          <div class="footer-col-h">PRODUCTO</div>
+          <a href="index.html#modulos">Módulos</a>
+          <a href="Precios.html">Precios</a>
+          <a href="index.html#nosotros">Nosotros</a>
+          <a href="Auth.html">Acceder</a>
+        </div>
+        <div class="footer-col">
+          <div class="footer-col-h">EMPRESA</div>
+          <a href="https://r3ads.com" target="_blank" rel="noopener">R3ads</a>
+          <a href="index.html#contacto">Contacto</a>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2026 Ancla, un producto de R3ads. Hecho en Centroamérica.</span>
+      <span>Precios en lempiras (HNL), sujetos a cambio.</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+(function () {
+  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var els = document.querySelectorAll('.reveal');
+  if (reduce || !('IntersectionObserver' in window)) {
+    els.forEach(function (el) { el.classList.add('is-visible'); });
+  } else {
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('is-visible');
+          io.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.15, rootMargin: '0px 0px -40px 0px' });
+    els.forEach(function (el) { io.observe(el); });
+  }
+
+  /* ── Toggle mensual / anual ── */
+  var buttons = document.querySelectorAll('.billing-btn');
+  buttons.forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var period = btn.dataset.period;
+      buttons.forEach(function (b) { b.classList.toggle('is-active', b === btn); });
+      document.querySelectorAll('[data-monthly]').forEach(function (el) {
+        el.textContent = period === 'annual' ? el.dataset.annual : el.dataset.monthly;
+      });
+      document.querySelectorAll('[data-monthly-note]').forEach(function (el) {
+        el.textContent = period === 'annual' ? el.dataset.annualNote : el.dataset.monthlyNote;
+      });
+    });
+  });
+})();
+</script>
+
+</body>
+</html>

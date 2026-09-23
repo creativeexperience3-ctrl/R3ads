@@ -51,7 +51,7 @@ a:focus-visible, .btn:focus-visible { outline: 2px solid var(--bronze); outline-
 
 .skip-link {
   position: absolute; left: 12px; top: -60px; z-index: 50;
-  background: var(--jet); color: #fff; padding: 10px 16px; border-radius: 6px;
+  background: var(--jet); color: #fff; padding: 10px 16px; border-radius: 10px;
   font-size: 14px; font-weight: 600; transition: top .2s ease;
 }
 .skip-link:focus { top: 12px; color: #fff; }
@@ -75,7 +75,7 @@ a:focus-visible, .btn:focus-visible { outline: 2px solid var(--bronze); outline-
 
 /* ── Botones ── */
 .btn {
-  display: inline-block; border-radius: 6px; font-weight: 600;
+  display: inline-block; border-radius: 10px; font-weight: 600;
   font-size: 15px; padding: 14px 26px; border: 1.5px solid transparent;
   transition: background-color .15s ease, color .15s ease, border-color .15s ease,
               transform .15s ease, box-shadow .2s ease;
@@ -150,8 +150,8 @@ a:focus-visible, .btn:focus-visible { outline: 2px solid var(--bronze); outline-
 
 /* Mockup ilustrativo del panel — placeholder hasta tener captura real */
 .hero-visual {
-  aspect-ratio: 4/3; border-radius: 12px; border: 1px solid rgba(36,47,64,0.15);
-  background: var(--card); box-shadow: 0 24px 48px rgba(36,47,64,0.10);
+  aspect-ratio: 4/3; border-radius: 16px; border: 1px solid rgba(36,47,64,0.15);
+  background: var(--card); box-shadow: 0 28px 56px -12px rgba(36,47,64,0.22), 0 8px 20px rgba(36,47,64,0.08);
   overflow: hidden; display: flex; flex-direction: column;
 }
 .mock-bar {
@@ -205,12 +205,12 @@ a:focus-visible, .btn:focus-visible { outline: 2px solid var(--bronze); outline-
 }
 
 .card {
-  border: 1px solid var(--line); border-radius: 12px; padding: 28px; background: var(--card);
+  border: 1px solid var(--line); border-radius: 16px; padding: 28px; background: var(--card);
   transition: transform .25s var(--ease-decel), box-shadow .25s ease, border-color .25s ease;
 }
 .card:hover {
   transform: translateY(-4px);
-  box-shadow: 0 16px 32px rgba(36,47,64,0.12);
+  box-shadow: 0 20px 40px -8px rgba(36,47,64,0.16);
   border-color: rgba(36,47,64,0.22);
 }
 .card h3 { font-size: 17px; font-weight: 600; color: var(--jet); margin: 0 0 8px; }
@@ -247,6 +247,44 @@ a:focus-visible, .btn:focus-visible { outline: 2px solid var(--bronze); outline-
 .card-mv p { font-size: 15.5px; line-height: 1.65; color: var(--txt-2); }
 .subhead { font-size: 20px; font-weight: 700; color: var(--jet); margin: 0 0 20px; }
 .grid-values { grid-template-columns: repeat(auto-fit, minmax(220px,1fr)); }
+
+/* ── Franja de planes (teaser, detalle completo en Precios.html) ── */
+.plans-card {
+  display: flex; flex-wrap: wrap; align-items: stretch;
+  border: 1px solid var(--line); border-radius: 16px; background: var(--card);
+  box-shadow: 0 20px 44px -14px rgba(36,47,64,0.14); overflow: hidden;
+}
+.plan-tile {
+  flex: 1 1 220px; padding: 32px 28px; position: relative;
+  border-right: 1px solid var(--line);
+}
+.plan-tile:last-child { border-right: none; }
+.plan-tile-name { font-size: 13px; font-weight: 700; letter-spacing: 0.02em; color: var(--txt-4); margin-bottom: 10px; }
+.plan-tile-price { font-size: 28px; font-weight: 700; color: var(--jet); margin-bottom: 4px; letter-spacing: -0.01em; }
+.plan-tile-price span { font-size: 14px; font-weight: 500; color: var(--txt-4); }
+.plan-tile-desc { font-size: 14px; line-height: 1.5; color: var(--txt-3); margin: 0; }
+.plan-tile--featured {
+  background: var(--jet); color: #fff; border-radius: 12px;
+  margin: -1px; padding-top: 40px; padding-bottom: 40px;
+  box-shadow: 0 24px 48px -12px rgba(36,47,64,0.32); z-index: 1;
+}
+.plan-tile--featured .plan-tile-name { color: var(--bronze); }
+.plan-tile--featured .plan-tile-price { color: #fff; }
+.plan-tile--featured .plan-tile-price span { color: rgba(255,255,255,0.6); }
+.plan-tile--featured .plan-tile-desc { color: rgba(255,255,255,0.72); }
+.plan-tile-tag {
+  position: absolute; top: 16px; right: 16px;
+  font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; font-weight: 600;
+  letter-spacing: 0.04em; color: var(--jet); background: rgba(204,164,59,0.16);
+  padding: 3px 9px; border-radius: 999px;
+}
+@media (max-width: 760px) {
+  .plan-tile { border-right: none; border-bottom: 1px solid var(--line); }
+  .plan-tile:last-child { border-bottom: none; }
+  .plan-tile--featured { margin: -1px 0; }
+}
+.plans-foot { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; margin-top: 24px; }
+.plans-foot p { font-size: 14.5px; color: var(--txt-3); margin: 0; }
 
 /* ── CTA de cierre ── */
 .cta {
@@ -297,6 +335,7 @@ a:focus-visible, .btn:focus-visible { outline: 2px solid var(--bronze); outline-
     </a>
     <div class="nav-links">
       <a href="#modulos">Módulos</a>
+      <a href="Precios.html">Precios</a>
       <a href="#nosotros">Nosotros</a>
       <a href="#contacto">Contacto</a>
       <a href="Auth.html">Acceder</a>
@@ -455,6 +494,33 @@ a:focus-visible, .btn:focus-visible { outline: 2px solid var(--bronze); outline-
   </div>
 </div>
 
+<!-- ═══ PLANES (teaser) ═══ -->
+<div class="wrap section">
+  <h2>Un plan para cada tamaño de clínica.</h2>
+  <div class="plans-card reveal">
+    <div class="plan-tile">
+      <div class="plan-tile-name">ESENCIAL</div>
+      <div class="plan-tile-price">L 1,900<span> /mes</span></div>
+      <p class="plan-tile-desc">Expedientes, caja y consultas para una clínica con un consultorio.</p>
+    </div>
+    <div class="plan-tile plan-tile--featured">
+      <span class="plan-tile-tag">Más elegida</span>
+      <div class="plan-tile-name">PROFESIONAL</div>
+      <div class="plan-tile-price">L 3,400<span> /mes</span></div>
+      <p class="plan-tile-desc">Suma laboratorio, pruebas rápidas, constancias y EKG en un mismo panel.</p>
+    </div>
+    <div class="plan-tile">
+      <div class="plan-tile-name">CLÍNICA+</div>
+      <div class="plan-tile-price">A medida</div>
+      <p class="plan-tile-desc">Varios consultorios o sedes, roles avanzados y soporte prioritario.</p>
+    </div>
+  </div>
+  <div class="plans-foot">
+    <p>Precios en lempiras, facturación mensual. Sin costo de instalación.</p>
+    <a href="Precios.html" class="btn btn-outline btn-sm">Ver planes completos</a>
+  </div>
+</div>
+
 <!-- ═══ CTA DE CIERRE ═══ -->
 <div id="contacto" class="cta">
   <div class="cta-inner reveal">
@@ -484,6 +550,7 @@ a:focus-visible, .btn:focus-visible { outline: 2px solid var(--bronze); outline-
         <div class="footer-col">
           <div class="footer-col-h">PRODUCTO</div>
           <a href="#modulos">Módulos</a>
+          <a href="Precios.html">Precios</a>
           <a href="#nosotros">Nosotros</a>
           <a href="Auth.html">Acceder</a>
         </div>
