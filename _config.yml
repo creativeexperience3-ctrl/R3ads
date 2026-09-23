@@ -1,0 +1,10 @@
+# Config de Jekyll para GitHub Pages (r3ads.com).
+#
+# portal-clinico/ es el producto Ancla — vive en este mismo repo por
+# comodidad de código, pero se despliega y se sirve SOLO desde Firebase
+# Hosting en ancla.r3ads.com, nunca desde acá. Sin este exclude, GitHub
+# Pages publicaba por accidente una copia paralela y desactualizada en
+# r3ads.com/portal-clinico/ (sin el Cache-Control correcto, sin los
+# últimos fixes) — confundía sobre cuál era el link real del portal.
+exclude:
+  - portal-clinico
