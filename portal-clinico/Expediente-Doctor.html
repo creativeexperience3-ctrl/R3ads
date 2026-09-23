@@ -6520,8 +6520,18 @@ summary.ed-meds-cat { list-style: revert; }
     var cont = $id('historial-contenido');
     if (historialVista === 'paciente' && pacienteActual) {
       renderHistorialPacienteView(cont);
-    } else {
+    } else if (r3adsModulos.activo('historialCalendario')) {
       renderHistorialCalendarioView(cont);
+    } else {
+      /* Plan Básico: el calendario es diferenciador del plan Completo — el
+         historial de un paciente puntual sigue funcionando igual para
+         todas las clínicas, solo vía búsqueda directa (pestaña Buscar). */
+      cont.innerHTML =
+        '<div class="ed-empty">' +
+          '<div class="ed-empty-icon"></div>' +
+          '<p><b>El calendario de atenciones es parte del plan Completo.</b><br>' +
+          'Mientras tanto, buscá un paciente en la pestaña "Buscar" y elegí "Ver historial" para ver su historial completo.</p>' +
+        '</div>';
     }
   }
 

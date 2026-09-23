@@ -5,7 +5,7 @@
    en `/clinics/{clinicId}.modulos`, un mapa de banderas:
 
      modulos: { laboratorio: true, pruebasRapidas: false,
-                constancias: true, ekg: false }
+                constancias: true, ekg: false, historialCalendario: false }
 
    Solo R3ads (superadmin) puede escribir ese campo — es una decisión de
    facturación, no de la clínica. Las reglas de `/clinics/{clinicId}` ya
@@ -18,13 +18,22 @@
    - Si el mapa SÍ existe -> solo lo que está explícitamente en `true`
      queda habilitado. Un módulo ausente del mapa cuenta como apagado.
    El panel de alta de clínicas (Fase 4) siempre debe escribir el mapa
-   completo, para que la ambigüedad no exista en la práctica.
+   completo, para que la ambigüedad no exista en la práctica. Por esto
+   mismo las clínicas que ya tenían un mapa guardado ANTES de que
+   `historialCalendario` existiera quedan con ese módulo apagado por
+   defecto (el mapa no tiene la clave) — hay que prenderlo a mano desde
+   portal-admin.html para las que correspondan al plan Completo.
 
    QUÉ NO ES CONFIGURABLE: expedientes, consultas/pendientes, búsqueda,
-   edición, historial, unificación y caja. Caja en particular NO es
-   opcional aunque parezca un módulo: es el cierre del circuito de la
-   consulta (`pendiente_caja` -> `completa`). Apagarla no oculta una
+   edición, historial (la búsqueda de un paciente puntual — Etapa Básico
+   la tiene igual que Completo), unificación y caja. Caja en particular
+   NO es opcional aunque parezca un módulo: es el cierre del circuito de
+   la consulta (`pendiente_caja` -> `completa`). Apagarla no oculta una
    pestaña, deja consultas sin poder cerrarse.
+   `historialCalendario` SÍ es opcional — es solo la vista de calendario
+   mensual dentro de la pestaña Historial (diferenciador del plan
+   Completo); sin ella, Historial sigue funcionando vía búsqueda directa
+   de paciente.
 
    ESTO NO ES UNA FRONTERA DE SEGURIDAD POR SÍ SOLO. Esconder botones en
    el cliente no impide que alguien escriba directo a Firestore. El
@@ -34,7 +43,7 @@
 (function (global) {
   'use strict';
 
-  var OPCIONALES = ['laboratorio', 'pruebasRapidas', 'constancias', 'ekg'];
+  var OPCIONALES = ['laboratorio', 'pruebasRapidas', 'constancias', 'ekg', 'historialCalendario'];
 
   var _mods = null;        // null = todavía no se cargó
   var _promesa = null;     // para no pedir el doc dos veces por página

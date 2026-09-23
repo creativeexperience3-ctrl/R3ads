@@ -245,6 +245,7 @@ body { margin: 0; background: #F4F6FB; font-family: 'Segoe UI', Arial, sans-seri
               <label class="pa-check"><input type="checkbox" id="f-mod-pruebasRapidas"> Pruebas Rápidas</label>
               <label class="pa-check"><input type="checkbox" id="f-mod-constancias"> Constancias</label>
               <label class="pa-check"><input type="checkbox" id="f-mod-ekg"> EKG</label>
+              <label class="pa-check"><input type="checkbox" id="f-mod-historialCalendario"> Calendario en Historial</label>
             </div>
             <div class="pa-hint">Expedientes, consultas y caja siempre están incluidos, no son opcionales. Marca solo lo que esta clínica contrató — lo que quede sin marcar no estará disponible.</div>
           </div>
@@ -320,8 +321,8 @@ body { margin: 0; background: #F4F6FB; font-family: 'Segoe UI', Arial, sans-seri
   function clearErr(id) { var el = $(id); el.textContent = ''; el.classList.remove('is-visible'); }
 
   var _clinics = [];
-  var MODULOS_KEYS = ['laboratorio', 'pruebasRapidas', 'constancias', 'ekg'];
-  var MODULOS_LABELS = { laboratorio: 'Laboratorio', pruebasRapidas: 'Pruebas Ráp.', constancias: 'Constancias', ekg: 'EKG' };
+  var MODULOS_KEYS = ['laboratorio', 'pruebasRapidas', 'constancias', 'ekg', 'historialCalendario'];
+  var MODULOS_LABELS = { laboratorio: 'Laboratorio', pruebasRapidas: 'Pruebas Ráp.', constancias: 'Constancias', ekg: 'EKG', historialCalendario: 'Calendario Historial' };
 
   /* ── Vistas ── */
   function showView(view) {
