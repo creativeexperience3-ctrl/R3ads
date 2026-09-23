@@ -1492,6 +1492,99 @@ img {
   color: #1f6b40;
 }
 
+/* ---------- Productos ---------- */
+.productos-hero { padding: 5rem 0 3rem; }
+.productos-hero-inner { max-width: 780px; }
+
+.productos { padding: 2rem 0 6rem; }
+
+.producto-feature {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3rem;
+  align-items: center;
+  border: 1px solid #e7e5e3;
+  border-top: 3px solid var(--naranja);
+  border-radius: 4px;
+  padding: 3rem;
+}
+
+.producto-feature-main { flex: 1 1 380px; min-width: 0; }
+.producto-feature-side { flex: 0 0 240px; }
+
+.producto-categoria {
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--naranja);
+  margin-bottom: 0.5rem;
+}
+
+.producto-nombre {
+  font-family: var(--font-display);
+  font-weight: 900;
+  text-transform: uppercase;
+  font-size: clamp(1.6rem, 3vw, 2.1rem);
+  margin-bottom: 1rem;
+}
+
+.producto-bio {
+  color: #4a4846;
+  font-size: 1rem;
+  max-width: 60ch;
+  margin-bottom: 1.5rem;
+}
+
+.producto-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  list-style: none;
+  margin-bottom: 2rem;
+}
+.producto-tags li {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: #4a4846;
+  background-color: #F7F6F5;
+  border-radius: 999px;
+  padding: 0.3rem 0.75rem;
+}
+
+.producto-ctas { display: flex; flex-wrap: wrap; gap: 1rem; }
+
+/* Monograma en los colores propios de Ancla (Jet Black + Golden Bronze) a
+   propósito: es una marca distinta bajo el paraguas de R3ads, no el naranja
+   de la agencia. */
+.producto-monograma {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  aspect-ratio: 1;
+  max-width: 220px;
+  margin: 0 auto;
+  border-radius: 8px;
+  background-color: #242F40;
+}
+.producto-monograma svg { width: 42%; height: auto; }
+
+.producto-status {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  justify-content: center;
+  margin-top: 1rem;
+  font-size: 0.8rem;
+  color: var(--gris);
+}
+.producto-status-dot {
+  width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0;
+  background-color: #CCA43B;
+}
+
 /* ---------- CTA final ---------- */
 .cta-final {
   background-color: var(--naranja);
@@ -1583,6 +1676,9 @@ img {
   .equipo { padding: 1rem 0 4rem; }
   .df-hero { padding: 3rem 0 2rem; }
   .df-que-es, .df-paquete, .df-niveles-seccion, .df-elegir { padding: 4rem 0; }
+  .productos-hero { padding: 3rem 0 2rem; }
+  .productos { padding: 1rem 0 4rem; }
+  .producto-feature { padding: 2rem 1.5rem; }
   .form-hero { padding: 3rem 0 2rem; }
   .form-seccion { padding: 0 0 4rem; }
   .intake-doc { padding: 1.75rem 1.25rem; }
