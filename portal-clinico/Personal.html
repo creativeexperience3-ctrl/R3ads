@@ -1,0 +1,259 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Gestión de Personal · Portal Clínico</title>
+<link rel="stylesheet" href="assets/portal-tokens.css">
+<style>
+*, *::before, *::after { box-sizing: border-box; }
+body { margin: 0; background: #F4F6FB; font-family: system-ui,-apple-system,'Segoe UI',Arial,sans-serif; color: #1F2937; }
+
+/* ── Topbar ── */
+.pz-top {
+  background: #242F40; color: #fff;
+  padding: 14px 24px;
+  display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap;
+  position: sticky; top: 0; z-index: 20;
+}
+.pz-top-title { font-size: 16px; font-weight: 900; letter-spacing: .3px; }
+.pz-top-title small { display: block; font-size: 11px; font-weight: 600; color: rgba(255,255,255,.6); letter-spacing: .5px; }
+.pz-top-right { display: flex; align-items: center; gap: 12px; font-size: 13px; flex-wrap: wrap; }
+.pz-top-right .pz-email { color: rgba(255,255,255,.75); }
+.pz-link {
+  color: #fff; text-decoration: none; background: transparent;
+  border: 1px solid rgba(255,255,255,.3);
+  padding: 7px 14px; border-radius: 8px; font-weight: 800; font-size: 13px;
+}
+.pz-link:hover { filter: brightness(.95); }
+
+/* ── Wrap ── */
+.pz-wrap { max-width: 880px; margin: 0 auto; padding: 24px; }
+.pz-note {
+  background: #EFF6FF; border: 1px solid #BFDBFE; color: #1E40AF;
+  border-radius: 10px; padding: 12px 16px; font-size: 13px; line-height: 1.6;
+  margin-bottom: 18px;
+}
+
+/* ── Sección (Médicos / Enfermería) ── */
+.pz-cat { background: #fff; border-radius: 14px; box-shadow: 0 2px 12px rgba(33,60,125,.07); margin-bottom: 18px; overflow: hidden; }
+.pz-cat-h {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 20px; background: #FAFBFF; border-bottom: 1px solid #EEF1F8;
+}
+.pz-cat-h h3 { margin: 0; font-size: 15px; font-weight: 900; color: #242F40; }
+.pz-cat-count { font-size: 12px; color: #9CA3AF; font-weight: 700; }
+.pz-add-btn {
+  background: none; border: none; color: #242F40; font-weight: 800; font-size: 13px;
+  cursor: pointer; text-decoration: underline; font-family: inherit;
+}
+.pz-cat-body { padding: 6px 0; }
+
+.pz-row {
+  display: flex; align-items: center; justify-content: space-between; gap: 14px;
+  padding: 12px 20px; border-bottom: 1px solid #F3F4F6;
+}
+.pz-row:last-child { border-bottom: none; }
+.pz-row-name { font-size: 14px; font-weight: 700; color: #1F2937; }
+.pz-row-del {
+  background: none; border: none; color: #B91C1C; font-size: 12px; font-weight: 700;
+  cursor: pointer; text-decoration: underline; font-family: inherit; flex-shrink: 0;
+}
+
+.pz-add-form { display: none; grid-template-columns: 1fr auto; gap: 10px; padding: 14px 20px; border-bottom: 1px solid #F3F4F6; }
+.pz-input {
+  height: 40px; border: 1.5px solid #E5E7EB; border-radius: 8px; padding: 0 12px;
+  font-family: inherit; font-size: 14px; outline: none; background: #fff; width: 100%;
+}
+.pz-input:focus { border-color: #242F40; }
+.pz-btn-submit {
+  height: 40px; padding: 0 18px; border: none; border-radius: 8px;
+  background: #242F40; color: #fff; font-family: inherit; font-size: 13px; font-weight: 800; cursor: pointer;
+}
+.pz-btn-submit:hover { opacity: .92; }
+
+.pz-msg { text-align: center; padding: 30px 20px; color: #6B7280; font-size: 13px; }
+.pz-spinner { width: 30px; height: 30px; border: 3px solid #E5E7EB; border-top-color: #242F40; border-radius: 50%; animation: pzspin .7s linear infinite; margin: 0 auto 14px; }
+@keyframes pzspin { to { transform: rotate(360deg); } }
+
+.pz-toast {
+  position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(20px);
+  background: #242F40; color: #fff; padding: 12px 22px; border-radius: 10px;
+  font-size: 14px; font-weight: 600; box-shadow: 0 6px 24px rgba(0,0,0,.25);
+  opacity: 0; pointer-events: none; transition: opacity .2s, transform .2s; z-index: 50;
+}
+.pz-toast.is-visible { opacity: 1; transform: translateX(-50%) translateY(0); }
+.pz-toast.is-error { background: #C70B0C; }
+</style>
+</head>
+<body>
+
+<div class="pz-top">
+  <div class="pz-top-title" id="pz-clinic-name">Gestión de Personal<small>Médicos y enfermería</small></div>
+  <div class="pz-top-right">
+    <span class="pz-email" id="pz-user-email">—</span>
+    <a class="pz-link" href="Inicio.html">Inicio</a>
+    <a class="pz-link" href="Admin-Precios.html">Precios</a>
+    <a class="pz-link" href="Admin-Usuarios.html">Usuarios</a>
+    <a class="pz-link" href="#" id="pz-logout">Salir</a>
+  </div>
+</div>
+
+<div class="pz-wrap">
+  <div class="pz-note">
+    Estos nombres aparecen en el selector "Atendido por" de Expediente-Doctor.html (Enfermería, Completar servicio, Consulta médica) — las cuentas del sistema son compartidas, así que cada etapa pide el nombre real de quien atendió.
+  </div>
+  <div id="pz-list">
+    <div class="pz-msg"><div class="pz-spinner"></div>Cargando personal…</div>
+  </div>
+</div>
+
+<div class="pz-toast" id="pz-toast">—</div>
+
+<!-- Firebase compat SDK -->
+<script src="clinic-config.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="firebase-init.js"></script>
+<script src="r3ads-staff.js"></script>
+
+<script>
+(function () {
+  var CLINIC_ID = null; // se resuelve por sesión en el AUTH GUARD (r3adsStaff.resolveClinicId)
+  var _personal = []; // [{id, nombre, tipo}]
+
+  function $(id) { return document.getElementById(id); }
+  function esc(s) { return String(s || '').replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+
+  function pintarBranding(nombre) {
+    var clinicName = nombre || (window.R3ADS_CLINIC_FALLBACK && window.R3ADS_CLINIC_FALLBACK.nombre) || 'tu clínica';
+    $('pz-clinic-name').innerHTML = 'Gestión de Personal<small>Médicos y enfermería · ' + esc(clinicName) + '</small>';
+  }
+  pintarBranding();
+  function cargarBrandingReal() {
+    if (!CLINIC_ID) return;
+    r3adsDb.collection('clinics').doc(CLINIC_ID).get().then(function (snap) {
+      if (snap.exists && snap.data().nombre) pintarBranding(snap.data().nombre);
+    }).catch(function () {});
+  }
+
+  var toastEl = $('pz-toast'), toastT;
+  function toast(msg, isErr) {
+    toastEl.textContent = msg;
+    toastEl.classList.toggle('is-error', !!isErr);
+    toastEl.classList.add('is-visible');
+    clearTimeout(toastT);
+    toastT = setTimeout(function () { toastEl.classList.remove('is-visible'); }, 3200);
+  }
+
+  /* ── Auth ── */
+  r3adsAuth.onAuthStateChanged(function (user) {
+    if (!user) { window.location.href = 'Auth.html?returnTo=Personal.html'; return; }
+    r3adsStaff.resolveClinicId(user, function (clinicId) {
+      CLINIC_ID = clinicId;
+      cargarBrandingReal();
+      r3adsStaff.checkAdmin(user, CLINIC_ID, function (ok) {
+        if (!ok) { window.location.href = 'Auth.html'; return; }
+        $('pz-user-email').textContent = user.email;
+        boot();
+      });
+    });
+  });
+  $('pz-logout').addEventListener('click', function (e) {
+    e.preventDefault();
+    r3adsAuth.signOut().then(function () { window.location.href = 'Auth.html'; });
+  });
+
+  /* ── Cargar ── */
+  function personalRef() { return r3adsDb.collection('clinics').doc(CLINIC_ID).collection('personal'); }
+
+  function boot() {
+    personalRef().get().then(function (snap) {
+      _personal = [];
+      snap.forEach(function (doc) { _personal.push(Object.assign({ id: doc.id }, doc.data())); });
+      render();
+    }).catch(function (err) {
+      $('pz-list').innerHTML = '<div class="pz-msg" style="color:#B91C1C">No se pudo cargar el personal.<br>' + esc(err.message) + '</div>';
+    });
+  }
+
+  /* ── Render ── */
+  function seccionHtml(tipo, titulo) {
+    var items = _personal.filter(function (p) { return p.tipo === tipo; })
+      .sort(function (a, b) { return (a.nombre || '').localeCompare(b.nombre || ''); });
+    var rows = items.map(function (p) {
+      return '<div class="pz-row">' +
+        '<span class="pz-row-name">' + esc(p.nombre) + '</span>' +
+        '<button type="button" class="pz-row-del" data-del="' + esc(p.id) + '">Eliminar</button>' +
+      '</div>';
+    }).join('');
+    return '<div class="pz-cat" data-tipo="' + tipo + '">' +
+      '<div class="pz-cat-h"><h3>' + esc(titulo) + '</h3>' +
+        '<span><span class="pz-cat-count">' + items.length + '</span> · <button type="button" class="pz-add-btn" data-add="' + tipo + '">+ Agregar</button></span>' +
+      '</div>' +
+      '<div class="pz-cat-body">' +
+        '<div class="pz-add-form" id="pz-add-form-' + tipo + '">' +
+          '<input type="text" class="pz-input" id="pz-add-input-' + tipo + '" placeholder="Nombre completo (ej. Dr. Juan Pérez)">' +
+          '<button type="button" class="pz-btn-submit" data-submit="' + tipo + '">Crear</button>' +
+        '</div>' +
+        (items.length ? rows : '<div class="pz-msg">Todavía no agregaste a nadie acá.</div>') +
+      '</div>' +
+    '</div>';
+  }
+
+  function render() {
+    $('pz-list').innerHTML = seccionHtml('medico', 'Médicos') + seccionHtml('enfermeria', 'Enfermería');
+    bind();
+  }
+
+  function bind() {
+    document.querySelectorAll('[data-add]').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var form = $('pz-add-form-' + btn.dataset.add);
+        form.style.display = form.style.display === 'none' || !form.style.display ? 'grid' : 'none';
+        if (form.style.display === 'grid') $('pz-add-input-' + btn.dataset.add).focus();
+      });
+    });
+    document.querySelectorAll('[data-submit]').forEach(function (btn) {
+      btn.addEventListener('click', function () { agregar(btn.dataset.submit); });
+    });
+    document.querySelectorAll('.pz-add-form input').forEach(function (inp) {
+      inp.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter') { e.preventDefault(); agregar(inp.id.replace('pz-add-input-', '')); }
+      });
+    });
+    document.querySelectorAll('[data-del]').forEach(function (btn) {
+      btn.addEventListener('click', function () { eliminar(btn.dataset.del); });
+    });
+  }
+
+  /* ── Alta / baja ── */
+  function agregar(tipo) {
+    var input = $('pz-add-input-' + tipo);
+    var nombre = (input.value || '').trim();
+    if (!nombre) return;
+    personalRef().add({ nombre: nombre, tipo: tipo, creadoEn: firebase.firestore.FieldValue.serverTimestamp() })
+      .then(function (ref) {
+        _personal.push({ id: ref.id, nombre: nombre, tipo: tipo });
+        render();
+        toast('Agregado.');
+      }).catch(function (err) {
+        toast('Error al agregar: ' + err.message, true);
+      });
+  }
+
+  function eliminar(id) {
+    if (!confirm('¿Eliminar a esta persona de la lista? No se puede deshacer.')) return;
+    personalRef().doc(id).delete().then(function () {
+      _personal = _personal.filter(function (p) { return p.id !== id; });
+      render();
+      toast('Eliminado.');
+    }).catch(function (err) {
+      toast('Error al eliminar: ' + err.message, true);
+    });
+  }
+})();
+</script>
+</body>
+</html>

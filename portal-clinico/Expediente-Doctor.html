@@ -1010,6 +1010,7 @@ summary.ed-meds-cat { list-style: revert; }
     <div class="brand-lockup" id="ed-brand-name" style="color:#fff;font-weight:900;font-size:18px">—</div>
     <nav class="site-nav" aria-label="Principal">
       <a href="Inicio.html">Inicio</a>
+      <a href="Personal.html">Personal</a>
       <a href="Pruebas-Rapidas.html" data-modulo="pruebasRapidas">Pruebas Rápidas</a>
       <a href="Examenes-Laboratorio.html" data-modulo="laboratorio">Laboratorio</a>
     </nav>
@@ -2726,6 +2727,9 @@ summary.ed-meds-cat { list-style: revert; }
         /* Precarga del catálogo (enfermeriaCompletable) de ESTA clínica — ver
            cargarCatalogoEnfermeria() y puedeEnfermeriaCompletarServicio() más abajo. */
         cargarCatalogoEnfermeria();
+        /* Precarga el personal (médicos/enfermería) de ESTA clínica para los
+           3 selectores "Atendido por" — ver cargarPersonalAtiende() más abajo. */
+        cargarPersonalAtiende();
         /* Módulos contratados: saca del DOM lo que esta clínica no pagó
            (ver clinic-modules.js). El portal en sí y la pestaña Caja son
            núcleo, no se tocan. */
@@ -4347,17 +4351,32 @@ summary.ed-meds-cat { list-style: revert; }
      el correo de la sesión NO identifica a la persona que atendió. Por eso cada
      etapa pide el nombre real y ese nombre es el que se muestra en el historial.
      MANTENER EN SYNC con los tres formularios que lo usan: Enfermería (Etapa 2),
-     Completar servicio y Consulta médica. */
-  var PERSONAL_ATIENDE = [
-    'Dr. Brian Rojas',
-    'Dr. Hermes Molina',
-    'Dr. Adony Álvarez',
-    'Enfermería (Ana Ruiz)',
-    'Enfermería (Luz Ortíz)'
-  ];
+     Completar servicio y Consulta médica.
+     Nombres propios de ESTA clínica (Personal.html los administra, guardados en
+     clinics/{CLINIC_ID}/personal) — ya no es una lista fija de CMG. Se carga una
+     sola vez desde el AUTH GUARD (cargarPersonalAtiende) en _personalAtiende. */
+  var _personalAtiende = [];
+  function cargarPersonalAtiende() {
+    r3adsDb.collection('clinics').doc(CLINIC_ID).collection('personal').get()
+      .then(function (snap) {
+        var items = [];
+        snap.forEach(function (doc) { items.push(doc.data()); });
+        items.sort(function (a, b) {
+          if (a.tipo !== b.tipo) return a.tipo === 'medico' ? -1 : 1;
+          return (a.nombre || '').localeCompare(b.nombre || '');
+        });
+        _personalAtiende = items.map(function (it) { return it.nombre; }).filter(Boolean);
+      })
+      .catch(function (err) {
+        console.warn('[Portal Clínico] No se pudo cargar el personal (Atendido por):', err);
+      });
+  }
   function buildAtendidoPorOptionsHtml(seleccionado) {
+    if (!_personalAtiende.length) {
+      return '<option value="">Cargando personal…</option>';
+    }
     return '<option value="">— Seleccionar —</option>' +
-      PERSONAL_ATIENDE.map(function (n) {
+      _personalAtiende.map(function (n) {
         return '<option value="' + esc(n) + '"' + (n === seleccionado ? ' selected' : '') + '>' + esc(n) + '</option>';
       }).join('');
   }

@@ -151,6 +151,18 @@ service cloud.firestore {
         allow read: if true;
         allow write: if isAdmin(clinicId) || isSuperAdmin();
       }
+
+      // ═══ /clinics/{clinicId}/personal/{personalId} ════════════════
+      // Nombres de médicos/enfermería para el selector "Atendido por" en
+      // Expediente-Doctor.html (Personal.html los administra) — reemplaza
+      // el array PERSONAL_ATIENDE hardcodeado a CMG que traía el port.
+      // Lectura: cualquier staff activo de ESTA clínica (no público, a
+      // diferencia de catalogoConfig — son nombres de personal, no precios).
+      // Escritura: solo admin de esa clínica o superadmin.
+      match /personal/{personalId} {
+        allow read: if sameClinic(clinicId);
+        allow write: if isAdmin(clinicId) || isSuperAdmin();
+      }
     }
 
     // ═══ /_claimsRefresh/{uid} ═══════════════════════════════════════
