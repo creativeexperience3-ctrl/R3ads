@@ -970,6 +970,11 @@ summary.ed-meds-cat { list-style: revert; }
 }
 .ed-cal-pac-nombre { flex: 1; font-size: 14px; font-weight: 700; color: #1F2937; }
 .ed-cal-pac-tipo { font-size: 12px; color: #6B7280; flex: 0 0 auto; }
+.ed-cal-pac-factura {
+  flex: 0 0 auto; font-size: 12px; font-weight: 800; color: #242F40;
+  background: #FDD22C; padding: 5px 12px; border-radius: 100px; text-decoration: none;
+}
+.ed-cal-pac-factura:hover { filter: brightness(.95); }
 .ed-cal-rango-dias { display: flex; flex-direction: column; gap: 8px; }
 .ed-cal-rango-dia {
   display: flex;
@@ -1011,6 +1016,7 @@ summary.ed-meds-cat { list-style: revert; }
     <nav class="site-nav" aria-label="Principal">
       <a href="Inicio.html">Inicio</a>
       <a href="Personal.html">Personal</a>
+      <a href="Medicamentos.html">Medicamentos</a>
       <a href="Pruebas-Rapidas.html" data-modulo="pruebasRapidas">Pruebas Rápidas</a>
       <a href="Examenes-Laboratorio.html" data-modulo="laboratorio">Laboratorio</a>
     </nav>
@@ -1917,6 +1923,17 @@ summary.ed-meds-cat { list-style: revert; }
     if (m < 0 || (m === 0 && hoy.getDate() < fn.getDate())) e--;
     return e + ' años';
   }
+  /* Descuento por edad para la factura de Caja (tercera edad 60+: 25%,
+     cuarta edad 80+: 30% — mismos porcentajes que el Cotizador de CMG,
+     confirmado con el usuario al portar esta funcionalidad). Reutiliza
+     calcEdad() en vez de recalcular la edad por separado. */
+  function calcularPctDescuentoEdad(fechaNac) {
+    var edad = parseInt(calcEdad(fechaNac), 10);
+    if (!edad || isNaN(edad)) return 0;
+    if (edad >= 80) return 0.30;
+    if (edad >= 60) return 0.25;
+    return 0;
+  }
 
   /* Contador agregado de expedientes totales (el SDK de Firestore en uso no
      soporta consultas count(), así que se mantiene en un documento aparte
@@ -2329,8 +2346,14 @@ summary.ed-meds-cat { list-style: revert; }
                   pagoLiquidadoEn: firebase.firestore.FieldValue.serverTimestamp()
                 });
               });
-              return batch.commit();
-            }).then(function(){ showAlert('Pago liquidado ', 'success'); renderCajaTab(); })
+              return batch.commit().then(function(){ return hijos; });
+            }).then(function(hijos){
+              showAlert('Pago liquidado ', 'success');
+              renderCajaTab();
+              /* Factura: se genera DESPUÉS de que el pago ya quedó marcado, sin
+                 bloquear ni poder revertir la liquidación (ver generarFacturaCaja). */
+              generarFacturaCaja(id, cajaDocCache[id], hijos.docs);
+            })
               .catch(function(err){ showAlert('Error: ' + err.message, 'error'); });
           });
         });
@@ -2730,6 +2753,10 @@ summary.ed-meds-cat { list-style: revert; }
         /* Precarga el personal (médicos/enfermería) de ESTA clínica para los
            3 selectores "Atendido por" — ver cargarPersonalAtiende() más abajo. */
         cargarPersonalAtiende();
+        /* Precarga el catálogo de medicamentos de ESTA clínica (precio,
+           excluidoDescuento) para los checklists de Consulta/Completar
+           servicio y para facturar en Caja — ver cargarMedicamentos() más abajo. */
+        cargarMedicamentos();
         /* Módulos contratados: saca del DOM lo que esta clínica no pagó
            (ver clinic-modules.js). El portal en sí y la pestaña Caja son
            núcleo, no se tocan. */
@@ -4609,71 +4636,63 @@ summary.ed-meds-cat { list-style: revert; }
       });
   }
 
-  /* ─── Catálogos de medicamentos, compartidos entre Consulta y Completar servicio ─── */
-  var MEDS_VISITA_CATS = [
-    { titulo: 'Prueba de sensibilidad', items: [
-      'Prueba de sensibilidad'
-    ] },
-    { titulo: 'Inyectable', items: [
-      'Alergil', 'Amikacina', 'Antigripal - Antiviral IM', 'Astriaxona 1g', 'Bixicort',
-      'Citicolina 500mg', 'Clevium', 'Complejo B', 'Dexametasona 8 mg', 'Dexketoprofeno',
-      'Diazepam', 'Diclofenac Sodico', 'DICLO-NEURAXIN', 'Diclosona', 'Dipirona',
-      'DOLGENAL AMP', 'Dramanyl', 'Epinefrina (Pinadrina 1 mg)', 'Esomeprazol 40 mg', 'Ferroin',
-      'Furosemida', 'Gentamicina', 'Glirron', 'Hidrocortisona 100mg', 'Hidrocortisona 500mg',
-      'Hioscina', 'Insulina Cristalina (UI - Unidad Internacional)', 'Labetalol', 'Levofloxacina 750mg / 150ml', 'Metoclopramida',
-      'Metronidazol 500 MG (I.V.)', 'Onemer (Ketorolaco 30mg)', 'Orfenaflex', 'Paracetamol 10mg /100 ml (Benphamol)', 'Penicilina 1.2 millones',
-      'Ranitidina', 'Rofemed 1g', 'Sertal Compuesto', 'Sulfato de Magnesio 10%', 'Tiamina',
-      'TONVAL (Pantoprazol 40mg)', 'Tramadol', 'Ultra-Neuraxin', 'Vitamina K'
-    ] },
-    { titulo: 'Insumos (Sueros)', items: [
-      'Suero Solución Salina 1000 ml', 'Suero Solución Salina 500 ml', 'Suero Solución Salina 250 ml', 'Suero Solución Salina 100 ml',
-      'Suero Hartman 1000 ml', 'Suero Hartman 500 ml', 'Suero Hartman 250 ml', 'Suero Hartman 100 ml',
-      'Suero Mixto 1000 ml', 'Suero Mixto 500 ml', 'Suero Mixto 250 ml', 'Suero Mixto 100 ml',
-      'Suero Dextrosa 1000 ml', 'Suero Dextrosa 500 ml', 'Suero Dextrosa 250 ml', 'Suero Dextrosa 100 ml'
-    ] },
-    { titulo: 'Sueroterapia (En Consultorio)', items: [
-      'Suero de Glucosa'
-    ] },
-    { titulo: 'Gotas / Otros', items: [
-      'Budoxigen'
-    ] }
-  ];
-  var MEDS_DESPACHO_CATS = [
-    { titulo: 'Suspensión', items: [
-      'Acetaminofen', 'Acla-Med', 'Desloratadina 2.5 mg', 'Dilabrom HH', 'Kold-Grip',
-      'Sales de Rehidratacion Oral', 'Tusivanz', 'VISCOF-D', 'CORIVIT'
-    ] },
-    { titulo: 'Tableta / Cápsula', items: [
-      'Acetaminofen 500 mg', 'Amoxicilina + Acido Clavulonico 875 mg / 125 mg (Caja de 14 unidades)', 'Azitromicina 500mg', 'Cetirizina 10 MG', 'Ciprofloxacina 500 MG',
-      'Demoxil 500 mg', 'Desloratadina 5 MG', 'Difenac 75mg', 'DolFix (Diclofenaco Potásico 100 mg)', 'Fluconazol 150 mg', 'Gastrolev',
-      'Hidrocloratiazida 25 MG', 'Hioscina 10 MG', 'Ibuprofeno 600 MG', 'KoldGrip', 'Levofloxacino 750 mg (Calox)',
-      'Loratadina 10 MG (Lorat)', 'Paracetamol 750 MG', 'Rhinolar 5mg', 'Ultifenol Plus+'
-    ] },
-    { titulo: 'Tópico', items: [
-      'Ketoconazol 2%', 'Septidex', 'Sulfadiazina de Plata', 'Ultifenol Gel'
-    ] },
-    { titulo: 'Gotas', items: [
-      'Otan', 'Budoxigen'
-    ] }
-  ];
-  /* Cada categoría es un <details> desplegable (colapsado por defecto); el buscador
-     asociado (wireMedsBuscador) las abre automáticamente cuando hay coincidencias. */
-  function buildMedsCatsHtml(cats, extraAfterTitle) {
-    return cats.map(function (c) {
-      var itemsHtml = c.items.map(function (m) {
-        var dataName = ' data-name="' + esc(normalizarBusqueda(m)) + '"';
-        /* La prueba de sensibilidad es un chequeo, no una unidad aplicada: sin cantidad */
-        if (m === 'Prueba de sensibilidad') {
-          return '<label class="ed-meds-opt"' + dataName + '><input type="checkbox" value="' + esc(m) + '"> ' + esc(m) + '</label>';
-        }
-        return '<label class="ed-meds-opt"' + dataName + ' style="display:flex;align-items:center;gap:8px;justify-content:space-between">' +
+  /* ─── Catálogo de medicamentos de ESTA clínica, compartido entre Consulta y
+     Completar servicio (Medicamentos.html lo administra, guardado en
+     clinics/{CLINIC_ID}/medicamentos) — reemplaza MEDS_VISITA_CATS /
+     MEDS_DESPACHO_CATS, que eran nombres reales de la farmacia de CMG
+     hardcodeados al portar este archivo (mismo problema que
+     PERSONAL_ATIENDE, ver cargarPersonalAtiende arriba). Se carga una sola
+     vez desde el AUTH GUARD (cargarMedicamentos) en _medicamentosCache
+     (por nombre, para precio/excluidoDescuento al facturar en Caja — ver
+     calcularPctDescuentoEdad) y en dos arrays planos para los checklists.
+     "Prueba de sensibilidad" sigue siendo un ítem especial fijo (chequeo
+     clínico, no medicamento facturable): no viene del catálogo de la
+     clínica, se antepone siempre a la lista de visita. */
+  var _medicamentosCache = {};   // nombre -> { tipo, precio, excluidoDescuento }
+  var _medsVisitaNombres = ['Prueba de sensibilidad'];
+  var _medsDespachoNombres = [];
+  function cargarMedicamentos() {
+    r3adsDb.collection('clinics').doc(CLINIC_ID).collection('medicamentos').get()
+      .then(function (snap) {
+        var items = [];
+        snap.forEach(function (doc) { items.push(doc.data()); });
+        items.sort(function (a, b) { return (a.nombre || '').localeCompare(b.nombre || ''); });
+        _medicamentosCache = {};
+        var visita = ['Prueba de sensibilidad'], despacho = [];
+        items.forEach(function (it) {
+          if (!it.nombre) return;
+          _medicamentosCache[it.nombre] = it;
+          if (it.tipo === 'visita' || it.tipo === 'ambos') visita.push(it.nombre);
+          if (it.tipo === 'despacho' || it.tipo === 'ambos') despacho.push(it.nombre);
+        });
+        _medsVisitaNombres = visita;
+        _medsDespachoNombres = despacho;
+      })
+      .catch(function (err) {
+        console.warn('[Portal Clínico] No se pudo cargar el catálogo de medicamentos:', err);
+      });
+  }
+  /* Lista plana (sin categorías) de checkboxes de medicamentos; mismo
+     markup por ítem que antes (ed-meds-opt + ed-meds-chk + ed-meds-cantidad),
+     compatible sin cambios con collectChecked/wireMedsBuscador/
+     wireMedsCantidad/wireMedsGroupNinguno. extraAfterItem inserta HTML extra
+     (el formulario de resultado de sensibilidad) justo después de un ítem
+     puntual por su value. */
+  function buildMedsFlatHtml(nombres, extraAfterItem) {
+    return (nombres || []).map(function (m) {
+      var dataName = ' data-name="' + esc(normalizarBusqueda(m)) + '"';
+      var html;
+      /* La prueba de sensibilidad es un chequeo, no una unidad aplicada: sin cantidad */
+      if (m === 'Prueba de sensibilidad') {
+        html = '<label class="ed-meds-opt"' + dataName + '><input type="checkbox" value="' + esc(m) + '"> ' + esc(m) + '</label>';
+      } else {
+        html = '<label class="ed-meds-opt"' + dataName + ' style="display:flex;align-items:center;gap:8px;justify-content:space-between">' +
           '<span><input type="checkbox" value="' + esc(m) + '" class="ed-meds-chk"> ' + esc(m) + '</span>' +
           '<input type="number" min="1" step="1" value="1" class="ed-input ed-meds-cantidad" style="width:56px;text-align:center;padding:2px 4px" disabled>' +
         '</label>';
-      }).join('');
-      if (extraAfterTitle && c.titulo === extraAfterTitle.titulo) itemsHtml += extraAfterTitle.html;
-      return '<details class="ed-meds-cat-group"><summary class="ed-meds-cat">' + c.titulo + '</summary>' +
-        '<div class="ed-meds-items">' + itemsHtml + '</div></details>';
+      }
+      if (extraAfterItem && m === extraAfterItem.value) html += extraAfterItem.html;
+      return html;
     }).join('');
   }
   /* Filtra medicamentos por nombre (ignora tildes) y abre automáticamente las
@@ -4938,13 +4957,13 @@ summary.ed-meds-cat { list-style: revert; }
           '<div class="ed-fgroup full"><label class="ed-label">Medicamentos aplicados en consulta</label>' +
             '<input type="text" id="serv-meds-visita-buscar" class="ed-input" placeholder="Buscar medicamento..." style="margin-bottom:6px">' +
             '<div id="serv-meds-visita-list" class="ed-meds-list" data-meds-group="visita">' +
-              buildMedsCatsHtml(MEDS_VISITA_CATS, { titulo: 'Prueba de sensibilidad', html: buildSensResultadoHtml('serv') }) +
+              buildMedsFlatHtml(_medsVisitaNombres, { value: 'Prueba de sensibilidad', html: buildSensResultadoHtml('serv') }) +
               '<label class="ed-meds-opt" style="background:#FEF3C7;border:1px dashed #F59E0B"><input type="checkbox" value="__ninguno__" data-meds-ninguno="1"> Ninguno (no se aplicó ningún medicamento)</label>' +
             '</div></div>' +
           '<div class="ed-fgroup full"><label class="ed-label">Medicamentos de despacho</label>' +
             '<input type="text" id="serv-meds-despacho-buscar" class="ed-input" placeholder="Buscar medicamento..." style="margin-bottom:6px">' +
             '<div id="serv-meds-despacho-list" class="ed-meds-list" data-meds-group="despacho">' +
-              buildMedsCatsHtml(MEDS_DESPACHO_CATS) +
+              buildMedsFlatHtml(_medsDespachoNombres) +
               '<label class="ed-meds-opt" style="background:#FEF3C7;border:1px dashed #F59E0B"><input type="checkbox" value="__ninguno__" data-meds-ninguno="1"> Ninguno (no se despachan medicamentos)</label>' +
             '</div></div>' +
           '<div class="ed-fgroup full"><label class="ed-label">Receta externa (medicamentos a comprar en farmacia)</label>' +
@@ -5432,13 +5451,13 @@ summary.ed-meds-cat { list-style: revert; }
           '<div class="ed-fgroup full"><label class="ed-label">Medicamentos aplicados en la visita *</label>' +
             '<input type="text" id="cons-meds-visita-buscar" class="ed-input" placeholder="Buscar medicamento..." style="margin-bottom:6px">' +
             '<div id="cons-meds-visita-list" class="ed-meds-list" data-meds-group="visita">' +
-              buildMedsCatsHtml(MEDS_VISITA_CATS, { titulo: 'Prueba de sensibilidad', html: buildSensResultadoHtml('cons') }) +
+              buildMedsFlatHtml(_medsVisitaNombres, { value: 'Prueba de sensibilidad', html: buildSensResultadoHtml('cons') }) +
               '<label class="ed-meds-opt" style="background:#FEF3C7;border:1px dashed #F59E0B"><input type="checkbox" value="__ninguno__" data-meds-ninguno="1"> Ninguno (no se aplicó ningún medicamento en la visita)</label>' +
             '</div></div>' +
           '<div class="ed-fgroup full"><label class="ed-label">Medicamentos de despacho *</label>' +
             '<input type="text" id="cons-meds-despacho-buscar" class="ed-input" placeholder="Buscar medicamento..." style="margin-bottom:6px">' +
             '<div id="cons-meds-despacho-list" class="ed-meds-list" data-meds-group="despacho">' +
-              buildMedsCatsHtml(MEDS_DESPACHO_CATS) +
+              buildMedsFlatHtml(_medsDespachoNombres) +
               '<label class="ed-meds-opt" style="background:#FEF3C7;border:1px dashed #F59E0B"><input type="checkbox" value="__ninguno__" data-meds-ninguno="1"> Ninguno (no se despachan medicamentos)</label>' +
             '</div></div>' +
           '<div class="ed-fgroup full"><label class="ed-label">Receta externa (medicamentos a comprar en farmacia) *</label>' +
@@ -6483,6 +6502,237 @@ summary.ed-meds-cat { list-style: revert; }
   }
 
   /* ════════════════════════════════════════════════════════════
+     FACTURA DE CAJA — desglose con descuento por edad (tercera edad
+     60+: 25%, cuarta edad 80+: 30%), generada automáticamente al
+     liquidar en Caja (ver handler [data-caja-id] más arriba).
+     A PROPÓSITO fail-soft: se llama DESPUÉS de que el pago ya quedó
+     marcado en Firestore, así que un error acá (PDF, Storage, o el
+     update final) nunca debe revertir ni bloquear la liquidación —
+     solo se registra en consola. El botón "Ver factura" en el
+     calendario de Historial (renderListaDia) depende de que
+     facturaUrl haya quedado guardado; si falla, simplemente no
+     aparece, sin romper nada más.
+     ════════════════════════════════════════════════════════════ */
+  /* Línea del servicio/consulta principal de un doc de /consultas. Si no es
+     un servicio (esServicio false), es una consulta médica y se factura
+     como 'Consulta médica general' — el mismo fallback que usa
+     computeServicioKey() en el resto del archivo cuando no hay servicioKey
+     guardado (docs viejos, antes de que existiera ese campo). */
+  function facturaLineaServicio(docData) {
+    var esServicio = !!docData.servicioNombre;
+    var nombre = esServicio ? servicioLabelConCantidad(docData) : 'Consulta médica general';
+    var key = docData.servicioKey || computeServicioKey(esServicio ? docData.servicioNombre : 'Consulta médica general');
+    var cfg = key ? _catalogoConfigCache[key] : null;
+    var precio = (cfg && cfg.precio !== undefined && cfg.precio !== null) ? (Number(cfg.precio) || 0) : 0;
+    var excluido = !!(cfg && cfg.excluidoDescuento === true);
+    return [{ nombre: nombre, cantidad: 1, precioUnit: precio, subtotal: precio, excluidoDescuento: excluido }];
+  }
+  /* Líneas de medicamentos a partir de medicamentosVisita/medicamentosDespacho
+     (arrays de strings "Nombre" o "Nombre xN", formato de collectChecked).
+     "Prueba de sensibilidad" es un chequeo clínico, no un medicamento — no se
+     factura aunque aparezca marcada en la lista de visita. */
+  function facturaLineasMedicamentos(lista) {
+    return (lista || []).map(function (texto) {
+      var m = /^(.*) x(\d+)$/.exec(texto);
+      var nombre = m ? m[1] : texto;
+      var cantidad = m ? (parseInt(m[2], 10) || 1) : 1;
+      if (nombre === 'Prueba de sensibilidad') return null;
+      var med = _medicamentosCache[nombre] || {};
+      var precio = Number(med.precio) || 0;
+      var excluido = med.excluidoDescuento === true;
+      return { nombre: nombre, cantidad: cantidad, precioUnit: precio, subtotal: precio * cantidad, excluidoDescuento: excluido };
+    }).filter(Boolean);
+  }
+  function facturaLineasDeDoc(docData) {
+    return facturaLineaServicio(docData)
+      .concat(facturaLineasMedicamentos(docData.medicamentosVisita))
+      .concat(facturaLineasMedicamentos(docData.medicamentosDespacho));
+  }
+  /* cached = { d, dg } tal como lo guarda renderCajaTab en cajaDocCache[id].
+     hijosDocs = array de QueryDocumentSnapshot de los servicios hijos
+     vinculados a esta consulta (ya se consultan en el mismo handler para
+     liquidarlos). Una consulta con hijos genera UNA factura combinada,
+     guardada en el doc principal y copiada a cada hijo (mismo facturaUrl),
+     para que el botón "Ver factura" del calendario funcione sin importar en
+     cuál fila de esa familia se haga clic. */
+  function generarFacturaCaja(id, cached, hijosDocs) {
+    if (!cached || !cached.d) return Promise.resolve();
+    var d = cached.d, dg = cached.dg || {};
+    var items = facturaLineasDeDoc(d);
+    (hijosDocs || []).forEach(function (hijo) { items = items.concat(facturaLineasDeDoc(hijo.data())); });
+
+    var subtotal = items.reduce(function (s, it) { return s + it.subtotal; }, 0);
+    var descontable = items.filter(function (it) { return !it.excluidoDescuento; })
+      .reduce(function (s, it) { return s + it.subtotal; }, 0);
+    var pct = calcularPctDescuentoEdad(dg.fechaNacimiento);
+    var montoDescuento = descontable * pct;
+    var total = subtotal - montoDescuento;
+
+    var pacienteObj = { codigoPaciente: d.codigoPaciente, datosGenerales: dg };
+    var pdfBlob;
+    try {
+      pdfBlob = generarPdfFactura(pacienteObj, items, subtotal, pct, montoDescuento, total);
+    } catch (e) {
+      console.warn('[Portal Clínico] No se pudo generar la factura (PDF):', e);
+      return Promise.resolve();
+    }
+
+    var fechaStr = new Date().toISOString().slice(0, 19).replace(/[:T]/g, '-');
+    var storagePath = 'clinics/' + CLINIC_ID + '/expedientes/' + d.codigoPaciente + '/facturas/' + fechaStr + '.pdf';
+    return firebase.storage().ref(storagePath).put(pdfBlob)
+      .then(function (snap) { return snap.ref.getDownloadURL(); })
+      .then(function (url) {
+        var facturaData = {
+          facturaUrl: url,
+          facturaStoragePath: storagePath,
+          facturaTotal: total,
+          facturaFecha: firebase.firestore.FieldValue.serverTimestamp()
+        };
+        var batch = r3adsDb.batch();
+        batch.update(r3adsDb.collection('consultas').doc(id), facturaData);
+        (hijosDocs || []).forEach(function (hijo) { batch.update(hijo.ref, facturaData); });
+        return batch.commit();
+      })
+      .catch(function (err) {
+        console.warn('[Portal Clínico] No se pudo generar la factura:', err);
+      });
+  }
+
+  function generarPdfFactura(paciente, itemsFacturados, subtotal, pctDescuento, montoDescuento, total) {
+    var jsPDF = window.jspdf.jsPDF;
+    var doc = new jsPDF({ unit: 'mm', format: 'letter' });
+    var pageW = doc.internal.pageSize.getWidth();
+    var marginX = 18;
+    var y = 18;
+
+    doc.setFillColor(33, 60, 125);
+    doc.rect(0, 0, pageW, 24, 'F');
+    doc.setFillColor(253, 210, 44);
+    doc.rect(0, 24, pageW, 2, 'F');
+
+    doc.setTextColor(255, 255, 255);
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(16);
+    doc.text((CLINIC.razonSocial || CLINIC.nombre || '—').toUpperCase(), marginX, 12);
+    doc.setFontSize(9);
+    doc.setFont('helvetica', 'normal');
+    doc.text('Factura de Consumo', marginX, 18);
+    doc.setFontSize(8);
+    doc.text([CLINIC.direccion, CLINIC.telefono ? ('Tel. ' + CLINIC.telefono) : null].filter(Boolean).join(' · '), pageW - marginX, 18, { align: 'right' });
+
+    y = 36;
+    var dg = paciente.datosGenerales || {};
+
+    doc.setTextColor(33, 60, 125);
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(11);
+    doc.text('DATOS DEL PACIENTE', marginX, y);
+    y += 5;
+    doc.setDrawColor(33, 60, 125);
+    doc.setLineWidth(0.5);
+    doc.line(marginX, y, pageW - marginX, y);
+    y += 5;
+
+    doc.setTextColor(50, 50, 50);
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(10);
+    function row(label, val) {
+      doc.setFont('helvetica', 'bold');
+      doc.text(label + ':', marginX, y);
+      doc.setFont('helvetica', 'normal');
+      doc.text(String(val || '—'), marginX + 38, y);
+      y += 5;
+    }
+    row('Nombre', dg.nombreCompleto);
+    row('Identidad', dg.numeroIdentidad);
+    row('Código', paciente.codigoPaciente);
+    row('Edad', calcEdad(dg.fechaNacimiento));
+    y += 4;
+
+    doc.setFillColor(253, 210, 44);
+    doc.rect(marginX, y, pageW - marginX * 2, 8, 'F');
+    doc.setTextColor(33, 60, 125);
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(10);
+    doc.text('FECHA: ' + new Date().toLocaleString('es-HN', {
+      day: '2-digit', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit'
+    }), marginX + 3, y + 5);
+    y += 14;
+
+    doc.setTextColor(33, 60, 125);
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(11);
+    doc.text('DETALLE', marginX, y);
+    y += 5;
+    doc.line(marginX, y, pageW - marginX, y);
+    y += 6;
+
+    var colItem = marginX, colCant = pageW - marginX - 70, colPrecio = pageW - marginX - 44, colSub = pageW - marginX;
+    doc.setFontSize(9);
+    doc.setFont('helvetica', 'bold');
+    doc.text('Ítem', colItem, y);
+    doc.text('Cant.', colCant, y, { align: 'right' });
+    doc.text('Precio', colPrecio, y, { align: 'right' });
+    doc.text('Subtotal', colSub, y, { align: 'right' });
+    y += 2;
+    doc.setDrawColor(200, 200, 200);
+    doc.line(marginX, y, pageW - marginX, y);
+    y += 5;
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(50, 50, 50);
+
+    (itemsFacturados || []).forEach(function (it) {
+      if (y > 255) { doc.addPage(); y = 20; }
+      var nombreLines = doc.splitTextToSize(it.nombre + (it.excluidoDescuento ? '  (sin descuento)' : ''), colCant - colItem - 6);
+      doc.text(nombreLines, colItem, y);
+      doc.text(String(it.cantidad), colCant, y, { align: 'right' });
+      doc.text('L ' + it.precioUnit.toFixed(2), colPrecio, y, { align: 'right' });
+      doc.text('L ' + it.subtotal.toFixed(2), colSub, y, { align: 'right' });
+      y += Math.max(nombreLines.length, 1) * 5 + 2;
+    });
+
+    y += 4;
+    if (y > 255) { doc.addPage(); y = 20; }
+    doc.setDrawColor(33, 60, 125);
+    doc.line(pageW - marginX - 80, y, pageW - marginX, y);
+    y += 6;
+
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(10);
+    doc.setTextColor(50, 50, 50);
+    doc.text('Subtotal:', pageW - marginX - 50, y);
+    doc.text('L ' + subtotal.toFixed(2), pageW - marginX, y, { align: 'right' });
+    y += 6;
+
+    if (pctDescuento > 0) {
+      var motivo = pctDescuento >= 0.30 ? 'Cuarta edad (80+)' : 'Tercera edad (60+)';
+      doc.setTextColor(185, 28, 28);
+      doc.text('Descuento ' + motivo + ' (' + Math.round(pctDescuento * 100) + '%):', pageW - marginX - 50, y);
+      doc.text('- L ' + montoDescuento.toFixed(2), pageW - marginX, y, { align: 'right' });
+      y += 6;
+    }
+
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(12);
+    doc.setTextColor(33, 60, 125);
+    doc.text('TOTAL:', pageW - marginX - 50, y);
+    doc.text('L ' + total.toFixed(2), pageW - marginX, y, { align: 'right' });
+
+    var pages = doc.internal.getNumberOfPages();
+    for (var i = 1; i <= pages; i++) {
+      doc.setPage(i);
+      doc.setFontSize(7);
+      doc.setTextColor(150, 150, 150);
+      doc.setFont('helvetica', 'normal');
+      doc.text((CLINIC.nombre || '—') + ' · Expediente: ' + paciente.codigoPaciente +
+        ' · Factura de consumo · Página ' + i + ' de ' + pages,
+        pageW / 2, 285, { align: 'center' });
+    }
+
+    return doc.output('blob');
+  }
+
+  /* ════════════════════════════════════════════════════════════
      HISTORIAL — vista unificada: consultas, procedimientos,
      pruebas rápidas y laboratorios, todo en la misma línea de tiempo.
      ════════════════════════════════════════════════════════════ */
@@ -6750,15 +7000,28 @@ summary.ed-meds-cat { list-style: revert; }
       var esServicio = it.status === 'servicio' || it.status === 'servicio-completo' ||
         it.tipoRegistro === 'servicio-standalone' || it.tipoRegistro === 'servicio-vinculado';
       var tipoLabel = esServicio ? 'Procedimiento' : 'Consulta';
-      return '<button type="button" class="ed-cal-pac-item" data-cal-pac="' + esc(it.codigoPaciente || '') + '">' +
+      /* Factura (ver generarFacturaCaja): solo existe si esta atención ya se
+         liquidó en Caja y la generación no falló. A propósito SOLO acá, en el
+         calendario — no en renderHistorialPacienteView/renderHistorialUnificado
+         (búsqueda directa de un paciente), tal como se pidió. */
+      /* <a> dentro de <button> es HTML inválido, así que la fila pasa a ser un
+         <div role="button"> (misma apariencia/click, ver bind más abajo). */
+      var facturaBtn = it.facturaUrl
+        ? '<a class="ed-cal-pac-factura" href="' + esc(it.facturaUrl) + '" target="_blank" rel="noopener" onclick="event.stopPropagation()">Ver factura</a>'
+        : '';
+      return '<div class="ed-cal-pac-item" data-cal-pac="' + esc(it.codigoPaciente || '') + '" role="button" tabindex="0">' +
         '<span class="ed-cal-pac-hora">' + hora + '</span>' +
         '<span class="ed-cal-pac-nombre">' + esc(it.pacienteNombre || '—') + '</span>' +
         '<span class="ed-cal-pac-tipo">' + tipoLabel + '</span>' +
-      '</button>';
+        facturaBtn +
+      '</div>';
     }).join('');
     cont.innerHTML = html;
     cont.querySelectorAll('[data-cal-pac]').forEach(function (btn) {
       btn.addEventListener('click', function () { abrirHistorialDesdeCalendario(this.getAttribute('data-cal-pac')); });
+      btn.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); abrirHistorialDesdeCalendario(this.getAttribute('data-cal-pac')); }
+      });
     });
   }
 

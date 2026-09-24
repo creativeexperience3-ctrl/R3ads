@@ -1,0 +1,318 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Catálogo de Medicamentos · Portal Clínico</title>
+<link rel="stylesheet" href="assets/portal-tokens.css">
+<style>
+*, *::before, *::after { box-sizing: border-box; }
+body { margin: 0; background: #F4F6FB; font-family: system-ui,-apple-system,'Segoe UI',Arial,sans-serif; color: #1F2937; }
+
+/* ── Topbar ── */
+.mz-top {
+  background: #242F40; color: #fff;
+  padding: 14px 24px;
+  display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap;
+  position: sticky; top: 0; z-index: 20;
+}
+.mz-top-title { font-size: 16px; font-weight: 900; letter-spacing: .3px; }
+.mz-top-title small { display: block; font-size: 11px; font-weight: 600; color: rgba(255,255,255,.6); letter-spacing: .5px; }
+.mz-top-right { display: flex; align-items: center; gap: 12px; font-size: 13px; flex-wrap: wrap; }
+.mz-top-right .mz-email { color: rgba(255,255,255,.75); }
+.mz-link {
+  color: #fff; text-decoration: none; background: transparent;
+  border: 1px solid rgba(255,255,255,.3);
+  padding: 7px 14px; border-radius: 8px; font-weight: 800; font-size: 13px;
+}
+.mz-link:hover { filter: brightness(.95); }
+
+/* ── Wrap ── */
+.mz-wrap { max-width: 980px; margin: 0 auto; padding: 24px; }
+.mz-note {
+  background: #EFF6FF; border: 1px solid #BFDBFE; color: #1E40AF;
+  border-radius: 10px; padding: 12px 16px; font-size: 13px; line-height: 1.6;
+  margin-bottom: 18px;
+}
+
+/* ── Sección (Aplicados en visita / Despacho) ── */
+.mz-cat { background: #fff; border-radius: 14px; box-shadow: 0 2px 12px rgba(33,60,125,.07); margin-bottom: 18px; overflow: hidden; }
+.mz-cat-h {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 20px; background: #FAFBFF; border-bottom: 1px solid #EEF1F8;
+}
+.mz-cat-h h3 { margin: 0; font-size: 15px; font-weight: 900; color: #242F40; }
+.mz-cat-count { font-size: 12px; color: #9CA3AF; font-weight: 700; }
+.mz-add-btn {
+  background: none; border: none; color: #242F40; font-weight: 800; font-size: 13px;
+  cursor: pointer; text-decoration: underline; font-family: inherit;
+}
+.mz-cat-body { padding: 6px 0; }
+
+.mz-row {
+  display: grid; grid-template-columns: 1fr 140px 170px auto; align-items: center; gap: 14px;
+  padding: 12px 20px; border-bottom: 1px solid #F3F4F6;
+}
+.mz-row:last-child { border-bottom: none; }
+.mz-row-name { font-size: 14px; font-weight: 700; color: #1F2937; }
+.mz-row-name small { display: block; font-size: 11px; font-weight: 600; color: #9CA3AF; margin-top: 2px; }
+.mz-row-del {
+  background: none; border: none; color: #B91C1C; font-size: 12px; font-weight: 700;
+  cursor: pointer; text-decoration: underline; font-family: inherit; flex-shrink: 0; justify-self: end;
+}
+
+.mz-price-wrap { position: relative; }
+.mz-price-wrap .mz-prefix { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); font-size: 13px; color: #9CA3AF; pointer-events: none; }
+.mz-price-input {
+  height: 38px; width: 100%; border: 1.5px solid #E5E7EB; border-radius: 8px; padding: 0 10px 0 22px;
+  font-family: inherit; font-size: 14px; outline: none; background: #fff;
+}
+.mz-price-input:focus { border-color: #242F40; }
+
+.mz-excl-switch { display: inline-flex; align-items: center; gap: 8px; cursor: pointer; font-size: 12.5px; color: #374151; font-weight: 600; }
+.mz-excl-switch input { display: none; }
+.mz-excl-track { width: 40px; height: 22px; background: #D1D5DB; border-radius: 12px; position: relative; transition: background .15s; flex-shrink: 0; }
+.mz-excl-thumb { position: absolute; top: 3px; left: 3px; width: 16px; height: 16px; background: #fff; border-radius: 50%; transition: left .15s; box-shadow: 0 1px 3px rgba(0,0,0,.25); }
+.mz-excl-switch input:checked + .mz-excl-track { background: #CCA43B; }
+.mz-excl-switch input:checked + .mz-excl-track .mz-excl-thumb { left: 21px; }
+
+.mz-add-form { display: none; grid-template-columns: 1fr 130px 170px auto; gap: 10px; padding: 14px 20px; border-bottom: 1px solid #F3F4F6; align-items: center; }
+.mz-input {
+  height: 40px; border: 1.5px solid #E5E7EB; border-radius: 8px; padding: 0 12px;
+  font-family: inherit; font-size: 14px; outline: none; background: #fff; width: 100%;
+}
+.mz-input:focus { border-color: #242F40; }
+.mz-select {
+  height: 40px; border: 1.5px solid #E5E7EB; border-radius: 8px; padding: 0 10px;
+  font-family: inherit; font-size: 13px; outline: none; background: #fff; width: 100%;
+}
+.mz-btn-submit {
+  height: 40px; padding: 0 18px; border: none; border-radius: 8px;
+  background: #242F40; color: #fff; font-family: inherit; font-size: 13px; font-weight: 800; cursor: pointer;
+}
+.mz-btn-submit:hover { opacity: .92; }
+
+.mz-msg { text-align: center; padding: 30px 20px; color: #6B7280; font-size: 13px; }
+.mz-spinner { width: 30px; height: 30px; border: 3px solid #E5E7EB; border-top-color: #242F40; border-radius: 50%; animation: mzspin .7s linear infinite; margin: 0 auto 14px; }
+@keyframes mzspin { to { transform: rotate(360deg); } }
+
+.mz-toast {
+  position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(20px);
+  background: #242F40; color: #fff; padding: 12px 22px; border-radius: 10px;
+  font-size: 14px; font-weight: 600; box-shadow: 0 6px 24px rgba(0,0,0,.25);
+  opacity: 0; pointer-events: none; transition: opacity .2s, transform .2s; z-index: 50;
+}
+.mz-toast.is-visible { opacity: 1; transform: translateX(-50%) translateY(0); }
+.mz-toast.is-error { background: #C70B0C; }
+
+@media (max-width: 640px) {
+  .mz-row, .mz-add-form { grid-template-columns: 1fr; }
+  .mz-row-del { justify-self: start; }
+}
+</style>
+</head>
+<body>
+
+<div class="mz-top">
+  <div class="mz-top-title" id="mz-clinic-name">Catálogo de Medicamentos<small>Precios y descuentos</small></div>
+  <div class="mz-top-right">
+    <span class="mz-email" id="mz-user-email">—</span>
+    <a class="mz-link" href="Inicio.html">Inicio</a>
+    <a class="mz-link" href="Admin-Precios.html">Precios</a>
+    <a class="mz-link" href="Personal.html">Personal</a>
+    <a class="mz-link" href="Admin-Usuarios.html">Usuarios</a>
+    <a class="mz-link" href="#" id="mz-logout">Salir</a>
+  </div>
+</div>
+
+<div class="mz-wrap">
+  <div class="mz-note">
+    Estos medicamentos aparecen en los checklists "Aplicados en visita" y "Despacho" de Expediente-Doctor.html (Consulta médica, Completar servicio). El precio y el interruptor "Excluir de descuentos" se usan al generar la factura en Caja — por defecto, un medicamento SÍ recibe el descuento por edad (tercera/cuarta edad) salvo que lo excluyas acá.
+  </div>
+  <div id="mz-list">
+    <div class="mz-msg"><div class="mz-spinner"></div>Cargando medicamentos…</div>
+  </div>
+</div>
+
+<div class="mz-toast" id="mz-toast">—</div>
+
+<!-- Firebase compat SDK -->
+<script src="clinic-config.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="firebase-init.js"></script>
+<script src="r3ads-staff.js"></script>
+
+<script>
+(function () {
+  var CLINIC_ID = null; // se resuelve por sesión en el AUTH GUARD (r3adsStaff.resolveClinicId)
+  var _meds = []; // [{id, nombre, tipo:'visita'|'despacho'|'ambos', precio, excluidoDescuento}]
+
+  function $(id) { return document.getElementById(id); }
+  function esc(s) { return String(s || '').replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+  function fmtN(n) { n = Number(n) || 0; return Number.isInteger(n) ? n.toLocaleString('en-US') : n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
+
+  function pintarBranding(nombre) {
+    var clinicName = nombre || (window.R3ADS_CLINIC_FALLBACK && window.R3ADS_CLINIC_FALLBACK.nombre) || 'tu clínica';
+    $('mz-clinic-name').innerHTML = 'Catálogo de Medicamentos<small>Precios y descuentos · ' + esc(clinicName) + '</small>';
+  }
+  pintarBranding();
+  function cargarBrandingReal() {
+    if (!CLINIC_ID) return;
+    r3adsDb.collection('clinics').doc(CLINIC_ID).get().then(function (snap) {
+      if (snap.exists && snap.data().nombre) pintarBranding(snap.data().nombre);
+    }).catch(function () {});
+  }
+
+  var toastEl = $('mz-toast'), toastT;
+  function toast(msg, isErr) {
+    toastEl.textContent = msg;
+    toastEl.classList.toggle('is-error', !!isErr);
+    toastEl.classList.add('is-visible');
+    clearTimeout(toastT);
+    toastT = setTimeout(function () { toastEl.classList.remove('is-visible'); }, 3200);
+  }
+
+  /* ── Auth ── */
+  r3adsAuth.onAuthStateChanged(function (user) {
+    if (!user) { window.location.href = 'Auth.html?returnTo=Medicamentos.html'; return; }
+    r3adsStaff.resolveClinicId(user, function (clinicId) {
+      CLINIC_ID = clinicId;
+      cargarBrandingReal();
+      r3adsStaff.checkAdmin(user, CLINIC_ID, function (ok) {
+        if (!ok) { window.location.href = 'Auth.html'; return; }
+        $('mz-user-email').textContent = user.email;
+        boot();
+      });
+    });
+  });
+  $('mz-logout').addEventListener('click', function (e) {
+    e.preventDefault();
+    r3adsAuth.signOut().then(function () { window.location.href = 'Auth.html'; });
+  });
+
+  /* ── Cargar ── */
+  function medsRef() { return r3adsDb.collection('clinics').doc(CLINIC_ID).collection('medicamentos'); }
+
+  function boot() {
+    medsRef().get().then(function (snap) {
+      _meds = [];
+      snap.forEach(function (doc) { _meds.push(Object.assign({ id: doc.id }, doc.data())); });
+      render();
+    }).catch(function (err) {
+      $('mz-list').innerHTML = '<div class="mz-msg" style="color:#B91C1C">No se pudo cargar el catálogo de medicamentos.<br>' + esc(err.message) + '</div>';
+    });
+  }
+
+  /* ── Render ── */
+  function rowHtml(m) {
+    var precio = (m.precio !== undefined && m.precio !== null) ? m.precio : 0;
+    var excl = m.excluidoDescuento === true;
+    return '<div class="mz-row" data-id="' + esc(m.id) + '">' +
+      '<span class="mz-row-name">' + esc(m.nombre) + (m.tipo === 'ambos' ? '<small>Visita y despacho</small>' : '') + '</span>' +
+      '<div class="mz-price-wrap"><span class="mz-prefix">L</span>' +
+        '<input type="number" min="0" step="0.01" class="mz-price-input" data-id="' + esc(m.id) + '" data-field="precio" value="' + esc(precio) + '">' +
+      '</div>' +
+      '<label class="mz-excl-switch"><input type="checkbox" data-id="' + esc(m.id) + '" data-field="excluidoDescuento"' + (excl ? ' checked' : '') + '>' +
+        '<span class="mz-excl-track"><span class="mz-excl-thumb"></span></span> Excluir de descuentos</label>' +
+      '<button type="button" class="mz-row-del" data-del="' + esc(m.id) + '">Eliminar</button>' +
+    '</div>';
+  }
+
+  function seccionHtml(tipo, titulo) {
+    var items = _meds.filter(function (m) { return m.tipo === tipo || m.tipo === 'ambos'; })
+      .sort(function (a, b) { return (a.nombre || '').localeCompare(b.nombre || ''); });
+    var rows = items.map(rowHtml).join('');
+    return '<div class="mz-cat" data-tipo="' + tipo + '">' +
+      '<div class="mz-cat-h"><h3>' + esc(titulo) + '</h3>' +
+        '<span><span class="mz-cat-count">' + items.length + '</span> · <button type="button" class="mz-add-btn" data-add="' + tipo + '">+ Agregar</button></span>' +
+      '</div>' +
+      '<div class="mz-cat-body">' +
+        '<div class="mz-add-form" id="mz-add-form-' + tipo + '">' +
+          '<input type="text" class="mz-input" id="mz-add-nombre-' + tipo + '" placeholder="Nombre del medicamento">' +
+          '<div class="mz-price-wrap"><span class="mz-prefix">L</span><input type="number" min="0" step="0.01" class="mz-input" id="mz-add-precio-' + tipo + '" placeholder="0.00" style="padding-left:22px"></div>' +
+          '<select class="mz-select" id="mz-add-tipo-' + tipo + '">' +
+            '<option value="' + tipo + '">Solo ' + (tipo === 'visita' ? 'aplicados en visita' : 'despacho') + '</option>' +
+            '<option value="ambos">Visita y despacho</option>' +
+          '</select>' +
+          '<button type="button" class="mz-btn-submit" data-submit="' + tipo + '">Crear</button>' +
+        '</div>' +
+        (items.length ? rows : '<div class="mz-msg">Todavía no agregaste medicamentos acá.</div>') +
+      '</div>' +
+    '</div>';
+  }
+
+  function render() {
+    $('mz-list').innerHTML = seccionHtml('visita', 'Aplicados en visita') + seccionHtml('despacho', 'Despacho');
+    bind();
+  }
+
+  function bind() {
+    document.querySelectorAll('[data-add]').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var form = $('mz-add-form-' + btn.dataset.add);
+        form.style.display = form.style.display === 'none' || !form.style.display ? 'grid' : 'none';
+        if (form.style.display === 'grid') $('mz-add-nombre-' + btn.dataset.add).focus();
+      });
+    });
+    document.querySelectorAll('[data-submit]').forEach(function (btn) {
+      btn.addEventListener('click', function () { agregar(btn.dataset.submit); });
+    });
+    document.querySelectorAll('.mz-add-form input[type="text"]').forEach(function (inp) {
+      inp.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter') { e.preventDefault(); agregar(inp.id.replace('mz-add-nombre-', '')); }
+      });
+    });
+    document.querySelectorAll('[data-del]').forEach(function (btn) {
+      btn.addEventListener('click', function () { eliminar(btn.dataset.del); });
+    });
+    document.querySelectorAll('input[data-field="precio"]').forEach(function (inp) {
+      inp.addEventListener('change', function () { guardarCampo(inp.dataset.id, 'precio', parseFloat(inp.value) || 0); });
+    });
+    document.querySelectorAll('input[data-field="excluidoDescuento"]').forEach(function (chk) {
+      chk.addEventListener('change', function () { guardarCampo(chk.dataset.id, 'excluidoDescuento', !!chk.checked); });
+    });
+  }
+
+  /* ── Alta / baja / edición ── */
+  function agregar(tipoSeccion) {
+    var nombre = ($('mz-add-nombre-' + tipoSeccion).value || '').trim();
+    if (!nombre) return;
+    var precio = parseFloat($('mz-add-precio-' + tipoSeccion).value) || 0;
+    var tipo = $('mz-add-tipo-' + tipoSeccion).value || tipoSeccion;
+    medsRef().add({ nombre: nombre, tipo: tipo, precio: precio, excluidoDescuento: false, creadoEn: firebase.firestore.FieldValue.serverTimestamp() })
+      .then(function (ref) {
+        _meds.push({ id: ref.id, nombre: nombre, tipo: tipo, precio: precio, excluidoDescuento: false });
+        render();
+        toast('Medicamento agregado.');
+      }).catch(function (err) {
+        toast('Error al agregar: ' + err.message, true);
+      });
+  }
+
+  function guardarCampo(id, field, value) {
+    var payload = {}; payload[field] = value;
+    medsRef().doc(id).set(payload, { merge: true }).then(function () {
+      var m = _meds.filter(function (x) { return x.id === id; })[0];
+      if (m) m[field] = value;
+      toast('Guardado.');
+    }).catch(function (err) {
+      toast('Error al guardar: ' + err.message, true);
+    });
+  }
+
+  function eliminar(id) {
+    if (!confirm('¿Eliminar este medicamento del catálogo? No se puede deshacer.')) return;
+    medsRef().doc(id).delete().then(function () {
+      _meds = _meds.filter(function (m) { return m.id !== id; });
+      render();
+      toast('Eliminado.');
+    }).catch(function (err) {
+      toast('Error al eliminar: ' + err.message, true);
+    });
+  }
+})();
+</script>
+</body>
+</html>

@@ -163,6 +163,17 @@ service cloud.firestore {
         allow read: if sameClinic(clinicId);
         allow write: if isAdmin(clinicId) || isSuperAdmin();
       }
+
+      // ═══ /clinics/{clinicId}/medicamentos/{medId} ═════════════════
+      // Catálogo de medicamentos propio de la clínica (nombre, tipo
+      // visita/despacho/ambos, precio, excluidoDescuento) — reemplaza
+      // MEDS_VISITA_CATS/MEDS_DESPACHO_CATS hardcodeados a CMG. Mismo
+      // patrón de acceso que /personal: lectura para cualquier staff de
+      // ESTA clínica, escritura solo admin/superadmin (Medicamentos.html).
+      match /medicamentos/{medId} {
+        allow read: if sameClinic(clinicId);
+        allow write: if isAdmin(clinicId) || isSuperAdmin();
+      }
     }
 
     // ═══ /_claimsRefresh/{uid} ═══════════════════════════════════════

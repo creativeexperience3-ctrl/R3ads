@@ -80,7 +80,7 @@ body { margin: 0; background: #F4F6FB; font-family: system-ui,-apple-system,'Seg
 /* ── Row ── */
 .ap-row {
   display: grid;
-  grid-template-columns: 1fr 150px 180px 150px;
+  grid-template-columns: 1fr 150px 180px 170px 150px;
   gap: 14px; align-items: center;
   padding: 12px 20px; border-bottom: 1px solid #F3F4F6;
 }
@@ -160,6 +160,7 @@ body { margin: 0; background: #F4F6FB; font-family: system-ui,-apple-system,'Seg
     <span class="ap-email" id="ap-user-email">—</span>
     <a class="ap-link ghost" href="Inicio.html">Inicio</a>
     <a class="ap-link ghost" href="Personal.html">Personal</a>
+    <a class="ap-link ghost" href="Medicamentos.html">Medicamentos</a>
     <a class="ap-link ghost" href="Admin-Usuarios.html">Usuarios</a>
     <a class="ap-link ghost" href="#" id="ap-logout">Salir</a>
   </div>
@@ -350,9 +351,21 @@ body { margin: 0; background: #F4F6FB; font-family: system-ui,-apple-system,'Seg
       (isCustom ? '<button type="button" class="ap-reset ap-delete-custom" data-key="' + esc(it.key) + '" style="color:#B91C1C">Eliminar</button>' : '') +
     '</div>';
 
+    // Excluir de descuentos: por defecto NO (fail-open, cfg.excluidoDescuento
+    // === true) — sin configuración explícita, el ítem SÍ recibe el
+    // descuento por edad (tercera/cuarta edad) al facturar en Caja. Es un
+    // interruptor de excepción, no de habilitación, así que el default
+    // seguro es "no excluido" (ver calcularPctDescuentoEdad en
+    // Expediente-Doctor.html).
+    var exclDesc = cfg.excluidoDescuento === true;
+    var exclCol = '<div class="ap-field ap-excl">' +
+      '<label class="ap-excl-switch"><input type="checkbox" data-key="' + esc(it.key) + '" data-field="excluidoDescuento"' + (exclDesc ? ' checked' : '') + '>' +
+        '<span class="ap-excl-track"><span class="ap-excl-thumb"></span></span> Excluir de descuentos</label>' +
+    '</div>';
+
     return '<div class="ap-row' + (activo ? '' : ' is-inactive') + '" data-key="' + esc(it.key) + '" data-name="' + esc((it.nameEs + ' ' + it.nameEn).toLowerCase()) + '">' +
       '<div class="ap-row-name"><b>' + esc(it.nameEs) + '</b><small>' + esc(it.nameEn) + '</small></div>' +
-      priceInput + enfCol + activoCol +
+      priceInput + enfCol + exclCol + activoCol +
     '</div>';
   }
 
@@ -381,6 +394,10 @@ body { margin: 0; background: #F4F6FB; font-family: system-ui,-apple-system,'Seg
         if (r) r.classList.toggle('is-inactive', !chk.checked);
         markDirty(chk.dataset.key);
       });
+    });
+    /* Toggle excluir de descuentos */
+    $('ap-list').querySelectorAll('input[data-field="excluidoDescuento"]').forEach(function (chk) {
+      chk.addEventListener('change', function () { markDirty(chk.dataset.key); });
     });
     /* Restablecer */
     $('ap-list').querySelectorAll('.ap-reset:not(#ap-add-custom-btn):not(.ap-delete-custom)').forEach(function (btn) {
@@ -466,9 +483,11 @@ body { margin: 0; background: #F4F6FB; font-family: system-ui,-apple-system,'Seg
     var r = rowEl(key); if (!r) return;
     var priceInp = r.querySelector('input[data-field="precio"]');
     var enfChk   = r.querySelector('input[data-field="enfermeriaCompletable"]');
+    var exclChk  = r.querySelector('input[data-field="excluidoDescuento"]');
     var activoChk = r.querySelector('input[data-field="activo"]');
     if (priceInp) priceInp.value = it.defPrice;
     if (enfChk)   enfChk.checked = false;
+    if (exclChk)  exclChk.checked = false;
     if (activoChk) { activoChk.checked = true; r.classList.remove('is-inactive'); }
     markDirty(key);
   }
@@ -494,6 +513,7 @@ body { margin: 0; background: #F4F6FB; font-family: system-ui,-apple-system,'Seg
       var r = rowEl(key); if (!r) return;
       var priceInp = r.querySelector('input[data-field="precio"]');
       var enfChk   = r.querySelector('input[data-field="enfermeriaCompletable"]');
+      var exclChk  = r.querySelector('input[data-field="excluidoDescuento"]');
       var activoChk = r.querySelector('input[data-field="activo"]');
 
       var payload = {
@@ -501,6 +521,7 @@ body { margin: 0; background: #F4F6FB; font-family: system-ui,-apple-system,'Seg
         nombreEs : it.nameEs,
         precio   : priceInp ? (parseFloat(priceInp.value) || 0) : it.defPrice,
         enfermeriaCompletable: enfChk ? !!enfChk.checked : false,
+        excluidoDescuento: exclChk ? !!exclChk.checked : false,
         activo   : activoChk ? !!activoChk.checked : true,
         custom   : it.cat === 'custom',
         actualizado: firebase.firestore.FieldValue.serverTimestamp()
