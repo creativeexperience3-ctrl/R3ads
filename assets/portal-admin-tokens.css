@@ -1,0 +1,134 @@
+/* ═══════════════════════════════════════════════════════════════════
+   PORTAL-ADMIN.HTML · PIEL VISUAL "ANCLA" (pa-*)
+   Copia AUTOCONTENIDA y REDUCIDA de portal-clinico/assets/portal-tokens.css
+   — solo los tokens y las clases (pa-*) que usa portal-admin.html.
+
+   Por qué existe una copia en vez de enlazar el original: portal-admin.html
+   vive en web/ (GitHub Pages, r3ads.com), y portal-clinico/ está EXCLUIDO
+   a propósito de ese sitio (ver web/_config.yml — evita una copia fantasma
+   del producto real, que vive solo en Firebase Hosting / ancla.r3ads.com).
+   Un <link> a portal-clinico/assets/portal-tokens.css desde acá daría 404.
+
+   Si el branding de Ancla cambia (colores, tipografía, radios, sombras),
+   replicar el cambio en AMBOS archivos — este y portal-tokens.css.
+   ═══════════════════════════════════════════════════════════════════ */
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@500;600;700&family=Figtree:wght@400;500;600;700;800&display=swap');
+
+:root {
+  --ink:  #242F40;
+  --gold: #CCA43B;
+  --ice:  #F4F6FB;
+
+  --ink-900: color-mix(in oklab, var(--ink) 80%, black);
+  --ink-600: color-mix(in oklab, var(--ink) 82%, white);
+  --ink-500: color-mix(in oklab, var(--ink) 66%, white);
+  --ink-300: color-mix(in oklab, var(--ink) 40%, white);
+  --line:    color-mix(in oklab, var(--ink) 9%, white);
+  --line-2:  color-mix(in oklab, var(--ink) 16%, white);
+  --fill:    color-mix(in oklab, var(--ice) 70%, white);
+  --fill-2:  var(--ice);
+  --ink-glow: oklch(0.52 0.09 258);
+
+  --gold-ink:  color-mix(in oklab, var(--gold) 60%, black);
+  --gold-soft: color-mix(in oklab, var(--gold) 16%, white);
+  --gold-wash: color-mix(in oklab, var(--gold) 7%, white);
+  --gold-ring: color-mix(in oklab, var(--gold) 30%, transparent);
+
+  --ok: #1E7A55;   --ok-bg: #E8F5EE;
+  --bad: #B3262C;  --bad-bg: #FCEBEB;
+
+  --font-ui: 'Figtree', system-ui, -apple-system, 'Segoe UI', Arial, sans-serif;
+  --font-display: 'Outfit', 'Figtree', system-ui, sans-serif;
+
+  --r-sm: 10px; --r-md: 14px; --r-lg: 22px; --r-pill: 999px;
+  --shadow-2: 0 1px 2px rgba(36,47,64,.04), 0 18px 40px -22px rgba(36,47,64,.22);
+  --shadow-3: 0 30px 70px -24px rgba(36,47,64,.35);
+
+  --aurora:
+    radial-gradient(70% 90% at 88% -20%, var(--ink-900) 0%, transparent 70%),
+    radial-gradient(60% 80% at 10% 10%, color-mix(in oklab, var(--ink-glow) 70%, transparent) 0%, transparent 70%),
+    linear-gradient(180deg, var(--ink) 0%, var(--ink-glow) 48%, color-mix(in oklab, var(--ink-glow) 30%, white) 78%, #fff 100%);
+}
+
+@keyframes portal-drift { 0%,100% { background-position: 0% 0%, 0% 0%, 0 0; } 50% { background-position: 6% 4%, -4% 2%, 0 0; } }
+
+/* Selectores con prefijo `html` (+1 especificidad) para ganarle al <style>
+   propio de portal-admin.html sin depender del orden de carga — mismo
+   truco que usa portal-tokens.css en el resto del producto. */
+html body { margin: 0; font-family: var(--font-ui); -webkit-font-smoothing: antialiased; color: var(--ink); background: #fff; }
+html :focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+html ::placeholder { color: var(--ink-300); opacity: 1; }
+::selection { background: var(--gold-soft); color: var(--ink); }
+
+html .pa-login-wrap { background: var(--aurora); background-size: 120% 120%, 120% 120%, 100% 100%; animation: portal-drift 18s ease-in-out infinite; }
+html .pa-login-box { border-radius: var(--r-lg); box-shadow: var(--shadow-3); }
+html .pa-brand { color: var(--gold-ink); }
+html .pa-login-box h1 { font-family: var(--font-display); font-weight: 600; letter-spacing: -.01em; color: var(--ink); }
+html .pa-login-box p { color: var(--ink-500); }
+html .pa-denied h2 { font-family: var(--font-display); font-weight: 600; color: var(--bad); }
+html .pa-denied p { color: var(--ink-500); }
+html .pa-field label { font-size: 13px; font-weight: 600; color: var(--ink-600); }
+html .pa-input, html .pa-select {
+  border: 1px solid transparent; border-radius: 12px; background-color: var(--fill-2); color: var(--ink);
+  font-weight: 500; font-size: 15px; box-shadow: none; transition: border-color .15s, box-shadow .15s, background-color .15s;
+}
+html .pa-input:hover, html .pa-select:hover { background-color: color-mix(in oklab, var(--ice) 80%, var(--ink) 4%); }
+html .pa-input:focus, html .pa-select:focus { background-color: #fff; border-color: var(--ink); box-shadow: 0 0 0 4px var(--gold-ring); }
+html .pa-error { background: var(--bad-bg); color: var(--bad); border: 0; border-radius: var(--r-md); }
+
+html .pa-btn { border-radius: 12px; font-weight: 700; border: 0; transition: transform .15s cubic-bezier(.2,.7,.2,1), box-shadow .2s, background .2s, opacity .2s; }
+html .pa-btn--primary { background: var(--ink); color: #fff; box-shadow: 0 8px 20px -10px color-mix(in oklab, var(--ink) 70%, transparent); }
+html .pa-btn--primary:hover:not(:disabled) { opacity: 1; background: var(--ink-900); transform: translateY(-1px); box-shadow: 0 14px 26px -12px color-mix(in oklab, var(--ink) 80%, transparent); }
+html .pa-btn:active { transform: scale(.98); }
+
+html .pa-top { background: color-mix(in oklab, #fff 82%, transparent); backdrop-filter: saturate(1.6) blur(14px); color: var(--ink); border-bottom: 1px solid var(--line); box-shadow: none; }
+html .pa-top-title { font-family: var(--font-display); font-weight: 600; font-size: 18px; letter-spacing: -.01em; color: var(--ink); }
+html .pa-top-title small { color: var(--ink-500); font-weight: 500; font-size: 12px; letter-spacing: 0; margin-top: 1px; }
+html .pa-email { color: var(--ink-500); font-size: 13px; }
+html .pa-logout { border-radius: var(--r-pill); font-weight: 600; font-size: 13px; padding: 8px 14px; background: transparent; color: var(--ink-600); border: 1px solid transparent; transition: background .15s, color .15s; }
+html .pa-logout:hover { background: var(--fill-2); color: var(--ink); }
+
+html .pa-wrap { padding-top: 32px; }
+html .pa-stat, html .pa-create-panel, html .pa-card { background: #fff; border: 1px solid var(--line); border-radius: var(--r-lg); box-shadow: var(--shadow-2); }
+html .pa-stat-num { font-family: var(--font-display); font-weight: 600; font-size: 38px; letter-spacing: -.03em; color: var(--ink); }
+html .pa-stat-lbl { font-size: 13px; font-weight: 600; color: var(--ink-500); margin-top: 6px; }
+html .pa-stat.ok .pa-stat-num { color: var(--ok); }
+html .pa-stat.warn .pa-stat-num { color: var(--gold-ink); }
+html .pa-create-heading { font-family: var(--font-display); font-weight: 600; font-size: 22px; letter-spacing: -.02em; color: var(--ink); }
+html .pa-hint { color: var(--ink-300); }
+html .pa-check { color: var(--ink-600); }
+html .pa-check input { accent-color: var(--ink); }
+
+html .pa-table th { font-size: 11.5px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: var(--ink-500); background: #fff; border-bottom: 1px solid var(--line); padding: 14px 18px; }
+html .pa-table td { border-bottom-color: var(--line); padding: 14px 18px; }
+html .pa-table tbody tr:hover td { background: var(--fill); }
+html .pa-clinic-name { font-weight: 700; color: var(--ink); }
+html .pa-clinic-id { color: var(--ink-500); }
+html .pa-status { border-radius: var(--r-pill); }
+html .pa-status--activa { background: var(--ok-bg); color: var(--ok); }
+html .pa-status--activa::before { background: var(--ok); }
+html .pa-status--suspendida { background: var(--bad-bg); color: var(--bad); }
+html .pa-status--suspendida::before { background: var(--bad); }
+html .pa-act { border-radius: 10px; padding: 7px 12px; font-weight: 600; }
+html .pa-act--edit, html .pa-act--admin { background: var(--fill-2); color: var(--ink); }
+html .pa-act--edit:hover, html .pa-act--admin:hover { background: var(--ink); color: #fff; }
+html .pa-act--suspend, html .pa-act--upgrade { background: var(--gold-wash); color: var(--gold-ink); }
+html .pa-act--suspend:hover, html .pa-act--upgrade:hover { background: var(--gold-soft); }
+html .pa-act--activate { background: var(--ok-bg); color: var(--ok); }
+html .pa-act--downgrade { background: var(--fill-2); color: var(--ink-600); }
+html .pa-act--downgrade:hover { background: var(--fill); }
+html .pa-mod-badge { background: var(--fill-2); color: var(--ink-600); font-weight: 700; }
+html .pa-mod-badge--all { background: var(--fill); color: var(--ink-500); }
+html .pa-mod-badge--none { background: var(--bad-bg); color: var(--bad); }
+html .pa-plan-badge { border-radius: var(--r-pill); }
+html .pa-plan-badge--basico { background: var(--fill-2); color: var(--ink-600); }
+html .pa-plan-badge--completo { background: var(--gold-soft); color: var(--gold-ink); }
+html .pa-plan-badge--personalizado { background: var(--fill); color: var(--ink-500); }
+
+html .pa-modal { background: color-mix(in oklab, var(--ink) 40%, transparent); backdrop-filter: blur(8px); }
+html .pa-modal-box { border-radius: var(--r-lg); border: 0; box-shadow: var(--shadow-3); padding: 28px; }
+html .pa-modal-title { font-family: var(--font-display); font-weight: 600; font-size: 20px; letter-spacing: -.01em; color: var(--ink); }
+html .pa-toast { background: var(--ink); color: #fff; border-radius: var(--r-md); padding: 13px 20px 13px 40px; box-shadow: var(--shadow-3); }
+html .pa-toast::before { content: ''; position: absolute; left: 18px; top: 50%; width: 8px; height: 8px; margin-top: -4px; border-radius: 50%; background: var(--gold); }
+html .pa-toast.err { background: var(--bad); }
+html .pa-toast.ok { background: var(--ok); }
