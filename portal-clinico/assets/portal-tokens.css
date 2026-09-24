@@ -67,21 +67,21 @@ a:hover { color: var(--ink-glow); }
   html ::placeholder { color: var(--ink-300); opacity: 1; }
 
   /* ── Barras blancas translúcidas (admin) ── */
-  html .ap-top, html .au-top, html .site-header {
+  html .ap-top, html .au-top, html .pa-top, html .site-header {
     background: color-mix(in oklab, #fff 82%, transparent);
     backdrop-filter: saturate(1.6) blur(14px);
     color: var(--ink);
     border-bottom: 1px solid var(--line);
     box-shadow: none;
   }
-  html .ap-top-title, html .au-top-title { font-family: var(--font-display); font-weight: 600; font-size: 18px; letter-spacing: -.01em; color: var(--ink); }
-  html .ap-top-title small, html .au-top-title small { color: var(--ink-500); font-weight: 500; font-size: 12px; letter-spacing: 0; margin-top: 1px; }
-  html .ap-top-right .ap-email, html .au-email { color: var(--ink-500); font-size: 13px; }
-  html .ap-link, html .au-nav-link, html .au-logout {
+  html .ap-top-title, html .au-top-title, html .pa-top-title { font-family: var(--font-display); font-weight: 600; font-size: 18px; letter-spacing: -.01em; color: var(--ink); }
+  html .ap-top-title small, html .au-top-title small, html .pa-top-title small { color: var(--ink-500); font-weight: 500; font-size: 12px; letter-spacing: 0; margin-top: 1px; }
+  html .ap-top-right .ap-email, html .au-email, html .pa-email { color: var(--ink-500); font-size: 13px; }
+  html .ap-link, html .au-nav-link, html .au-logout, html .pa-logout {
     border-radius: var(--r-pill); font-weight: 600; font-size: 13px; padding: 8px 14px;
     background: transparent; color: var(--ink-600); border: 1px solid transparent; transition: background .15s, color .15s;
   }
-  html .ap-link:hover, html .ap-link.ghost:hover, html .au-nav-link:hover, html .au-logout:hover { background: var(--fill-2); color: var(--ink); filter: none; }
+  html .ap-link:hover, html .ap-link.ghost:hover, html .au-nav-link:hover, html .au-logout:hover, html .pa-logout:hover { background: var(--fill-2); color: var(--ink); filter: none; }
   html .ap-link.ghost { background: transparent; color: var(--ink-600); border-color: transparent; }
   html .au-nav-link.active { background: var(--ink); color: #fff; border-color: var(--ink); }
   html .au-logout, html .ap-link.ghost#ap-logout { border-color: var(--line-2); }
@@ -132,11 +132,12 @@ a:hover { color: var(--ink-glow); }
   html .au-avatar { background: var(--fill-2); color: var(--ink); box-shadow: inset 0 0 0 1px var(--line); }
 
   /* ── Tarjetas ── */
-  html .el-card, html .pr-card, html .au-card, html .ap-cat, html .au-stat, html .au-create-panel {
+  html .el-card, html .pr-card, html .au-card, html .ap-cat, html .au-stat, html .au-create-panel,
+  html .pa-stat, html .pa-create-panel, html .pa-card {
     background: #fff; border: 1px solid var(--line); border-radius: var(--r-lg); box-shadow: var(--shadow-2);
   }
   html .el-card, html .pr-card { padding: 32px; }
-  html .el-card-title, html .pr-card-title, html .au-create-heading {
+  html .el-card-title, html .pr-card-title, html .au-create-heading, html .pa-create-heading {
     font-family: var(--font-display); font-weight: 600; font-size: 22px; letter-spacing: -.02em; color: var(--ink); line-height: 1.2;
   }
   html .pr-card-title { border-bottom: 0; padding-bottom: 0; margin-bottom: 22px; }
@@ -152,23 +153,26 @@ a:hover { color: var(--ink-glow); }
   @media (prefers-reduced-motion: reduce) { html .pr-hero, html .el-header { animation: none; } }
 
   /* ── Campos ── */
-  html .el-label, html .pr-label, html .au-field label, html .ap-field-label {
+  html .el-label, html .pr-label, html .au-field label, html .ap-field-label, html .pa-field label {
     font-size: 13px; font-weight: 600; letter-spacing: 0; text-transform: none; color: var(--ink-600);
   }
   html .ap-field-label { font-size: 11.5px; color: var(--ink-500); }
   html .el-input, html .el-select, html .el-textarea, html .pr-input, html .pr-select,
-  html .au-input, html .au-select, html .au-search, html .au-filter, html .ap-input, html .ap-search {
+  html .au-input, html .au-select, html .au-search, html .au-filter, html .ap-input, html .ap-search,
+  html .pa-input, html .pa-select {
     border: 1px solid transparent; border-radius: 12px; background-color: var(--fill-2); color: var(--ink);
     font-weight: 500; font-size: 15px; box-shadow: none; transition: border-color .15s, box-shadow .15s, background-color .15s;
   }
   html .el-input, html .el-select { padding: 12px 14px; }
   html .pr-input, html .pr-select, html .au-search, html .au-filter, html .ap-search { height: 48px; }
   html .el-input:hover, html .el-select:hover, html .el-textarea:hover, html .pr-input:hover, html .pr-select:hover,
-  html .au-input:hover, html .au-select:hover, html .au-search:hover, html .au-filter:hover, html .ap-input:hover, html .ap-search:hover {
+  html .au-input:hover, html .au-select:hover, html .au-search:hover, html .au-filter:hover, html .ap-input:hover, html .ap-search:hover,
+  html .pa-input:hover, html .pa-select:hover {
     background-color: color-mix(in oklab, var(--ice) 80%, var(--ink) 4%);
   }
   html .el-input:focus, html .el-select:focus, html .el-textarea:focus, html .pr-input:focus, html .pr-select:focus,
-  html .au-input:focus, html .au-select:focus, html .au-search:focus, html .au-filter:focus, html .ap-input:focus, html .ap-search:focus {
+  html .au-input:focus, html .au-select:focus, html .au-search:focus, html .au-filter:focus, html .ap-input:focus, html .ap-search:focus,
+  html .pa-input:focus, html .pa-select:focus {
     background-color: #fff; border-color: var(--ink); box-shadow: 0 0 0 4px var(--gold-ring);
   }
   html .ap-input:disabled { background: var(--fill); color: var(--ink-300); }
@@ -188,15 +192,15 @@ a:hover { color: var(--ink-glow); }
   html .el-match-loading { background: var(--fill-2); color: var(--ink-600); }
 
   /* ── Botones ── */
-  html .el-btn, html .pr-btn, html .au-btn, html .ap-save, html .cm-btn, html .ek-btn, html .vp-btn {
+  html .el-btn, html .pr-btn, html .au-btn, html .ap-save, html .cm-btn, html .ek-btn, html .vp-btn, html .pa-btn {
     border-radius: 12px; font-weight: 700; letter-spacing: 0; border: 0;
     transition: transform .15s cubic-bezier(.2,.7,.2,1), box-shadow .2s, background .2s, opacity .2s;
   }
-  html .el-btn-primary, html .pr-btn-primary, html .pr-btn-save, html .au-btn--primary, html .ap-save, html .vp-btn-pdf {
+  html .el-btn-primary, html .pr-btn-primary, html .pr-btn-save, html .au-btn--primary, html .ap-save, html .vp-btn-pdf, html .pa-btn--primary {
     background: var(--ink); color: #fff; box-shadow: 0 8px 20px -10px color-mix(in oklab, var(--ink) 70%, transparent);
   }
   html .el-btn-primary:hover:not(:disabled), html .pr-btn-primary:hover:not(:disabled), html .pr-btn-save:hover,
-  html .au-btn--primary:hover, html .ap-save:hover:not(:disabled), html .vp-btn-pdf:hover {
+  html .au-btn--primary:hover, html .ap-save:hover:not(:disabled), html .vp-btn-pdf:hover, html .pa-btn--primary:hover:not(:disabled) {
     opacity: 1; background: var(--ink-900); transform: translateY(-1px); box-shadow: 0 14px 26px -12px color-mix(in oklab, var(--ink) 80%, transparent);
   }
   html .el-btn-ghost, html .pr-btn-ghost, html .au-btn--outline { background: var(--fill-2); color: var(--ink); border: 0; }
@@ -208,7 +212,7 @@ a:hover { color: var(--ink-glow); }
     opacity: 1; transform: translateY(-1px); background: color-mix(in oklab, var(--gold) 88%, white);
   }
   html .ap-save .ap-badge { background: var(--gold); color: var(--ink); animation: portal-pulse 2s infinite; }
-  html .el-btn:active, html .pr-btn:active, html .au-btn:active, html .ap-save:active { transform: scale(.98); }
+  html .el-btn:active, html .pr-btn:active, html .au-btn:active, html .ap-save:active, html .pa-btn:active { transform: scale(.98); }
 
   /* ── Selector de prueba: tarjetas grandes numeradas ── */
   html .pr-type-grid { counter-reset: prtype; gap: 12px; }
@@ -247,22 +251,22 @@ a:hover { color: var(--ink-glow); }
   html .el-empty { color: var(--ink-300); font-size: 14px; }
 
   /* ── Modal / overlay / toast / spinners ── */
-  html .el-modal { background: color-mix(in oklab, var(--ink) 40%, transparent); backdrop-filter: blur(8px); }
-  html .el-modal-box { border-radius: var(--r-lg); border: 0; box-shadow: var(--shadow-3); padding: 28px; }
-  html .el-modal-title { font-family: var(--font-display); font-weight: 600; font-size: 20px; letter-spacing: -.01em; }
+  html .el-modal, html .pa-modal { background: color-mix(in oklab, var(--ink) 40%, transparent); backdrop-filter: blur(8px); }
+  html .el-modal-box, html .pa-modal-box { border-radius: var(--r-lg); border: 0; box-shadow: var(--shadow-3); padding: 28px; }
+  html .el-modal-title, html .pa-modal-title { font-family: var(--font-display); font-weight: 600; font-size: 20px; letter-spacing: -.01em; color: var(--ink); }
   html .el-overlay { background: color-mix(in oklab, #fff 75%, transparent); backdrop-filter: blur(6px); }
   html .el-overlay-box { border-radius: var(--r-lg); box-shadow: var(--shadow-3); }
   html .el-spinner, html .ap-spinner, html .au-spinner, html .pr-spinner, html .cm-spinner, html .ek-spinner, html .vp-spinner {
     border-color: var(--fill-2); border-top-color: var(--ink); border-right-color: var(--gold);
   }
-  html .el-toast, html .ap-toast, html .au-toast, html .pr-toast {
+  html .el-toast, html .ap-toast, html .au-toast, html .pr-toast, html .pa-toast {
     background: var(--ink); color: #fff; border-radius: var(--r-md); padding: 13px 20px 13px 40px; box-shadow: var(--shadow-3);
   }
-  html .el-toast::before, html .ap-toast::before, html .au-toast::before, html .pr-toast::before {
+  html .el-toast::before, html .ap-toast::before, html .au-toast::before, html .pr-toast::before, html .pa-toast::before {
     content: ''; position: absolute; left: 18px; top: 50%; width: 8px; height: 8px; margin-top: -4px; border-radius: 50%; background: var(--gold);
   }
-  html .ap-toast.is-error, html .au-toast.err { background: var(--bad); }
-  html .au-toast.ok { background: var(--ok); }
+  html .ap-toast.is-error, html .au-toast.err, html .pa-toast.err { background: var(--bad); }
+  html .au-toast.ok, html .pa-toast.ok { background: var(--ok); }
   html .cm-message, html .ek-message, html .vp-message { border: 1px solid var(--line); border-radius: var(--r-lg); box-shadow: var(--shadow-2); color: var(--ink-500); }
 
   /* ════════ ADMIN · USUARIOS ════════ */
@@ -328,6 +332,56 @@ a:hover { color: var(--ink-glow); }
   html .ap-reset:hover { color: var(--ink); }
   html .ap-tag--free { background: var(--ok-bg); color: var(--ok); }
   html .ap-tag--aes { background: var(--gold-soft); color: var(--gold-ink); }
+
+  /* ════════ ADMIN · CLÍNICAS (portal-admin.html, pa-*) ════════
+     Panel interno de superadmin (alta de clínicas, módulos, planes) — no
+     forma parte de portal-clinico/ pero comparte esta misma piel visual
+     para que "Ancla" se sienta como un solo producto también puertas
+     adentro. Ver portal-admin.html para el <style> estructural (pa-*). */
+  html .pa-login-wrap {
+    background: var(--aurora); background-size: 120% 120%, 120% 120%, 100% 100%;
+    animation: portal-drift 18s ease-in-out infinite;
+  }
+  html .pa-login-box { border-radius: var(--r-lg); box-shadow: var(--shadow-3); }
+  html .pa-brand { color: var(--gold-ink); }
+  html .pa-login-box h1 { font-family: var(--font-display); font-weight: 600; letter-spacing: -.01em; color: var(--ink); }
+  html .pa-login-box p { color: var(--ink-500); }
+  html .pa-denied h2 { font-family: var(--font-display); font-weight: 600; color: var(--bad); }
+  html .pa-denied p { color: var(--ink-500); }
+  html .pa-error { background: var(--bad-bg); color: var(--bad); border: 0; border-radius: var(--r-md); }
+  html .pa-wrap { padding-top: 32px; }
+  html .pa-stat-num { font-family: var(--font-display); font-weight: 600; font-size: 38px; letter-spacing: -.03em; color: var(--ink); }
+  html .pa-stat-lbl { font-size: 13px; font-weight: 600; color: var(--ink-500); margin-top: 6px; }
+  html .pa-stat.ok .pa-stat-num { color: var(--ok); }
+  html .pa-stat.warn .pa-stat-num { color: var(--gold-ink); }
+  html .pa-hint { color: var(--ink-300); }
+  html .pa-check { color: var(--ink-600); }
+  html .pa-check input { accent-color: var(--ink); }
+  html .pa-table th { font-size: 11.5px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: var(--ink-500); background: #fff; border-bottom: 1px solid var(--line); padding: 14px 18px; }
+  html .pa-table td { border-bottom-color: var(--line); padding: 14px 18px; }
+  html .pa-table tbody tr:hover td { background: var(--fill); }
+  html .pa-clinic-name { font-weight: 700; color: var(--ink); }
+  html .pa-clinic-id { color: var(--ink-500); }
+  html .pa-status { border-radius: var(--r-pill); }
+  html .pa-status--activa { background: var(--ok-bg); color: var(--ok); }
+  html .pa-status--activa::before { background: var(--ok); }
+  html .pa-status--suspendida { background: var(--bad-bg); color: var(--bad); }
+  html .pa-status--suspendida::before { background: var(--bad); }
+  html .pa-act { border-radius: 10px; padding: 7px 12px; font-weight: 600; }
+  html .pa-act--edit, html .pa-act--admin { background: var(--fill-2); color: var(--ink); }
+  html .pa-act--edit:hover, html .pa-act--admin:hover { background: var(--ink); color: #fff; }
+  html .pa-act--suspend, html .pa-act--upgrade { background: var(--gold-wash); color: var(--gold-ink); }
+  html .pa-act--suspend:hover, html .pa-act--upgrade:hover { background: var(--gold-soft); }
+  html .pa-act--activate { background: var(--ok-bg); color: var(--ok); }
+  html .pa-act--downgrade { background: var(--fill-2); color: var(--ink-600); }
+  html .pa-act--downgrade:hover { background: var(--fill); }
+  html .pa-mod-badge { background: var(--fill-2); color: var(--ink-600); font-weight: 700; }
+  html .pa-mod-badge--all { background: var(--fill); color: var(--ink-500); }
+  html .pa-mod-badge--none { background: var(--bad-bg); color: var(--bad); }
+  html .pa-plan-badge { border-radius: var(--r-pill); }
+  html .pa-plan-badge--basico { background: var(--fill-2); color: var(--ink-600); }
+  html .pa-plan-badge--completo { background: var(--gold-soft); color: var(--gold-ink); }
+  html .pa-plan-badge--personalizado { background: var(--fill); color: var(--ink-500); }
 
   /* ════════ DOCUMENTOS (vista en pantalla) ════════ */
   html .cm-back, html .ek-back, html .vp-back {
