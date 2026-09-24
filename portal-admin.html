@@ -117,6 +117,13 @@ body { margin: 0; background: #F4F6FB; font-family: 'Segoe UI', Arial, sans-seri
 .pa-mod-badge--all { background: #F3F4F6; color: #6B7280; }
 .pa-mod-badge--none { background: #FEE2E2; color: #991B1B; }
 
+.pa-plan-badge { display: inline-block; font-size: 11px; font-weight: 800; padding: 4px 11px; border-radius: 20px; white-space: nowrap; }
+.pa-plan-badge--basico { background: #EEF2FF; color: #213C7D; }
+.pa-plan-badge--completo { background: #FEF3C7; color: #92400E; }
+.pa-plan-badge--personalizado { background: #F3F4F6; color: #6B7280; }
+.pa-act--upgrade { background: #FEF3C7; color: #92400E; }
+.pa-act--downgrade { background: #F3F4F6; color: #374151; }
+
 /* ── Modal ── */
 .pa-modal { position: fixed; inset: 0; background: rgba(33,60,125,.45); display: none; align-items: center; justify-content: center; z-index: 1000; padding: 20px; }
 .pa-modal.is-open { display: flex; }
@@ -324,6 +331,46 @@ body { margin: 0; background: #F4F6FB; font-family: 'Segoe UI', Arial, sans-seri
   var MODULOS_KEYS = ['laboratorio', 'pruebasRapidas', 'constancias', 'ekg', 'historialCalendario'];
   var MODULOS_LABELS = { laboratorio: 'Laboratorio', pruebasRapidas: 'Pruebas Ráp.', constancias: 'Constancias', ekg: 'EKG', historialCalendario: 'Calendario Historial' };
 
+  /* ── Plan (Básico/Completo) — ver Precios.html: Básico es solo el núcleo
+     (expedientes/consultas/caja/búsqueda, siempre incluidos) + Constancias;
+     Completo suma Laboratorio, Pruebas Rápidas, EKG y el Calendario de
+     Historial. Estos mapas son EXACTAMENTE lo que Subir/Bajar de plan
+     escribe en clinics/{id}.modulos — si algún día cambian los límites de
+     un plan en Precios.html, hay que actualizarlos acá también. */
+  var PLAN_MODULOS = {
+    basico:   { laboratorio: false, pruebasRapidas: false, constancias: true, ekg: false, historialCalendario: false },
+    completo: { laboratorio: true,  pruebasRapidas: true,  constancias: true, ekg: true,  historialCalendario: true }
+  };
+  var PLAN_LABELS = { basico: 'Básico', completo: 'Completo', personalizado: 'Personalizado' };
+  /* Mapa ausente (clínica legacy, ver setModulosForm) equivale a "todo
+     habilitado" en el resto del sistema, así que para efectos de este
+     badge cuenta como Completo. Cualquier combinación que no calce EXACTO
+     con ninguno de los dos presets queda como "Personalizado" (p. ej. una
+     clínica a la que le prendieron Laboratorio a mano sin subirla de plan). */
+  function detectPlan(c) {
+    if (!c.modulos) return 'completo';
+    var matchesBasico = MODULOS_KEYS.every(function (k) { return !!c.modulos[k] === PLAN_MODULOS.basico[k]; });
+    if (matchesBasico) return 'basico';
+    var matchesCompleto = MODULOS_KEYS.every(function (k) { return !!c.modulos[k] === PLAN_MODULOS.completo[k]; });
+    if (matchesCompleto) return 'completo';
+    return 'personalizado';
+  }
+  function planBadgeHtml(plan) {
+    return '<span class="pa-plan-badge pa-plan-badge--' + plan + '">' + PLAN_LABELS[plan] + '</span>';
+  }
+  function cambiarPlan(clinicId, tier) {
+    var c = _clinics.find(function (x) { return x.id === clinicId; });
+    var verbo = tier === 'completo' ? 'subir' : 'bajar';
+    if (!confirm('¿Seguro que deseas ' + verbo + ' "' + (c ? (c.nombre || c.id) : clinicId) + '" a plan ' + PLAN_LABELS[tier] + '? Esto reemplaza sus módulos contratados por los del plan ' + PLAN_LABELS[tier] + '.')) return;
+    db.collection('clinics').doc(clinicId).update({
+      modulos: PLAN_MODULOS[tier],
+      actualizadoEn: firebase.firestore.FieldValue.serverTimestamp()
+    }).then(function () {
+      toast('✅ Plan actualizado a ' + PLAN_LABELS[tier] + '.', 'ok');
+      loadClinics();
+    }).catch(function (err) { toast('Error: ' + err.message, 'err'); });
+  }
+
   /* ── Vistas ── */
   function showView(view) {
     $('pa-login-wrap').hidden = view !== 'login';
@@ -466,15 +513,19 @@ body { margin: 0; background: #F4F6FB; font-family: 'Segoe UI', Arial, sans-seri
     }
     var rows = _clinics.map(function (c) {
       var estado = c.estado || 'activa';
+      var plan = detectPlan(c);
       return '<tr>' +
         '<td><div class="pa-clinic-name">' + esc(c.nombre || '—') + '</div><div class="pa-clinic-id">' + esc(c.id) + '</div></td>' +
         '<td>' + esc(c.prefijoCodigoPaciente || '—') + '</td>' +
         '<td>' + esc(c.subdominio || '—') + '</td>' +
+        '<td>' + planBadgeHtml(plan) + '</td>' +
         '<td>' + modulosBadgesHtml(c) + '</td>' +
         '<td><span class="pa-status pa-status--' + esc(estado) + '">' + (estado === 'activa' ? 'Activa' : 'Suspendida') + '</span></td>' +
         '<td><div class="pa-row-actions">' +
           '<button class="pa-act pa-act--edit" data-edit-id="' + esc(c.id) + '">Editar</button>' +
           '<button class="pa-act pa-act--admin" data-admin-id="' + esc(c.id) + '" data-admin-name="' + esc(c.nombre || c.id) + '">+ Admin</button>' +
+          (plan !== 'completo' ? '<button class="pa-act pa-act--upgrade" data-plan-id="' + esc(c.id) + '" data-plan-to="completo">⬆ Subir a Completo</button>' : '') +
+          (plan !== 'basico' ? '<button class="pa-act pa-act--downgrade" data-plan-id="' + esc(c.id) + '" data-plan-to="basico">⬇ Bajar a Básico</button>' : '') +
           (estado === 'activa'
             ? '<button class="pa-act pa-act--suspend" data-toggle-id="' + esc(c.id) + '" data-toggle-to="suspendida">Suspender</button>'
             : '<button class="pa-act pa-act--activate" data-toggle-id="' + esc(c.id) + '" data-toggle-to="activa">Activar</button>') +
@@ -482,7 +533,7 @@ body { margin: 0; background: #F4F6FB; font-family: 'Segoe UI', Arial, sans-seri
       '</tr>';
     }).join('');
     $('pa-list').innerHTML =
-      '<table class="pa-table"><thead><tr><th>Clínica</th><th>Prefijo</th><th>Subdominio</th><th>Módulos</th><th>Estado</th><th>Acciones</th></tr></thead>' +
+      '<table class="pa-table"><thead><tr><th>Clínica</th><th>Prefijo</th><th>Subdominio</th><th>Plan</th><th>Módulos</th><th>Estado</th><th>Acciones</th></tr></thead>' +
       '<tbody>' + rows + '</tbody></table>';
 
     $('pa-list').querySelectorAll('[data-edit-id]').forEach(function (btn) {
@@ -493,6 +544,9 @@ body { margin: 0; background: #F4F6FB; font-family: 'Segoe UI', Arial, sans-seri
     });
     $('pa-list').querySelectorAll('[data-toggle-id]').forEach(function (btn) {
       btn.addEventListener('click', function () { toggleEstado(btn.dataset.toggleId, btn.dataset.toggleTo); });
+    });
+    $('pa-list').querySelectorAll('[data-plan-id]').forEach(function (btn) {
+      btn.addEventListener('click', function () { cambiarPlan(btn.dataset.planId, btn.dataset.planTo); });
     });
   }
 
