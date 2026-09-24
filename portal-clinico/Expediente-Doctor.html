@@ -6318,9 +6318,9 @@ summary.ed-meds-cat { list-style: revert; }
     var y = 18;
 
     /* Cabecera azul */
-    doc.setFillColor(33, 60, 125);
+    doc.setFillColor(36, 47, 64);
     doc.rect(0, 0, pageW, 24, 'F');
-    doc.setFillColor(253, 210, 44);
+    doc.setFillColor(204, 164, 59);
     doc.rect(0, 24, pageW, 2, 'F');
 
     doc.setTextColor(255, 255, 255);
@@ -6337,12 +6337,12 @@ summary.ed-meds-cat { list-style: revert; }
     var dg = paciente.datosGenerales || {};
 
     /* Bloque paciente */
-    doc.setTextColor(33, 60, 125);
+    doc.setTextColor(36, 47, 64);
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(11);
     doc.text('DATOS DEL PACIENTE', marginX, y);
     y += 5;
-    doc.setDrawColor(33, 60, 125);
+    doc.setDrawColor(36, 47, 64);
     doc.setLineWidth(0.5);
     doc.line(marginX, y, pageW - marginX, y);
     y += 5;
@@ -6368,9 +6368,9 @@ summary.ed-meds-cat { list-style: revert; }
     y += 4;
 
     /* Fecha consulta */
-    doc.setFillColor(253, 210, 44);
+    doc.setFillColor(204, 164, 59);
     doc.rect(marginX, y, pageW - marginX * 2, 8, 'F');
-    doc.setTextColor(33, 60, 125);
+    doc.setTextColor(36, 47, 64);
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(10);
     doc.text('FECHA DE CONSULTA: ' + new Date().toLocaleString('es-HN', {
@@ -6379,7 +6379,7 @@ summary.ed-meds-cat { list-style: revert; }
     y += 14;
 
     /* Signos vitales */
-    doc.setTextColor(33, 60, 125);
+    doc.setTextColor(36, 47, 64);
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(11);
     doc.text('SIGNOS VITALES', marginX, y);
@@ -6408,12 +6408,12 @@ summary.ed-meds-cat { list-style: revert; }
     /* Secciones de texto */
     function bloque(titulo, texto) {
       if (y > 250) { doc.addPage(); y = 20; }
-      doc.setTextColor(33, 60, 125);
+      doc.setTextColor(36, 47, 64);
       doc.setFont('helvetica', 'bold');
       doc.setFontSize(11);
       doc.text(titulo, marginX, y);
       y += 5;
-      doc.setDrawColor(33, 60, 125);
+      doc.setDrawColor(36, 47, 64);
       doc.line(marginX, y, pageW - marginX, y);
       y += 6;
       doc.setTextColor(50, 50, 50);
@@ -6605,9 +6605,9 @@ summary.ed-meds-cat { list-style: revert; }
     var marginX = 18;
     var y = 18;
 
-    doc.setFillColor(33, 60, 125);
+    doc.setFillColor(36, 47, 64);
     doc.rect(0, 0, pageW, 24, 'F');
-    doc.setFillColor(253, 210, 44);
+    doc.setFillColor(204, 164, 59);
     doc.rect(0, 24, pageW, 2, 'F');
 
     doc.setTextColor(255, 255, 255);
@@ -6623,12 +6623,12 @@ summary.ed-meds-cat { list-style: revert; }
     y = 36;
     var dg = paciente.datosGenerales || {};
 
-    doc.setTextColor(33, 60, 125);
+    doc.setTextColor(36, 47, 64);
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(11);
     doc.text('DATOS DEL PACIENTE', marginX, y);
     y += 5;
-    doc.setDrawColor(33, 60, 125);
+    doc.setDrawColor(36, 47, 64);
     doc.setLineWidth(0.5);
     doc.line(marginX, y, pageW - marginX, y);
     y += 5;
@@ -6649,9 +6649,9 @@ summary.ed-meds-cat { list-style: revert; }
     row('Edad', calcEdad(dg.fechaNacimiento));
     y += 4;
 
-    doc.setFillColor(253, 210, 44);
+    doc.setFillColor(204, 164, 59);
     doc.rect(marginX, y, pageW - marginX * 2, 8, 'F');
-    doc.setTextColor(33, 60, 125);
+    doc.setTextColor(36, 47, 64);
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(10);
     doc.text('FECHA: ' + new Date().toLocaleString('es-HN', {
@@ -6659,7 +6659,7 @@ summary.ed-meds-cat { list-style: revert; }
     }), marginX + 3, y + 5);
     y += 14;
 
-    doc.setTextColor(33, 60, 125);
+    doc.setTextColor(36, 47, 64);
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(11);
     doc.text('DETALLE', marginX, y);
@@ -6693,7 +6693,7 @@ summary.ed-meds-cat { list-style: revert; }
 
     y += 4;
     if (y > 255) { doc.addPage(); y = 20; }
-    doc.setDrawColor(33, 60, 125);
+    doc.setDrawColor(36, 47, 64);
     doc.line(pageW - marginX - 80, y, pageW - marginX, y);
     y += 6;
 
@@ -6714,7 +6714,7 @@ summary.ed-meds-cat { list-style: revert; }
 
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(12);
-    doc.setTextColor(33, 60, 125);
+    doc.setTextColor(36, 47, 64);
     doc.text('TOTAL:', pageW - marginX - 50, y);
     doc.text('L ' + total.toFixed(2), pageW - marginX, y, { align: 'right' });
 
@@ -8151,7 +8151,7 @@ summary.ed-meds-cat { list-style: revert; }
       return new Paragraph({
         heading: level || HeadingLevel.HEADING_2,
         spacing: { before: 240, after: 120 },
-        children: [new TextRun({ text: text, bold: true, color: '213C7D' })]
+        children: [new TextRun({ text: text, bold: true, color: '242F40' })]
       });
     }
     function P(label, value) {
@@ -8182,7 +8182,7 @@ summary.ed-meds-cat { list-style: revert; }
     var children = [
       new Paragraph({
         alignment: AlignmentType.CENTER,
-        children: [new TextRun({ text: (CLINIC.razonSocial || CLINIC.nombre || '—').toUpperCase(), bold: true, size: 32, color: '213C7D' })]
+        children: [new TextRun({ text: (CLINIC.razonSocial || CLINIC.nombre || '—').toUpperCase(), bold: true, size: 32, color: '242F40' })]
       }),
       new Paragraph({
         alignment: AlignmentType.CENTER,
@@ -8194,7 +8194,7 @@ summary.ed-meds-cat { list-style: revert; }
         spacing: { after: 300 },
         children: [
           new TextRun({ text: 'Código de paciente: ', bold: true }),
-          new TextRun({ text: p.codigoPaciente, bold: true, color: '213C7D' })
+          new TextRun({ text: p.codigoPaciente, bold: true, color: '242F40' })
         ]
       }),
       H('1. DATOS GENERALES'),
