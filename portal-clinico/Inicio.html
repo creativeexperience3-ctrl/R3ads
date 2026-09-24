@@ -86,6 +86,7 @@ body {
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <script src="firebase-init.js"></script>
+<script src="clinic-trial-gate.js"></script>
 <script src="r3ads-staff.js"></script>
 
 <script>
@@ -172,6 +173,7 @@ body {
     if (!user) { window.location.href = 'Auth.html?returnTo=Inicio.html'; return; }
     r3adsStaff.resolveClinicId(user, function (clinicId) {
       CLINIC_ID = clinicId;
+      r3adsTrialGate.cargar(CLINIC_ID).then(function (estado) { if (estado === 'prueba_bloqueada') r3adsTrialGate.mostrarBanner(); });
       cargarBrandingReal();
       r3adsStaff.checkStaff(user, CLINIC_ID, function (ok) {
         if (!ok) { mostrarRestringido(); return; }

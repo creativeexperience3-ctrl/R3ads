@@ -287,6 +287,27 @@
 }
 .auth-switch a:hover { color: var(--bronze); }
 
+/* ── Selector de plan (registro self-service) ── */
+.plan-picker { display: flex; gap: 10px; }
+.plan-card {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  border: 1.5px solid #E5E7EB;
+  border-radius: 10px;
+  padding: 12px 14px;
+  cursor: pointer;
+  transition: border-color .18s, box-shadow .18s;
+  position: relative;
+}
+.plan-card input { position: absolute; top: 12px; right: 12px; accent-color: var(--jet); }
+.plan-card:has(input:checked) { border-color: var(--jet); box-shadow: 0 0 0 3px rgba(36,47,64,.10); }
+.plan-card-name { font-size: 13px; font-weight: 700; color: var(--jet); }
+.plan-card-price { font-size: 18px; font-weight: 700; color: var(--jet); }
+.plan-card-price small { font-size: 12px; font-weight: 500; color: #9CA3AF; }
+.plan-card-desc { font-size: 11.5px; color: #6B7280; line-height: 1.35; }
+
 /* ── Divisor "o continúa con" ── */
 .auth-divider {
   display: flex;
@@ -489,10 +510,62 @@
             <input type="text" id="clinic-prefijo" class="auth-input" placeholder="CSR" maxlength="8" style="text-transform:uppercase">
             <div style="font-size:12px;color:#9CA3AF">Va al inicio del código de cada paciente, ej. CSR-A7K9M2.</div>
           </div>
+          <div class="auth-fgroup">
+            <label class="auth-label">Plan</label>
+            <div class="plan-picker">
+              <label class="plan-card">
+                <input type="radio" name="clinic-plan" value="basico" checked>
+                <span class="plan-card-name">Básico</span>
+                <span class="plan-card-price">$75<small>/mes</small></span>
+                <span class="plan-card-desc">Expedientes, caja, consultas y constancias.</span>
+              </label>
+              <label class="plan-card">
+                <input type="radio" name="clinic-plan" value="completo">
+                <span class="plan-card-name">Completo</span>
+                <span class="plan-card-price">$99<small>/mes</small></span>
+                <span class="plan-card-desc">Todo lo de Básico + laboratorio, pruebas rápidas y EKG.</span>
+              </label>
+            </div>
+            <div style="font-size:12px;color:#9CA3AF">7 días de prueba gratis. No se cobra nada hoy — el plan elegido se cobra hasta el día 8, y puedes cancelar antes.</div>
+          </div>
           <button type="submit" class="auth-submit" id="btn-create-clinic">
             <div class="auth-spinner"></div>
             <span class="auth-btn-text">Crear mi clínica</span>
           </button>
+        </form>
+
+        <!-- ── Confirmando activación (vuelta de PayPal) ──
+             Puente breve entre el redirect de PayPal y entrar al portal:
+             el webhook que activa la clínica puede tardar unos segundos
+             más que el propio redirect (carrera de tiempos observada en
+             pruebas) — esto evita mostrar el aviso de "vista previa" por
+             error mientras esa confirmación todavía viene en camino. -->
+        <div id="view-confirming" class="auth-view" style="align-items:center;text-align:center">
+          <div class="auth-spinner" style="display:block;width:28px;height:28px;border-color:rgba(36,47,64,.2);border-top-color:var(--jet)"></div>
+          <h1 style="font-size:20px">Confirmando tu activación…</h1>
+          <p style="font-size:14px;color:#6B7280;margin:0">Esto toma unos segundos.</p>
+        </div>
+
+        <!-- ── Activa tu prueba gratis (post-creación) ──
+             La clínica ya existe en 'prueba_bloqueada' — puede entrar y
+             mirar, pero firestore.rules le niega cualquier escritura real
+             hasta que esto la pase a 'activa' (ver paypalWebhook en
+             functions/index.js). "Prefiero solo mirar" la deja seguir sin
+             activar; puede volver a esta pantalla después. -->
+        <form id="view-activate" class="auth-view" novalidate>
+          <h1>Activa tu prueba gratis</h1>
+          <p style="font-size:14px;color:#4B5563;line-height:1.5;margin:0">
+            Tu clínica ya se creó. Para poder guardar pacientes, consultas y
+            todo lo demás, agrega una tarjeta con PayPal — hoy no se cobra
+            nada. Tienes <strong>7 días gratis</strong>; si no cancelas, el
+            día 8 se cobra el plan <strong id="activate-plan-name">Básico ($75/mes)</strong>.
+          </p>
+          <div id="activate-error" class="auth-error"></div>
+          <button type="button" class="auth-submit" id="btn-activate-trial">
+            <div class="auth-spinner"></div>
+            <span class="auth-btn-text">Continuar con PayPal</span>
+          </button>
+          <a href="#" class="auth-aux-link" id="link-skip-activate">Prefiero solo mirar por ahora</a>
         </form>
 
       </div>
@@ -533,6 +606,34 @@
   function afterAuthSuccess(user) {
     r3adsDb.collection('usuarios').doc(user.uid).get().then(function (snap) {
       if (snap.exists) {
+        // Vuelta de PayPal sin completar: no seguir de largo, dejar ver el aviso y ofrecer reintentar.
+        if (params.get('activacion') === 'cancelada') {
+          showNotice('No se completó la activación en PayPal. Puedes intentarlo de nuevo cuando quieras.');
+          switchView('activate');
+          return;
+        }
+        // Vuelta de PayPal exitosa: el webhook que pone estado:'activa'
+        // puede tardar unos segundos más que este redirect (visto en
+        // pruebas) — esperar aquí en vez de entrar de una vez y toparse
+        // con el aviso de "vista previa" por una clínica que en realidad
+        // ya se activó, solo que Firestore todavía no lo reflejaba.
+        if (params.get('activacion') === 'ok') {
+          var clinicIdEsperar = snap.data().clinicId;
+          switchView('confirming');
+          esperarActivacion(clinicIdEsperar, 0);
+          return;
+        }
+        // Enlace directo desde el aviso de "vista previa" dentro del portal
+        // (ver clinic-trial-gate.js) — alguien que ya tiene cuenta y clínica,
+        // pero eligió "solo mirar" antes, volviendo a activar más tarde.
+        if (params.get('activar') === '1') {
+          var clinicId = snap.data().clinicId;
+          r3adsDb.collection('clinics').doc(clinicId).get().then(function (clinicSnap) {
+            var plan = (clinicSnap.exists && clinicSnap.data().planElegido) || 'basico';
+            goToActivate(plan);
+          }).catch(function () { goToActivate('basico'); });
+          return;
+        }
         window.location.href = returnTo;
       } else {
         document.getElementById('clinic-email-display').textContent = user.email || '';
@@ -553,7 +654,7 @@
     document.querySelectorAll('.auth-view').forEach(function (v) {
       v.classList.toggle('is-active', v.id === 'view-' + name);
     });
-    document.getElementById('signup-hint').style.display = (name === 'register' || name === 'clinic') ? 'none' : '';
+    document.getElementById('signup-hint').style.display = (name === 'register' || name === 'clinic' || name === 'activate' || name === 'confirming') ? 'none' : '';
     clearMessages();
   }
   document.querySelectorAll('[data-view]').forEach(function (a) {
@@ -709,25 +810,83 @@
     var user = r3adsAuth.currentUser;
     if (!user) { showError('Tu sesión expiró. Vuelve a iniciar sesión.'); switchView('email'); return; }
 
+    var planEl = document.querySelector('input[name="clinic-plan"]:checked');
+    var plan = planEl ? planEl.value : 'basico';
+
     setLoading('btn-create-clinic', true);
     var crearClinica = firebase.functions().httpsCallable('crearClinicaSelfService');
     crearClinica({
       nombreClinica: nombreClinica,
       prefijoCodigoPaciente: prefijo,
-      nombreAdmin: user.displayName || ''
+      nombreAdmin: user.displayName || '',
+      plan: plan
     })
       .then(function () { return user.getIdToken(true); }) // trae el clinicId/rol recién asignados
-      .then(function () { window.location.href = returnTo; })
+      .then(function () { goToActivate(plan); })
       .catch(function (err) {
         setLoading('btn-create-clinic', false);
-        // already-exists: alguien ya completó esta alta (doble clic, back/forward) — no es un error real, solo entra.
+        // already-exists: alguien ya completó esta alta (doble clic, back/forward) — no es un error real, solo sigue.
         if (err.code === 'already-exists' || err.code === 'functions/already-exists') {
-          user.getIdToken(true).then(function () { window.location.href = returnTo; });
+          user.getIdToken(true).then(function () { goToActivate(plan); });
           return;
         }
         showError(err.message || 'No se pudo crear la clínica. Intenta de nuevo.');
       });
   });
+
+  /* ── Activa tu prueba gratis ──
+     La clínica ya existe en 'prueba_bloqueada'. Este paso llama a
+     crearSuscripcionPayPal (que arma la suscripción del plan elegido en
+     PayPal, con 7 días de prueba en $0) y redirige a PayPal para que
+     apruebe con tarjeta — la activación real la hace paypalWebhook
+     cuando PayPal confirma, nunca este redirect. */
+  /* Reintenta hasta 6 veces (1.5s aparte, ~9s en total) esperando a que
+     el webhook ponga estado:'activa'. Si se agota el tiempo, entra de
+     todos modos — el peor caso es ver el aviso de "vista previa" un rato
+     más, no un bloqueo permanente (el webhook ya está en camino). */
+  function esperarActivacion(clinicId, intento) {
+    r3adsDb.collection('clinics').doc(clinicId).get().then(function (snap) {
+      var activada = snap.exists && snap.data().estado === 'activa';
+      if (activada || intento >= 6) {
+        window.location.href = returnTo;
+      } else {
+        setTimeout(function () { esperarActivacion(clinicId, intento + 1); }, 1500);
+      }
+    }).catch(function () { window.location.href = returnTo; });
+  }
+
+  var PLAN_LABELS_ACTIVATE = { basico: 'Básico ($75/mes)', completo: 'Completo ($99/mes)' };
+  function goToActivate(plan) {
+    document.getElementById('activate-plan-name').textContent = PLAN_LABELS_ACTIVATE[plan] || PLAN_LABELS_ACTIVATE.basico;
+    switchView('activate');
+  }
+  document.getElementById('btn-activate-trial').addEventListener('click', function () {
+    clearMessages();
+    setLoading('btn-activate-trial', true);
+    var crearSuscripcion = firebase.functions().httpsCallable('crearSuscripcionPayPal');
+    crearSuscripcion({
+      returnUrl: window.location.origin + window.location.pathname + '?activacion=ok&returnTo=' + encodeURIComponent(returnTo),
+      cancelUrl: window.location.origin + window.location.pathname + '?activacion=cancelada'
+    })
+      .then(function (result) { window.location.href = result.data.approveUrl; })
+      .catch(function (err) {
+        setLoading('btn-activate-trial', false);
+        showError(err.message || 'No se pudo conectar con PayPal. Intenta de nuevo.');
+      });
+  });
+  document.getElementById('link-skip-activate').addEventListener('click', function (e) {
+    e.preventDefault();
+    window.location.href = returnTo;
+  });
+
+  /* Nota sobre la vuelta de PayPal exitosa (?activacion=ok): no necesita
+     manejo especial acá. El returnUrl que mandamos ya incluye
+     ?returnTo=..., así que la var `returnTo` de arriba lo lee de la URL
+     igual que en cualquier otra visita, y afterAuthSuccess() (disparado
+     por el onAuthStateChanged de siempre) redirige en cuanto confirma que
+     /usuarios/{uid} ya existe — que ya existía desde antes de ir a
+     PayPal. El caso "cancelada" se maneja dentro de afterAuthSuccess(),
+     arriba. */
 })();
 </script>
 
