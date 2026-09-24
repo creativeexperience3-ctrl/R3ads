@@ -470,6 +470,31 @@
           </div>
         </form>
 
+        <!-- ── Crea tu clínica (self-service) ──
+             Se muestra después de crear la cuenta (o del primer login con
+             Google) cuando esa cuenta todavía no tiene /usuarios/{uid} —
+             ver afterAuthSuccess() más abajo. Nunca aparece para quien ya
+             es staff de una clínica existente. -->
+        <form id="view-clinic" class="auth-view" novalidate>
+          <h1>Crea tu clínica</h1>
+          <div class="auth-email-chip">
+            <span id="clinic-email-display"></span>
+          </div>
+          <div class="auth-fgroup">
+            <label class="auth-label" for="clinic-name">Nombre de la clínica</label>
+            <input type="text" id="clinic-name" class="auth-input" placeholder="Clínica San Rafael" autocomplete="organization">
+          </div>
+          <div class="auth-fgroup">
+            <label class="auth-label" for="clinic-prefijo">Prefijo de código de paciente</label>
+            <input type="text" id="clinic-prefijo" class="auth-input" placeholder="CSR" maxlength="8" style="text-transform:uppercase">
+            <div style="font-size:12px;color:#9CA3AF">Va al inicio del código de cada paciente, ej. CSR-A7K9M2.</div>
+          </div>
+          <button type="submit" class="auth-submit" id="btn-create-clinic">
+            <div class="auth-spinner"></div>
+            <span class="auth-btn-text">Crear mi clínica</span>
+          </button>
+        </form>
+
       </div>
     </div>
   </div>
@@ -485,6 +510,7 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-functions-compat.js"></script>
 <script src="firebase-init.js"></script>
 
 <script>
@@ -498,17 +524,36 @@
   var returnTo  = params.get('returnTo') || 'Inicio.html';
   var currentEmail = ''; // recordado entre el paso de correo y el de contraseña
 
-  /* ── Si ya está logueado, redirigir ── */
+  /* ── Tras cualquier login/registro exitoso: ¿esta cuenta ya tiene
+     clínica? (doc /usuarios/{uid} — lectura de su propio doc, permitida
+     por regla aunque el doc no exista todavía). Si no tiene, es una
+     cuenta nueva (self-service): se le pide crear su clínica antes de
+     entrar. Si falla la lectura por lo que sea, no se bloquea el login —
+     se deja pasar al returnTo normal, que ya tiene sus propios guards. */
+  function afterAuthSuccess(user) {
+    r3adsDb.collection('usuarios').doc(user.uid).get().then(function (snap) {
+      if (snap.exists) {
+        window.location.href = returnTo;
+      } else {
+        document.getElementById('clinic-email-display').textContent = user.email || '';
+        switchView('clinic');
+      }
+    }).catch(function () {
+      window.location.href = returnTo;
+    });
+  }
+
+  /* ── Si ya está logueado, pasar por el mismo chequeo ── */
   r3adsAuth.onAuthStateChanged(function (user) {
-    if (user) window.location.href = returnTo;
+    if (user) afterAuthSuccess(user);
   });
 
-  /* ── Vistas: view-email (paso 1) → view-password (paso 2), o view-register ── */
+  /* ── Vistas: view-email (paso 1) → view-password (paso 2), view-register, o view-clinic ── */
   function switchView(name) {
     document.querySelectorAll('.auth-view').forEach(function (v) {
       v.classList.toggle('is-active', v.id === 'view-' + name);
     });
-    document.getElementById('signup-hint').style.display = (name === 'register') ? 'none' : '';
+    document.getElementById('signup-hint').style.display = (name === 'register' || name === 'clinic') ? 'none' : '';
     clearMessages();
   }
   document.querySelectorAll('[data-view]').forEach(function (a) {
@@ -593,7 +638,7 @@
     if (!pass) { showError('Ingresa tu contraseña.'); return; }
     setLoading('btn-login', true);
     r3adsAuth.signInWithEmailAndPassword(currentEmail, pass)
-      .then(function () { window.location.href = returnTo; })
+      .then(function (cred) { afterAuthSuccess(cred.user); })
       .catch(function (err) {
         setLoading('btn-login', false);
         showError(errMsg(err.code));
@@ -615,7 +660,7 @@
     btn.disabled = true;
     var provider = new firebase.auth.GoogleAuthProvider();
     r3adsAuth.signInWithPopup(provider)
-      .then(function () { window.location.href = returnTo; })
+      .then(function (result) { afterAuthSuccess(result.user); })
       .catch(function (err) {
         btn.disabled = false;
         if (err.code !== 'auth/popup-closed-by-user') {
@@ -637,11 +682,50 @@
     if (pass.length < 6) { showError('La contraseña debe tener al menos 6 caracteres.'); return; }
     setLoading('btn-register', true);
     r3adsAuth.createUserWithEmailAndPassword(email, pass)
-      .then(function (cred) { return cred.user.updateProfile({ displayName: name }); })
-      .then(function () { window.location.href = returnTo; })
+      .then(function (cred) {
+        return cred.user.updateProfile({ displayName: name }).then(function () { return cred.user; });
+      })
+      .then(function (user) { afterAuthSuccess(user); })
       .catch(function (err) {
         setLoading('btn-register', false);
         showError(errMsg(err.code));
+      });
+  });
+
+  /* ── Crea tu clínica (self-service) ──
+     Cuenta ya autenticada (recién creada, o login/Google sin clínica
+     todavía) sin /usuarios/{uid}: crea su propia clínica y se vuelve su
+     admin en un solo paso — ver crearClinicaSelfService en functions/index.js.
+     Firestore rules no dejan hacer esto desde el cliente a propósito (nadie
+     puede auto-nombrarse admin de una clínica que no existe); por eso pasa
+     por una Cloud Function con Admin SDK, no por un write directo. */
+  document.getElementById('view-clinic').addEventListener('submit', function (e) {
+    e.preventDefault();
+    clearMessages();
+    var nombreClinica = document.getElementById('clinic-name').value.trim();
+    var prefijo = document.getElementById('clinic-prefijo').value.trim();
+    if (!nombreClinica) { showError('Ingresa el nombre de tu clínica.'); return; }
+    if (!prefijo) { showError('Ingresa el prefijo de código de paciente.'); return; }
+    var user = r3adsAuth.currentUser;
+    if (!user) { showError('Tu sesión expiró. Vuelve a iniciar sesión.'); switchView('email'); return; }
+
+    setLoading('btn-create-clinic', true);
+    var crearClinica = firebase.functions().httpsCallable('crearClinicaSelfService');
+    crearClinica({
+      nombreClinica: nombreClinica,
+      prefijoCodigoPaciente: prefijo,
+      nombreAdmin: user.displayName || ''
+    })
+      .then(function () { return user.getIdToken(true); }) // trae el clinicId/rol recién asignados
+      .then(function () { window.location.href = returnTo; })
+      .catch(function (err) {
+        setLoading('btn-create-clinic', false);
+        // already-exists: alguien ya completó esta alta (doble clic, back/forward) — no es un error real, solo entra.
+        if (err.code === 'already-exists' || err.code === 'functions/already-exists') {
+          user.getIdToken(true).then(function () { window.location.href = returnTo; });
+          return;
+        }
+        showError(err.message || 'No se pudo crear la clínica. Intenta de nuevo.');
       });
   });
 })();

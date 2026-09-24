@@ -236,27 +236,24 @@ quedan fuera, ver el plan).
   sola vez con el Admin SDK / `firebase-admin` desde una consola local,
   nunca vía un endpoint que el cliente pueda alcanzar. Sin esto, el panel
   de administración R3ads (arriba) no deja entrar a nadie.
-- **Suscripción/cobro** (Stripe) y gating por `clinics/{clinicId}.estado`
-  (Fase 6).
-- **`clinicId` desde la sesión, no desde un archivo estático** (reemplaza a
-  la vieja Fase 5, ver "Dominio" arriba). Hoy `clinic-config.js` fija
-  `window.R3ADS_CLINIC_ID` en tiempo de build, lo cual solo funciona con una
-  clínica. Con un único dominio para todas, tiene que resolverse del usuario
-  logueado (custom claim `clinicId`, o `/usuarios/{uid}`), y el branding
-  (`window.R3ADS_CLINIC_FALLBACK`, usado en los documentos impresos) desde
-  `/clinics/{clinicId}`.
+- **Suscripción/cobro** (PayPal Subscriptions, decidido 2026-09-24 — no
+  Stripe, que no opera con empresas domiciliadas en Honduras) y gating por
+  `clinics/{clinicId}.estado` (Fase 6). Requiere además legalizar la empresa
+  ante el SAR (RTN de empresa + CAI) para poder facturar; mientras tanto se
+  opera con RTN personal y cuenta PayPal Business a título personal.
 
-  **Alcance real del cambio:** los ~77 usos de `CLINIC_ID` y ~44 de `CLINIC`
-  repartidos en las páginas **no cambian** — solo cambian las 8 líneas
-  `var CLINIC_ID = window.R3ADS_CLINIC_ID;` (una por página). El detalle
-  fino es de orden de ejecución: hoy esa línea corre al parsear el script,
-  y la sesión se resuelve después (async), así que la asignación tiene que
-  moverse adentro del AUTH GUARD de cada página, antes de su `boot()`.
+### ✅ Hecho — `clinicId` desde la sesión, no desde un archivo estático
+(2026-09-24; reemplaza a la vieja Fase 5, ver "Dominio" arriba). Las 11
+páginas ya resuelven `CLINIC_ID` con `r3adsStaff.resolveClinicId(user, cb)`
+dentro del AUTH GUARD (custom claim `clinicId` del token), no desde
+`window.R3ADS_CLINIC_ID` en tiempo de build — confirmado por grep, sin
+páginas pendientes. `window.R3ADS_CLINIC_FALLBACK` (de `clinic-config.js`)
+se sigue usando solo para el branding de arranque antes de que cargue el
+doc real de `/clinics/{clinicId}`, y para los documentos impresos.
 
-  **No bloquea nada hoy**: con una sola clínica (Demo) el archivo estático
-  funciona. Hace falta antes de dar de alta la clínica #2. Mientras tanto
-  sigue existiendo el `clinic-config.js` de la Clínica Demo commiteado a la
-  fuerza (ver `.gitignore`), que hay que sacar cuando esto exista.
+**Con esto ya no hay bloqueo técnico para dar de alta la clínica #2** — el
+paso que sigue es el piloto de la Fase 7 (alta real de 1-2 clínicas vía
+`portal-admin.html` y validar que no hay fuga de datos entre tenants).
 
 ### ⚠️ Gaps conocidos (revisar antes de la primera clínica de pago)
 - **Qué servicios registra Caja directo sin preclínica de enfermería**:
