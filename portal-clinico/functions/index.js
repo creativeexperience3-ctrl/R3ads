@@ -117,14 +117,20 @@ const PLAN_COMPLETO_MODULOS = {
   ekg: true,
   historialCalendario: true
 };
-// Mismos IDs que imprimió scripts/setup-paypal-plans.js al crear el
-// Producto y los Billing Plans en PayPal Sandbox (2026-09-24). Cambian
-// solo si se recrean los planes (ej. al pasar a Live) — no son secretos,
-// son identificadores públicos del catálogo de PayPal.
+// Mismos IDs que imprimió el script de setup al crear el Producto y los
+// Billing Plans en PayPal Sandbox. Cambian solo si se recrean los planes
+// (ej. al pasar a Live, o al cambiar de precio) — no son secretos, son
+// identificadores públicos del catálogo de PayPal.
+//
+// Precio Fundador (2026-09-24): Básico $40/mes, Completo $65/mes — para
+// las primeras clínicas que se registren. Los planes originales a
+// $75/$99 (P-4J942821SL9562706NK2UZCY / P-4KR215680L6922628NK2UZDA)
+// siguen existiendo en PayPal por si algún día se necesita volver a
+// ellos, pero ya no se usan para altas nuevas.
 const PAYPAL_API_BASE = 'https://api-m.sandbox.paypal.com'; // TODO Fase Live: https://api-m.paypal.com + nuevos IDs de plan
 const PAYPAL_PLAN_IDS = {
-  basico: 'P-4J942821SL9562706NK2UZCY',
-  completo: 'P-4KR215680L6922628NK2UZDA'
+  basico: 'P-8A723034MA5250942NK2VL7I',
+  completo: 'P-1KB25418PC537783SNK2VL7I'
 };
 
 function slugify(texto) {

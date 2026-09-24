@@ -64,6 +64,14 @@ a:focus-visible, .btn:focus-visible, .auth-tab:focus-visible { outline: 2px soli
   font-size: 13px; font-weight: 600; letter-spacing: 0.08em;
   text-transform: uppercase; color: var(--txt-4); margin-bottom: 10px;
 }
+.founder-banner {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-size: 13px; font-weight: 700; color: var(--jet);
+  background: rgba(204,164,59,.12); border: 1px solid rgba(204,164,59,.4);
+  border-radius: 20px; padding: 6px 16px; margin-bottom: 16px;
+}
+.page-header .founder-banner { justify-content: center; }
+.price-founder-note { font-size: 12px; font-weight: 700; color: var(--bronze); margin: 2px 0 0; }
 
 /* ── Botones ── */
 .btn {
@@ -315,6 +323,7 @@ a:focus-visible, .btn:focus-visible, .auth-tab:focus-visible { outline: 2px soli
 <div class="wrap">
   <div class="page-header reveal">
     <div class="eyebrow">Precios</div>
+    <div class="founder-banner">🚀 Precio Fundador — válido para las primeras clínicas que se unan a Ancla</div>
     <h1>Un precio por lo que tu clínica usa.</h1>
     <p>Sin costo de instalación, sin letra pequeña. Cambia de plan cuando tu clínica crezca.</p>
     <div class="billing-toggle" role="group" aria-label="Ciclo de facturación">
@@ -330,10 +339,11 @@ a:focus-visible, .btn:focus-visible, .auth-tab:focus-visible { outline: 2px soli
       <h3 class="price-name">Un consultorio</h3>
       <p class="price-desc">Para dejar el papel atrás sin pagar de más — lo esencial, bien hecho.</p>
       <div class="price-amount">
-        <span class="price-num" data-monthly="$75" data-annual="$62.50">$75</span>
+        <span class="price-num" data-monthly="$40" data-annual="$33.33">$40</span>
         <span class="price-period">/mes</span>
       </div>
-      <p class="price-note" data-monthly-note="Facturado mensual." data-annual-note="$750 al año, facturado una vez.">Facturado mensual.</p>
+      <p class="price-note" data-monthly-note="Facturado mensual." data-annual-note="$400 al año, facturado una vez.">Facturado mensual.</p>
+      <p class="price-founder-note">🚀 Precio Fundador</p>
       <ul class="price-list">
         <li><svg class="price-check" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8.5l3 3 7-7"/></svg>1 cuenta de Administrador</li>
         <li><svg class="price-check" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8.5l3 3 7-7"/></svg>Hasta 2 médicos</li>
@@ -353,10 +363,11 @@ a:focus-visible, .btn:focus-visible, .auth-tab:focus-visible { outline: 2px soli
       <h3 class="price-name">Completo</h3>
       <p class="price-desc">El expediente, laboratorio y caja de tu clínica, todo conectado.</p>
       <div class="price-amount">
-        <span class="price-num" data-monthly="$99" data-annual="$82.50">$99</span>
+        <span class="price-num" data-monthly="$65" data-annual="$54.17">$65</span>
         <span class="price-period">/mes</span>
       </div>
-      <p class="price-note" data-monthly-note="Facturado mensual." data-annual-note="$990 al año, facturado una vez.">Facturado mensual.</p>
+      <p class="price-note" data-monthly-note="Facturado mensual." data-annual-note="$650 al año, facturado una vez.">Facturado mensual.</p>
+      <p class="price-founder-note">🚀 Precio Fundador</p>
       <ul class="price-list">
         <li><svg class="price-check" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8.5l3 3 7-7"/></svg>Todo lo de Básico</li>
         <li><svg class="price-check" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8.5l3 3 7-7"/></svg>Hasta 2 Administradores</li>

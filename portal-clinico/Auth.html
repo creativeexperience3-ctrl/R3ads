@@ -288,6 +288,12 @@
 .auth-switch a:hover { color: var(--bronze); }
 
 /* ── Selector de plan (registro self-service) ── */
+.founder-badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 11.5px; font-weight: 700; color: var(--jet);
+  background: rgba(204,164,59,.12); border: 1px solid rgba(204,164,59,.4);
+  border-radius: 20px; padding: 4px 10px; margin-bottom: 8px; width: fit-content;
+}
 .plan-picker { display: flex; gap: 10px; }
 .plan-card {
   flex: 1;
@@ -512,17 +518,18 @@
           </div>
           <div class="auth-fgroup">
             <label class="auth-label">Plan</label>
+            <div class="founder-badge">🚀 Precio Fundador — por ser de los primeros en usar Ancla</div>
             <div class="plan-picker">
               <label class="plan-card">
                 <input type="radio" name="clinic-plan" value="basico" checked>
                 <span class="plan-card-name">Básico</span>
-                <span class="plan-card-price">$75<small>/mes</small></span>
+                <span class="plan-card-price">$40<small>/mes</small></span>
                 <span class="plan-card-desc">Expedientes, caja, consultas y constancias.</span>
               </label>
               <label class="plan-card">
                 <input type="radio" name="clinic-plan" value="completo">
                 <span class="plan-card-name">Completo</span>
-                <span class="plan-card-price">$99<small>/mes</small></span>
+                <span class="plan-card-price">$65<small>/mes</small></span>
                 <span class="plan-card-desc">Todo lo de Básico + laboratorio, pruebas rápidas y EKG.</span>
               </label>
             </div>
@@ -554,6 +561,7 @@
              activar; puede volver a esta pantalla después. -->
         <form id="view-activate" class="auth-view" novalidate>
           <h1>Activa tu prueba gratis</h1>
+          <div class="founder-badge">🚀 Precio Fundador — por ser de los primeros en usar Ancla</div>
           <p style="font-size:14px;color:#4B5563;line-height:1.5;margin:0">
             Tu clínica ya se creó. Para poder guardar pacientes, consultas y
             todo lo demás, agrega una tarjeta con PayPal — hoy no se cobra
@@ -855,7 +863,7 @@
     }).catch(function () { window.location.href = returnTo; });
   }
 
-  var PLAN_LABELS_ACTIVATE = { basico: 'Básico ($75/mes)', completo: 'Completo ($99/mes)' };
+  var PLAN_LABELS_ACTIVATE = { basico: 'Básico ($40/mes, Fundador)', completo: 'Completo ($65/mes, Fundador)' };
   function goToActivate(plan) {
     document.getElementById('activate-plan-name').textContent = PLAN_LABELS_ACTIVATE[plan] || PLAN_LABELS_ACTIVATE.basico;
     switchView('activate');
