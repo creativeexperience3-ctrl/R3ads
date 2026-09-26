@@ -365,6 +365,24 @@ html, body { margin: 0; }
           <a href="#" class="auth-aux-link" id="link-forgot">¿Olvidaste tu contraseña?</a>
         </form>
 
+        <!-- ── Confirmar reset de contraseña (llega por el link del correo,
+             ver actionCodeSettings en el handler de link-forgot) ── -->
+        <form id="view-reset" class="auth-view" novalidate>
+          <h1>Nueva contraseña</h1>
+          <div class="auth-email-chip">
+            <span id="reset-email-display">Verificando enlace…</span>
+          </div>
+          <div class="auth-fgroup">
+            <label class="auth-label" for="reset-pass">Nueva contraseña</label>
+            <input type="password" id="reset-pass" class="auth-input"
+              placeholder="Mínimo 6 caracteres" autocomplete="new-password">
+          </div>
+          <button type="submit" class="auth-submit" id="btn-reset-confirm">
+            <div class="auth-spinner"></div>
+            <span class="auth-btn-text">Guardar nueva contraseña</span>
+          </button>
+        </form>
+
         <!-- ── Registro ── -->
         <form id="view-register" class="auth-view" novalidate>
           <h1>Crear cuenta</h1>
@@ -414,6 +432,7 @@ html, body { margin: 0; }
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-check-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-functions-compat.js"></script>
 <script src="firebase-init.js"></script>
 
 <script>
@@ -429,8 +448,13 @@ html, body { margin: 0; }
     window.location.href = returnTo;
   }
 
+  /* No redirigir automáticamente si llegamos en medio de un reset de
+     contraseña (?mode=resetPassword) — de lo contrario una sesión vieja
+     cacheada en esta pestaña saltaría al returnTo antes de dejar completar
+     el cambio de contraseña. */
+  var esResetPassword = params.get('mode') === 'resetPassword' && !!params.get('oobCode');
   r3adsAuth.onAuthStateChanged(function (user) {
-    if (user) afterAuthSuccess(user);
+    if (user && !esResetPassword) afterAuthSuccess(user);
   });
 
   if (params.get('view') === 'register') switchView('register');
@@ -439,7 +463,7 @@ html, body { margin: 0; }
     document.querySelectorAll('.auth-view').forEach(function (v) {
       v.classList.toggle('is-active', v.id === 'view-' + name);
     });
-    document.getElementById('signup-hint').style.display = (name === 'register') ? 'none' : '';
+    document.getElementById('signup-hint').style.display = (name === 'register' || name === 'reset') ? 'none' : '';
     clearMessages();
   }
   document.querySelectorAll('[data-view]').forEach(function (a) {
@@ -507,28 +531,107 @@ html, body { margin: 0; }
   });
 
   /* ── Paso 2: contraseña ── */
+  /* ── Rate limiting de login (2026-09-26): 3 intentos fallidos por correo
+     → bloqueado 15 min — ver el comentario largo en functions/index.js. ── */
+  function checkLoginLock(email) {
+    return r3adsDb.collection('loginAttempts').doc(email.toLowerCase()).get()
+      .then(function (snap) {
+        if (!snap.exists) return { locked: false };
+        var d = snap.data();
+        if (d.lockedUntil && d.lockedUntil.toMillis() > Date.now()) {
+          return { locked: true, lockedUntil: d.lockedUntil.toMillis() };
+        }
+        return { locked: false };
+      })
+      .catch(function () { return { locked: false }; });
+  }
+  function mensajeBloqueo(lockedUntilMs) {
+    var mins = Math.max(1, Math.ceil((lockedUntilMs - Date.now()) / 60000));
+    return 'Demasiados intentos fallidos. Espera ' + mins + ' minuto(s), o restablece tu contraseña abajo.';
+  }
+
   document.getElementById('view-password').addEventListener('submit', function (e) {
     e.preventDefault();
     clearMessages();
     var pass = document.getElementById('step-pass').value;
     if (!pass) { showError('Ingresa tu contraseña.'); return; }
     setLoading('btn-login', true);
-    r3adsAuth.signInWithEmailAndPassword(currentEmail, pass)
-      .then(function (cred) { afterAuthSuccess(cred.user); })
-      .catch(function (err) {
+    checkLoginLock(currentEmail).then(function (estado) {
+      if (estado.locked) {
         setLoading('btn-login', false);
-        showError(errMsg(err.code));
-      });
+        showError(mensajeBloqueo(estado.lockedUntil));
+        return;
+      }
+      r3adsAuth.signInWithEmailAndPassword(currentEmail, pass)
+        .then(function (cred) {
+          firebase.functions().httpsCallable('registrarLoginExitoso')().catch(function () {});
+          afterAuthSuccess(cred.user);
+        })
+        .catch(function (err) {
+          firebase.functions().httpsCallable('registrarIntentoLogin')({ email: currentEmail })
+            .then(function (result) {
+              setLoading('btn-login', false);
+              if (result.data.locked) {
+                showError(mensajeBloqueo(result.data.lockedUntil));
+              } else {
+                showError(errMsg(err.code) + ' (' + result.data.intentosRestantes + ' intento(s) restante(s))');
+              }
+            })
+            .catch(function () {
+              setLoading('btn-login', false);
+              showError(errMsg(err.code));
+            });
+        });
+    });
   });
 
-  /* ── ¿Olvidaste tu contraseña? ── */
+  /* ── ¿Olvidaste tu contraseña? ── manda el link a esta misma página para
+     poder desbloquear el rate limit solo con un reset completado de
+     verdad — ver el comentario largo en portal-clinico/Auth.html. */
   document.getElementById('link-forgot').addEventListener('click', function (e) {
     e.preventDefault();
     if (!currentEmail) return;
-    r3adsAuth.sendPasswordResetEmail(currentEmail)
+    var actionCodeSettings = {
+      url: window.location.origin + window.location.pathname + '?mode=resetPassword',
+      handleCodeInApp: true
+    };
+    r3adsAuth.sendPasswordResetEmail(currentEmail, actionCodeSettings)
       .then(function () { showNotice('Te enviamos un correo a ' + currentEmail + ' para restablecer tu contraseña.'); })
       .catch(function (err) { showError(errMsg(err.code)); });
   });
+
+  /* ── Confirmar reset de contraseña (llega por el link del correo de arriba) ── */
+  if (esResetPassword) {
+    switchView('reset');
+    var oobCode = params.get('oobCode');
+    firebase.functions().httpsCallable('verificarCodigoReset')({ oobCode: oobCode })
+      .then(function () { return r3adsAuth.verifyPasswordResetCode(oobCode); })
+      .then(function (email) {
+        document.getElementById('reset-email-display').textContent = email;
+      })
+      .catch(function () {
+        showError('El enlace de recuperación no es válido o ya expiró. Pide uno nuevo desde "Iniciar sesión".');
+      });
+
+    document.getElementById('view-reset').addEventListener('submit', function (e) {
+      e.preventDefault();
+      clearMessages();
+      var newPass = document.getElementById('reset-pass').value;
+      if (!newPass || newPass.length < 6) { showError('La contraseña debe tener al menos 6 caracteres.'); return; }
+      setLoading('btn-reset-confirm', true);
+      r3adsAuth.confirmPasswordReset(oobCode, newPass)
+        .then(function () {
+          setLoading('btn-reset-confirm', false);
+          window.history.replaceState({}, '', window.location.pathname);
+          switchView('email');
+          showNotice('Contraseña actualizada. Ya puedes iniciar sesión.');
+        })
+        .catch(function (err) {
+          setLoading('btn-reset-confirm', false);
+          showError(errMsg(err.code));
+        });
+    });
+  }
 
   /* ── Google Sign-In (compartido entre correo y registro) ── */
   function handleGoogleSignIn(btn) {

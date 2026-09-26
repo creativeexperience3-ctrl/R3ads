@@ -470,6 +470,20 @@ service cloud.firestore {
       allow write: if isDoctor(request.resource.data.clinicId) || isAdmin(request.resource.data.clinicId);
     }
 
+    // ═══ /loginAttempts/{email} ══════════════════════════════════════
+    // Rate limiting de login (functions/index.js: registrarIntentoLogin,
+    // registrarLoginExitoso, verificarCodigoReset). Lectura pública a
+    // propósito — Auth.html necesita saber si un correo está bloqueado
+    // ANTES de que exista sesión (nadie ha iniciado sesión todavía en ese
+    // punto). Solo expone count/lockedUntil, nada sensible. Escritura
+    // SIEMPRE false: el conteo solo lo toca el Admin SDK desde las Cloud
+    // Functions de arriba — si el cliente pudiera escribir aquí, cualquiera
+    // resetearía su propio contador y el límite no protegería nada.
+    match /loginAttempts/{email} {
+      allow read: if true;
+      allow write: if false;
+    }
+
     // ═══ Bloqueo por defecto ═══════════════════════════════════════
     match /{document=**} {
       allow read, write: if false;

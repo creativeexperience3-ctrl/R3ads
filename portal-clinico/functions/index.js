@@ -400,3 +400,87 @@ exports.paypalWebhook = functions
       res.status(500).send('Error interno');
     }
   });
+
+/* ============================================================
+   Rate limiting de login (2026-09-26)
+
+   3 intentos fallidos por correo → bloqueado 15 minutos. El contador vive
+   en /loginAttempts/{email en minúsculas}, escrito SOLO desde acá (Admin
+   SDK) — firestore.rules le da lectura pública (para que Auth.html sepa
+   si debe bloquear el intento ANTES de llamar a Firebase) pero
+   `allow write: if false` a todo el mundo, porque si el cliente pudiera
+   escribir ahí, cualquiera podría resetear su propio contador y el
+   límite no serviría de nada.
+
+   Dos formas de desbloquear antes de que pasen los 15 minutos:
+   - registrarLoginExitoso: el login correcto ya prueba que es el dueño.
+   - verificarCodigoReset: completar de verdad un reset de contraseña
+     (no solo pedirlo — pedirlo no prueba nada, cualquiera puede pedir un
+     reset para el correo de otro). Por eso Auth.html manda el link de
+     reset a sí mismo (actionCodeSettings) en vez del hosted UI de
+     Firebase, y llama a esta función con el oobCode ANTES de confirmar
+     el cambio de contraseña.
+   ============================================================ */
+const LOGIN_LOCK_MINUTOS = 15;
+const LOGIN_INTENTOS_MAX = 3;
+
+function loginAttemptsRef(email) {
+  return db.collection('loginAttempts').doc(String(email || '').trim().toLowerCase());
+}
+
+exports.registrarIntentoLogin = functions.https.onCall(async (data, context) => {
+  const email = String((data && data.email) || '').trim().toLowerCase();
+  if (!email) throw new functions.https.HttpsError('invalid-argument', 'Falta el correo.');
+
+  const ref = loginAttemptsRef(email);
+  const ahora = Date.now();
+
+  return db.runTransaction(async (tx) => {
+    const snap = await tx.get(ref);
+    const d = snap.exists ? snap.data() : { count: 0, lockedUntil: null };
+
+    // Ya estaba bloqueado y el bloqueo sigue vigente — no sumar más, solo informar.
+    if (d.lockedUntil && d.lockedUntil.toMillis() > ahora) {
+      return { locked: true, lockedUntil: d.lockedUntil.toMillis(), intentosRestantes: 0 };
+    }
+
+    const nuevoCount = (d.lockedUntil && d.lockedUntil.toMillis() <= ahora ? 0 : (d.count || 0)) + 1;
+
+    if (nuevoCount >= LOGIN_INTENTOS_MAX) {
+      const lockedUntil = admin.firestore.Timestamp.fromMillis(ahora + LOGIN_LOCK_MINUTOS * 60 * 1000);
+      tx.set(ref, { count: 0, lockedUntil, updatedAt: admin.firestore.FieldValue.serverTimestamp() });
+      return { locked: true, lockedUntil: lockedUntil.toMillis(), intentosRestantes: 0 };
+    }
+
+    tx.set(ref, { count: nuevoCount, lockedUntil: null, updatedAt: admin.firestore.FieldValue.serverTimestamp() });
+    return { locked: false, lockedUntil: null, intentosRestantes: LOGIN_INTENTOS_MAX - nuevoCount };
+  });
+});
+
+exports.registrarLoginExitoso = functions.https.onCall(async (data, context) => {
+  if (!context.auth || !context.auth.token.email) return { ok: true };
+  await loginAttemptsRef(context.auth.token.email).delete().catch(() => {});
+  return { ok: true };
+});
+
+/* verificarCodigoReset: se llama ANTES de confirmPasswordReset en el cliente.
+   checkActionCode (a diferencia de applyActionCode) solo valida el código,
+   no lo consume — así el cliente puede seguir usándolo justo después para
+   completar el reset de verdad. Si el código no es válido (expirado, ya
+   usado, inventado), esto lanza y el cliente nunca llega a desbloquear
+   nada. */
+exports.verificarCodigoReset = functions.https.onCall(async (data, context) => {
+  const oobCode = String((data && data.oobCode) || '');
+  if (!oobCode) throw new functions.https.HttpsError('invalid-argument', 'Falta el código.');
+
+  let info;
+  try {
+    info = await admin.auth().checkActionCode(oobCode);
+  } catch (err) {
+    throw new functions.https.HttpsError('invalid-argument', 'El enlace de recuperación no es válido o ya expiró.');
+  }
+
+  const email = info.data && info.data.email;
+  if (email) await loginAttemptsRef(email).delete().catch(() => {});
+  return { ok: true, email: email || null };
+});

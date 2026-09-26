@@ -317,6 +317,7 @@ body { margin: 0; background: #F4F6FB; font-family: 'Segoe UI', Arial, sans-seri
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-check-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-functions-compat.js"></script>
 <script>
 (function () {
   var FIREBASE_CFG = {
@@ -418,15 +419,57 @@ body { margin: 0; background: #F4F6FB; font-family: 'Segoe UI', Arial, sans-seri
     });
   });
 
+  /* Rate limiting de login (2026-09-26): mismo mecanismo que Auth.html —
+     3 intentos fallidos por correo → bloqueado 15 min. Ver el comentario
+     largo en functions/index.js. Este panel no tiene flujo propio de
+     "olvidé mi contraseña" (usa el de Auth.html, mismo proyecto/cuentas),
+     así que solo necesita chequear/registrar, no la parte de reset. */
+  function checkLoginLock(email) {
+    return db.collection('loginAttempts').doc(email.toLowerCase()).get()
+      .then(function (snap) {
+        if (!snap.exists) return { locked: false };
+        var d = snap.data();
+        if (d.lockedUntil && d.lockedUntil.toMillis() > Date.now()) {
+          return { locked: true, lockedUntil: d.lockedUntil.toMillis() };
+        }
+        return { locked: false };
+      })
+      .catch(function () { return { locked: false }; });
+  }
+  function mensajeBloqueo(lockedUntilMs) {
+    var mins = Math.max(1, Math.ceil((lockedUntilMs - Date.now()) / 60000));
+    return 'Demasiados intentos fallidos. Espera ' + mins + ' minuto(s), o restablece tu contraseña desde Auth.html.';
+  }
+
   $('btn-login').addEventListener('click', function () {
     clearErr('login-error');
     var email = $('login-email').value.trim();
     var pass = $('login-pass').value;
     if (!email || !pass) { showErr('login-error', 'Completa correo y contraseña.'); return; }
     $('btn-login').disabled = true;
-    auth.signInWithEmailAndPassword(email, pass)
-      .catch(function (err) { showErr('login-error', 'No se pudo iniciar sesión: ' + err.message); })
-      .finally(function () { $('btn-login').disabled = false; });
+    checkLoginLock(email).then(function (estado) {
+      if (estado.locked) {
+        showErr('login-error', mensajeBloqueo(estado.lockedUntil));
+        $('btn-login').disabled = false;
+        return;
+      }
+      auth.signInWithEmailAndPassword(email, pass)
+        .then(function () {
+          firebase.functions().httpsCallable('registrarLoginExitoso')().catch(function () {});
+        })
+        .catch(function (err) {
+          firebase.functions().httpsCallable('registrarIntentoLogin')({ email: email })
+            .then(function (result) {
+              if (result.data.locked) {
+                showErr('login-error', mensajeBloqueo(result.data.lockedUntil));
+              } else {
+                showErr('login-error', 'No se pudo iniciar sesión: ' + err.message + ' (' + result.data.intentosRestantes + ' intento(s) restante(s))');
+              }
+            })
+            .catch(function () { showErr('login-error', 'No se pudo iniciar sesión: ' + err.message); });
+        })
+        .finally(function () { $('btn-login').disabled = false; });
+    });
   });
   $('btn-logout').addEventListener('click', function () { auth.signOut(); });
   $('btn-denied-logout').addEventListener('click', function () { auth.signOut(); });
