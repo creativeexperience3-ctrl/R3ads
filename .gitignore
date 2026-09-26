@@ -13,3 +13,7 @@ serviceAccountKey*.json
 
 # Config real por clínica (Fase 5) — no debe vivir en el repo compartido
 clinic-config.js
+
+# Herramientas locales de Claude Code (no forman parte del sitio)
+.claude/
+CLAUDE.md

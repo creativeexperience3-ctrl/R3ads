@@ -1,0 +1,573 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mi Cuenta · Portal Paciente</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+/* ── Portal Paciente · Auth ──
+   Producto separado de portal-clinico/ (ese es solo para staff). Mismos
+   tokens de marca de Ancla (Jet Black / Golden Bronze, IBM Plex), pero
+   sin ningún flujo de "crea tu clínica" — cualquier cuenta nueva aquí es
+   simplemente un paciente. ── */
+*, *::before, *::after { box-sizing: border-box; }
+
+:root {
+  --jet:      #242F40;
+  --jet-deep: #1c2534;
+  --bronze:   #CCA43B;
+  --bg:       #F6F6F7;
+  --card:     #FFFFFF;
+  --line:     rgba(36,47,64,0.12);
+}
+
+html, body { margin: 0; }
+.auth-page,
+.auth-page input,
+.auth-page button {
+  font-family: 'IBM Plex Sans', system-ui, sans-serif;
+}
+
+.auth-page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg);
+  color: var(--jet);
+}
+
+.auth-center {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 56px;
+  padding: 24px 40px 48px;
+  flex-wrap: wrap;
+}
+
+.auth-brand { display: flex; }
+.auth-promo-card {
+  width: 380px;
+  background: var(--jet);
+  border-radius: 22px;
+  padding: 40px 36px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 24px 48px -20px rgba(36,47,64,.45);
+}
+.auth-promo-card::after {
+  content: '';
+  position: absolute;
+  width: 260px; height: 260px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(204,164,59,.22), transparent 70%);
+  top: -110px; right: -90px; pointer-events: none;
+}
+.auth-promo-mark {
+  display: flex; align-items: center; gap: 9px;
+  margin-bottom: 32px; position: relative;
+}
+.auth-promo-mark span { font-size: 16px; font-weight: 700; color: #fff; letter-spacing: -0.01em; }
+.auth-promo-card h2 {
+  font-size: 26px;
+  font-weight: 700;
+  color: #fff;
+  line-height: 1.22;
+  letter-spacing: -0.01em;
+  margin: 0 0 22px;
+  position: relative;
+}
+.auth-promo-card h2 span { color: var(--bronze); }
+.auth-promo-benefits {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  position: relative;
+}
+.auth-promo-benefits li {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  color: rgba(255,255,255,.82);
+  font-size: 14px;
+  line-height: 1.4;
+}
+.auth-promo-benefits li::before {
+  content: '';
+  width: 6px; height: 6px; margin-top: 6px;
+  border-radius: 50%;
+  background: var(--bronze);
+  flex-shrink: 0;
+}
+
+.auth-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 16px;
+  flex-wrap: wrap;
+  padding: 24px 40px 0;
+}
+.auth-signup-hint { font-size: 13px; color: #6B7280; }
+.auth-signup-hint a { color: var(--jet); font-weight: 700; text-decoration: none; margin-left: 4px; }
+.auth-signup-hint a:hover { color: var(--bronze); }
+
+.auth-form-wrap { display: flex; }
+.auth-box {
+  width: 380px;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 22px;
+  box-shadow: 0 24px 48px -20px rgba(36,47,64,.18);
+  padding: 40px 36px;
+}
+
+.auth-view { display: none; flex-direction: column; gap: 18px; }
+.auth-view.is-active { display: flex; }
+.auth-view h1 {
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--jet);
+  margin: 0;
+  letter-spacing: -0.01em;
+}
+
+.auth-fgroup { display: flex; flex-direction: column; gap: 6px; }
+.auth-label { font-size: 13px; font-weight: 600; color: #374151; }
+.auth-input {
+  height: 48px;
+  border: 1.5px solid #E5E7EB;
+  border-radius: 10px;
+  padding: 0 14px;
+  font-family: inherit;
+  font-size: 15px;
+  color: #1F2937;
+  outline: none;
+  transition: border-color .18s, box-shadow .18s;
+  width: 100%;
+}
+.auth-input:focus { border-color: var(--jet); box-shadow: 0 0 0 3px rgba(36,47,64,.10); }
+
+.auth-email-chip {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  background: var(--bg);
+  border: 1.5px solid var(--line);
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-size: 14px;
+  color: var(--jet);
+  font-weight: 600;
+}
+.auth-email-chip button {
+  background: none;
+  border: none;
+  color: var(--jet);
+  font-weight: 700;
+  font-size: 13px;
+  text-decoration: underline;
+  cursor: pointer;
+  font-family: inherit;
+  padding: 0;
+  flex-shrink: 0;
+}
+.auth-email-chip button:hover { color: var(--bronze); }
+
+.auth-error {
+  background: #FEF2F2;
+  border: 1px solid #FCA5A5;
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-size: 13px;
+  color: #991B1B;
+  display: none;
+}
+.auth-error.is-visible { display: block; }
+.auth-notice {
+  background: #EFF6FF;
+  border: 1px solid #BFDBFE;
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-size: 13px;
+  color: #1E40AF;
+  display: none;
+}
+.auth-notice.is-visible { display: block; }
+
+.auth-submit {
+  height: 50px;
+  border: none;
+  border-radius: 10px;
+  background: var(--jet);
+  color: #fff;
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background-color .18s, transform .1s, box-shadow .2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 1px 2px rgba(36,47,64,.18);
+}
+.auth-submit:hover:not(:disabled) { background: var(--jet-deep); box-shadow: 0 10px 22px rgba(36,47,64,.28); }
+.auth-submit:active:not(:disabled) { transform: scale(.98); }
+.auth-submit:disabled { opacity: .6; cursor: wait; }
+
+.auth-spinner {
+  width: 18px; height: 18px;
+  border: 2px solid rgba(255,255,255,.35);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: auth-spin .7s linear infinite;
+  display: none;
+}
+.auth-submit.is-loading .auth-spinner { display: block; }
+.auth-submit.is-loading .auth-btn-text { display: none; }
+@keyframes auth-spin { to { transform: rotate(360deg); } }
+
+.auth-aux-link { text-align: center; font-size: 13px; color: var(--jet); text-decoration: none; font-weight: 600; }
+.auth-aux-link:hover { color: var(--bronze); }
+.auth-switch { text-align: center; font-size: 14px; color: #6B7280; }
+.auth-switch a { color: var(--jet); font-weight: 600; text-decoration: none; }
+.auth-switch a:hover { color: var(--bronze); }
+
+.auth-divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: #9CA3AF;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  margin: 2px 0;
+}
+.auth-divider::before, .auth-divider::after { content: ''; flex: 1; height: 1px; background: #E5E7EB; }
+
+.auth-google {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  height: 50px;
+  border: 1.5px solid #E5E7EB;
+  border-radius: 10px;
+  background: #fff;
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 600;
+  color: #374151;
+  cursor: pointer;
+  transition: border-color .18s, box-shadow .18s, background .18s;
+  width: 100%;
+}
+.auth-google:hover { border-color: #4285F4; box-shadow: 0 2px 10px rgba(66,133,244,.15); }
+.auth-google:disabled { opacity: .6; cursor: wait; }
+
+@media (max-width: 900px) { .auth-brand { display: none; } }
+@media (max-width: 480px) {
+  .auth-topbar { padding: 20px 16px 0; }
+  .auth-center { padding: 16px 16px 32px; }
+  .auth-box { width: 100%; padding: 28px 20px; }
+  .auth-view h1 { font-size: 24px; }
+}
+</style>
+</head>
+<body>
+
+<div class="auth-page">
+
+  <div class="auth-topbar">
+    <div class="auth-signup-hint" id="signup-hint">
+      ¿Es nuevo? <a href="#" data-view="register">Crea tu cuenta</a>
+    </div>
+  </div>
+
+  <div class="auth-center">
+
+  <div class="auth-brand">
+    <div class="auth-promo-card">
+      <div class="auth-promo-mark">
+        <svg width="18" height="22" viewBox="0 0 22 26" fill="none" aria-hidden="true">
+          <circle cx="11" cy="5" r="4" stroke="#ffffff" stroke-width="2"/>
+          <path d="M11 9v15M4 24h14" stroke="#ffffff" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+        <span>Ancla</span>
+      </div>
+      <h2>Tu historial médico,<br>en <span>un solo lugar</span></h2>
+      <ul class="auth-promo-benefits">
+        <li>Vincula el código que te dio tu clínica</li>
+        <li>Ve tus consultas, laboratorios y pruebas</li>
+        <li>Comparte tu expediente con tu familia</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="auth-main">
+    <div class="auth-form-wrap">
+      <div class="auth-box">
+
+        <div id="auth-error" class="auth-error"></div>
+        <div id="auth-notice" class="auth-notice"></div>
+
+        <!-- ── Paso 1: correo ── -->
+        <form id="view-email" class="auth-view is-active" novalidate>
+          <h1>Iniciar sesión</h1>
+          <div class="auth-fgroup">
+            <label class="auth-label" for="step-email">Correo electrónico</label>
+            <input type="email" id="step-email" class="auth-input"
+              placeholder="tu@correo.com" autocomplete="email" inputmode="email" autofocus>
+          </div>
+          <button type="submit" class="auth-submit" id="btn-next">
+            <div class="auth-spinner"></div>
+            <span class="auth-btn-text">Siguiente</span>
+          </button>
+          <div class="auth-divider">o inicia sesión con</div>
+          <button type="button" class="auth-google" id="btn-google-1">
+            <svg width="20" height="20" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+              <path fill="#4285F4" d="M44.5 20H24v8.5h11.8C34.7 33.9 29.9 37 24 37c-7.2 0-13-5.8-13-13s5.8-13 13-13c3.1 0 5.9 1.1 8.1 2.9l6.4-6.4C34.6 5.1 29.6 3 24 3 12.4 3 3 12.4 3 24s9.4 21 21 21c10.9 0 20-7.9 20-21 0-1.3-.2-2.7-.5-4z"/>
+              <path fill="#34A853" d="M6.3 14.7l7 5.1C15.1 16 19.3 13 24 13c3.1 0 5.9 1.1 8.1 2.9l6.4-6.4C34.6 5.1 29.6 3 24 3c-7.7 0-14.3 4.4-17.7 10.7z"/>
+              <path fill="#FBBC05" d="M24 45c5.8 0 10.8-1.9 14.5-5.2l-6.7-5.5C29.8 35.9 27 37 24 37c-5.8 0-10.7-3.9-12.4-9.2l-7 5.4C8 39.1 15.4 45 24 45z"/>
+              <path fill="#EA4335" d="M44.5 20H24v8.5h11.8c-.9 2.8-2.7 5.1-5.1 6.8l6.7 5.5C41.8 37 45 31 45 24c0-1.3-.2-2.7-.5-4z"/>
+            </svg>
+            Continuar con Google
+          </button>
+        </form>
+
+        <!-- ── Paso 2: contraseña ── -->
+        <form id="view-password" class="auth-view" novalidate>
+          <h1>Iniciar sesión</h1>
+          <div class="auth-email-chip">
+            <span id="pw-email-display"></span>
+            <button type="button" id="btn-change-email">Cambiar</button>
+          </div>
+          <div class="auth-fgroup">
+            <label class="auth-label" for="step-pass">Contraseña</label>
+            <input type="password" id="step-pass" class="auth-input"
+              placeholder="••••••••" autocomplete="current-password" autofocus>
+          </div>
+          <button type="submit" class="auth-submit" id="btn-login">
+            <div class="auth-spinner"></div>
+            <span class="auth-btn-text">Iniciar Sesión</span>
+          </button>
+          <a href="#" class="auth-aux-link" id="link-forgot">¿Olvidaste tu contraseña?</a>
+        </form>
+
+        <!-- ── Registro ── -->
+        <form id="view-register" class="auth-view" novalidate>
+          <h1>Crear cuenta</h1>
+          <div class="auth-fgroup">
+            <label class="auth-label" for="reg-name">Nombre completo</label>
+            <input type="text" id="reg-name" class="auth-input" autocomplete="name">
+          </div>
+          <div class="auth-fgroup">
+            <label class="auth-label" for="reg-email">Correo electrónico</label>
+            <input type="email" id="reg-email" class="auth-input"
+              placeholder="tu@correo.com" autocomplete="email" inputmode="email">
+          </div>
+          <div class="auth-fgroup">
+            <label class="auth-label" for="reg-pass">Contraseña</label>
+            <input type="password" id="reg-pass" class="auth-input"
+              placeholder="Mínimo 6 caracteres" autocomplete="new-password">
+          </div>
+          <button type="submit" class="auth-submit" id="btn-register">
+            <div class="auth-spinner"></div>
+            <span class="auth-btn-text">Crear Cuenta</span>
+          </button>
+          <div class="auth-divider">o continúa con</div>
+          <button type="button" class="auth-google" id="btn-google-2">
+            <svg width="20" height="20" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+              <path fill="#4285F4" d="M44.5 20H24v8.5h11.8C34.7 33.9 29.9 37 24 37c-7.2 0-13-5.8-13-13s5.8-13 13-13c3.1 0 5.9 1.1 8.1 2.9l6.4-6.4C34.6 5.1 29.6 3 24 3 12.4 3 3 12.4 3 24s9.4 21 21 21c10.9 0 20-7.9 20-21 0-1.3-.2-2.7-.5-4z"/>
+              <path fill="#34A853" d="M6.3 14.7l7 5.1C15.1 16 19.3 13 24 13c3.1 0 5.9 1.1 8.1 2.9l6.4-6.4C34.6 5.1 29.6 3 24 3c-7.7 0-14.3 4.4-17.7 10.7z"/>
+              <path fill="#FBBC05" d="M24 45c5.8 0 10.8-1.9 14.5-5.2l-6.7-5.5C29.8 35.9 27 37 24 37c-5.8 0-10.7-3.9-12.4-9.2l-7 5.4C8 39.1 15.4 45 24 45z"/>
+              <path fill="#EA4335" d="M44.5 20H24v8.5h11.8c-.9 2.8-2.7 5.1-5.1 6.8l6.7 5.5C41.8 37 45 31 45 24c0-1.3-.2-2.7-.5-4z"/>
+            </svg>
+            Continuar con Google
+          </button>
+          <div class="auth-switch">
+            ¿Ya tienes cuenta? <a href="#" data-view="email">Iniciar sesión</a>
+          </div>
+        </form>
+
+      </div>
+    </div>
+  </div>
+
+  </div>
+
+</div>
+
+<!-- Firebase compat SDK -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="firebase-init.js"></script>
+
+<script>
+(function () {
+  /* ── Destino tras login ── */
+  var params    = new URLSearchParams(window.location.search);
+  var returnTo  = params.get('returnTo') || 'Mi-Historial.html';
+  var currentEmail = '';
+
+  /* Sin flujo de "crea tu clínica": este portal es solo para pacientes.
+     Cualquier login/registro exitoso pasa directo al returnTo. */
+  function afterAuthSuccess(user) {
+    window.location.href = returnTo;
+  }
+
+  r3adsAuth.onAuthStateChanged(function (user) {
+    if (user) afterAuthSuccess(user);
+  });
+
+  if (params.get('view') === 'register') switchView('register');
+
+  function switchView(name) {
+    document.querySelectorAll('.auth-view').forEach(function (v) {
+      v.classList.toggle('is-active', v.id === 'view-' + name);
+    });
+    document.getElementById('signup-hint').style.display = (name === 'register') ? 'none' : '';
+    clearMessages();
+  }
+  document.querySelectorAll('[data-view]').forEach(function (a) {
+    a.addEventListener('click', function (e) {
+      e.preventDefault();
+      switchView(a.dataset.view);
+    });
+  });
+
+  function showError(msg) {
+    clearMessages();
+    var el = document.getElementById('auth-error');
+    el.textContent = msg;
+    el.classList.add('is-visible');
+  }
+  function showNotice(msg) {
+    clearMessages();
+    var el = document.getElementById('auth-notice');
+    el.textContent = msg;
+    el.classList.add('is-visible');
+  }
+  function clearMessages() {
+    var err = document.getElementById('auth-error');
+    err.textContent = ''; err.classList.remove('is-visible');
+    var notice = document.getElementById('auth-notice');
+    notice.textContent = ''; notice.classList.remove('is-visible');
+  }
+
+  function setLoading(id, on) {
+    var btn = document.getElementById(id);
+    if (!btn) return;
+    btn.classList.toggle('is-loading', on);
+    btn.disabled = on;
+  }
+
+  function errMsg(code) {
+    var map = {
+      'auth/user-not-found'            : 'No existe una cuenta con ese correo.',
+      'auth/wrong-password'            : 'Contraseña incorrecta. Intenta de nuevo.',
+      'auth/invalid-credential'        : 'Correo o contraseña incorrectos.',
+      'auth/email-already-in-use'      : 'Ese correo ya está registrado. Inicia sesión.',
+      'auth/invalid-email'             : 'El correo electrónico no es válido.',
+      'auth/weak-password'             : 'La contraseña es muy débil. Usa mínimo 6 caracteres.',
+      'auth/too-many-requests'         : 'Demasiados intentos. Espera unos minutos e intenta de nuevo.',
+      'auth/network-request-failed'    : 'Error de red. Verifica tu conexión a internet.',
+      'auth/popup-blocked'             : 'El navegador bloqueó la ventana de Google. Permite ventanas emergentes e intenta de nuevo.',
+      'auth/account-exists-with-different-credential': 'Ya existe una cuenta con ese correo. Inicia sesión con correo y contraseña.'
+    };
+    return map[code] || 'Ocurrió un error. Intenta de nuevo.';
+  }
+
+  /* ── Paso 1: correo → pasa a contraseña ── */
+  document.getElementById('view-email').addEventListener('submit', function (e) {
+    e.preventDefault();
+    var email = document.getElementById('step-email').value.trim();
+    if (!email) { showError('Ingresa tu correo electrónico.'); return; }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { showError('El correo electrónico no es válido.'); return; }
+    currentEmail = email;
+    document.getElementById('pw-email-display').textContent = email;
+    document.getElementById('step-pass').value = '';
+    switchView('password');
+  });
+  document.getElementById('btn-change-email').addEventListener('click', function () {
+    switchView('email');
+  });
+
+  /* ── Paso 2: contraseña ── */
+  document.getElementById('view-password').addEventListener('submit', function (e) {
+    e.preventDefault();
+    clearMessages();
+    var pass = document.getElementById('step-pass').value;
+    if (!pass) { showError('Ingresa tu contraseña.'); return; }
+    setLoading('btn-login', true);
+    r3adsAuth.signInWithEmailAndPassword(currentEmail, pass)
+      .then(function (cred) { afterAuthSuccess(cred.user); })
+      .catch(function (err) {
+        setLoading('btn-login', false);
+        showError(errMsg(err.code));
+      });
+  });
+
+  /* ── ¿Olvidaste tu contraseña? ── */
+  document.getElementById('link-forgot').addEventListener('click', function (e) {
+    e.preventDefault();
+    if (!currentEmail) return;
+    r3adsAuth.sendPasswordResetEmail(currentEmail)
+      .then(function () { showNotice('Te enviamos un correo a ' + currentEmail + ' para restablecer tu contraseña.'); })
+      .catch(function (err) { showError(errMsg(err.code)); });
+  });
+
+  /* ── Google Sign-In (compartido entre correo y registro) ── */
+  function handleGoogleSignIn(btn) {
+    clearMessages();
+    btn.disabled = true;
+    var provider = new firebase.auth.GoogleAuthProvider();
+    r3adsAuth.signInWithPopup(provider)
+      .then(function (result) { afterAuthSuccess(result.user); })
+      .catch(function (err) {
+        btn.disabled = false;
+        if (err.code !== 'auth/popup-closed-by-user') {
+          showError(errMsg(err.code));
+        }
+      });
+  }
+  document.getElementById('btn-google-1').addEventListener('click', function () { handleGoogleSignIn(this); });
+  document.getElementById('btn-google-2').addEventListener('click', function () { handleGoogleSignIn(this); });
+
+  /* ── Registro ── */
+  document.getElementById('view-register').addEventListener('submit', function (e) {
+    e.preventDefault();
+    clearMessages();
+    var name  = document.getElementById('reg-name').value.trim();
+    var email = document.getElementById('reg-email').value.trim();
+    var pass  = document.getElementById('reg-pass').value;
+    if (!name || !email || !pass) { showError('Por favor completa todos los campos.'); return; }
+    if (pass.length < 6) { showError('La contraseña debe tener al menos 6 caracteres.'); return; }
+    setLoading('btn-register', true);
+    r3adsAuth.createUserWithEmailAndPassword(email, pass)
+      .then(function (cred) {
+        return cred.user.updateProfile({ displayName: name }).then(function () { return cred.user; });
+      })
+      .then(function (user) { afterAuthSuccess(user); })
+      .catch(function (err) {
+        setLoading('btn-register', false);
+        showError(errMsg(err.code));
+      });
+  });
+
+})();
+</script>
+</body>
+</html>

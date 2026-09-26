@@ -122,6 +122,22 @@ service cloud.firestore {
         || get(/databases/$(database)/documents/clinics/$(clinicId)).data.modulos.get(nombre, false) == true;
     }
 
+    // accesoPaciente: ¿el usuario logueado es el dueño (ownerUid) del
+    // expediente `codigo`, o está en su compartidoCon? Usado por el portal
+    // separado web/portal-paciente/ para leer consultas/pruebas/laboratorio
+    // de SU propio expediente (o el de un familiar que le compartió acceso),
+    // sin necesitar clinicId — el paciente no tiene ese custom claim.
+    function accesoPaciente(codigo) {
+      return exists(/databases/$(database)/documents/expedientes/$(codigo))
+        && (
+          get(/databases/$(database)/documents/expedientes/$(codigo)).data.ownerUid == request.auth.uid
+          || (
+            get(/databases/$(database)/documents/expedientes/$(codigo)).data.compartidoCon is list
+            && request.auth.uid in get(/databases/$(database)/documents/expedientes/$(codigo)).data.compartidoCon
+          )
+        );
+    }
+
     // ═══ /clinics/{clinicId} ═══════════════════════════════════════
     // Ficha de la clínica: nombre, logo, colores, prefijo de código de
     // paciente, estado de suscripción ('activa' | 'suspendida').
@@ -206,6 +222,17 @@ service cloud.firestore {
       allow delete: if isAdmin(resource.data.clinicId) || isSuperAdmin();
     }
 
+    // ═══ /users/{uid} ══════════════════════════════════════════════
+    // Perfil del PACIENTE (códigos de expediente vinculados/compartidos),
+    // usado por el portal separado web/portal-paciente/ — no confundir con
+    // /usuarios/{uid}, que es el staff de una clínica. Sin clinicId: un
+    // paciente puede tener códigos de varias clínicas distintas en Ancla.
+    match /users/{userId} {
+      allow read: if (isAuth() && request.auth.uid == userId) || isSuperAdmin();
+      allow create, update: if isAuth() && request.auth.uid == userId;
+      allow delete: if isSuperAdmin();
+    }
+
     // ═══ /expedientes/{codigo} ═════════════════════════════════════
     // Document ID = código del paciente, con prefijo de la clínica
     // (ej. {prefijo}-A7K9M2, ver Fase 2 del plan).
@@ -219,10 +246,19 @@ service cloud.firestore {
       // null, y un error de evaluación en las reglas se trata como negado —
       // bloqueaba crear expedientes nuevos. No expone nada: no hay data que
       // devolver para un documento que no existe.
+      // Autoservicio de paciente (portal separado web/portal-paciente/,
+      // 2026-09-25): el código de 6 caracteres actúa como control de
+      // acceso, igual que en el CMG original — cualquier usuario
+      // autenticado que lo conozca puede leer ese expediente. En Ancla
+      // esto cruza clínicas (una sola base de Firestore multi-tenant), a
+      // diferencia de CMG que era una sola clínica — decisión consciente,
+      // aceptada igual que el modelo de CMG en vez de bloquear lectura por
+      // clinicId.
       allow read: if (resource == null && isAuth())
         || isDoctor(resource.data.clinicId)
         || isCaja(resource.data.clinicId)
-        || sameClinic(resource.data.clinicId);
+        || sameClinic(resource.data.clinicId)
+        || isAuth();
 
       // Solo el doctor de esa clínica crea expedientes, y el documento debe
       // nacer con el clinicId de quien lo crea (nunca "en blanco" ni de otra
@@ -230,12 +266,39 @@ service cloud.firestore {
       allow create: if isDoctor(request.resource.data.clinicId)
         && request.resource.data.clinicId == myClinic();
 
-      // Update — solo el doctor de esa clínica, sin permitir cambiar el
-      // clinicId del documento. (El producto no tiene autoservicio de
-      // paciente — se quitaron las ramas que permitían reclamar ownerUid o
-      // compartir vía compartidoCon/solicitudesAcceso junto con Mi-Historial.html.)
+      // Update:
+      //   - Doctor de esa clínica: siempre, sin poder cambiar el clinicId.
+      //   - Paciente sin owner asignado: puede reclamar (set ownerUid),
+      //     solo tocando los campos de vinculación.
+      //   - Paciente ya owner: solo puede tocar compartidoCon/solicitudesAcceso
+      //     (aprobar/rechazar solicitudes de acceso de terceros).
+      //   - Cualquier autenticado: solo puede agregarse a sí mismo a
+      //     solicitudesAcceso (pedir acceso compartido) o quitar su propia
+      //     solicitud — nunca tocar datos clínicos ni el clinicId.
+      // Restaurado del modelo original de CMG (Mi-Historial.html), con el
+      // invariante de clinicId agregado porque este Firestore es multi-tenant.
       allow update: if request.resource.data.clinicId == resource.data.clinicId
-        && isDoctor(resource.data.clinicId);
+        && (
+          isDoctor(resource.data.clinicId)
+          || (
+            isAuth()
+            && resource.data.ownerUid == null
+            && request.resource.data.ownerUid == request.auth.uid
+            && request.resource.data.diff(resource.data).affectedKeys()
+                .hasOnly(['ownerUid', 'ownerVinculado', 'ownerEmail', 'updatedAt'])
+          )
+          || (
+            isAuth()
+            && resource.data.ownerUid == request.auth.uid
+            && request.resource.data.diff(resource.data).affectedKeys()
+                .hasOnly(['compartidoCon', 'solicitudesAcceso', 'updatedAt'])
+          )
+          || (
+            isAuth()
+            && request.resource.data.diff(resource.data).affectedKeys()
+                .hasOnly(['solicitudesAcceso', 'updatedAt'])
+          )
+        );
 
       allow delete: if isDoctor(resource.data.clinicId);
     }
@@ -246,7 +309,12 @@ service cloud.firestore {
     match /consultas/{consultaId} {
       // resource == null: mismo bypass que en /expedientes — un get() a un
       // id que no existe todavía no debe tronar la evaluación de la regla.
-      allow read: if (resource == null && isAuth()) || isDoctor(resource.data.clinicId) || isCaja(resource.data.clinicId);
+      // Rama de paciente (portal-paciente/Mi-Historial.html): ve las
+      // consultas de SU expediente vinculado o compartido.
+      allow read: if (resource == null && isAuth())
+        || isDoctor(resource.data.clinicId)
+        || isCaja(resource.data.clinicId)
+        || (isAuth() && accesoPaciente(resource.data.codigoPaciente));
 
       allow create: if request.resource.data.clinicId == myClinic()
         && (
@@ -304,7 +372,12 @@ service cloud.firestore {
     match /resultadosPruebas/{resultadoId} {
       // resource == null: mismo bypass que en /expedientes — un get() a un
       // id que no existe todavía no debe tronar la evaluación de la regla.
-      allow read: if (resource == null && isAuth()) || isDoctor(resource.data.clinicId) || isCaja(resource.data.clinicId);
+      // Rama de paciente (portal-paciente/Mi-Historial.html): ve las
+      // pruebas rápidas de SU expediente vinculado o compartido.
+      allow read: if (resource == null && isAuth())
+        || isDoctor(resource.data.clinicId)
+        || isCaja(resource.data.clinicId)
+        || (isAuth() && accesoPaciente(resource.data.codigoPaciente));
       allow create, update: if (isDoctor(request.resource.data.clinicId) || isCaja(request.resource.data.clinicId))
         && moduloActivo(request.resource.data.clinicId, 'pruebasRapidas');
       allow delete: if isDoctor(resource.data.clinicId);
@@ -314,9 +387,29 @@ service cloud.firestore {
     match /examenesLaboratorio/{examenId} {
       // resource == null: mismo bypass que en /expedientes — un get() a un
       // id que no existe todavía no debe tronar la evaluación de la regla.
-      allow read: if (resource == null && isAuth()) || isDoctor(resource.data.clinicId) || isCaja(resource.data.clinicId);
-      allow create: if (isDoctor(request.resource.data.clinicId) || isCaja(request.resource.data.clinicId))
-        && moduloActivo(request.resource.data.clinicId, 'laboratorio');
+      // Rama de paciente: ve los exámenes de SU expediente vinculado o
+      // compartido (subidos por CMG/la clínica o por él mismo).
+      allow read: if (resource == null && isAuth())
+        || isDoctor(resource.data.clinicId)
+        || isCaja(resource.data.clinicId)
+        || (isAuth() && accesoPaciente(resource.data.codigoPaciente));
+      allow create: if (
+          (isDoctor(request.resource.data.clinicId) || isCaja(request.resource.data.clinicId))
+          && moduloActivo(request.resource.data.clinicId, 'laboratorio')
+        )
+        // Paciente sube su propio examen (portal-paciente/Mi-Historial.html):
+        // solo a un expediente al que ya tiene acceso, y el clinicId debe
+        // coincidir con el de ESE expediente (el paciente no elige clinicId
+        // a mano — lo toma del documento que ya está leyendo).
+        || (
+          isAuth()
+          && request.resource.data.subidoPorPaciente == true
+          && request.resource.data.codigoPaciente is string
+          && accesoPaciente(request.resource.data.codigoPaciente)
+          && request.resource.data.clinicId ==
+              get(/databases/$(database)/documents/expedientes/$(request.resource.data.codigoPaciente)).data.clinicId
+          && moduloActivo(request.resource.data.clinicId, 'laboratorio')
+        );
       allow update: if (isDoctor(resource.data.clinicId) || isCaja(resource.data.clinicId))
         && moduloActivo(resource.data.clinicId, 'laboratorio');
       allow delete: if isDoctor(resource.data.clinicId);
@@ -335,6 +428,21 @@ service cloud.firestore {
 
     // ═══ /constancias/{id} ═════════════════════════════════════════
     match /constancias/{constanciaId} {
+      // resource == null: mismo bypass que en /expedientes — un get() a un
+      // id que no existe todavía no debe tronar la evaluación de la regla.
+      allow read: if (resource == null && isAuth()) || isDoctor(resource.data.clinicId) || isCaja(resource.data.clinicId);
+      allow create, update: if isDoctor(request.resource.data.clinicId)
+        && moduloActivo(request.resource.data.clinicId, 'constancias');
+      allow delete: if isAdmin(resource.data.clinicId);
+    }
+
+    // ═══ /referencias/{id} ═══════════════════════════════════════════
+    // Referencia a Especialista o Emergencia, emitida desde la consulta, Caja
+    // o Historial (ver prepararReferencia() en Expediente-Doctor.html).
+    // Mismo patrón exacto que /constancias — reutiliza el módulo 'constancias'
+    // en vez de crear un módulo nuevo, porque es el mismo tipo de documento
+    // legal/administrativo emitido por el médico.
+    match /referencias/{referenciaId} {
       // resource == null: mismo bypass que en /expedientes — un get() a un
       // id que no existe todavía no debe tronar la evaluación de la regla.
       allow read: if (resource == null && isAuth()) || isDoctor(resource.data.clinicId) || isCaja(resource.data.clinicId);

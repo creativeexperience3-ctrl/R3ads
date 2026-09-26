@@ -38,22 +38,26 @@ service firebase.storage {
 
     // ─── Archivos de expedientes (PDFs de consulta, Word del expediente) ──
     // Estructura: /clinics/{clinicId}/expedientes/{codigo}/...
-    //   - Lectura: cualquier autenticado de ESA clínica (la URL es secreta y
-    //     se guarda en Firestore, protegido por firestore.rules).
+    //   - Lectura: cualquier autenticado (portal-paciente/Mi-Historial.html,
+    //     2026-09-25 — ese usuario no tiene el custom claim clinicId, igual
+    //     que en CMG: la URL es secreta y el acceso real lo controla
+    //     firestore.rules por código, no este archivo).
     //   - Escritura: solo doctores de esa clínica.
     match /clinics/{clinicId}/expedientes/{codigo}/{allPaths=**} {
-      allow read: if isAuth() && myClinic() == clinicId;
+      allow read: if isAuth();
       allow write: if isDoctor(clinicId);
     }
 
     // ─── Exámenes de laboratorio (PDFs externos) ──
     // Estructura: /clinics/{clinicId}/examenes-laboratorio/{folder}/...
-    //   - Lectura: cualquier autenticado de esa clínica.
-    //   - Escritura: doctores (cualquier carpeta) y pacientes (control real
-    //     de a qué expediente queda vinculado lo hace Firestore).
+    //   - Lectura: cualquier autenticado (mismo motivo que arriba).
+    //   - Escritura: doctores/caja de esa clínica, y pacientes subiendo su
+    //     propio examen desde portal-paciente/Mi-Historial.html (control
+    //     real de a qué expediente queda vinculado lo hace firestore.rules,
+    //     igual que en CMG).
     match /clinics/{clinicId}/examenes-laboratorio/{folder}/{allPaths=**} {
-      allow read: if isAuth() && myClinic() == clinicId;
-      allow write: if isAuth() && myClinic() == clinicId;
+      allow read: if isAuth();
+      allow write: if isAuth();
     }
 
     // ─── Cualquier otra ruta ──

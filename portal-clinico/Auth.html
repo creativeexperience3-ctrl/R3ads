@@ -377,6 +377,11 @@
 </head>
 <body>
 
+<!-- "Crea tu clínica" quedó con la sesión de la cuenta equivocada cacheada
+     (ej. el superadmin, que nunca debe terminar en este paso) — fijo en la
+     esquina para no reventar el ancho del auth-box con el chip de correo. -->
+<button type="button" id="btn-clinic-logout" style="display:none;position:fixed;top:16px;right:16px;z-index:50;background:#fff;border:1.5px solid #E5E7EB;color:#242F40;font-family:inherit;font-size:12px;font-weight:700;padding:8px 14px;border-radius:20px;cursor:pointer;box-shadow:0 2px 10px rgba(36,47,64,.08)">Cambiar de cuenta</button>
+
 <div class="auth-page">
 
   <div class="auth-topbar">
@@ -675,6 +680,7 @@
       v.classList.toggle('is-active', v.id === 'view-' + name);
     });
     document.getElementById('signup-hint').style.display = (name === 'register' || name === 'clinic' || name === 'activate' || name === 'confirming') ? 'none' : '';
+    document.getElementById('btn-clinic-logout').style.display = (name === 'clinic') ? '' : 'none';
     clearMessages();
   }
   document.querySelectorAll('[data-view]').forEach(function (a) {
@@ -749,6 +755,13 @@
   });
   document.getElementById('btn-change-email').addEventListener('click', function () {
     switchView('email');
+  });
+
+  /* ── "Crea tu clínica" quedó con la sesión de la cuenta equivocada
+     cacheada (ej. el superadmin, que nunca debe terminar en este paso) —
+     cerrar sesión aquí mismo en vez de forzar a borrar cookies a mano. ── */
+  document.getElementById('btn-clinic-logout').addEventListener('click', function () {
+    r3adsAuth.signOut().then(function () { switchView('email'); });
   });
 
   /* ── Paso 2: contraseña ── */

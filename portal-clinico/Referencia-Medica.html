@@ -1,0 +1,517 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Referencia Médica</title>
+<!-- Favicon: pendiente por clínica (Fase 5 del plan). -->
+<link rel="stylesheet" href="assets/portal-tokens.css">
+<style>
+*, *::before, *::after { box-sizing: border-box; }
+body { margin: 0; background: #F4F6FB; font-family: 'Segoe UI', Arial, sans-serif; min-height: 100vh; }
+
+/* ── Toolbar ── */
+.rm-toolbar {
+  max-width: 850px;
+  margin: 28px auto 16px;
+  padding: 0 28px;
+  display: flex;
+  gap: 10px;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.rm-back {
+  color: #242F40;
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 600;
+}
+.rm-back:hover { text-decoration: underline; }
+.rm-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+.rm-btn {
+  border: none;
+  border-radius: 8px;
+  padding: 10px 18px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+  transition: opacity .15s, transform .1s;
+}
+.rm-btn:hover { opacity: .9; }
+.rm-btn:active { transform: scale(.98); }
+.rm-btn-print { background: #059669; color: #fff; }
+
+/* ── Loading / Error ── */
+.rm-message {
+  max-width: 850px;
+  margin: 60px auto;
+  padding: 40px;
+  background: #fff;
+  border-radius: 12px;
+  text-align: center;
+  color: #4B5563;
+}
+.rm-spinner {
+  width: 28px; height: 28px;
+  border: 3px solid #E5E7EB;
+  border-top-color: #242F40;
+  border-radius: 50%;
+  animation: spin .7s linear infinite;
+  margin: 0 auto 16px;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ═══ HOJA DE REFERENCIA ═══ */
+.rm-container {
+  max-width: 850px;
+  margin: 0 auto;
+  padding: 0 28px 40px;
+}
+.rm-sheet {
+  background: #fff;
+  border: 1px solid #ddd;
+  padding: 0;
+  font-family: 'Segoe UI', Arial, sans-serif;
+  color: #242F40;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 2px 16px rgba(0,0,0,.06);
+}
+
+/* Header */
+.rm-header {
+  position: relative; z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 22px 32px;
+  border-bottom: 3px solid #CCA43B;
+  background: linear-gradient(180deg,#fafbff 0%,#fff 100%);
+}
+.rm-header .rm-h-name {
+  font-size: 18px;
+  font-weight: 900;
+  letter-spacing: .3px;
+  margin: 0;
+}
+.rm-header .rm-h-sub {
+  font-size: 12px;
+  color: #6B7280;
+  margin: 2px 0 0;
+  font-weight: 600;
+}
+.rm-tipo-badge {
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: .5px;
+  text-transform: uppercase;
+  padding: 6px 14px;
+  border-radius: 20px;
+  white-space: nowrap;
+}
+.rm-tipo-badge.tipo-emergencia { background: #FEE2E2; color: #991B1B; }
+.rm-tipo-badge.tipo-especialista { background: #DBEAFE; color: #1E40AF; }
+
+/* Body */
+.rm-body { position: relative; z-index: 1; padding: 28px 32px; }
+.rm-title {
+  text-align: center;
+  font-size: 22px;
+  font-weight: 900;
+  letter-spacing: 2px;
+  margin: 4px 0 22px;
+  color: #242F40;
+  border-top: 1px solid #E5E7EB;
+  border-bottom: 1px solid #E5E7EB;
+  padding: 12px 0;
+  background: #F9FAFB;
+}
+
+.rm-meta {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+  font-size: 12px;
+  color: #6B7280;
+  margin-bottom: 18px;
+}
+.rm-meta b { color: #242F40; }
+
+.rm-paragraph {
+  font-size: 14.5px;
+  line-height: 1.75;
+  color: #1F2937;
+  margin: 14px 0;
+  text-align: justify;
+}
+.rm-paragraph b { color: #242F40; }
+
+.rm-section-title {
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: .4px;
+  text-transform: uppercase;
+  color: #242F40;
+  margin: 20px 0 8px;
+  padding-bottom: 4px;
+  border-bottom: 1px solid #E5E7EB;
+}
+.rm-section-body {
+  font-size: 14px;
+  line-height: 1.6;
+  color: #1F2937;
+  white-space: pre-wrap;
+}
+
+.rm-vitals {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 10px 0;
+}
+.rm-vital-chip {
+  background: #F9FAFB;
+  border: 1px solid #E5E7EB;
+  border-radius: 8px;
+  padding: 6px 12px;
+  font-size: 13px;
+  color: #242F40;
+}
+.rm-vital-chip b { font-weight: 800; }
+
+.rm-details {
+  background: #F9FAFB;
+  border: 1px solid #E5E7EB;
+  border-radius: 8px;
+  padding: 14px 18px;
+  margin: 18px 0;
+  font-size: 14px;
+  color: #1F2937;
+}
+.rm-details-row {
+  display: flex;
+  justify-content: space-between;
+  border-bottom: 1px dashed #E5E7EB;
+  padding: 6px 0;
+  gap: 12px;
+}
+.rm-details-row:last-child { border-bottom: 0; }
+.rm-details-row b { color: #242F40; min-width: 180px; }
+
+/* Firma */
+.rm-firma {
+  margin-top: 60px;
+  display: flex;
+  justify-content: flex-end;
+}
+.rm-firma-box {
+  width: 280px;
+  text-align: center;
+  border-top: 1px solid #242F40;
+  padding-top: 6px;
+  font-size: 13px;
+  color: #242F40;
+}
+.rm-firma-box small {
+  display: block;
+  color: #6B7280;
+  font-size: 11px;
+  margin-top: 2px;
+}
+
+/* Pie de página */
+.rm-foot {
+  position: relative; z-index: 1;
+  padding: 16px 32px 24px;
+  border-top: 1px solid #E5E7EB;
+  background: #F9FAFB;
+  text-align: center;
+  font-size: 11px;
+  color: #6B7280;
+  line-height: 1.6;
+}
+.rm-foot b { color: #242F40; }
+
+/* Print */
+@media print {
+  body { background: #fff; }
+  .no-print { display: none !important; }
+  .rm-toolbar { display: none; }
+  .rm-container { padding: 0; max-width: none; }
+  .rm-sheet { border: none; box-shadow: none; }
+  @page { size: A4; margin: 16mm; }
+}
+</style>
+</head>
+<body>
+
+<!-- Toolbar -->
+<div class="rm-toolbar no-print">
+  <a href="Expediente-Doctor.html" class="rm-back">← Volver al expediente</a>
+  <div class="rm-actions">
+    <button class="rm-btn rm-btn-print" id="rm-btn-print">Imprimir</button>
+  </div>
+</div>
+
+<!-- Loading / Error placeholder -->
+<div id="rm-loading" class="rm-message">
+  <div class="rm-spinner"></div>
+  Cargando referencia...
+</div>
+
+<!-- Referencia -->
+<div id="rm-container" class="rm-container" style="display:none">
+  <div class="rm-sheet" id="rm-sheet">
+
+    <!-- Header -->
+    <div class="rm-header">
+      <div>
+        <p class="rm-h-name" id="rm-h-name">—</p>
+        <p class="rm-h-sub" id="rm-h-sub">—</p>
+      </div>
+      <span class="rm-tipo-badge" id="rm-tipo-badge">—</span>
+    </div>
+
+    <div class="rm-body">
+      <h2 class="rm-title" id="rm-title">REFERENCIA MÉDICA</h2>
+
+      <div class="rm-meta">
+        <div>N° Referencia: <b id="rm-num">—</b></div>
+        <div><span id="rm-ciudad">—</span>, <b id="rm-fecha-emision">—</b></div>
+      </div>
+
+      <p class="rm-paragraph">
+        Se refiere al/la paciente <b id="rm-paciente-nombre">—</b>,
+        identificado(a) con <b id="rm-paciente-tipoid">documento</b> N° <b id="rm-paciente-dni">—</b>,
+        de <b id="rm-paciente-edad">—</b>, evaluado(a) en esta institución el día
+        <b id="rm-fecha-consulta">—</b>, a:
+      </p>
+
+      <div class="rm-details">
+        <div class="rm-details-row"><b>Destino:</b> <span id="rm-destino">—</span></div>
+      </div>
+
+      <div id="rm-app-block">
+        <div class="rm-section-title">Antecedentes patológicos personales</div>
+        <div class="rm-section-body" id="rm-app">—</div>
+      </div>
+
+      <div class="rm-section-title">Historia de la enfermedad actual</div>
+      <div class="rm-section-body" id="rm-motivo">—</div>
+
+      <div id="rm-examen-block">
+        <div class="rm-section-title">Examen físico / hallazgos</div>
+        <div class="rm-section-body" id="rm-examen">—</div>
+      </div>
+
+      <div id="rm-vitals-block">
+        <div class="rm-section-title">Signos vitales</div>
+        <div class="rm-vitals" id="rm-vitals"></div>
+      </div>
+
+      <div class="rm-section-title">Impresión diagnóstica / sospecha</div>
+      <div class="rm-section-body" id="rm-diagnostico">—</div>
+
+      <div id="rm-tratamiento-block">
+        <div class="rm-section-title">Tratamiento ya iniciado</div>
+        <div class="rm-section-body" id="rm-tratamiento">—</div>
+      </div>
+
+      <div id="rm-recomendacion-block">
+        <div class="rm-section-title">Recomendación</div>
+        <div class="rm-section-body" id="rm-recomendacion">—</div>
+      </div>
+
+      <!-- Firma -->
+      <div class="rm-firma">
+        <div class="rm-firma-box">
+          <b id="rm-medico-nombre">—</b>
+          <small id="rm-medico-sub">Médico tratante</small>
+        </div>
+      </div>
+    </div>
+
+    <!-- Pie: datos de la clínica, ver clinic-config.js -->
+    <div class="rm-foot">
+      <p>
+        <b id="rm-foot-razon">—</b> · <span id="rm-foot-correo">—</span> · <span id="rm-foot-web">—</span>
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- Firebase + lógica -->
+<script src="clinic-config.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="firebase-init.js"></script>
+<script src="clinic-trial-gate.js"></script>
+<script src="r3ads-staff.js"></script>
+<script src="clinic-modules.js"></script>
+<script>
+(function(){
+  var CLINIC_ID = null; // se resuelve por sesión en el AUTH GUARD (r3adsStaff.resolveClinicId)
+  var CLINIC = window.R3ADS_CLINIC_FALLBACK || {};
+  function $(id){ return document.getElementById(id); }
+
+  function pintarBranding() {
+    $('rm-h-name').textContent = (CLINIC.razonSocial || CLINIC.nombre || '—').toUpperCase();
+    $('rm-h-sub').textContent = [CLINIC.direccion, CLINIC.telefono].filter(Boolean).join(' · ') || '—';
+    $('rm-ciudad').textContent = CLINIC.ciudad || '—';
+    $('rm-medico-sub').textContent = 'Médico tratante · ' + (CLINIC.nombre || 'la clínica');
+    $('rm-foot-razon').textContent = CLINIC.razonSocial || CLINIC.nombre || '—';
+    $('rm-foot-correo').textContent = CLINIC.correo || '—';
+    $('rm-foot-web').textContent = CLINIC.sitioWeb || '—';
+  }
+  pintarBranding();
+  function cargarBrandingReal() {
+    if (!CLINIC_ID) return;
+    r3adsDb.collection('clinics').doc(CLINIC_ID).get().then(function (snap) {
+      if (!snap.exists) return;
+      Object.assign(CLINIC, snap.data());
+      pintarBranding();
+    }).catch(function () {});
+  }
+  function esc(s){ return (s||'').toString().replace(/[&<>]/g, function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;'}[c];}); }
+  function fmtFecha(s){
+    if (!s) return '—';
+    try {
+      var d = new Date(s + 'T00:00:00');
+      if (isNaN(d.getTime())) d = new Date(s);
+      return d.toLocaleDateString('es-HN', { day:'2-digit', month:'long', year:'numeric' });
+    } catch(e){ return s; }
+  }
+  function fechaHoyLocal(){
+    var d = new Date();
+    var pad = function (n) { return String(n).padStart(2, '0'); };
+    return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
+  }
+  function calcEdad(fechaNac){
+    if (!fechaNac) return '';
+    try {
+      var d = new Date(fechaNac);
+      var hoy = new Date();
+      var e = hoy.getFullYear() - d.getFullYear();
+      var m = hoy.getMonth() - d.getMonth();
+      if (m < 0 || (m === 0 && hoy.getDate() < d.getDate())) e--;
+      return e + ' años';
+    } catch(err){ return ''; }
+  }
+
+  function getParam(name){
+    var m = new RegExp('[?&]' + name + '=([^&]+)').exec(window.location.search);
+    return m ? decodeURIComponent(m[1]) : null;
+  }
+
+  function tipoIdLabel(tipo){
+    if (!tipo) return 'documento de identidad';
+    if (tipo === 'dni') return 'DNI';
+    if (tipo === 'residencia') return 'Carnet de Residencia';
+    if (tipo === 'extranjera') return 'Identidad Extranjera';
+    return tipo;
+  }
+
+  /* Oculta una sección opcional entera (título + cuerpo) cuando no hay dato */
+  function toggleBlock(blockId, tieneContenido) {
+    var el = $(blockId);
+    if (el) el.style.display = tieneContenido ? '' : 'none';
+  }
+
+  function render(data){
+    $('rm-num').textContent = data.numero || data._id || '—';
+    $('rm-fecha-emision').textContent = fmtFecha((data.emitidaEn || fechaHoyLocal()).slice(0,10));
+    $('rm-paciente-nombre').textContent = data.pacienteNombre || '—';
+    $('rm-paciente-tipoid').textContent = tipoIdLabel(data.pacienteTipoId);
+    $('rm-paciente-dni').textContent = data.pacienteDNI || '—';
+    $('rm-paciente-edad').textContent = data.pacienteEdad || calcEdad(data.pacienteFechaNacimiento) || '—';
+    $('rm-fecha-consulta').textContent = fmtFecha(data.fechaConsulta);
+    $('rm-destino').textContent = data.destino || '—';
+
+    var esEmergencia = (data.tipo || '').toLowerCase() === 'emergencia';
+    $('rm-title').textContent = 'REFERENCIA A ' + (data.tipo || 'ESPECIALISTA').toUpperCase();
+    var badge = $('rm-tipo-badge');
+    badge.textContent = data.tipo || 'Especialista';
+    badge.className = 'rm-tipo-badge ' + (esEmergencia ? 'tipo-emergencia' : 'tipo-especialista');
+
+    $('rm-app').textContent = data.antecedentes || '—';
+    toggleBlock('rm-app-block', !!data.antecedentes);
+
+    $('rm-motivo').textContent = data.motivo || '—';
+
+    $('rm-examen').textContent = data.examenFisico || '—';
+    toggleBlock('rm-examen-block', !!data.examenFisico);
+
+    var sv = data.signosVitales || {};
+    var vitalsHtml = [
+      sv.pa   ? '<div class="rm-vital-chip"><b>PA:</b> ' + esc(sv.pa) + '</div>' : '',
+      sv.fc   ? '<div class="rm-vital-chip"><b>FC:</b> ' + esc(sv.fc) + '</div>' : '',
+      sv.fr   ? '<div class="rm-vital-chip"><b>FR:</b> ' + esc(sv.fr) + '</div>' : '',
+      sv.temp ? '<div class="rm-vital-chip"><b>Temp:</b> ' + esc(sv.temp) + '</div>' : ''
+    ].join('');
+    $('rm-vitals').innerHTML = vitalsHtml;
+    toggleBlock('rm-vitals-block', !!vitalsHtml);
+
+    $('rm-diagnostico').textContent = data.diagnostico || '—';
+
+    $('rm-tratamiento').textContent = data.tratamiento || '—';
+    toggleBlock('rm-tratamiento-block', !!data.tratamiento);
+
+    $('rm-recomendacion').textContent = data.recomendacion || '—';
+    toggleBlock('rm-recomendacion-block', !!data.recomendacion);
+
+    $('rm-medico-nombre').textContent = data.emitidaPor || '—';
+
+    $('rm-loading').style.display = 'none';
+    $('rm-container').style.display = '';
+    document.title = 'Referencia ' + (data.pacienteNombre || '') + ' · ' + (CLINIC.nombre || 'Portal Clínico');
+  }
+
+  function showError(msg){
+    $('rm-loading').innerHTML = '<div style="color:#b91c1c;font-weight:700">' + esc(msg) + '</div><div style="margin-top:8px;font-size:13px">' +
+      '<a href="Expediente-Doctor.html" class="rm-back">← Volver al expediente</a></div>';
+  }
+
+  /* Imprimir */
+  $('rm-btn-print').addEventListener('click', function(){ window.print(); });
+
+  /* Inicializar */
+  var id = getParam('id');
+  if (!id) { showError('No se especificó la referencia (parámetro ?id= ausente).'); return; }
+
+  r3adsAuth.onAuthStateChanged(function(user){
+    if (!user) { showError('Sesión requerida. Inicia sesión.'); return; }
+    r3adsStaff.resolveClinicId(user, function (clinicId) {
+      if (!clinicId) { showError('Sesión requerida. Inicia sesión.'); return; }
+      CLINIC_ID = clinicId;
+      r3adsTrialGate.cargar(CLINIC_ID).then(function (estado) { if (estado === 'prueba_bloqueada') r3adsTrialGate.mostrarBanner(); });
+      cargarBrandingReal();
+      r3adsModulos.cargar(CLINIC_ID).then(function () {
+        if (!r3adsModulos.exigir('constancias', 'Referencias Médicas')) return;
+        cargarReferencia();
+      });
+    });
+  });
+
+  function cargarReferencia() {
+    r3adsDb.collection('referencias').doc(id).get()
+      .then(function(snap){
+        if (!snap.exists) { showError('La referencia no existe o fue eliminada.'); return; }
+        var d = snap.data();
+        d._id = snap.id;
+        if (d.clinicId && d.clinicId !== CLINIC_ID) { showError('Esta referencia no pertenece a esta clínica.'); return; }
+        render(d);
+      })
+      .catch(function(err){
+        showError('Error al cargar la referencia: ' + err.message);
+      });
+  }
+})();
+</script>
+
+</body>
+</html>

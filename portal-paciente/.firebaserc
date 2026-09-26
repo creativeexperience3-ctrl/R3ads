@@ -1,0 +1,14 @@
+{
+  "projects": {
+    "default": "r3ads-clinic-crm"
+  },
+  "targets": {
+    "r3ads-clinic-crm": {
+      "hosting": {
+        "paciente": [
+          "ancla-paciente"
+        ]
+      }
+    }
+  }
+}

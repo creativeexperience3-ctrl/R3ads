@@ -127,10 +127,15 @@ const PLAN_COMPLETO_MODULOS = {
 // $75/$99 (P-4J942821SL9562706NK2UZCY / P-4KR215680L6922628NK2UZDA)
 // siguen existiendo en PayPal por si algún día se necesita volver a
 // ellos, pero ya no se usan para altas nuevas.
-const PAYPAL_API_BASE = 'https://api-m.sandbox.paypal.com'; // TODO Fase Live: https://api-m.paypal.com + nuevos IDs de plan
+//
+// Pasado a LIVE (2026-09-26): IDs de Sandbox (P-8A723034MA5250942NK2VL7I /
+// P-1KB25418PC537783SNK2VL7I) reemplazados por los de Live, creados con
+// functions/crear-planes-paypal-live.js — no son intercambiables, un plan
+// de Sandbox no existe en Live ni viceversa.
+const PAYPAL_API_BASE = 'https://api-m.paypal.com';
 const PAYPAL_PLAN_IDS = {
-  basico: 'P-8A723034MA5250942NK2VL7I',
-  completo: 'P-1KB25418PC537783SNK2VL7I'
+  basico: 'P-0WX001956C216161VNK36XBI',
+  completo: 'P-3M884515R5435801MNK36XBI'
 };
 
 function slugify(texto) {
@@ -241,7 +246,7 @@ async function paypalToken() {
     method: 'POST',
     headers: {
       Authorization: 'Basic ' + Buffer.from(
-        `${process.env.PAYPAL_SANDBOX_CLIENT_ID}:${process.env.PAYPAL_SANDBOX_CLIENT_SECRET}`
+        `${process.env.PAYPAL_LIVE_CLIENT_ID}:${process.env.PAYPAL_LIVE_CLIENT_SECRET}`
       ).toString('base64'),
       'Content-Type': 'application/x-www-form-urlencoded'
     },
@@ -253,7 +258,7 @@ async function paypalToken() {
 }
 
 exports.crearSuscripcionPayPal = functions
-  .runWith({ secrets: ['PAYPAL_SANDBOX_CLIENT_ID', 'PAYPAL_SANDBOX_CLIENT_SECRET'] })
+  .runWith({ secrets: ['PAYPAL_LIVE_CLIENT_ID', 'PAYPAL_LIVE_CLIENT_SECRET'] })
   .https.onCall(async (data, context) => {
     if (!context.auth) {
       throw new functions.https.HttpsError('unauthenticated', 'Debes iniciar sesión.');
@@ -342,7 +347,7 @@ async function clinicRefForEvent(resource) {
 }
 
 exports.paypalWebhook = functions
-  .runWith({ secrets: ['PAYPAL_SANDBOX_CLIENT_ID', 'PAYPAL_SANDBOX_CLIENT_SECRET', 'PAYPAL_WEBHOOK_ID'] })
+  .runWith({ secrets: ['PAYPAL_LIVE_CLIENT_ID', 'PAYPAL_LIVE_CLIENT_SECRET', 'PAYPAL_WEBHOOK_ID'] })
   .https.onRequest(async (req, res) => {
     if (req.method !== 'POST') { res.status(405).send('Method not allowed'); return; }
 
