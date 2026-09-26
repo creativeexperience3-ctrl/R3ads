@@ -657,6 +657,18 @@
     if (user) afterAuthSuccess(user);
   });
 
+  /* ── Enlace directo desde la landing (?view=register): abrir el registro de una vez ── */
+  if (params.get('view') === 'register') switchView('register');
+
+  /* ── Plan preseleccionado desde Precios.html (?plan=basico|completo) ──
+     Se marca ahora aunque el paso "Crea tu clínica" venga después del
+     registro — el radio queda listo en el DOM para cuando aparezca. */
+  var planPreseleccionado = params.get('plan');
+  if (planPreseleccionado === 'basico' || planPreseleccionado === 'completo') {
+    var radioPlan = document.querySelector('input[name="clinic-plan"][value="' + planPreseleccionado + '"]');
+    if (radioPlan) radioPlan.checked = true;
+  }
+
   /* ── Vistas: view-email (paso 1) → view-password (paso 2), view-register, o view-clinic ── */
   function switchView(name) {
     document.querySelectorAll('.auth-view').forEach(function (v) {
