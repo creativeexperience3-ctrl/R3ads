@@ -314,6 +314,7 @@ body { margin: 0; background: #F4F6FB; font-family: 'Segoe UI', Arial, sans-seri
 <!-- Firebase compat SDK — proyecto r3ads-clinic-crm (el del PRODUCTO, no
      el de R3ads/web que usa el resto de este sitio, r3ads-59bd8). -->
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-check-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <script>
@@ -327,6 +328,15 @@ body { margin: 0; background: #F4F6FB; font-family: 'Segoe UI', Arial, sans-seri
     appId            : '1:185048797679:web:04da52fcc3c336f7f5a61a'
   };
   var app = firebase.initializeApp(FIREBASE_CFG);
+  // App Check (2026-09-26): misma site key que portal-clinico/firebase-init.js
+  // — no es secreta, es pública por diseño. Panel de superadmin, mismo motivo
+  // para protegerlo que el resto del proyecto.
+  if (firebase.appCheck) {
+    firebase.appCheck().activate(
+      new firebase.appCheck.ReCaptchaEnterpriseProvider('6LeCddAtAAAAACM_6iq-lJ8Kdl0tDVu9-Av2Rbhw'),
+      true
+    );
+  }
   var auth = app.auth();
   var db = app.firestore();
 
@@ -663,6 +673,14 @@ body { margin: 0; background: #F4F6FB; font-family: 'Segoe UI', Arial, sans-seri
     btn.disabled = true; btn.textContent = 'Creando…';
 
     var secondaryApp = firebase.initializeApp(FIREBASE_CFG, 'secondary-' + Date.now());
+    /* App Check es por instancia de app — sin esto, esta instancia secundaria
+       queda sin token válido y se rompe en cuanto Auth pase a "Aplicar". */
+    if (firebase.appCheck) {
+      firebase.appCheck(secondaryApp).activate(
+        new firebase.appCheck.ReCaptchaEnterpriseProvider('6LeCddAtAAAAACM_6iq-lJ8Kdl0tDVu9-Av2Rbhw'),
+        true
+      );
+    }
     var secondaryAuth = secondaryApp.auth();
     var tempPwd = 'Rtemp!' + Math.random().toString(36).slice(2, 10);
 

@@ -203,6 +203,7 @@ body { margin: 0; background: #F4F6FB; font-family: system-ui,-apple-system,'Seg
 </style>
 <script src="clinic-config.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-check-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <script src="firebase-init.js"></script>
@@ -486,6 +487,14 @@ body { margin: 0; background: #F4F6FB; font-family: system-ui,-apple-system,'Seg
        que ya inicializó firebase-init.js, expuesta en window.r3adsFirebaseConfig) */
     var secondaryName = 'secondary-' + Date.now();
     var secondaryApp = firebase.initializeApp(window.r3adsFirebaseConfig, secondaryName);
+    /* App Check es por instancia de app — sin esto, esta instancia secundaria
+       queda sin token válido y se rompe en cuanto Auth pase a "Aplicar". */
+    if (firebase.appCheck) {
+      firebase.appCheck(secondaryApp).activate(
+        new firebase.appCheck.ReCaptchaEnterpriseProvider('6LeCddAtAAAAACM_6iq-lJ8Kdl0tDVu9-Av2Rbhw'),
+        true
+      );
+    }
     var secondaryAuth = secondaryApp.auth();
 
     /* Contraseña temporal (nunca se muestra al admin) */
