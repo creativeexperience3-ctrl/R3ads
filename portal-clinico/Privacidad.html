@@ -1,0 +1,555 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Política de Privacidad · Ancla</title>
+<meta name="description" content="Política de privacidad de Ancla, software de gestión clínica de R3ads: qué datos tratamos, cómo los protegemos y los derechos de clínicas y pacientes conforme a la normativa de Honduras.">
+<meta name="robots" content="index,follow">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Política de Privacidad · Ancla">
+<meta property="og:description" content="Cómo Ancla trata, protege y entrega los datos de tu clínica, conforme al Código de Comercio, la Ley de Protección al Consumidor y la normativa de la Secretaría de Salud de Honduras.">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 22 26'%3E%3Ccircle cx='11' cy='5' r='4' fill='none' stroke='%23242F40' stroke-width='2.4'/%3E%3Cpath d='M11 9v15M4 24h14' stroke='%23242F40' stroke-width='2.4' stroke-linecap='round'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --jet:        #242F40;
+  --jet-deep:   #1c2534;
+  --graphite:   #363636;
+  --bronze:     #CCA43B;
+  --bg:         #F6F6F7;
+  --card:       #FFFFFF;
+  --txt-2:      #4a4a4a;
+  --txt-3:      #5a5a5a;
+  --txt-4:      #6b6b6b;
+  --line:       rgba(36,47,64,0.12);
+  --maxw:       1200px;
+  --pad:        clamp(20px,5vw,64px);
+  --ease-decel: cubic-bezier(.22,1,.36,1);
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  margin: 0;
+  font-family: 'IBM Plex Sans', system-ui, sans-serif;
+  background: var(--bg);
+  color: var(--graphite);
+  -webkit-font-smoothing: antialiased;
+}
+a { color: var(--jet); text-decoration: none; }
+a:hover { color: var(--bronze); }
+a:focus-visible { outline: 2px solid var(--bronze); outline-offset: 3px; border-radius: 4px; }
+
+.wrap { max-width: var(--maxw); margin: 0 auto; padding-left: var(--pad); padding-right: var(--pad); }
+.eyebrow {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 13px; font-weight: 600; letter-spacing: 0.08em;
+  text-transform: uppercase; color: var(--txt-4); margin-bottom: 10px;
+}
+
+.btn {
+  display: inline-block; border-radius: 10px; font-weight: 600;
+  font-size: 15px; padding: 14px 26px; border: 1.5px solid transparent;
+  transition: background-color .15s ease, color .15s ease, border-color .15s ease, transform .15s ease;
+}
+.btn-primary { background: var(--jet); color: #fff; }
+.btn-primary:hover { background: var(--jet-deep); color: #fff; transform: translateY(-1px); }
+.btn-outline { border-color: var(--jet); color: var(--jet); }
+.btn-outline:hover { background: var(--jet); color: #fff; }
+.btn-sm { padding: 10px 20px; font-size: 14px; }
+
+.logo { display: flex; align-items: center; gap: 10px; }
+.logo-mark { flex-shrink: 0; }
+.logo-word { font-size: 20px; font-weight: 700; color: var(--jet); letter-spacing: -0.01em; }
+
+.nav {
+  position: sticky; top: 0; z-index: 20;
+  background: rgba(246,246,247,0.92); backdrop-filter: blur(8px);
+  border-bottom: 1px solid rgba(36,47,64,0.1);
+}
+.nav-row {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 16px; flex-wrap: wrap; padding-top: 16px; padding-bottom: 16px;
+}
+.nav-links { display: flex; align-items: center; gap: 28px; flex-wrap: wrap; }
+.nav-links a { color: var(--graphite); font-size: 15px; font-weight: 500; }
+.nav-links a:hover { color: var(--bronze); }
+
+/* ── Encabezado del documento ── */
+.doc-hero { padding-top: clamp(40px,6vw,72px); padding-bottom: clamp(28px,4vw,40px); border-bottom: 1px solid var(--line); }
+.doc-hero h1 { font-size: clamp(1.9rem,4vw,2.75rem); font-weight: 700; color: var(--jet); margin: 0 0 14px; letter-spacing: -0.01em; }
+.doc-meta { display: flex; gap: 18px; flex-wrap: wrap; font-size: 13.5px; color: var(--txt-4); font-family: 'IBM Plex Mono', monospace; }
+.doc-meta strong { color: var(--txt-2); font-weight: 600; }
+
+/* ── Layout de dos columnas: TOC + contenido ── */
+.legal-layout {
+  display: grid; grid-template-columns: 240px minmax(0,1fr); gap: 56px;
+  padding-top: clamp(32px,5vw,48px); padding-bottom: clamp(56px,8vw,96px); align-items: start;
+}
+@media (max-width: 880px) { .legal-layout { grid-template-columns: 1fr; } }
+
+.toc { position: sticky; top: 84px; }
+.toc-h { font-family: 'IBM Plex Mono', monospace; font-size: 12px; font-weight: 600; letter-spacing: 0.05em; color: var(--txt-4); margin-bottom: 14px; text-transform: uppercase; }
+.toc ol { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 2px; border-left: 1px solid var(--line); }
+.toc a {
+  display: block; padding: 7px 0 7px 16px; font-size: 13.5px; color: var(--txt-3);
+  border-left: 2px solid transparent; margin-left: -1px; transition: color .15s ease, border-color .15s ease;
+}
+.toc a:hover { color: var(--jet); border-left-color: var(--bronze); }
+@media (max-width: 880px) {
+  .toc { position: static; margin-bottom: 8px; }
+  .toc ol { display: grid; grid-template-columns: repeat(auto-fill,minmax(220px,1fr)); border-left: none; gap: 4px 20px; }
+  .toc a { border-left: none; padding: 4px 0; }
+}
+
+/* ── Callout de rol (Responsable / Encargado) ── */
+.callout {
+  background: var(--card); border: 1px solid var(--line); border-left: 4px solid var(--bronze);
+  border-radius: 10px; padding: 22px 24px; margin: 0 0 40px;
+  font-size: 15px; line-height: 1.65; color: var(--txt-2);
+}
+.callout strong { color: var(--jet); }
+
+/* ── Prosa legal ── */
+.doc { max-width: 760px; font-size: 15.5px; line-height: 1.75; color: var(--txt-2); }
+.doc section { padding-top: 8px; margin-bottom: 44px; scroll-margin-top: 96px; }
+.doc h2 {
+  font-size: clamp(1.25rem,2.2vw,1.55rem); font-weight: 700; color: var(--jet);
+  margin: 0 0 16px; letter-spacing: -0.005em; display: flex; align-items: baseline; gap: 10px;
+}
+.doc h2 .num { font-family: 'IBM Plex Mono', monospace; font-size: 14px; font-weight: 600; color: var(--bronze); }
+.doc h3 { font-size: 16px; font-weight: 600; color: var(--jet); margin: 24px 0 10px; }
+.doc p { margin: 0 0 14px; }
+.doc ul, .doc ol.legal-list { margin: 0 0 14px; padding-left: 22px; }
+.doc li { margin-bottom: 8px; }
+.doc a.inline-link { text-decoration: underline; text-underline-offset: 2px; }
+
+table.data-table { width: 100%; border-collapse: collapse; margin: 4px 0 20px; font-size: 14px; }
+table.data-table th, table.data-table td { text-align: left; padding: 10px 14px; border: 1px solid var(--line); vertical-align: top; }
+table.data-table th { background: rgba(36,47,64,0.04); font-weight: 600; color: var(--jet); font-size: 13px; }
+table.data-table td { color: var(--txt-3); }
+
+.legal-note {
+  font-size: 13.5px; color: var(--txt-4); background: rgba(36,47,64,0.035);
+  border: 1px dashed rgba(36,47,64,0.18); border-radius: 8px; padding: 14px 16px; margin: 10px 0 20px;
+}
+.legal-note strong { color: var(--txt-2); }
+
+.contact-card {
+  border: 1px solid var(--line); border-radius: 12px; background: var(--card);
+  padding: 26px 28px; margin-top: 8px;
+}
+.contact-card dl { display: grid; grid-template-columns: 140px 1fr; gap: 10px 16px; margin: 0; font-size: 14.5px; }
+.contact-card dt { font-weight: 600; color: var(--jet); }
+.contact-card dd { margin: 0; color: var(--txt-3); }
+
+.back-top { display: inline-block; margin-top: 8px; font-size: 13.5px; }
+
+/* ── Footer (idéntico al resto del sitio) ── */
+.footer { position: relative; overflow: hidden; background: var(--jet-deep); padding: 48px var(--pad) 28px; }
+.footer-inner { position: relative; z-index: 1; max-width: var(--maxw); margin: 0 auto; }
+.footer-top { display: flex; flex-wrap: wrap; gap: 40px; justify-content: space-between; margin-bottom: 32px; }
+.footer .logo-word { color: #fff; font-size: 18px; }
+.footer-about { max-width: 320px; }
+.footer-about p { font-size: 13.5px; line-height: 1.6; color: rgba(255,255,255,0.6); margin: 14px 0 0; }
+.footer-cols { display: flex; gap: 48px; flex-wrap: wrap; }
+.footer-col-h { font-family: 'IBM Plex Mono', monospace; font-size: 12px; font-weight: 600; color: rgba(255,255,255,0.5); letter-spacing: 0.05em; margin-bottom: 14px; }
+.footer-col a { display: block; color: rgba(255,255,255,0.75); font-size: 14px; margin-bottom: 10px; }
+.footer-col a:hover { color: var(--bronze); }
+.footer-bottom {
+  border-top: 1px solid rgba(255,255,255,0.12); padding-top: 20px;
+  display: flex; justify-content: space-between; flex-wrap: wrap; gap: 10px;
+  font-size: 12.5px; color: rgba(255,255,255,0.5);
+}
+</style>
+</head>
+<body>
+
+<!-- ═══ NAV ═══ -->
+<nav class="nav">
+  <div class="wrap nav-row">
+    <a href="index.html" class="logo">
+      <svg class="logo-mark" width="22" height="26" viewBox="0 0 22 26" fill="none" aria-hidden="true">
+        <circle cx="11" cy="5" r="4" stroke="#242F40" stroke-width="2"/>
+        <path d="M11 9v15M4 24h14" stroke="#242F40" stroke-width="2" stroke-linecap="round"/>
+      </svg>
+      <span class="logo-word">Ancla</span>
+    </a>
+    <div class="nav-links">
+      <a href="index.html#modulos">Módulos</a>
+      <a href="Precios.html">Precios</a>
+      <a href="index.html#nosotros">Nosotros</a>
+      <a href="index.html#contacto">Contacto</a>
+      <a href="Auth.html">Acceder</a>
+    </div>
+    <a href="Auth.html?view=register" class="btn btn-primary btn-sm">Registrarte</a>
+  </div>
+</nav>
+
+<!-- ═══ ENCABEZADO ═══ -->
+<div class="doc-hero">
+  <div class="wrap">
+    <div class="eyebrow">Aviso legal · Ancla, un producto de R3ads</div>
+    <h1>Política de Privacidad</h1>
+    <div class="doc-meta">
+      <span><strong>Última actualización:</strong> 28 de septiembre de 2026</span>
+      <span><strong>Aplica a:</strong> el sitio, el portal clínico y el portal de pacientes de Ancla</span>
+      <span><strong>Idioma oficial:</strong> español</span>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ CONTENIDO ═══ -->
+<div class="wrap legal-layout">
+
+  <!-- TOC -->
+  <aside class="toc" aria-label="Tabla de contenido">
+    <div class="toc-h">En esta página</div>
+    <ol>
+      <li><a href="#alcance">1. Alcance</a></li>
+      <li><a href="#roles">2. Nuestro rol: Encargados, no dueños</a></li>
+      <li><a href="#datos">3. Qué datos tratamos</a></li>
+      <li><a href="#origen">4. De dónde vienen los datos</a></li>
+      <li><a href="#finalidades">5. Para qué los usamos</a></li>
+      <li><a href="#marco-legal">6. Marco legal en Honduras</a></li>
+      <li><a href="#seguridad">7. Cómo protegemos tus datos</a></li>
+      <li><a href="#encargados">8. Dónde viven los datos y terceros</a></li>
+      <li><a href="#conservacion">9. Cuánto tiempo los conservamos</a></li>
+      <li><a href="#derechos">10. Tus derechos</a></li>
+      <li><a href="#ejercicio">11. Cómo ejercerlos y descargar tu información</a></li>
+      <li><a href="#menores">12. Datos de menores de edad</a></li>
+      <li><a href="#comercio">13. Contratación y comercio electrónico</a></li>
+      <li><a href="#cookies">14. Cookies y tecnologías similares</a></li>
+      <li><a href="#incidentes">15. Incidentes de seguridad</a></li>
+      <li><a href="#cambios">16. Cambios a esta política</a></li>
+      <li><a href="#contacto-legal">17. Contacto</a></li>
+    </ol>
+  </aside>
+
+  <!-- DOC -->
+  <article class="doc">
+
+    <div class="callout">
+      <strong>En una frase:</strong> Ancla es la infraestructura técnica que administra la información que cada
+      clínica ingresa al sistema — no la observamos, no la usamos para fines propios y no la vendemos.
+      Cada expediente, resultado o archivo pertenece a la clínica y al paciente, y puede descargarse o
+      entregarse en su totalidad cuando el titular lo solicite.
+    </div>
+
+    <section id="alcance">
+      <h2><span class="num">01</span> Alcance</h2>
+      <p>
+        Esta Política de Privacidad describe cómo <strong>R3ads</strong> (en adelante, "R3ads", "nosotros" o "la
+        Empresa"), a través de su producto <strong>Ancla</strong>, recolecta, usa, almacena, protege y entrega la
+        información personal y clínica de las clínicas que contratan el servicio ("Clínica" o "Cliente") y de los
+        pacientes cuyos datos son ingresados al sistema por esas clínicas ("Paciente" o "Titular").
+      </p>
+      <p>
+        Aplica al sitio informativo de Ancla, al portal clínico (uso del personal médico y administrativo) y al
+        portal de pacientes, así como a cualquier canal de soporte (WhatsApp, correo) asociado al servicio.
+      </p>
+      <div class="legal-note">
+        Esta política se redactó tomando como referencia el <strong>Código de Comercio</strong> y sus reformas en
+        materia de contratación electrónica, la <strong>Ley de Protección al Consumidor</strong> (Decreto 24-2008)
+        y su Reglamento, la <strong>Ley Sobre Firmas Electrónicas</strong> (Decreto 149-2013), la garantía
+        constitucional de <strong>hábeas data</strong> (artículo 182 de la Constitución de la República) y la
+        normativa de la <strong>Secretaría de Salud (SESAL)</strong> sobre confidencialidad y resguardo del
+        expediente clínico. Honduras aún no cuenta con una ley general de protección de datos personales
+        equivalente a las de otros países de la región; donde la ley local no detalla un procedimiento, esta
+        política adopta el estándar más protector disponible.
+      </div>
+    </section>
+
+    <section id="roles">
+      <h2><span class="num">02</span> Nuestro rol: Encargados, no dueños</h2>
+      <p>
+        En materia de protección de datos es clave distinguir dos roles. El <strong>Responsable del tratamiento</strong>
+        decide qué datos se recolectan y para qué se usan. El <strong>Encargado del tratamiento</strong> (o
+        "procesador") únicamente almacena y procesa esos datos siguiendo instrucciones del Responsable, y no
+        puede usarlos para fines propios.
+      </p>
+      <table class="data-table">
+        <thead><tr><th>Dato</th><th>Responsable</th><th>Encargado (Ancla / R3ads)</th></tr></thead>
+        <tbody>
+          <tr><td>Expedientes clínicos, consultas, resultados de laboratorio, recetas</td><td>La Clínica y el médico tratante</td><td>Almacenamiento, disponibilidad y respaldo técnico</td></tr>
+          <tr><td>Datos de cuenta y facturación de la Clínica</td><td>R3ads</td><td>—</td></tr>
+          <tr><td>Datos de contacto de pacientes usados por Ancla para soporte de plataforma</td><td>R3ads (uso limitado a soporte)</td><td>—</td></tr>
+        </tbody>
+      </table>
+      <p>
+        En la práctica: el personal de Ancla no revisa expedientes clínicos como parte de su operación normal.
+        El acceso técnico de soporte, cuando es estrictamente necesario para resolver una incidencia, queda
+        registrado y requiere autorización expresa de la clínica afectada.
+      </p>
+    </section>
+
+    <section id="datos">
+      <h2><span class="num">03</span> Qué datos tratamos</h2>
+      <table class="data-table">
+        <thead><tr><th>Categoría</th><th>Ejemplos</th><th>Sensibilidad</th></tr></thead>
+        <tbody>
+          <tr><td>Datos de identificación de la Clínica</td><td>Razón social, RTN, dirección, responsable de cuenta, correo, teléfono</td><td>Estándar</td></tr>
+          <tr><td>Datos de cuentas de usuario (médicos, personal, pacientes)</td><td>Nombre, correo, contraseña (cifrada), rol dentro del sistema</td><td>Estándar</td></tr>
+          <tr><td>Datos de identificación del paciente</td><td>Nombre completo, fecha de nacimiento, sexo, dirección, contacto de emergencia</td><td>Personal</td></tr>
+          <tr><td>Datos clínicos y de salud</td><td>Antecedentes, signos vitales, diagnósticos, tratamientos, resultados de laboratorio, EKG, recetas, tipo de sangre, alergias</td><td>Sensible (dato de salud)</td></tr>
+          <tr><td>Datos de facturación</td><td>Historial de cobros, plan contratado, referencias de pago (Ancla no almacena números de tarjeta completos)</td><td>Estándar / financiero</td></tr>
+          <tr><td>Datos técnicos y de uso</td><td>Dirección IP, registros de acceso, dispositivo, fecha y hora de inicio de sesión</td><td>Estándar</td></tr>
+        </tbody>
+      </table>
+      <p>
+        Los datos clínicos y de salud reciben el nivel de protección más alto dentro de nuestro sistema, dado su
+        carácter sensible conforme al estándar general de protección de datos y a la confidencialidad que exige
+        la práctica médica en Honduras.
+      </p>
+    </section>
+
+    <section id="origen">
+      <h2><span class="num">04</span> De dónde vienen los datos</h2>
+      <ul>
+        <li>Directamente de la Clínica y su personal, al registrar pacientes, consultas y resultados.</li>
+        <li>Directamente del paciente, cuando crea su cuenta en el portal de pacientes o vincula un código de expediente.</li>
+        <li>De forma automática, por el uso de la plataforma (registros técnicos de acceso y actividad, necesarios para seguridad y soporte).</li>
+      </ul>
+    </section>
+
+    <section id="finalidades">
+      <h2><span class="num">05</span> Para qué usamos los datos</h2>
+      <ul>
+        <li>Prestar el servicio: expedientes, caja, laboratorio, consultas, constancias y agenda.</li>
+        <li>Generar y entregar documentos clínicos (PDF, Word) solicitados por la Clínica o el paciente.</li>
+        <li>Dar soporte técnico y resolver incidencias reportadas por la Clínica.</li>
+        <li>Facturar el servicio contratado por la Clínica.</li>
+        <li>Cumplir obligaciones legales, contables y fiscales aplicables a R3ads en Honduras.</li>
+        <li>Detectar uso indebido, fraude o riesgos de seguridad en la plataforma.</li>
+      </ul>
+      <p>No usamos los datos clínicos de pacientes con fines publicitarios, ni los vendemos, alquilamos o cedemos a terceros para fines comerciales ajenos al servicio.</p>
+    </section>
+
+    <section id="marco-legal">
+      <h2><span class="num">06</span> Marco legal en Honduras</h2>
+      <p>Este tratamiento se rige, entre otras, por las siguientes normas hondureñas:</p>
+      <ul class="legal-list">
+        <li><strong>Constitución de la República de Honduras</strong>, artículo 182 — garantía de hábeas data: toda persona tiene derecho a acceder, rectificar o cancelar la información personal que se tenga sobre ella en bancos o registros de datos.</li>
+        <li><strong>Código de Comercio</strong> (Decreto 73-1950 y sus reformas) — validez de los contratos y documentos mercantiles celebrados por medios electrónicos, base de la contratación en línea del servicio Ancla.</li>
+        <li><strong>Ley Sobre Firmas Electrónicas</strong> (Decreto 149-2013) — validez jurídica de firmas y mensajes de datos electrónicos, aplicable a la aceptación de términos y a los documentos clínicos generados digitalmente.</li>
+        <li><strong>Ley de Protección al Consumidor</strong> (Decreto 24-2008) y su Reglamento — derechos de información, contratación a distancia, comercio electrónico y reclamo ante la Dirección General de Protección al Consumidor (DGPC) de la Secretaría de Industria y Comercio (SIC).</li>
+        <li><strong>Ley de Transparencia y Acceso a la Información Pública</strong> (Decreto 170-2006) y su Reglamento — principio de reserva de datos personales frente a autoridades e instituciones.</li>
+        <li><strong>Normativa de la Secretaría de Salud (SESAL)</strong> sobre el expediente clínico — confidencialidad, custodia, tiempos de resguardo y condiciones de acceso a la historia clínica electrónica.</li>
+        <li><strong>Código de Ética y Deontología Médica</strong> del Colegio Médico de Honduras — deber de secreto profesional del personal médico que usa la plataforma.</li>
+        <li><strong>Código Penal</strong> — tipifica el acceso no autorizado a sistemas informáticos y la violación de secretos, como respaldo frente a accesos indebidos a la información.</li>
+      </ul>
+      <div class="legal-note">
+        Honduras no cuenta aún con una ley integral de protección de datos personales de aplicación general
+        (como sí existe en otros países de la región). Mientras esa ley no exista, Ancla aplica como política
+        interna los principios reconocidos por el hábeas data constitucional y por estándares internacionales de
+        buenas prácticas (minimización de datos, finalidad, seguridad y derecho de acceso), aplicados con el
+        mismo rigor que exigiría una ley de protección de datos.
+      </div>
+    </section>
+
+    <section id="seguridad">
+      <h2><span class="num">07</span> Cómo protegemos tus datos</h2>
+      <p>Aplicamos medidas técnicas y organizativas razonables y proporcionales a la sensibilidad de la información, entre ellas:</p>
+      <ul>
+        <li><strong>Aislamiento por clínica (multi-tenant):</strong> cada clínica opera sobre sus propios datos, sin acceso cruzado entre clínicas.</li>
+        <li><strong>Cifrado en tránsito y en reposo</strong> para las conexiones y el almacenamiento de la información.</li>
+        <li><strong>Control de acceso por rol:</strong> médicos, personal administrativo y pacientes solo ven lo que su rol permite.</li>
+        <li><strong>Reglas de seguridad a nivel de base de datos y almacenamiento</strong>, no solo a nivel de aplicación.</li>
+        <li><strong>Registro de accesos</strong> a información clínica sensible.</li>
+        <li><strong>Copias de respaldo</strong> periódicas de la información.</li>
+      </ul>
+      <p>
+        Trabajamos para alinear nuestras prácticas internas de seguridad de la información con estándares
+        reconocidos internacionalmente (como ISO/IEC 27001 para gestión de seguridad de la información e
+        ISO/IEC 27799 para informática de salud), como referencia de buenas prácticas, más allá del mínimo que
+        exige la legislación hondureña vigente.
+      </p>
+    </section>
+
+    <section id="encargados">
+      <h2><span class="num">08</span> Dónde viven los datos y terceros involucrados</h2>
+      <p>
+        Ancla opera sobre infraestructura de nube de terceros (por ejemplo, servicios de Google Cloud / Firebase)
+        para hospedaje, base de datos y almacenamiento de archivos. Estos proveedores actúan como
+        sub-encargados y procesan los datos únicamente para prestar el servicio de infraestructura, bajo sus
+        propios compromisos de seguridad y confidencialidad.
+      </p>
+      <p>
+        Cuando corresponde, se utilizan pasarelas de pago (por ejemplo, PayPal) para procesar cobros de
+        suscripción; Ancla no almacena los datos completos de tarjetas de pago. También puede usarse WhatsApp
+        como canal de contacto y soporte, conforme a los términos de ese servicio.
+      </p>
+      <p>
+        Parte de esta infraestructura puede ubicarse fuera de Honduras. En esos casos, R3ads exige a sus
+        proveedores compromisos contractuales de confidencialidad y seguridad equivalentes a los descritos en
+        esta política antes de transferir o almacenar información en el extranjero.
+      </p>
+    </section>
+
+    <section id="conservacion">
+      <h2><span class="num">09</span> Cuánto tiempo conservamos los datos</h2>
+      <p>
+        Los expedientes clínicos y sus consultas se conservan mientras la Clínica mantenga el servicio activo, y
+        posteriormente durante el plazo que exija la normativa de la Secretaría de Salud (SESAL) sobre resguardo
+        del expediente clínico, o el que defina la propia Clínica como responsable del historial médico, el que
+        sea mayor.
+      </p>
+      <p>
+        Los datos de cuenta y facturación se conservan mientras dure la relación contractual con la Clínica y por
+        el plazo adicional que exijan las obligaciones fiscales y contables aplicables en Honduras. Al finalizar
+        el servicio, la Clínica puede solicitar la exportación completa de su información antes de su eliminación
+        de nuestros sistemas activos.
+      </p>
+    </section>
+
+    <section id="derechos">
+      <h2><span class="num">10</span> Tus derechos</h2>
+      <p>Como titular de los datos (Clínica o paciente), tenés derecho a:</p>
+      <ul>
+        <li><strong>Acceso:</strong> saber qué datos tuyos o de tu expediente están almacenados.</li>
+        <li><strong>Rectificación:</strong> corregir datos inexactos o incompletos.</li>
+        <li><strong>Cancelación:</strong> solicitar la eliminación de datos cuando ya no exista base legal o contractual para conservarlos.</li>
+        <li><strong>Oposición:</strong> oponerte a un uso específico de tus datos que no sea indispensable para el servicio.</li>
+        <li><strong>Portabilidad / descarga:</strong> obtener una copia completa y descargable de tu información o la de tu expediente, en un formato utilizable (PDF, Word o el formato original del archivo).</li>
+      </ul>
+      <p>
+        Cuando se trata de un expediente clínico de un paciente, la solicitud puede hacerla el propio paciente
+        (o su representante legal, en el caso de menores o personas con representación) o la clínica responsable
+        del historial, sin perjuicio del derecho del paciente a solicitar directamente su información a la clínica
+        tratante.
+      </p>
+    </section>
+
+    <section id="ejercicio">
+      <h2><span class="num">11</span> Cómo ejercer tus derechos y descargar tu información</h2>
+      <p>
+        Todos los archivos almacenados en Ancla —expedientes, consultas, resultados y documentos generados—
+        pueden descargarse desde la plataforma por los usuarios autorizados de cada clínica, o ser entregados
+        directamente por nosotros a solicitud del titular o de la clínica responsable.
+      </p>
+      <ol class="legal-list">
+        <li>Enviá la solicitud al correo de contacto indicado en la sección 17, indicando el dato o expediente que querés consultar, corregir, descargar o eliminar.</li>
+        <li>Verificamos la identidad del solicitante (o su vínculo con la clínica/paciente) antes de procesar la solicitud, para proteger la información de terceros.</li>
+        <li>Respondemos y, cuando aplica, entregamos la información dentro de un plazo razonable, priorizando siempre solicitudes relacionadas con la atención médica en curso.</li>
+      </ol>
+    </section>
+
+    <section id="menores">
+      <h2><span class="num">12</span> Datos de menores de edad</h2>
+      <p>
+        Cuando un expediente corresponde a un paciente menor de edad, los datos son ingresados y gestionados
+        por la clínica bajo el consentimiento del padre, madre o tutor legal, quien ejerce los derechos descritos
+        en la sección 10 en representación del menor hasta que este alcance la mayoría de edad.
+      </p>
+    </section>
+
+    <section id="comercio">
+      <h2><span class="num">13</span> Contratación y comercio electrónico</h2>
+      <p>
+        La contratación del servicio Ancla (registro de clínica, selección de plan y aceptación de estos términos)
+        se realiza por medios electrónicos. Conforme al Código de Comercio y a la Ley Sobre Firmas Electrónicas,
+        la aceptación electrónica de estos términos tiene la misma validez que una firma manuscrita.
+      </p>
+      <p>
+        Conforme a la Ley de Protección al Consumidor, antes de contratar tenés derecho a conocer con claridad
+        el precio, las condiciones del plan, la forma de pago y las condiciones de cancelación del servicio
+        (disponibles en <a class="inline-link" href="Precios.html">Precios</a>). Cualquier reclamo relacionado con
+        la contratación del servicio puede presentarse también ante la Dirección General de Protección al
+        Consumidor (DGPC) de la Secretaría de Industria y Comercio (SIC).
+      </p>
+    </section>
+
+    <section id="cookies">
+      <h2><span class="num">14</span> Cookies y tecnologías similares</h2>
+      <p>
+        El sitio informativo de Ancla utiliza únicamente cookies técnicas necesarias para su funcionamiento
+        (por ejemplo, mantener la sesión iniciada). No utilizamos cookies de rastreo publicitario de terceros en
+        el portal clínico ni en el portal de pacientes.
+      </p>
+    </section>
+
+    <section id="incidentes">
+      <h2><span class="num">15</span> Incidentes de seguridad</h2>
+      <p>
+        Si detectamos un incidente que comprometa la confidencialidad, integridad o disponibilidad de datos
+        clínicos o personales, notificaremos a la Clínica afectada sin dilación indebida, con la información
+        disponible sobre el alcance del incidente y las medidas tomadas para contenerlo, de modo que la Clínica
+        pueda cumplir con sus propias obligaciones frente a sus pacientes y ante la autoridad competente.
+      </p>
+    </section>
+
+    <section id="cambios">
+      <h2><span class="num">16</span> Cambios a esta política</h2>
+      <p>
+        Podemos actualizar esta política para reflejar cambios en el servicio o en la normativa aplicable.
+        Publicaremos la versión vigente en esta misma página, indicando la fecha de última actualización. Los
+        cambios sustanciales serán comunicados a las clínicas activas por correo o dentro de la plataforma.
+      </p>
+    </section>
+
+    <section id="contacto-legal">
+      <h2><span class="num">17</span> Contacto</h2>
+      <p>Para ejercer tus derechos o resolver dudas sobre esta política, escribinos:</p>
+      <div class="contact-card">
+        <dl>
+          <dt>Empresa</dt><dd>R3ads — operadora de Ancla · Inversiones REWA · RTN 0801-2000-01030-1</dd>
+          <dt>Correo</dt><dd>[Completar: correo de contacto / privacidad]</dd>
+          <dt>WhatsApp</dt><dd><a class="inline-link" href="https://wa.me/50495652894" target="_blank" rel="noopener">+504 9565 2894</a></dd>
+          <dt>Dirección</dt><dd>[Completar: dirección física de la Empresa en Honduras]</dd>
+        </dl>
+      </div>
+      <p class="legal-note" style="margin-top:20px">
+        <strong>Nota interna:</strong> completar correo de privacidad y dirección física antes de publicar esta
+        página, y actualizar la fecha de vigencia cuando se haga.
+      </p>
+      <a class="back-top" href="#top">Volver arriba ↑</a>
+    </section>
+
+  </article>
+</div>
+
+<!-- ═══ FOOTER ═══ -->
+<footer class="footer">
+  <div class="footer-inner">
+    <div class="footer-top">
+      <div class="footer-about">
+        <div class="logo">
+          <svg class="logo-mark" width="20" height="24" viewBox="0 0 22 26" fill="none" aria-hidden="true">
+            <circle cx="11" cy="5" r="4" stroke="#ffffff" stroke-width="2"/>
+            <path d="M11 9v15M4 24h14" stroke="#ffffff" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+          <span class="logo-word">Ancla</span>
+        </div>
+        <p>Sistema de gestión clínica para clínicas pequeñas y medianas de Centroamérica.</p>
+      </div>
+      <div class="footer-cols">
+        <div class="footer-col">
+          <div class="footer-col-h">PRODUCTO</div>
+          <a href="index.html#modulos">Módulos</a>
+          <a href="Precios.html">Precios</a>
+          <a href="index.html#nosotros">Nosotros</a>
+          <a href="Auth.html">Acceder</a>
+        </div>
+        <div class="footer-col">
+          <div class="footer-col-h">EMPRESA</div>
+          <a href="https://r3ads.com" target="_blank" rel="noopener">R3ads</a>
+          <a href="index.html#contacto">Contacto</a>
+        </div>
+        <div class="footer-col">
+          <div class="footer-col-h">LEGAL</div>
+          <a href="Privacidad.html">Política de Privacidad</a>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2026 Ancla, un producto de R3ads. Hecho en Centroamérica.</span>
+      <span>Identidad en desarrollo.</span>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>
