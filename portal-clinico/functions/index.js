@@ -278,6 +278,19 @@ exports.crearSuscripcionPayPal = functions
       throw new functions.https.HttpsError('not-found', 'No se encontró la clínica.');
     }
     const clinic = clinicSnap.data();
+
+    // plan (opcional): permite elegir/cambiar el plan justo antes de activar
+    // o reactivar (ver Mi-Suscripcion.html) sin un paso aparte — si no viene,
+    // se mantiene el comportamiento original (usa el plan ya guardado en la
+    // clínica, elegido al registrarse). Se persiste ANTES de llamar a PayPal
+    // para que planElegido/modulos ya reflejen la elección aunque el admin
+    // abandone la aprobación de PayPal a mitad de camino.
+    const planPedido = data && PAYPAL_PLAN_IDS[data.plan] ? data.plan : null;
+    if (planPedido && planPedido !== clinic.planElegido) {
+      const modulosDelPlanPedido = planPedido === 'completo' ? PLAN_COMPLETO_MODULOS : PLAN_BASICO_MODULOS;
+      await clinicRef.update({ planElegido: planPedido, modulos: modulosDelPlanPedido });
+      clinic.planElegido = planPedido;
+    }
     const planKey = PAYPAL_PLAN_IDS[clinic.planElegido] ? clinic.planElegido : 'basico';
 
     const returnUrl = (data && data.returnUrl) || 'https://ancla.r3ads.com/Auth.html?activacion=ok';
@@ -324,6 +337,160 @@ exports.crearSuscripcionPayPal = functions
 
     await clinicRef.update({ paypalSubscriptionId: sub.id });
     return { approveUrl: approveLink.href, subscriptionId: sub.id };
+  });
+
+/* ============================================================
+   PayPal — cambio de plan y cancelación (Mi perfil / Suscripción)
+
+   Dos piezas nuevas, mismo patrón que crearSuscripcionPayPal (admin de la
+   clínica, secrets vía runWith, paypalToken() compartido):
+
+   - revisarSuscripcionPayPal: cambia el plan (Básico <-> Completo) de una
+     suscripción YA activa, vía POST .../subscriptions/{id}/revise — no crea
+     una suscripción nueva ni vuelve a pedir tarjeta, reutiliza la forma de
+     pago ya aprobada. Para un cambio de plan simple (mismo suscriptor,
+     misma moneda) sobre una suscripción activa, PayPal aplica el cambio de
+     inmediato sin pedirle nada más al pagador — por eso acá actualizamos
+     planElegido/modulos apenas PayPal confirma. El caso borde en el que
+     PayPal SÍ devuelve un link de aprobación (cambios más profundos, no
+     esperado en este flujo) se deja explícito: no tocamos Firestore todavía
+     y le devolvemos ese link al cliente para que el admin lo complete.
+   - cancelarSuscripcionPayPal: POST .../subscriptions/{id}/cancel. A
+     diferencia de revise, cancel es síncrono (PayPal responde 204 sin más
+     pasos), así que acá SÍ marcamos estado:'cancelada' de una vez, sin
+     esperar al webhook — paypalWebhook también lo marca al recibir
+     BILLING.SUBSCRIPTION.CANCELLED (más abajo), como refuerzo redundante,
+     no como única fuente de verdad (a diferencia de la activación, donde
+     el webhook manda porque el redirect de vuelta lo podría visitar
+     cualquiera con un id inventado — acá quien llama ya fue autenticado y
+     verificado como admin de la clínica antes de tocar PayPal).
+
+   'cancelada' es un estado nuevo, distinto de 'suspendida' (PayPal
+   suspende/expira por un cobro fallido, sin que el admin lo pidiera).
+   Ambos bloquean el acceso exactamente igual en firestore.rules
+   (clinicActiva() solo exige 'activa') — la única diferencia es qué
+   explicación ve el admin en el banner (ver clinic-trial-gate.js).
+   ============================================================ */
+
+function requireAdminUsuario(context) {
+  if (!context.auth) {
+    throw new functions.https.HttpsError('unauthenticated', 'Debes iniciar sesión.');
+  }
+  return db.collection('usuarios').doc(context.auth.uid).get().then((snap) => {
+    if (!snap.exists) {
+      throw new functions.https.HttpsError('failed-precondition', 'Esta cuenta no pertenece a ninguna clínica.');
+    }
+    const usuario = snap.data();
+    if (usuario.rol !== 'admin') {
+      throw new functions.https.HttpsError('permission-denied', 'Solo el admin de la clínica puede administrar la suscripción.');
+    }
+    return usuario;
+  });
+}
+
+exports.revisarSuscripcionPayPal = functions
+  .runWith({ secrets: ['PAYPAL_LIVE_CLIENT_ID', 'PAYPAL_LIVE_CLIENT_SECRET'] })
+  .https.onCall(async (data, context) => {
+    const usuario = await requireAdminUsuario(context);
+
+    const nuevoPlan = data && (data.nuevoPlan === 'completo' || data.nuevoPlan === 'basico') ? data.nuevoPlan : null;
+    if (!nuevoPlan) {
+      throw new functions.https.HttpsError('invalid-argument', 'Plan inválido.');
+    }
+
+    const clinicRef = db.collection('clinics').doc(usuario.clinicId);
+    const clinicSnap = await clinicRef.get();
+    if (!clinicSnap.exists) {
+      throw new functions.https.HttpsError('not-found', 'No se encontró la clínica.');
+    }
+    const clinic = clinicSnap.data();
+
+    if (clinic.estado !== 'activa') {
+      throw new functions.https.HttpsError('failed-precondition', 'Tu suscripción no está activa. Actívala antes de cambiar de plan.');
+    }
+    if (!clinic.paypalSubscriptionId) {
+      throw new functions.https.HttpsError('failed-precondition', 'No se encontró una suscripción de PayPal para esta clínica.');
+    }
+    if (clinic.planElegido === nuevoPlan) {
+      throw new functions.https.HttpsError('failed-precondition', 'Ya estás en ese plan.');
+    }
+
+    let token;
+    try {
+      token = await paypalToken();
+    } catch (err) {
+      console.error('[revisarSuscripcionPayPal] Error de autenticación con PayPal', err);
+      throw new functions.https.HttpsError('internal', 'No se pudo conectar con PayPal. Intenta de nuevo.');
+    }
+
+    const res = await fetch(`${PAYPAL_API_BASE}/v1/billing/subscriptions/${clinic.paypalSubscriptionId}/revise`, {
+      method: 'POST',
+      headers: { Authorization: 'Bearer ' + token, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ plan_id: PAYPAL_PLAN_IDS[nuevoPlan] })
+    });
+
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      console.error('[revisarSuscripcionPayPal] Error de PayPal al revisar la suscripción', err);
+      throw new functions.https.HttpsError('internal', 'PayPal no pudo cambiar el plan. Intenta de nuevo.');
+    }
+    const revised = await res.json().catch(() => ({}));
+    const approveLink = (revised.links || []).find((l) => l.rel === 'approve');
+    if (approveLink) {
+      // Caso infrecuente (ver nota arriba) — no tocamos planElegido/modulos
+      // hasta que el admin complete esa aprobación.
+      return { requiereAprobacion: true, approveUrl: approveLink.href };
+    }
+
+    const modulosDelPlan = nuevoPlan === 'completo' ? PLAN_COMPLETO_MODULOS : PLAN_BASICO_MODULOS;
+    await clinicRef.update({ planElegido: nuevoPlan, modulos: modulosDelPlan });
+    return { requiereAprobacion: false };
+  });
+
+exports.cancelarSuscripcionPayPal = functions
+  .runWith({ secrets: ['PAYPAL_LIVE_CLIENT_ID', 'PAYPAL_LIVE_CLIENT_SECRET'] })
+  .https.onCall(async (data, context) => {
+    const usuario = await requireAdminUsuario(context);
+
+    const clinicRef = db.collection('clinics').doc(usuario.clinicId);
+    const clinicSnap = await clinicRef.get();
+    if (!clinicSnap.exists) {
+      throw new functions.https.HttpsError('not-found', 'No se encontró la clínica.');
+    }
+    const clinic = clinicSnap.data();
+    if (!clinic.paypalSubscriptionId) {
+      throw new functions.https.HttpsError('failed-precondition', 'No se encontró una suscripción de PayPal para esta clínica.');
+    }
+
+    let token;
+    try {
+      token = await paypalToken();
+    } catch (err) {
+      console.error('[cancelarSuscripcionPayPal] Error de autenticación con PayPal', err);
+      throw new functions.https.HttpsError('internal', 'No se pudo conectar con PayPal. Intenta de nuevo.');
+    }
+
+    const res = await fetch(`${PAYPAL_API_BASE}/v1/billing/subscriptions/${clinic.paypalSubscriptionId}/cancel`, {
+      method: 'POST',
+      headers: { Authorization: 'Bearer ' + token, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        reason: (data && data.motivo) ? String(data.motivo).slice(0, 200) : 'Cancelado por el admin de la clínica desde Ancla.'
+      })
+    });
+
+    // PayPal responde 204 sin cuerpo cuando cancela bien. Un 422 (ej.
+    // SUBSCRIPTION_STATUS_INVALID) normalmente significa que ya estaba
+    // cancelada/expirada del lado de PayPal — lo tratamos como éxito, porque
+    // el resultado que quería el admin (dejar de pagar) ya es un hecho, en
+    // vez de mostrarle un error confuso por algo que no puede resolver.
+    if (!res.ok && res.status !== 422) {
+      const err = await res.json().catch(() => ({}));
+      console.error('[cancelarSuscripcionPayPal] Error de PayPal al cancelar', err);
+      throw new functions.https.HttpsError('internal', 'PayPal no pudo cancelar la suscripción. Intenta de nuevo.');
+    }
+
+    await clinicRef.update({ estado: 'cancelada', canceladaEn: admin.firestore.FieldValue.serverTimestamp() });
+    return { ok: true };
   });
 
 /* clinicRefForEvent: identifica a qué clínica pertenece un evento de
@@ -382,7 +549,14 @@ exports.paypalWebhook = functions
           if (ref) await ref.update({ estado: 'activa' });
           break;
         }
-        case 'BILLING.SUBSCRIPTION.CANCELLED':
+        case 'BILLING.SUBSCRIPTION.CANCELLED': {
+          // Refuerzo de cancelarSuscripcionPayPal (arriba) — llega también
+          // cuando la cancelación la origina el propio PayPal o se hace
+          // directo desde su panel, no solo desde Mi-Suscripcion.html.
+          const ref = await clinicRefForEvent(resource);
+          if (ref) await ref.update({ estado: 'cancelada' });
+          break;
+        }
         case 'BILLING.SUBSCRIPTION.SUSPENDED':
         case 'BILLING.SUBSCRIPTION.EXPIRED':
         case 'PAYMENT.SALE.DENIED': {

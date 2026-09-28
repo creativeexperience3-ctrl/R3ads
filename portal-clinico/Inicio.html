@@ -142,14 +142,21 @@ body {
       icon: '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.5 20.5 3.5 13.5a5 5 0 1 1 7-7l7 7a5 5 0 1 1-7 7Z"/><line x1="8.5" y1="8.5" x2="15.5" y2="15.5"/></svg>'
     }
   ];
+  var TARJETA_SUSCRIPCION = {
+    href: 'Mi-Suscripcion.html',
+    title: 'Mi Perfil / Suscripción',
+    sub: 'Cambiá de plan o cancelá tu suscripción — pagos con PayPal.',
+    icon: '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>'
+  };
 
-  function renderHub() {
+  function renderHub(esAdmin) {
+    var tarjetas = esAdmin ? TARJETAS.concat([TARJETA_SUSCRIPCION]) : TARJETAS;
     var html = '<div class="in-heading">' +
         '<div class="in-eyebrow">Portal Clínico</div>' +
         '<h1 class="in-h1">¿A dónde querés entrar?</h1>' +
       '</div>' +
       '<div class="in-grid">' +
-      TARJETAS.map(function (t) {
+      tarjetas.map(function (t) {
         return '<a class="in-card" href="' + t.href + '">' +
           '<div class="in-card-icon">' + t.icon + '</div>' +
           '<h2 class="in-card-title">' + t.title + '</h2>' +
@@ -174,12 +181,12 @@ body {
     if (!user) { window.location.href = 'Auth.html?returnTo=Inicio.html'; return; }
     r3adsStaff.resolveClinicId(user, function (clinicId) {
       CLINIC_ID = clinicId;
-      r3adsTrialGate.cargar(CLINIC_ID).then(function (estado) { if (estado === 'prueba_bloqueada') r3adsTrialGate.mostrarBanner(); });
+      r3adsTrialGate.cargar(CLINIC_ID).then(function (estado) { if (estado === 'prueba_bloqueada' || estado === 'suspendida' || estado === 'cancelada') r3adsTrialGate.mostrarBanner(estado); });
       cargarBrandingReal();
       r3adsStaff.checkStaff(user, CLINIC_ID, function (ok) {
         if (!ok) { mostrarRestringido(); return; }
         $('in-email').textContent = user.email;
-        renderHub();
+        r3adsStaff.checkAdmin(user, CLINIC_ID, function (esAdmin) { renderHub(esAdmin); });
       });
     });
   });

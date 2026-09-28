@@ -26,11 +26,22 @@
     appId            : '1:185048797679:web:04da52fcc3c336f7f5a61a'
   };
   if (!firebase.apps.length) firebase.initializeApp(config);
+  // try/catch a propósito: el script de reCAPTCHA Enterprise que activa App
+  // Check puede tirar (ej. "Cannot read properties of null (reading
+  // 'appendChild')" cuando un bloqueador de anuncios/privacidad impide que
+  // inyecte su badge en el DOM). Sin este try/catch, esa excepción
+  // interrumpe TODO este script antes de llegar a definir r3adsAuth/r3adsDb
+  // más abajo — tumbando el login de la página entera por algo que está en
+  // modo "solo monitoreo" y no debería bloquear nada (ver nota arriba).
   if (firebase.appCheck) {
-    firebase.appCheck().activate(
-      new firebase.appCheck.ReCaptchaEnterpriseProvider('6LeCddAtAAAAACM_6iq-lJ8Kdl0tDVu9-Av2Rbhw'),
-      true // isTokenAutoRefreshEnabled
-    );
+    try {
+      firebase.appCheck().activate(
+        new firebase.appCheck.ReCaptchaEnterpriseProvider('6LeCddAtAAAAACM_6iq-lJ8Kdl0tDVu9-Av2Rbhw'),
+        true // isTokenAutoRefreshEnabled
+      );
+    } catch (err) {
+      console.error('[firebase-init] App Check no se pudo activar (modo monitoreo, no debería bloquear nada):', err);
+    }
   }
   window.r3adsAuth = firebase.auth();
   window.r3adsDb   = firebase.firestore();

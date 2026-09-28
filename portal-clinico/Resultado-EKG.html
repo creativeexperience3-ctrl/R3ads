@@ -436,7 +436,7 @@ body { margin: 0; background: #F4F6FB; font-family: 'Segoe UI', Arial, sans-seri
     r3adsStaff.resolveClinicId(user, function (clinicId) {
       if (!clinicId) { showError('Sesión requerida. Inicia sesión.'); return; }
       CLINIC_ID = clinicId;
-      r3adsTrialGate.cargar(CLINIC_ID).then(function (estado) { if (estado === 'prueba_bloqueada') r3adsTrialGate.mostrarBanner(); });
+      r3adsTrialGate.cargar(CLINIC_ID).then(function (estado) { if (estado === 'prueba_bloqueada' || estado === 'suspendida' || estado === 'cancelada') r3adsTrialGate.mostrarBanner(estado); });
       cargarBrandingReal();
       r3adsModulos.cargar(CLINIC_ID).then(function () {
         if (!r3adsModulos.exigir('ekg', 'Electrocardiogramas')) return;

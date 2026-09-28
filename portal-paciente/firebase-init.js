@@ -23,11 +23,19 @@
     appId            : '1:185048797679:web:04da52fcc3c336f7f5a61a'
   };
   if (!firebase.apps.length) firebase.initializeApp(config);
+  // try/catch a propósito — ver el comentario completo en
+  // portal-clinico/firebase-init.js: sin esto, un fallo del script de
+  // reCAPTCHA Enterprise (ej. bloqueado por un ad-blocker) tumba TODO este
+  // script antes de definir r3adsAuth/r3adsDb, rompiendo el login entero.
   if (firebase.appCheck) {
-    firebase.appCheck().activate(
-      new firebase.appCheck.ReCaptchaEnterpriseProvider('6LeCddAtAAAAACM_6iq-lJ8Kdl0tDVu9-Av2Rbhw'),
-      true // isTokenAutoRefreshEnabled
-    );
+    try {
+      firebase.appCheck().activate(
+        new firebase.appCheck.ReCaptchaEnterpriseProvider('6LeCddAtAAAAACM_6iq-lJ8Kdl0tDVu9-Av2Rbhw'),
+        true // isTokenAutoRefreshEnabled
+      );
+    } catch (err) {
+      console.error('[firebase-init] App Check no se pudo activar (modo monitoreo, no debería bloquear nada):', err);
+    }
   }
   window.r3adsAuth = firebase.auth();
   window.r3adsDb   = firebase.firestore();

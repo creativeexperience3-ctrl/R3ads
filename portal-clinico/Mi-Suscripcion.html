@@ -1,0 +1,406 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mi Suscripción · Portal Clínico</title>
+<!-- Favicon: pendiente por clínica (Fase 5 del plan). -->
+<link rel="stylesheet" href="assets/portal-tokens.css">
+<style>
+*, *::before, *::after { box-sizing: border-box; }
+body { margin: 0; background: #F4F6FB; font-family: system-ui,-apple-system,'Segoe UI',Arial,sans-serif; color: #1F2937; }
+
+/* ── Topbar (mismo patrón que Admin-Precios.html) ── */
+.ap-top {
+  background: #242F40; color: #fff;
+  padding: 14px 24px;
+  display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap;
+  position: sticky; top: 0; z-index: 20;
+}
+.ap-top-left { display: flex; align-items: center; gap: 12px; }
+.ap-top-title { font-size: 16px; font-weight: 900; letter-spacing: .3px; }
+.ap-top-title small { display: block; font-size: 11px; font-weight: 600; color: rgba(255,255,255,.6); letter-spacing: .5px; }
+.ap-top-right { display: flex; align-items: center; gap: 12px; font-size: 13px; flex-wrap: wrap; }
+.ap-top-right .ap-email { color: rgba(255,255,255,.75); }
+.ap-link {
+  color: #242F40; background: #CCA43B; text-decoration: none;
+  padding: 7px 14px; border-radius: 8px; font-weight: 800; font-size: 13px;
+}
+.ap-link.ghost { background: transparent; color: #fff; border: 1px solid rgba(255,255,255,.3); }
+.ap-link.active { background: #fff; color: #242F40; }
+.ap-link:hover { filter: brightness(.95); }
+
+.ap-wrap { max-width: 880px; margin: 0 auto; padding: 24px; }
+
+/* ── Tarjetas (mismo patrón .el-card) ── */
+.el-card { background: #fff; border-radius: 14px; box-shadow: 0 4px 18px rgba(33,60,125,.08); padding: 26px; margin-bottom: 20px; }
+.el-card-title { font-size: 17px; font-weight: 800; color: #242F40; margin: 0 0 4px; }
+.el-card-subtitle { font-size: 13px; color: #6B7280; margin: 0 0 18px; line-height: 1.5; }
+
+/* ── Estado actual ── */
+.ms-estado-row { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+.ms-plan-nombre { font-size: 22px; font-weight: 900; color: #242F40; }
+.ms-plan-precio { font-size: 14px; color: #6B7280; margin-top: 2px; }
+.ms-badge { display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px; border-radius: 100px; font-size: 12.5px; font-weight: 800; }
+.ms-badge::before { content: ''; width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+.ms-badge.is-ok   { background: #D1FAE5; color: #065F46; }
+.ms-badge.is-warn { background: #FEF3C7; color: #92400E; }
+.ms-badge.is-bad  { background: #FEE2E2; color: #991B1B; }
+.ms-meta { margin-top: 14px; font-size: 12.5px; color: #9CA3AF; }
+
+/* ── Selector de plan ── */
+.plan-pick { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 20px; }
+@media (max-width: 560px) { .plan-pick { grid-template-columns: 1fr; } }
+.plan-pick label {
+  display: block; border: 2px solid #E5E7EB; border-radius: 12px; padding: 16px 18px;
+  cursor: pointer; transition: border-color .15s, background .15s;
+}
+.plan-pick label:hover { border-color: #CCA43B; }
+.plan-pick input { display: none; }
+.plan-pick input:checked + .plan-pick-body { color: #242F40; }
+.plan-pick input:checked ~ * {}
+.plan-pick label:has(input:checked) { border-color: #242F40; background: #F4F6FB; }
+.plan-pick-name { font-size: 15px; font-weight: 800; color: #242F40; }
+.plan-pick-price { font-size: 13px; color: #6B7280; margin: 2px 0 6px; }
+.plan-pick-desc { font-size: 12.5px; color: #9CA3AF; line-height: 1.5; }
+.plan-pick-tag {
+  display: inline-block; font-size: 10.5px; font-weight: 800; letter-spacing: .3px;
+  color: #92400E; background: #FEF3C7; padding: 2px 8px; border-radius: 100px; margin-bottom: 6px;
+}
+
+/* ── Botones ── */
+.el-btn { border: none; border-radius: 8px; padding: 12px 24px; font-size: 14px; font-weight: 700; cursor: pointer; font-family: inherit; transition: opacity .15s, transform .1s; }
+.el-btn:disabled { opacity: .5; cursor: not-allowed; }
+.el-btn:hover:not(:disabled) { opacity: .9; }
+.el-btn-primary { background: #242F40; color: #fff; }
+.el-btn-ghost { background: #F4F6FB; color: #4B5563; border: 1.5px solid #E5E7EB; }
+.el-btn-danger { background: #FEE2E2; color: #991B1B; }
+
+.ms-cancel-text { font-size: 13.5px; color: #6B7280; line-height: 1.6; margin-bottom: 18px; }
+.ms-cancel-text b { color: #242F40; }
+
+/* ── Modal ── */
+.el-modal { position: fixed; inset: 0; background: rgba(33,60,125,.45); display: none; align-items: center; justify-content: center; z-index: 1000; padding: 20px; }
+.el-modal.is-open { display: flex; }
+.el-modal-box { background: #fff; border-radius: 14px; padding: 24px; max-width: 440px; width: 100%; box-shadow: 0 12px 50px rgba(0,0,0,.18); }
+.el-modal-title { font-size: 16px; font-weight: 800; color: #242F40; margin: 0 0 6px; }
+.el-modal-text { font-size: 13px; color: #6B7280; margin: 0 0 16px; line-height: 1.55; }
+.el-label { font-size: 12px; font-weight: 700; color: #374151; display: block; margin-bottom: 6px; }
+.el-textarea { border: 1.5px solid #E5E7EB; border-radius: 8px; padding: 10px 12px; font-family: inherit; font-size: 13.5px; color: #1F2937; outline: none; width: 100%; resize: vertical; min-height: 64px; margin-bottom: 16px; }
+.el-textarea:focus { border-color: #242F40; }
+.el-modal-actions { display: flex; gap: 10px; justify-content: flex-end; }
+
+/* ── Toast ── */
+.el-toast {
+  position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(20px);
+  background: #242F40; color: #fff; padding: 12px 22px; border-radius: 10px;
+  font-size: 14px; font-weight: 600; opacity: 0; transition: opacity .2s, transform .2s;
+  z-index: 2000; pointer-events: none; max-width: 90vw; text-align: center;
+}
+.el-toast.is-visible { opacity: 1; transform: translateX(-50%) translateY(0); }
+.el-toast.is-error { background: #C70B0C; }
+
+/* ── Overlay de carga ── */
+.el-overlay { position: fixed; inset: 0; background: rgba(255,255,255,.85); display: none; align-items: center; justify-content: center; z-index: 3000; }
+.el-overlay.is-open { display: flex; }
+.el-overlay-box { background: #fff; border-radius: 12px; padding: 24px 32px; box-shadow: 0 8px 30px rgba(0,0,0,.12); text-align: center; }
+.el-spinner { width: 36px; height: 36px; border: 4px solid #E5E7EB; border-top-color: #242F40; border-radius: 50%; animation: el-spin .7s linear infinite; margin: 0 auto 10px; }
+@keyframes el-spin { to { transform: rotate(360deg); } }
+.el-overlay-text { font-size: 13px; color: #4B5563; }
+
+.ms-msg { text-align: center; padding: 50px 20px; color: #6B7280; }
+</style>
+<script src="clinic-config.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-check-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-functions-compat.js"></script>
+<script src="firebase-init.js"></script>
+<script src="clinic-trial-gate.js"></script>
+<script src="r3ads-staff.js"></script>
+</head>
+<body>
+
+<div class="ap-top">
+  <div class="ap-top-left">
+    <div class="ap-top-title" id="ap-clinic-name">Mi Suscripción<small>Plan y método de pago (PayPal)</small></div>
+  </div>
+  <div class="ap-top-right">
+    <span class="ap-email" id="ap-user-email">—</span>
+    <a class="ap-link ghost" href="Inicio.html">Inicio</a>
+    <a class="ap-link ghost" href="Personal.html">Personal</a>
+    <a class="ap-link ghost" href="Admin-Precios.html">Precios</a>
+    <a class="ap-link ghost" href="Medicamentos.html">Medicamentos</a>
+    <a class="ap-link ghost" href="Admin-Usuarios.html">Usuarios</a>
+    <a class="ap-link active" href="Mi-Suscripcion.html">Suscripción</a>
+    <a class="ap-link ghost" href="#" id="ap-logout">Salir</a>
+  </div>
+</div>
+
+<div class="ap-wrap" id="ms-content">
+  <div class="ms-msg"><div class="el-spinner" style="margin:0 auto 14px"></div>Cargando tu suscripción…</div>
+</div>
+
+<!-- Modal de confirmación de cancelación -->
+<div class="el-modal" id="modal-cancelar">
+  <div class="el-modal-box">
+    <h3 class="el-modal-title">¿Cancelar tu suscripción?</h3>
+    <p class="el-modal-text">Dejaremos de cobrarte en PayPal de inmediato. Tu clínica pasará a modo vista previa: podés seguir entrando, pero no vas a poder guardar pacientes, consultas ni nada nuevo hasta que reactives.</p>
+    <label class="el-label">¿Por qué cancelás? (opcional, nos ayuda a mejorar)</label>
+    <textarea class="el-textarea" id="cancel-motivo" placeholder="Ej. cerramos la clínica, cambiamos de sistema, es muy caro…"></textarea>
+    <div class="el-modal-actions">
+      <button class="el-btn el-btn-ghost" id="cancel-modal-no">Volver</button>
+      <button class="el-btn el-btn-danger" id="cancel-modal-si">Sí, cancelar suscripción</button>
+    </div>
+  </div>
+</div>
+
+<div class="el-overlay" id="ms-overlay">
+  <div class="el-overlay-box">
+    <div class="el-spinner"></div>
+    <div class="el-overlay-text" id="ms-overlay-text">Conectando con PayPal…</div>
+  </div>
+</div>
+
+<div class="el-toast" id="ms-toast">—</div>
+
+<script>
+(function () {
+  var CLINIC_ID = null; // se resuelve por sesión en el AUTH GUARD (r3adsStaff.resolveClinicId)
+  var CLINIC = window.R3ADS_CLINIC_FALLBACK || {};
+  var clinicData = null;
+
+  var PLAN_INFO = {
+    basico:   { nombre: 'Básico',   precio: '$40/mes · Precio Fundador', desc: 'Un consultorio: expedientes, caja, consultas y constancias.' },
+    completo: { nombre: 'Completo', precio: '$65/mes · Precio Fundador', desc: 'Todo lo de Básico + laboratorio, pruebas rápidas, EKG y calendario de atenciones.' }
+  };
+  var ESTADO_INFO = {
+    activa:            { label: 'Activa',                clase: 'is-ok' },
+    prueba_bloqueada:  { label: 'Vista previa (sin activar)', clase: 'is-warn' },
+    suspendida:        { label: 'Suspendida',             clase: 'is-bad' },
+    cancelada:         { label: 'Cancelada',              clase: 'is-bad' }
+  };
+
+  function $(id) { return document.getElementById(id); }
+  function esc(s) { return String(s || '').replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+
+  function pintarBranding(nombre) {
+    var clinicName = nombre || (window.R3ADS_CLINIC_FALLBACK && window.R3ADS_CLINIC_FALLBACK.nombre) || 'tu clínica';
+    $('ap-clinic-name').innerHTML = 'Mi Suscripción<small>Plan y método de pago (PayPal) · ' + esc(clinicName) + '</small>';
+  }
+  pintarBranding();
+
+  var toastEl = $('ms-toast'), toastTimer;
+  function toast(msg, isErr) {
+    toastEl.textContent = msg;
+    toastEl.classList.toggle('is-error', !!isErr);
+    toastEl.classList.add('is-visible');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { toastEl.classList.remove('is-visible'); }, 3600);
+  }
+
+  function overlay(mostrar, texto) {
+    $('ms-overlay-text').textContent = texto || 'Conectando con PayPal…';
+    $('ms-overlay').classList.toggle('is-open', !!mostrar);
+  }
+
+  /* ════════════════════════════════════════════════════════════
+     Carga y render
+     ════════════════════════════════════════════════════════════ */
+  function cargarClinica() {
+    return r3adsDb.collection('clinics').doc(CLINIC_ID).get().then(function (snap) {
+      if (!snap.exists) throw new Error('No se encontró la clínica.');
+      clinicData = snap.data();
+      if (clinicData.nombre) pintarBranding(clinicData.nombre);
+      return clinicData;
+    });
+  }
+
+  function planPickHtml(name, actual) {
+    return ['basico', 'completo'].map(function (key) {
+      var p = PLAN_INFO[key];
+      var checked = key === actual ? ' checked' : '';
+      var tag = key === 'completo' ? '<span class="plan-pick-tag">Más elegida</span><br>' : '';
+      return '<label>' +
+        '<input type="radio" name="' + name + '" value="' + key + '"' + checked + '>' +
+        '<span class="plan-pick-body">' + tag +
+          '<div class="plan-pick-name">' + p.nombre + '</div>' +
+          '<div class="plan-pick-price">' + p.precio + '</div>' +
+          '<div class="plan-pick-desc">' + p.desc + '</div>' +
+        '</span></label>';
+    }).join('');
+  }
+
+  function render() {
+    var estado = clinicData.estado || 'prueba_bloqueada';
+    var plan = PLAN_INFO[clinicData.planElegido] ? clinicData.planElegido : 'basico';
+    var ei = ESTADO_INFO[estado] || ESTADO_INFO.prueba_bloqueada;
+
+    var html = '';
+
+    // ── Tarjeta: estado actual ──
+    html += '<div class="el-card"><div class="ms-estado-row">' +
+      '<div><div class="ms-plan-nombre">Plan ' + esc(PLAN_INFO[plan].nombre) + '</div>' +
+      '<div class="ms-plan-precio">' + esc(PLAN_INFO[plan].precio) + '</div></div>' +
+      '<span class="ms-badge ' + ei.clase + '">' + esc(ei.label) + '</span>' +
+      '</div>' +
+      (clinicData.paypalSubscriptionId
+        ? '<div class="ms-meta">Suscripción de PayPal: ' + esc(clinicData.paypalSubscriptionId) + '</div>'
+        : '') +
+      '</div>';
+
+    if (estado === 'activa') {
+      // ── Tarjeta: cambiar plan ──
+      html += '<div class="el-card">' +
+        '<h2 class="el-card-title">Cambiar de plan</h2>' +
+        '<p class="el-card-subtitle">Subí a Completo cuando necesités laboratorio, pruebas rápidas o EKG — o bajá a Básico si por ahora no los usás. El cambio se aplica de inmediato sobre tu mismo método de pago en PayPal, sin volver a ingresar tarjeta.</p>' +
+        '<div class="plan-pick" id="plan-pick-cambiar">' + planPickHtml('plan-cambiar', plan) + '</div>' +
+        '<button class="el-btn el-btn-primary" id="btn-cambiar-plan">Confirmar cambio de plan</button>' +
+        '</div>';
+
+      // ── Tarjeta: cancelar ──
+      html += '<div class="el-card">' +
+        '<h2 class="el-card-title">Cancelar suscripción</h2>' +
+        '<p class="ms-cancel-text">Esto <b>detiene los cobros recurrentes en PayPal</b> de inmediato. Tu clínica y tu personal van a poder seguir iniciando sesión, pero en modo vista previa: no van a poder guardar pacientes, consultas ni nada nuevo hasta que reactivés la suscripción.</p>' +
+        '<button class="el-btn el-btn-danger" id="btn-abrir-cancelar">Cancelar mi suscripción</button>' +
+        '</div>';
+    } else {
+      // ── Tarjeta: activar / reactivar ──
+      var esReactivacion = estado === 'suspendida' || estado === 'cancelada';
+      html += '<div class="el-card">' +
+        '<h2 class="el-card-title">' + (esReactivacion ? 'Reactivar tu suscripción' : 'Activar tu prueba gratis de 7 días') + '</h2>' +
+        '<p class="el-card-subtitle">' + (esReactivacion
+          ? 'Elegí el plan y confirmá con PayPal para volver a tener acceso completo.'
+          : 'Elegí un plan, confirmá con PayPal y arrancás con 7 días gratis — el primer cobro es hasta el día 8.') + '</p>' +
+        '<div class="plan-pick" id="plan-pick-activar">' + planPickHtml('plan-activar', plan) + '</div>' +
+        '<button class="el-btn el-btn-primary" id="btn-activar">' + (esReactivacion ? 'Continuar con PayPal' : 'Activar prueba gratis con PayPal') + '</button>' +
+        '</div>';
+    }
+
+    $('ms-content').innerHTML = html;
+    wireEvents(estado);
+  }
+
+  /* ════════════════════════════════════════════════════════════
+     Eventos
+     ════════════════════════════════════════════════════════════ */
+  function wireEvents(estado) {
+    if (estado === 'activa') {
+      $('btn-cambiar-plan').addEventListener('click', onCambiarPlan);
+      $('btn-abrir-cancelar').addEventListener('click', function () { $('modal-cancelar').classList.add('is-open'); });
+    } else {
+      $('btn-activar').addEventListener('click', onActivar);
+    }
+  }
+
+  function planSeleccionado(name) {
+    var input = document.querySelector('input[name="' + name + '"]:checked');
+    return input ? input.value : null;
+  }
+
+  function onCambiarPlan() {
+    var nuevoPlan = planSeleccionado('plan-cambiar');
+    if (!nuevoPlan) return;
+    if (nuevoPlan === clinicData.planElegido) { toast('Ya estás en ese plan.'); return; }
+
+    overlay(true, 'Cambiando de plan…');
+    firebase.functions().httpsCallable('revisarSuscripcionPayPal')({ nuevoPlan: nuevoPlan })
+      .then(function (result) {
+        if (result.data && result.data.requiereAprobacion) {
+          window.location.href = result.data.approveUrl;
+          return;
+        }
+        overlay(false);
+        toast('Listo — tu plan ahora es ' + PLAN_INFO[nuevoPlan].nombre + '.');
+        return cargarClinica().then(render);
+      })
+      .catch(function (err) {
+        overlay(false);
+        toast(err.message || 'No se pudo cambiar el plan. Intenta de nuevo.', true);
+      });
+  }
+
+  function onActivar() {
+    var plan = planSeleccionado('plan-activar');
+    if (!plan) return;
+
+    overlay(true, 'Conectando con PayPal…');
+    var returnUrl = window.location.origin + window.location.pathname + '?activacion=ok';
+    var cancelUrl = window.location.origin + window.location.pathname + '?activacion=cancelada';
+    firebase.functions().httpsCallable('crearSuscripcionPayPal')({ plan: plan, returnUrl: returnUrl, cancelUrl: cancelUrl })
+      .then(function (result) { window.location.href = result.data.approveUrl; })
+      .catch(function (err) {
+        overlay(false);
+        toast(err.message || 'No se pudo conectar con PayPal. Intenta de nuevo.', true);
+      });
+  }
+
+  $('cancel-modal-no').addEventListener('click', function () { $('modal-cancelar').classList.remove('is-open'); });
+  $('cancel-modal-si').addEventListener('click', function () {
+    var motivo = $('cancel-motivo').value;
+    $('modal-cancelar').classList.remove('is-open');
+    overlay(true, 'Cancelando tu suscripción…');
+    firebase.functions().httpsCallable('cancelarSuscripcionPayPal')({ motivo: motivo })
+      .then(function () {
+        overlay(false);
+        toast('Tu suscripción quedó cancelada. Ya no habrá más cobros.');
+        return cargarClinica().then(render);
+      })
+      .catch(function (err) {
+        overlay(false);
+        toast(err.message || 'No se pudo cancelar la suscripción. Intenta de nuevo.', true);
+      });
+  });
+
+  /* Vuelta de PayPal (activación/reactivación desde esta misma página):
+     mismo patrón que Auth.html (esperarActivacion) — reintenta hasta 6
+     veces (~9s) esperando a que paypalWebhook confirme estado:'activa'
+     antes de renderizar; si se agota el tiempo, renderiza igual (el
+     webhook ya va en camino, no es un bloqueo permanente). */
+  function esperarActivacion(intento) {
+    cargarClinica().then(function () {
+      if (clinicData.estado === 'activa' || intento >= 6) {
+        history.replaceState(null, '', window.location.pathname);
+        overlay(false);
+        render();
+      } else {
+        setTimeout(function () { esperarActivacion(intento + 1); }, 1500);
+      }
+    }).catch(function () { overlay(false); render(); });
+  }
+
+  /* ════════════════════════════════════════════════════════════
+     AUTH GUARD
+     ════════════════════════════════════════════════════════════ */
+  r3adsAuth.onAuthStateChanged(function (user) {
+    if (!user) { window.location.href = 'Auth.html?returnTo=Mi-Suscripcion.html'; return; }
+    r3adsStaff.resolveClinicId(user, function (clinicId) {
+      CLINIC_ID = clinicId;
+      r3adsTrialGate.cargar(CLINIC_ID).then(function (estado) { if (estado === 'prueba_bloqueada' || estado === 'suspendida' || estado === 'cancelada') r3adsTrialGate.mostrarBanner(estado); });
+      r3adsStaff.checkAdmin(user, CLINIC_ID, function (ok) {
+        if (!ok) { window.location.href = 'Auth.html'; return; }
+        $('ap-user-email').textContent = user.email;
+        var params = new URLSearchParams(window.location.search);
+        cargarClinica().then(function () {
+          if (params.get('activacion') === 'ok') {
+            overlay(true, 'Confirmando con PayPal…');
+            esperarActivacion(0);
+          } else {
+            if (params.get('activacion')) history.replaceState(null, '', window.location.pathname);
+            render();
+          }
+        }).catch(function (err) {
+          $('ms-content').innerHTML = '<div class="ms-msg">No se pudo cargar tu suscripción.<br>' + esc(err.message) + '</div>';
+        });
+      });
+    });
+  });
+  $('ap-logout').addEventListener('click', function (e) {
+    e.preventDefault();
+    r3adsAuth.signOut().then(function () { window.location.href = 'Auth.html'; });
+  });
+})();
+</script>
+</body>
+</html>

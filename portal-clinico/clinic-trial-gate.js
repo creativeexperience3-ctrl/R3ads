@@ -24,17 +24,41 @@
       .catch(function () { return null; }); // sin red/permiso: no se muestra el aviso, las reglas igual protegen
   }
 
-  function mostrarBanner() {
+  // Copia distinta por estado: 'prueba_bloqueada' (nunca activó, ver arriba),
+  // 'cancelada' (el propio admin canceló desde Mi-Suscripcion.html) y
+  // 'suspendida' (PayPal reportó un cobro fallido/expirado — paypalWebhook).
+  // Las tres bloquean el acceso IGUAL en firestore.rules (clinicActiva()
+  // solo exige 'activa'); el mensaje solo ayuda al admin a entender por qué
+  // y a dónde ir a resolverlo — Mi-Suscripcion.html reactiva en los tres
+  // casos (revisarSuscripcionPayPal/crearSuscripcionPayPal, según si ya
+  // existe o no un paypalSubscriptionId vigente).
+  var BANNER_COPY = {
+    prueba_bloqueada: {
+      texto: '👀 Estás en <b>vista previa</b> — activa tu prueba gratis de 7 días para guardar pacientes, consultas y todo lo demás.',
+      cta: 'Activar prueba gratis'
+    },
+    cancelada: {
+      texto: '⏸️ Tu suscripción está <b>cancelada</b> — reactivala para volver a guardar pacientes, consultas y todo lo demás.',
+      cta: 'Reactivar suscripción'
+    },
+    suspendida: {
+      texto: '⚠️ Tu suscripción está <b>suspendida</b> — puede que PayPal no haya podido cobrar. Revisala para no perder acceso.',
+      cta: 'Revisar suscripción'
+    }
+  };
+
+  function mostrarBanner(estado) {
     if (document.getElementById('trial-gate-banner')) return; // ya está
+    var copy = BANNER_COPY[estado] || BANNER_COPY.prueba_bloqueada;
     var b = document.createElement('div');
     b.id = 'trial-gate-banner';
     b.style.cssText = 'position:sticky;top:0;z-index:9999;display:flex;align-items:center;justify-content:center;' +
       'gap:14px;flex-wrap:wrap;padding:10px 16px;background:#242F40;color:#fff;font-family:system-ui,sans-serif;' +
       'font-size:13.5px;text-align:center';
     b.innerHTML =
-      '<span>👀 Estás en <b>vista previa</b> — activa tu prueba gratis de 7 días para guardar pacientes, consultas y todo lo demás.</span>' +
-      '<a href="Auth.html?activar=1" style="background:#CCA43B;color:#242F40;padding:6px 14px;border-radius:6px;' +
-      'font-weight:700;text-decoration:none;white-space:nowrap">Activar prueba gratis</a>';
+      '<span>' + copy.texto + '</span>' +
+      '<a href="Mi-Suscripcion.html" style="background:#CCA43B;color:#242F40;padding:6px 14px;border-radius:6px;' +
+      'font-weight:700;text-decoration:none;white-space:nowrap">' + copy.cta + '</a>';
     document.body.insertBefore(b, document.body.firstChild);
   }
 

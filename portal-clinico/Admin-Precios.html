@@ -164,6 +164,7 @@ body { margin: 0; background: #F4F6FB; font-family: system-ui,-apple-system,'Seg
     <a class="ap-link ghost" href="Personal.html">Personal</a>
     <a class="ap-link ghost" href="Medicamentos.html">Medicamentos</a>
     <a class="ap-link ghost" href="Admin-Usuarios.html">Usuarios</a>
+    <a class="ap-link ghost" href="Mi-Suscripcion.html">Suscripción</a>
     <a class="ap-link ghost" href="#" id="ap-logout">Salir</a>
   </div>
 </div>
@@ -231,7 +232,7 @@ body { margin: 0; background: #F4F6FB; font-family: system-ui,-apple-system,'Seg
     if (!user) { window.location.href = 'Auth.html?returnTo=Admin-Precios.html'; return; }
     r3adsStaff.resolveClinicId(user, function (clinicId) {
       CLINIC_ID = clinicId;
-      r3adsTrialGate.cargar(CLINIC_ID).then(function (estado) { if (estado === 'prueba_bloqueada') r3adsTrialGate.mostrarBanner(); });
+      r3adsTrialGate.cargar(CLINIC_ID).then(function (estado) { if (estado === 'prueba_bloqueada' || estado === 'suspendida' || estado === 'cancelada') r3adsTrialGate.mostrarBanner(estado); });
       cargarBrandingReal();
       r3adsStaff.checkAdmin(user, CLINIC_ID, function (ok) {
         if (!ok) { window.location.href = 'Auth.html'; return; }

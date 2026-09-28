@@ -332,11 +332,19 @@ body { margin: 0; background: #F4F6FB; font-family: 'Segoe UI', Arial, sans-seri
   // App Check (2026-09-26): misma site key que portal-clinico/firebase-init.js
   // — no es secreta, es pública por diseño. Panel de superadmin, mismo motivo
   // para protegerlo que el resto del proyecto.
+  // try/catch a propósito — ver portal-clinico/firebase-init.js: sin esto,
+  // un fallo del script de reCAPTCHA Enterprise (ej. bloqueado por un
+  // ad-blocker) tumba TODO este bloque antes de definir auth/db, rompiendo
+  // el login del panel de superadmin entero.
   if (firebase.appCheck) {
-    firebase.appCheck().activate(
-      new firebase.appCheck.ReCaptchaEnterpriseProvider('6LeCddAtAAAAACM_6iq-lJ8Kdl0tDVu9-Av2Rbhw'),
-      true
-    );
+    try {
+      firebase.appCheck().activate(
+        new firebase.appCheck.ReCaptchaEnterpriseProvider('6LeCddAtAAAAACM_6iq-lJ8Kdl0tDVu9-Av2Rbhw'),
+        true
+      );
+    } catch (err) {
+      console.error('[portal-admin] App Check no se pudo activar (modo monitoreo, no debería bloquear nada):', err);
+    }
   }
   var auth = app.auth();
   var db = app.firestore();
@@ -719,10 +727,14 @@ body { margin: 0; background: #F4F6FB; font-family: 'Segoe UI', Arial, sans-seri
     /* App Check es por instancia de app — sin esto, esta instancia secundaria
        queda sin token válido y se rompe en cuanto Auth pase a "Aplicar". */
     if (firebase.appCheck) {
-      firebase.appCheck(secondaryApp).activate(
-        new firebase.appCheck.ReCaptchaEnterpriseProvider('6LeCddAtAAAAACM_6iq-lJ8Kdl0tDVu9-Av2Rbhw'),
-        true
-      );
+      try {
+        firebase.appCheck(secondaryApp).activate(
+          new firebase.appCheck.ReCaptchaEnterpriseProvider('6LeCddAtAAAAACM_6iq-lJ8Kdl0tDVu9-Av2Rbhw'),
+          true
+        );
+      } catch (err) {
+        console.error('[portal-admin] App Check (instancia secundaria) no se pudo activar:', err);
+      }
     }
     var secondaryAuth = secondaryApp.auth();
     var tempPwd = 'Rtemp!' + Math.random().toString(36).slice(2, 10);
