@@ -1,0 +1,391 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ancla · De Excel a un sistema real</title>
+<meta name="description" content="Deja el Excel atrás. Mira cómo funciona Ancla, el sistema de gestión clínica que agenda tu llamada de bienvenida y te asigna soporte 24/7 desde el día uno.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Ancla · De Excel a un sistema real">
+<meta property="og:description" content="Deja el Excel atrás. Mira cómo funciona Ancla, agenda tu llamada de bienvenida y prueba gratis 7 días.">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 22 26'%3E%3Ccircle cx='11' cy='5' r='4' fill='none' stroke='%23242F40' stroke-width='2.4'/%3E%3Cpath d='M11 9v15M4 24h14' stroke='%23242F40' stroke-width='2.4' stroke-linecap='round'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --jet:        #242F40;
+  --jet-deep:   #1c2534;
+  --graphite:   #363636;
+  --bronze:     #CCA43B;
+  --bg:         #F6F6F7;
+  --card:       #FFFFFF;
+  --txt-2:      #4a4a4a;
+  --txt-3:      #5a5a5a;
+  --txt-4:      #6b6b6b;
+  --line:       rgba(36,47,64,0.12);
+  --maxw:       1000px;
+  --pad:        clamp(20px,5vw,64px);
+  --ease-decel: cubic-bezier(.22,1,.36,1);
+}
+*, *::before, *::after { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  margin: 0;
+  font-family: 'IBM Plex Sans', system-ui, sans-serif;
+  background: var(--bg);
+  color: var(--graphite);
+  -webkit-font-smoothing: antialiased;
+}
+a { color: var(--jet); text-decoration: none; }
+a:hover { color: var(--bronze); }
+a:focus-visible, .btn:focus-visible { outline: 2px solid var(--bronze); outline-offset: 3px; border-radius: 4px; }
+
+#video, #pasos { scroll-margin-top: 84px; }
+
+.skip-link {
+  position: absolute; left: 12px; top: -60px; z-index: 50;
+  background: var(--jet); color: #fff; padding: 10px 16px; border-radius: 10px;
+  font-size: 14px; font-weight: 600; transition: top .2s ease;
+}
+.skip-link:focus { top: 12px; color: #fff; }
+
+.reveal {
+  opacity: 0; transform: translateY(16px);
+  transition: opacity .6s var(--ease-decel), transform .6s var(--ease-decel);
+}
+.reveal.is-visible { opacity: 1; transform: translateY(0); }
+@media (prefers-reduced-motion: reduce) {
+  .reveal { opacity: 1; transform: none; transition: none; }
+}
+
+.wrap { max-width: var(--maxw); margin: 0 auto; padding-left: var(--pad); padding-right: var(--pad); }
+.eyebrow {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 13px; font-weight: 600; letter-spacing: 0.08em;
+  text-transform: uppercase; color: var(--txt-4); margin-bottom: 10px;
+}
+
+/* ── Botones ── */
+.btn {
+  display: inline-block; border-radius: 10px; font-weight: 600;
+  font-size: 15px; padding: 14px 26px; border: 1.5px solid transparent;
+  transition: background-color .15s ease, color .15s ease, border-color .15s ease,
+              transform .15s ease, box-shadow .2s ease;
+}
+.btn-primary { background: var(--jet); color: #fff; box-shadow: 0 1px 2px rgba(36,47,64,.18); }
+.btn-primary:hover { background: var(--jet-deep); color: #fff; transform: translateY(-1px); box-shadow: 0 10px 22px rgba(36,47,64,.28); }
+.btn-primary:active { transform: translateY(0); box-shadow: 0 3px 8px rgba(36,47,64,.24); }
+.btn-outline { border-color: var(--jet); color: var(--jet); }
+.btn-outline:hover { background: var(--jet); color: #fff; transform: translateY(-1px); }
+.btn-light { background: #fff; color: var(--jet); box-shadow: 0 1px 2px rgba(0,0,0,.1); }
+.btn-light:hover { color: var(--jet); transform: translateY(-1px); box-shadow: 0 10px 24px rgba(0,0,0,.22); }
+.btn-lg { padding: 17px 34px; font-size: 16.5px; }
+
+/* ── Logo ── */
+.logo { display: flex; align-items: center; gap: 10px; }
+.logo-word { font-size: 20px; font-weight: 700; color: var(--jet); letter-spacing: -0.01em; }
+
+/* ── Nav (minimalista: solo marca, sin distraer del CTA) ── */
+.nav {
+  position: sticky; top: 0; z-index: 20;
+  background: rgba(246,246,247,0.92); backdrop-filter: blur(8px);
+  border-bottom: 1px solid rgba(36,47,64,0.1);
+}
+.nav-row { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding-top: 16px; padding-bottom: 16px; }
+
+/* ── Hero ── */
+.hero-section { position: relative; overflow: hidden; text-align: center; }
+.hero-glow {
+  position: absolute; width: 620px; height: 620px; border-radius: 50%;
+  background: radial-gradient(circle at 50% 35%, rgba(36,47,64,0.08), transparent 70%);
+  top: -320px; left: 50%; transform: translateX(-50%); pointer-events: none;
+}
+.hero {
+  position: relative; padding-top: clamp(48px,8vw,80px); padding-bottom: clamp(32px,6vw,56px);
+}
+.hero h1 {
+  font-size: clamp(2.1rem,5vw,3.1rem); line-height: 1.12; font-weight: 700;
+  color: var(--jet); margin: 0 0 20px; letter-spacing: -0.01em;
+}
+.hero h1 span { color: var(--bronze); }
+.hero p {
+  font-size: clamp(1.05rem,1.3vw,1.2rem); line-height: 1.6;
+  color: var(--txt-2); margin: 0 auto 32px; max-width: 620px;
+}
+.hero-ctas { display: flex; gap: 14px; flex-wrap: wrap; justify-content: center; margin-bottom: 28px; }
+
+.trust-strip { border-bottom: 1px solid rgba(36,47,64,0.08); background: rgba(36,47,64,0.02); }
+.trust-strip-inner { display: flex; gap: 22px; flex-wrap: wrap; justify-content: center; padding-top: 16px; padding-bottom: 16px; }
+.chip {
+  font-size: 13px; color: var(--txt-4); display: flex; align-items: center; gap: 7px;
+  padding: 6px 12px 6px 10px; border-radius: 999px;
+  background: rgba(36,47,64,0.04); border: 1px solid rgba(36,47,64,0.08);
+}
+.dot { width: 6px; height: 6px; border-radius: 50%; background: var(--bronze); flex-shrink: 0; }
+
+/* ── Sección de video ── */
+.section { padding-top: clamp(48px,7vw,80px); padding-bottom: clamp(48px,7vw,80px); }
+.section-head { text-align: center; max-width: 640px; margin: 0 auto 40px; }
+.section-head h2 {
+  font-size: clamp(1.6rem,3.2vw,2.2rem); font-weight: 700; color: var(--jet); margin: 0 0 12px;
+}
+.section-head p { font-size: 15.5px; line-height: 1.6; color: var(--txt-3); margin: 0; }
+
+/* Placeholder de video 16:9 — reemplazar el contenido de #video-frame por un
+   <iframe> (YouTube/Vimeo) o un <video src="..."> real cuando exista la grabación. */
+.video-frame {
+  position: relative; aspect-ratio: 16/9; border-radius: 18px; overflow: hidden;
+  background: linear-gradient(145deg, var(--jet) 0%, var(--jet-deep) 100%);
+  box-shadow: 0 28px 60px -16px rgba(36,47,64,0.35);
+  display: flex; align-items: center; justify-content: center;
+}
+.video-frame::before {
+  content: ""; position: absolute; inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  opacity: 0.05; mix-blend-mode: overlay; pointer-events: none;
+}
+.video-play {
+  position: relative; z-index: 1; width: 78px; height: 78px; border-radius: 50%;
+  background: rgba(255,255,255,0.14); border: 1.5px solid rgba(255,255,255,0.35);
+  display: flex; align-items: center; justify-content: center;
+  transition: transform .2s var(--ease-decel), background-color .2s ease;
+}
+.video-frame:hover .video-play { transform: scale(1.06); background: rgba(255,255,255,0.2); }
+.video-caption {
+  position: relative; z-index: 1; position: absolute; bottom: 26px; left: 0; right: 0;
+  text-align: center; color: rgba(255,255,255,0.78); font-size: 14px;
+}
+.video-note {
+  text-align: center; font-size: 13px; color: var(--txt-4); margin-top: 14px;
+}
+
+/* ── Pasos tras contratar ── */
+.steps { display: grid; gap: 20px; grid-template-columns: repeat(2, 1fr); }
+@media (max-width: 700px) { .steps { grid-template-columns: 1fr; } }
+.step-card {
+  border: 1px solid var(--line); border-radius: 16px; padding: 26px; background: var(--card);
+  display: flex; gap: 18px; align-items: flex-start;
+  transition: transform .25s var(--ease-decel), box-shadow .25s ease, border-color .25s ease;
+}
+.step-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 18px 36px -10px rgba(36,47,64,0.16);
+  border-color: rgba(36,47,64,0.22);
+}
+.step-num {
+  flex-shrink: 0; width: 40px; height: 40px; border-radius: 10px;
+  background: rgba(204,164,59,0.12); color: var(--jet);
+  font-family: 'IBM Plex Mono', monospace; font-weight: 700; font-size: 16px;
+  display: flex; align-items: center; justify-content: center;
+}
+.step-card h3 { font-size: 16.5px; font-weight: 600; color: var(--jet); margin: 0 0 6px; }
+.step-card p { font-size: 14.5px; line-height: 1.55; color: var(--txt-3); margin: 0; }
+
+/* ── Banda "de Excel a digital" ── */
+.band {
+  background: var(--card); border-top: 1px solid rgba(36,47,64,0.1); border-bottom: 1px solid rgba(36,47,64,0.1);
+}
+.band-inner { display: flex; align-items: center; justify-content: center; gap: 28px; flex-wrap: nowrap; text-align: center; }
+@media (max-width: 560px) { .band-inner { flex-direction: column; } }
+.band-before, .band-after {
+  display: flex; flex-direction: column; align-items: center; gap: 10px; width: 180px; max-width: 42vw;
+}
+.band-label { font-family: 'IBM Plex Mono', monospace; font-size: 12px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--txt-4); }
+.band-visual {
+  width: 72px; height: 72px; border-radius: 16px; display: flex; align-items: center; justify-content: center;
+  border: 1.5px solid var(--line);
+}
+.band-before .band-visual { background: rgba(36,47,64,0.04); }
+.band-after .band-visual { background: var(--jet); border-color: var(--jet); }
+.band-arrow { color: var(--bronze); flex-shrink: 0; }
+@media (max-width: 560px) { .band-arrow { transform: rotate(90deg); } }
+.band h2 { font-size: clamp(1.5rem,3vw,2rem); color: var(--jet); margin: 24px 0 0; max-width: 560px; }
+
+/* ── CTA de cierre ── */
+.cta {
+  position: relative; overflow: hidden; text-align: center;
+  background: var(--jet); border-top: 2px solid var(--bronze);
+  padding: clamp(56px,8vw,96px) var(--pad);
+}
+.cta::before {
+  content: ""; position: absolute; inset: 0; z-index: 0;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  opacity: 0.05; mix-blend-mode: overlay; pointer-events: none;
+}
+.cta-inner { position: relative; z-index: 1; max-width: 640px; margin: 0 auto; }
+.cta h2 { font-size: clamp(1.7rem,3.5vw,2.3rem); font-weight: 700; color: #fff; margin: 0 0 16px; }
+.cta p { font-size: 16px; line-height: 1.6; color: rgba(255,255,255,0.72); margin: 0 0 32px; }
+
+/* ── Footer ── */
+.footer { text-align: center; padding: 32px var(--pad); font-size: 13px; color: var(--txt-4); }
+.footer a { color: var(--txt-3); }
+</style>
+</head>
+<body>
+
+<a class="skip-link" href="#video">Saltar al contenido</a>
+
+<!-- ═══ NAV ═══ -->
+<nav class="nav">
+  <div class="wrap nav-row">
+    <a href="index.html" class="logo">
+      <svg width="22" height="26" viewBox="0 0 22 26" fill="none" aria-hidden="true">
+        <circle cx="11" cy="5" r="4" stroke="#242F40" stroke-width="2"/>
+        <path d="M11 9v15M4 24h14" stroke="#242F40" stroke-width="2" stroke-linecap="round"/>
+      </svg>
+      <span class="logo-word">Ancla</span>
+    </a>
+    <a href="Precios.html" class="btn btn-primary btn-sm" style="padding:10px 20px;font-size:14px">Explorar el servicio</a>
+  </div>
+</nav>
+
+<!-- ═══ HERO ═══ -->
+<div class="hero-section">
+  <div class="hero-glow" aria-hidden="true"></div>
+  <div class="wrap hero">
+    <div class="eyebrow reveal">Software de gestión clínica</div>
+    <h1 class="reveal">De Excel a un <span>sistema real</span> para tu clínica.</h1>
+    <p class="reveal" style="transition-delay:.06s">
+      Mira en menos de tres minutos cómo Ancla reemplaza las hojas de Excel, los cuadernos
+      y las notas sueltas por un solo sistema de expedientes, caja, laboratorio y consultas.
+    </p>
+    <div class="hero-ctas reveal" style="transition-delay:.1s">
+      <a href="Precios.html" class="btn btn-primary btn-lg">Explorar el servicio</a>
+      <a href="#video" class="btn btn-outline btn-lg">Ver el video</a>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ FRANJA DE CONFIANZA ═══ -->
+<div class="trust-strip">
+  <div class="wrap trust-strip-inner">
+    <span class="chip"><span class="dot"></span>Llamada de bienvenida incluida</span>
+    <span class="chip"><span class="dot"></span>7 días gratis, cancela cuando quieras</span>
+    <span class="chip"><span class="dot"></span>Soporte 24/7 asignado a tu clínica</span>
+  </div>
+</div>
+
+<!-- ═══ VIDEO ═══ -->
+<div id="video" class="wrap section">
+  <div class="section-head reveal">
+    <div class="eyebrow">Cómo funciona</div>
+    <h2>Todo el sistema, explicado en un video.</h2>
+    <p>Expedientes, caja, laboratorio y consultas — así se ve Ancla trabajando en una clínica real.</p>
+  </div>
+
+  <!-- Placeholder del video: reemplazar este bloque por un <iframe> de
+       YouTube/Vimeo o un <video src="..." controls> cuando la grabación
+       esté lista. Se deja el aspect-ratio 16:9 y el botón de play como
+       referencia visual únicamente. -->
+  <div class="video-frame reveal" style="transition-delay:.08s" role="img" aria-label="Video explicativo de Ancla — próximamente">
+    <div class="video-play" aria-hidden="true">
+      <svg width="26" height="26" viewBox="0 0 24 24" fill="#fff"><path d="M8 5v14l11-7z"/></svg>
+    </div>
+    <div class="video-caption">Video explicativo — próximamente</div>
+  </div>
+  <p class="video-note">¿Ya viste el video? Da clic en «Explorar el servicio» para elegir tu plan.</p>
+</div>
+
+<!-- ═══ QUÉ PASA AL CONTRATAR ═══ -->
+<div id="pasos" class="wrap section">
+  <div class="section-head reveal">
+    <div class="eyebrow">Al contratar</div>
+    <h2>No te quedas solo con el sistema.</h2>
+    <p>Desde el momento en que activas tu prueba, empieza un acompañamiento pensado para tu clínica.</p>
+  </div>
+  <div class="steps">
+    <div class="step-card reveal">
+      <div class="step-num">1</div>
+      <div>
+        <h3>Agendamos una llamada a tu hora</h3>
+        <p>Eliges el día y la hora que más te convenga — nosotros nos ajustamos a la agenda de tu clínica, no al revés.</p>
+      </div>
+    </div>
+    <div class="step-card reveal" style="transition-delay:.06s">
+      <div class="step-num">2</div>
+      <div>
+        <h3>Te mostramos todas las funcionalidades</h3>
+        <p>Recorremos expedientes, caja, laboratorio, consultas y todo lo que trae tu plan, con ejemplos reales.</p>
+      </div>
+    </div>
+    <div class="step-card reveal" style="transition-delay:.12s">
+      <div class="step-num">3</div>
+      <div>
+        <h3>Anotamos tus necesidades y tu feedback</h3>
+        <p>Cada clínica trabaja distinto — apuntamos lo específico de la tuya y lo que nos compartas para ajustar el sistema.</p>
+      </div>
+    </div>
+    <div class="step-card reveal" style="transition-delay:.18s">
+      <div class="step-num">4</div>
+      <div>
+        <h3>Te asignamos un agente de soporte 24/7</h3>
+        <p>Una persona de nuestro equipo queda disponible a cualquier hora para resolver dudas o darte soporte cuando lo necesites.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ DE EXCEL A DIGITAL ═══ -->
+<div class="band">
+  <div class="wrap section">
+    <div class="band-inner reveal">
+      <div class="band-before">
+        <span class="band-label">Hoy</span>
+        <div class="band-visual">
+          <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#242F40" stroke-width="1.6"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M3 15h18M9 3v18M15 3v18"/></svg>
+        </div>
+        <span style="font-size:14px;color:var(--txt-3)">Hojas de Excel, cuadernos, notas sueltas</span>
+      </div>
+      <svg class="band-arrow" width="28" height="20" viewBox="0 0 28 20" fill="none" aria-hidden="true"><path d="M0 10h26M18 2l8 8-8 8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <div class="band-after">
+        <span class="band-label">Con Ancla</span>
+        <div class="band-visual">
+          <svg width="18" height="22" viewBox="0 0 22 26" fill="none" aria-hidden="true">
+            <circle cx="11" cy="5" r="4" stroke="#ffffff" stroke-width="2"/>
+            <path d="M11 9v15M4 24h14" stroke="#ffffff" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <span style="font-size:14px;color:var(--txt-3)">Un sistema, un solo lugar, siempre al día</span>
+      </div>
+    </div>
+    <h2 class="reveal" style="text-align:center;margin-left:auto;margin-right:auto">De Excel a digital: la mejor decisión que tomará tu clínica este año.</h2>
+  </div>
+</div>
+
+<!-- ═══ CTA DE CIERRE ═══ -->
+<div class="cta">
+  <div class="cta-inner reveal">
+    <h2>¿Listo para dejar el Excel atrás?</h2>
+    <p>Explora los planes, elige el tuyo y empieza tu prueba gratis de 7 días. Nosotros te llamamos para el resto.</p>
+    <a href="Precios.html" class="btn btn-light btn-lg">Explorar el servicio</a>
+  </div>
+</div>
+
+<!-- ═══ FOOTER ═══ -->
+<footer class="footer">
+  © 2026 Ancla, un producto de <a href="https://r3ads.com" target="_blank" rel="noopener">R3ads</a>. Hecho en Centroamérica.
+</footer>
+
+<script>
+(function () {
+  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var els = document.querySelectorAll('.reveal');
+  if (reduce || !('IntersectionObserver' in window)) {
+    els.forEach(function (el) { el.classList.add('is-visible'); });
+    return;
+  }
+  var io = new IntersectionObserver(function (entries) {
+    entries.forEach(function (entry) {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('is-visible');
+        io.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.15, rootMargin: '0px 0px -40px 0px' });
+  els.forEach(function (el) { io.observe(el); });
+})();
+</script>
+
+</body>
+</html>
