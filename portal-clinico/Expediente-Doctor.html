@@ -2186,6 +2186,14 @@ summary.ed-meds-cat { list-style: revert; }
               '<textarea class="ed-textarea" id="cajaconst-motivo" rows="2" placeholder="Texto que aparecerá en la constancia (ej. Reposo por cuadro gripal agudo)"></textarea></div>' +
             '<div class="ed-fgroup full"><label class="ed-label">Observaciones adicionales</label>' +
               '<textarea class="ed-textarea" id="cajaconst-obs" rows="2" placeholder="Restricciones, recomendaciones laborales, etc."></textarea></div>' +
+            /* El nombre que va en la firma sale de /clinics/{id}/personal, igual
+               que en la consulta médica — NO de la cuenta con la que se entró.
+               Las cuentas del portal son compartidas (ver Personal.html), así
+               que la cuenta no dice quién atendió. Antes esto usaba
+               currentUser.displayName || currentUser.email, y como displayName
+               casi siempre está vacío, la constancia se firmaba con un correo. */
+            '<div class="ed-fgroup full"><label class="ed-label">Médico tratante *</label>' +
+              '<select class="ed-input" id="cajaconst-medico" required>' + buildAtendidoPorOptionsHtml() + '</select></div>' +
           '</div>' +
           '<div style="font-size:11px;color:#92400E;margin-top:6px">El formato sigue la plantilla "FORMATO DE CONSTANCIA (NO CAMBIAR)".</div>' +
           '<div style="display:flex;gap:10px;justify-content:flex-end;margin-top:18px">' +
@@ -2201,8 +2209,9 @@ summary.ed-meds-cat { list-style: revert; }
     $id('cajaconst-guardar').onclick = function(){
       if (!esMedicoTratanteClient()) { showAlert('Solo el médico puede emitir constancias.', 'error'); return; }
       var dias = $val('cajaconst-dias'), desde = $val('cajaconst-desde'), motivo = $val('cajaconst-motivo');
+      var medico = $val('cajaconst-medico');
       if (!dias || !desde || !motivo) { showAlert('Días, desde y motivo son obligatorios', 'error'); return; }
-      var medico = r3adsAuth.currentUser.displayName || r3adsAuth.currentUser.email;
+      if (!medico) { showAlert('Indicá el médico tratante que firma la constancia.', 'error'); return; }
       var constanciaPrep = prepararConstancia(
         consultaId,
         { codigoPaciente: d.codigoPaciente, datosGenerales: dgPac },
@@ -2245,6 +2254,10 @@ summary.ed-meds-cat { list-style: revert; }
           '<h3 style="margin:0 0 6px;color:#242F40">Emitir referencia médica</h3>' +
           '<p style="margin:0 0 14px;font-size:13px;color:#6B7280">Paciente: <b>' + esc(nombrePac) + '</b> · Expediente <code style="background:#F3F4F6;padding:1px 6px;border-radius:4px">' + esc((pacienteInfo && pacienteInfo.codigoPaciente) || '—') + '</code></p>' +
           buildReferenciaCamposHtml('refmodal') +
+          /* Misma razón que en el modal de constancia: la firma sale del
+             personal de la clínica, no de la cuenta. */
+          '<div class="ed-fgroup full" style="margin-top:10px"><label class="ed-label">Médico tratante *</label>' +
+            '<select class="ed-input" id="refmodal-medico" required>' + buildAtendidoPorOptionsHtml() + '</select></div>' +
           '<div style="display:flex;gap:10px;justify-content:flex-end;margin-top:18px">' +
             '<button class="ed-btn ed-btn-ghost" id="refmodal-cancelar">Cancelar</button>' +
             '<button class="ed-btn ed-btn-primary" id="refmodal-guardar">Emitir y abrir referencia</button>' +
@@ -2259,8 +2272,9 @@ summary.ed-meds-cat { list-style: revert; }
       if (!esMedicoTratanteClient()) { showAlert('Solo el médico puede emitir referencias.', 'error'); return; }
       var faltantes = [];
       var referencia = collectReferenciaData('refmodal', faltantes, true);
+      var medico = $val('refmodal-medico');
+      if (!medico) faltantes.push('Médico tratante');
       if (faltantes.length) { showAlert('Faltan campos obligatorios: ' + faltantes.join(', '), 'error'); return; }
-      var medico = r3adsAuth.currentUser.displayName || r3adsAuth.currentUser.email;
       var referenciaPrep = prepararReferencia(consultaId, pacienteInfo, referencia.datos, medico);
       showOverlay('Emitiendo referencia…');
       var batch = r3adsDb.batch();
