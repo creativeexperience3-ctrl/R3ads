@@ -1,0 +1,20 @@
+[
+  {
+    "origin": [
+      "https://r3ads-clinic-crm.web.app",
+      "https://r3ads-clinic-crm.firebaseapp.com",
+      "https://ancla-paciente.web.app",
+      "https://ancla-paciente.firebaseapp.com",
+      "https://ancla.r3ads.com",
+      "https://r3ads.com",
+      "https://www.r3ads.com",
+      "http://localhost:5000",
+      "http://localhost:5002",
+      "http://127.0.0.1:5000",
+      "http://127.0.0.1:5002"
+    ],
+    "method": ["GET", "HEAD"],
+    "responseHeader": ["Content-Type", "Content-Disposition", "Content-Length"],
+    "maxAgeSeconds": 3600
+  }
+]
