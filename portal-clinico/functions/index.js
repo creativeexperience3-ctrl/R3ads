@@ -163,7 +163,51 @@ function slugify(texto) {
     .slice(0, 40) || 'clinica';
 }
 
-exports.crearClinicaSelfService = functions.https.onCall(async (data, context) => {
+/* ════════════════════════════════════════════════════════════════
+   APP CHECK EN "APLICAR" — POR FUNCIÓN, NO POR TODAS (2026-09-29)
+
+   App Check estaba registrado desde el 2026-09-26 pero en modo monitoreo:
+   nada impedía que un bot o un script golpeara estas funciones. Acá se
+   pasa a exigirlo (`enforceAppCheck: true`) SOLO en las que el abuso
+   automatizado es la amenaza real, y se deja fuera a propósito todo lo
+   que está en un camino de entrada o de recuperación.
+
+   SE EXIGE en:
+     · crearClinicaSelfService  — alta de clínicas: sin esto, un script
+       puede crear clínicas sin límite.
+     · crearSuscripcionPayPal / revisarSuscripcionPayPal — todo lo que
+       toca dinero.
+     · registrarIntentoLogin — es el único endpoint sin autenticar que
+       ESCRIBE: un bot podía sumar intentos fallidos contra el correo de
+       cualquiera y dejarlo bloqueado 15 minutos (una negación de servicio
+       sobre el login ajeno). Exigirlo acá NO puede impedir un login: si
+       la llamada falla, Auth.html solo pierde el contador y muestra el
+       error de Firebase; el signIn ya ocurrió por su cuenta.
+
+   NO se exige en (y no es un olvido):
+     · verificar2FA — si App Check fallara, un usuario con segundo factor
+       activo no podría terminar de entrar NUNCA. El segundo factor no
+       puede depender de que reCAPTCHA le dé un buen puntaje.
+     · registrarLoginExitoso, verificarCodigoReset — limpian el bloqueo de
+       login y completan un reset de contraseña. Son caminos de
+       recuperación: bloquearlos deja a alguien afuera de su cuenta.
+     · cancelarSuscripcionPayPal — si un cliente no puede cancelar, abre
+       una disputa en PayPal, que es justo el riesgo que hay que evitar.
+     · el resto de las funciones de 2FA — ya exigen sesión y tienen su
+       propio límite de intentos.
+     · paypalWebhook — lo llama PayPal, servidor a servidor. No hay
+       navegador ni token de App Check posible.
+
+   Ojo: esto es independiente de pasar Firestore / Storage / Auth a
+   "Aplicar" en la consola de App Check, que es otra decisión y tiene otro
+   radio de impacto (ver RESPALDOS.md y las métricas del 2026-09-29:
+   Firestore venía con 8% de tráfico sin verificar por el bug de
+   activación que se arregló hoy).
+   ════════════════════════════════════════════════════════════════ */
+
+exports.crearClinicaSelfService = functions
+  .runWith({ enforceAppCheck: true })
+  .https.onCall(async (data, context) => {
   if (!context.auth) {
     throw new functions.https.HttpsError('unauthenticated', 'Debes iniciar sesión para crear una clínica.');
   }
@@ -274,7 +318,7 @@ async function paypalToken() {
 }
 
 exports.crearSuscripcionPayPal = functions
-  .runWith({ secrets: ['PAYPAL_LIVE_CLIENT_ID', 'PAYPAL_LIVE_CLIENT_SECRET'] })
+  .runWith({ secrets: ['PAYPAL_LIVE_CLIENT_ID', 'PAYPAL_LIVE_CLIENT_SECRET'], enforceAppCheck: true })
   .https.onCall(async (data, context) => {
     if (!context.auth) {
       throw new functions.https.HttpsError('unauthenticated', 'Debes iniciar sesión.');
@@ -405,7 +449,7 @@ function requireAdminUsuario(context) {
 }
 
 exports.revisarSuscripcionPayPal = functions
-  .runWith({ secrets: ['PAYPAL_LIVE_CLIENT_ID', 'PAYPAL_LIVE_CLIENT_SECRET'] })
+  .runWith({ secrets: ['PAYPAL_LIVE_CLIENT_ID', 'PAYPAL_LIVE_CLIENT_SECRET'], enforceAppCheck: true })
   .https.onCall(async (data, context) => {
     const usuario = await requireAdminUsuario(context);
 
@@ -639,7 +683,9 @@ function loginAttemptsRef(email) {
   return db.collection('loginAttempts').doc(String(email || '').trim().toLowerCase());
 }
 
-exports.registrarIntentoLogin = functions.https.onCall(async (data, context) => {
+exports.registrarIntentoLogin = functions
+  .runWith({ enforceAppCheck: true })
+  .https.onCall(async (data, context) => {
   const email = String((data && data.email) || '').trim().toLowerCase();
   if (!email) throw new functions.https.HttpsError('invalid-argument', 'Falta el correo.');
 
