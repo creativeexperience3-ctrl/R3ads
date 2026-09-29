@@ -205,6 +205,46 @@ function slugify(texto) {
    activación que se arregló hoy).
    ════════════════════════════════════════════════════════════════ */
 
+/* Subcolecciones de /clinics/{id} y colecciones de nivel raíz que llevan el
+   clinicId como CAMPO. Juntas son todo lo que puede sobrevivir a una clínica
+   dada de baja. */
+const SUBCOLECCIONES_CLINICA = ['personal', 'catalogoConfig', 'siteConfig', 'medicamentos'];
+const COLECCIONES_POR_CLINIC_ID = [
+  'usuarios', 'expedientes', 'consultas', 'resultadosPruebas',
+  'examenesLaboratorio', 'constancias', 'electrocardiogramas', 'referencias',
+];
+
+/* ¿Queda algo de un tenant anterior bajo este id?
+
+   Borrar /clinics/{id} en Firestore NO borra sus subcolecciones — siguen
+   existiendo aunque el documento padre desaparezca. Y las colecciones de
+   nivel raíz ni siquiera cuelgan de ahí: se filtran por el CAMPO clinicId.
+   O sea que dar de baja una clínica deja atrás su personal, su catálogo y
+   —lo grave— sus expedientes y consultas.
+
+   Como el id sale de slugificar el nombre, dos clínicas con nombres
+   parecidos producen el mismo slug. Si la primera se dio de baja, la
+   segunda encontraba /clinics/{slug} vacío, lo creaba, y HEREDABA todo lo
+   que la anterior dejó. En un sistema de expedientes médicos eso es
+   entregarle los pacientes de una clínica a otra.
+
+   Pasó de verdad y por eso existe esta función: clinica-r3ads se creó el
+   2026-09-29 y ya traía personal del 2026-09-24, de una prueba anterior con
+   el mismo nombre.
+
+   Son ~12 lecturas por candidato, y normalmente hay un solo candidato. */
+async function slugTieneRestos(candidato) {
+  for (const sub of SUBCOLECCIONES_CLINICA) {
+    const snap = await db.collection('clinics').doc(candidato).collection(sub).limit(1).get();
+    if (!snap.empty) return true;
+  }
+  for (const col of COLECCIONES_POR_CLINIC_ID) {
+    const snap = await db.collection(col).where('clinicId', '==', candidato).limit(1).get();
+    if (!snap.empty) return true;
+  }
+  return false;
+}
+
 exports.crearClinicaSelfService = functions
   .runWith({ enforceAppCheck: true })
   .https.onCall(async (data, context) => {
@@ -240,6 +280,12 @@ exports.crearClinicaSelfService = functions
   const MAX_INTENTOS = 30;
   for (let intento = 0; intento < MAX_INTENTOS; intento++) {
     const candidato = intento === 0 ? base : `${base}-${intento + 1}`;
+
+    /* Que no exista /clinics/{candidato} NO significa que el id esté libre
+       (ver slugTieneRestos). Si quedó cualquier rastro de un tenant anterior
+       con ese mismo id, se pasa al siguiente candidato en vez de heredarlo. */
+    if (await slugTieneRestos(candidato)) continue;
+
     const clinicRef = db.collection('clinics').doc(candidato);
     try {
       await db.runTransaction(async (tx) => {
