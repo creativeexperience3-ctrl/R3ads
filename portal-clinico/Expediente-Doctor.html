@@ -2877,6 +2877,7 @@ summary.ed-meds-cat { list-style: revert; }
         /* Precarga el personal (médicos/enfermería) de ESTA clínica para los
            3 selectores "Atendido por" — ver cargarPersonalAtiende() más abajo. */
         cargarPersonalAtiende();
+        cargarProveedores();
         /* Precarga el catálogo de medicamentos de ESTA clínica (precio,
            excluidoDescuento) para los checklists de Consulta/Completar
            servicio y para facturar en Caja — ver cargarMedicamentos() más abajo. */
@@ -4523,6 +4524,36 @@ summary.ed-meds-cat { list-style: revert; }
         console.warn('[Portal Clínico] No se pudo cargar el personal (Atendido por):', err);
       });
   }
+  /* Laboratorios a los que esta clínica manda las muestras. Viven en
+     /clinics/{id}/proveedores y los administra Proveedores.html. Antes eran
+     tres <option> escritos a mano acá (Labex, Masterlab, Laboratorio
+     Rivera), heredados de CMG: toda clínica del SaaS veía los proveedores de
+     otra clínica y no tenía forma de cargar los suyos. */
+  var _proveedores = [];
+  function cargarProveedores() {
+    r3adsDb.collection('clinics').doc(CLINIC_ID).collection('proveedores').get()
+      .then(function (snap) {
+        var items = [];
+        snap.forEach(function (doc) { items.push(doc.data()); });
+        items.sort(function (a, b) { return (a.nombre || '').localeCompare(b.nombre || ''); });
+        _proveedores = items.map(function (it) { return it.nombre; }).filter(Boolean);
+      })
+      .catch(function (err) {
+        console.warn('[Portal Clínico] No se pudieron cargar los proveedores:', err);
+      });
+  }
+  function buildProveedoresOptionsHtml(seleccionado) {
+    if (!_proveedores.length) {
+      /* Sin proveedores cargados el selector no puede ofrecer nada. Se dice
+         qué hacer en vez de dejar un desplegable vacío sin explicación. */
+      return '<option value="">— Ninguno cargado: agregalos en Proveedores —</option>';
+    }
+    return '<option value="">— Seleccionar —</option>' +
+      _proveedores.map(function (n) {
+        return '<option value="' + esc(n) + '"' + (n === seleccionado ? ' selected' : '') + '>' + esc(n) + '</option>';
+      }).join('');
+  }
+
   function buildAtendidoPorOptionsHtml(seleccionado) {
     if (!_personalAtiende.length) {
       return '<option value="">Cargando personal…</option>';
@@ -5785,7 +5816,11 @@ summary.ed-meds-cat { list-style: revert; }
       /* Abre Pruebas-Rapidas con paciente pre-llenado */
       var url = 'Pruebas-Rapidas.html?dni=' + encodeURIComponent(dgQuick.numeroIdentidad || '') +
                 '&nombre=' + encodeURIComponent(dgQuick.nombreCompleto || '') +
-                '&fechanac=' + encodeURIComponent(dgQuick.fechaNacimiento || '');
+                '&fechanac=' + encodeURIComponent(dgQuick.fechaNacimiento || '') +
+                /* El sexo lo pide la prueba de antígeno y antes no viajaba,
+                   así que había que volver a escribirlo a mano teniéndolo ya
+                   en el expediente. */
+                '&sexo=' + encodeURIComponent(dgQuick.sexo || '');
       window.open(url, '_blank', 'noopener');
     });
     $id('btn-acc-lab').addEventListener('click', function(){
@@ -5994,26 +6029,34 @@ summary.ed-meds-cat { list-style: revert; }
             '<button class="ed-btn ed-btn-ghost" id="qm-lab-todos" style="padding:4px 10px;font-size:11px">Ver todos</button>' +
             '<button class="ed-btn ed-btn-ghost" id="qm-lab-limpiar" style="padding:4px 10px;font-size:11px">Limpiar selección</button>' +
           '</div>' +
-          '<div class="ed-fgroup full" style="flex:1;min-height:0">' +
-            '<div class="ed-meds-list" id="qm-lab-lista" style="max-height:380px;overflow:auto;background:#FAFBFF;display:block">' + groupedHtml + '</div>' +
+          /* min-height en la LISTA, no solo en el contenedor. El modal es un
+             flex column con max-height:92vh, y este .ed-fgroup —que también es
+             flex column— llevaba min-height:0, o sea permiso explícito para
+             encogerse hasta cero. Con overflow:auto, el mínimo automático de
+             la lista también es cero. Resultado: al 100% de zoom, o en
+             cualquier ventana donde el resto del modal (título, buscador, 3
+             botones, 3 selectores, notas y pie) se comiera el alto, la lista
+             quedaba en ~20px y parecía vacía aunque tuviera los 145 exámenes
+             adentro. Al 90% aparecía sola, que fue la pista.
+             El mínimo de 220px gana siempre porque el modal tiene overflow:auto:
+             si no hay lugar, scrollea el modal en vez de aplastar la lista. */
+          '<div class="ed-fgroup full" style="flex:1 1 auto;min-height:220px">' +
+            '<div class="ed-meds-list" id="qm-lab-lista" style="flex:1 1 auto;min-height:180px;max-height:380px;overflow:auto;background:#FAFBFF;display:block">' + groupedHtml + '</div>' +
             '<small style="color:#6B7280;display:block;margin-top:6px">El catálogo es estricto y coincide con el cotizador. Si necesitás agregar un examen nuevo, pedile al admin que lo incluya en la lista del sistema.</small>' +
           '</div>' +
           '<div class="ed-grid ed-grid-2" style="gap:10px;margin-top:10px">' +
             '<div class="ed-fgroup"><label class="ed-label">Proveedor (laboratorio) *</label>' +
               '<select class="ed-input" id="qm-lab-proveedor" style="appearance:auto;-webkit-appearance:menulist">' +
-                '<option value="">— Seleccionar —</option>' +
-                '<option value="Labex">Labex</option>' +
-                '<option value="Masterlab">Masterlab</option>' +
-                '<option value="Laboratorio Rivera">Laboratorio Rivera</option>' +
+                buildProveedoresOptionsHtml() +
               '</select></div>' +
             '<div class="ed-fgroup"><label class="ed-label">Prioridad</label>' +
               '<select class="ed-input" id="qm-lab-prioridad"><option value="rutina">Rutina</option><option value="urgente">Urgente</option></select></div>' +
             '<div class="ed-fgroup full"><label class="ed-label">Solicitado por *</label>' +
               '<select class="ed-input" id="qm-lab-solicitadopor" style="appearance:auto;-webkit-appearance:menulist">' +
-                '<option value="">— Seleccionar —</option>' +
-                '<option value="Dr. Brian Rojas">Dr. Brian Rojas</option>' +
-                '<option value="Dr. Hermes Molina">Dr. Hermes Molina</option>' +
-                '<option value="Dr. Adony Álvarez">Dr. Adony Álvarez</option>' +
+                /* Mismo personal que el resto del portal. "Orden externa" se
+                   agrega aparte: no es alguien de la clínica, es el caso de
+                   una orden que trae el paciente de otro médico. */
+                buildAtendidoPorOptionsHtml() +
                 '<option value="Orden externa">Orden externa</option>' +
               '</select></div>' +
           '</div>' +

@@ -236,13 +236,12 @@ body { margin: 0; background: #F4F6FB; font-family: 'Segoe UI', Arial, sans-seri
         <h1 id="rs-h-name">—</h1>
         <h2 id="rs-h-sub">—</h2>
       </div>
-      <div class="rs-arsa-badge" id="rs-arsa" style="display:none">
-        Certificado de<br>Prueba (ARSA)
-      </div>
+      <!-- Sello ARSA removido: era específico de CMG. Un SaaS no sabe qué
+           marca de prueba compra cada clínica, así que no puede afirmar nada
+           sobre su desempeño ni certificarla ante ningún registro sanitario. -->
     </div>
     <div class="rs-body">
       <h3 class="rs-title">INFORME DE RESULTADOS</h3>
-      <div class="rs-correlativo" id="rs-correlativo" style="display:none"></div>
 
       <div class="rs-section-title">I.- INFORMACIÓN DEL PACIENTE</div>
       <table class="rs-table" id="rs-paciente-table"></table>
@@ -253,10 +252,9 @@ body { margin: 0; background: #F4F6FB; font-family: 'Segoe UI', Arial, sans-seri
       <div class="rs-section-title" id="rs-exam-title">III.- EXÁMENES REALIZADOS</div>
       <table class="rs-table rs-results-table" id="rs-results-table"></table>
 
-      <div class="rs-sensitivity" id="rs-sensitivity" style="display:none">
-        Sensibilidad: 97.1% | Especificidad: 99.5%<br>
-        Porcentajes según especificaciones del fabricante
-      </div>
+      <!-- Sensibilidad/especificidad del fabricante removido: era específico de CMG. Un SaaS no sabe qué
+           marca de prueba compra cada clínica, así que no puede afirmar nada
+           sobre su desempeño ni certificarla ante ningún registro sanitario. -->
 
       <div class="rs-nota">
         <strong>Nota:</strong>
@@ -272,10 +270,7 @@ body { margin: 0; background: #F4F6FB; font-family: 'Segoe UI', Arial, sans-seri
             TOMA Y RECEPCIÓN DE MUESTRAS
           </div>
         </div>
-        <div class="rs-stamp-right" id="rs-qr-container" style="display:none">
-          <canvas id="rs-qr-canvas" class="rs-qr"></canvas>
-          <div class="rs-qr-label">¡Escanea para verificar tus resultados!</div>
-        </div>
+      <!-- QR de verificación removido: era específico de CMG. -->
       </div>
 
       <div class="rs-footer" id="rs-footer">—</div>
@@ -414,14 +409,8 @@ body { margin: 0; background: #F4F6FB; font-family: 'Segoe UI', Arial, sans-seri
     var isAntigeno = data.tipo === 'antigeno';
     var edad = data.edadTxt || (data.edad !== '' && data.edad !== null ? data.edad + ' AÑOS' : '');
 
-    $id('rs-arsa').style.display = isAntigeno ? '' : 'none';
-
-    if (isAntigeno && data.correlativo) {
-      $id('rs-correlativo').style.display = '';
-      $id('rs-correlativo').textContent = data.correlativo;
-    } else {
-      $id('rs-correlativo').style.display = 'none';
-    }
+    /* Sello ARSA y correlativo removidos: registro de CMG ante la Agencia
+       de Regulación Sanitaria, que otra clínica no tiene. */
 
     /* Paciente */
     var pacienteHTML = '';
@@ -476,45 +465,8 @@ body { margin: 0; background: #F4F6FB; font-family: 'Segoe UI', Arial, sans-seri
     }
     $id('rs-results-table').innerHTML = resultsHTML;
 
-    $id('rs-sensitivity').style.display = isAntigeno ? '' : 'none';
-
-    /* QR para antigeno */
-    if (isAntigeno && data._id) {
-      $id('rs-qr-container').style.display = '';
-      generateQR(data._id);
-    } else {
-      $id('rs-qr-container').style.display = 'none';
-    }
   }
 
-  /* QR simple (placeholder visual) */
-  function generateQR(id) {
-    var canvas = $id('rs-qr-canvas');
-    if (!canvas || !canvas.getContext) return;
-    var ctx = canvas.getContext('2d');
-    canvas.width = 90; canvas.height = 90;
-    ctx.fillStyle = '#fff';
-    ctx.fillRect(0, 0, 90, 90);
-    ctx.fillStyle = '#000';
-    for (var i = 0; i < 81; i++) {
-      var x = (i % 9) * 10;
-      var y = Math.floor(i / 9) * 10;
-      var hash = 0;
-      for (var j = 0; j < id.length; j++) hash = ((hash << 5) - hash + id.charCodeAt(j) + i) & 0xff;
-      if (hash > 127) ctx.fillRect(x, y, 10, 10);
-    }
-    /* Finder patterns esquinas */
-    [[0,0],[60,0],[0,60]].forEach(function (p) {
-      ctx.fillStyle = '#fff';
-      ctx.fillRect(p[0], p[1], 30, 30);
-      ctx.fillStyle = '#000';
-      ctx.fillRect(p[0], p[1], 30, 30);
-      ctx.fillStyle = '#fff';
-      ctx.fillRect(p[0]+5, p[1]+5, 20, 20);
-      ctx.fillStyle = '#000';
-      ctx.fillRect(p[0]+10, p[1]+10, 10, 10);
-    });
-  }
 })();
 </script>
 

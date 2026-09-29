@@ -203,6 +203,19 @@ service cloud.firestore {
         allow write: if isAdmin(clinicId) || isSuperAdmin();
       }
 
+      // ═══ /clinics/{clinicId}/proveedores/{proveedorId} ════════════
+      // Laboratorios a los que esta clínica manda las muestras, para el
+      // selector "Proveedor (laboratorio)" al solicitar exámenes
+      // (Proveedores.html los administra). Mismo caso que /personal: eran
+      // tres <option> hardcodeados a CMG (Labex, Masterlab, Laboratorio
+      // Rivera) dentro de Expediente-Doctor.html, así que toda clínica del
+      // SaaS veía los proveedores de otra y no podía cargar los suyos.
+      // Lectura: staff activo de ESTA clínica. Escritura: solo admin.
+      match /proveedores/{proveedorId} {
+        allow read: if sameClinic(clinicId);
+        allow write: if isAdmin(clinicId) || isSuperAdmin();
+      }
+
       // ═══ /clinics/{clinicId}/medicamentos/{medId} ═════════════════
       // Catálogo de medicamentos propio de la clínica (nombre, tipo
       // visita/despacho/ambos, precio, excluidoDescuento) — reemplaza

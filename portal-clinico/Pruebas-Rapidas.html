@@ -536,9 +536,10 @@
             <label class="pr-label">Hora de toma de muestra</label>
             <input type="time" class="pr-input" id="f-horatoma">
           </div>
+          <!-- Correlativo removido: era el número de registro que CMG
+               llevaba ante ARSA. Se deja el contenedor oculto y vacío para
+               no romper los $id() que lo referencian. -->
           <div class="pr-field" id="field-correlativo" style="display:none">
-            <label class="pr-label">Correlativo</label>
-            <input type="text" class="pr-input" id="f-correlativo">
           </div>
         </div>
       </div>
@@ -666,15 +667,14 @@
         <h1 id="rs-h-name">—</h1>
         <h2 id="rs-h-sub">—</h2>
       </div>
-      <div class="rs-arsa-badge" id="rs-arsa" style="display:none">
-        Certificado de<br>Prueba (ARSA)
-      </div>
+      <!-- Sello ARSA removido: era específico de CMG. Un SaaS no sabe qué
+           marca de prueba compra cada clínica, así que no puede afirmar nada
+           sobre su desempeño ni certificarla ante ningún registro sanitario. -->
     </div>
 
     <!-- Body -->
     <div class="rs-body">
       <h3 class="rs-title">INFORME DE RESULTADOS</h3>
-      <div class="rs-correlativo" id="rs-correlativo" style="display:none"></div>
 
       <!-- I. Paciente -->
       <div class="rs-section-title">I.- INFORMACIÓN DEL PACIENTE</div>
@@ -696,10 +696,9 @@
 
       <div id="rs-extra-info" style="display:none"></div>
 
-      <div class="rs-sensitivity" id="rs-sensitivity" style="display:none">
-        Sensibilidad: 97.1% | Especificidad: 99.5%<br>
-        Porcentajes según especificaciones del fabricante
-      </div>
+      <!-- Sensibilidad/especificidad del fabricante removido: era específico de CMG. Un SaaS no sabe qué
+           marca de prueba compra cada clínica, así que no puede afirmar nada
+           sobre su desempeño ni certificarla ante ningún registro sanitario. -->
 
       <!-- Nota -->
       <div class="rs-nota">
@@ -717,10 +716,9 @@
             TOMA Y RECEPCIÓN DE MUESTRAS
           </div>
         </div>
-        <div class="rs-stamp-right" id="rs-qr-container" style="display:none">
-          <canvas id="rs-qr-canvas" class="rs-qr"></canvas>
-          <div class="rs-qr-label">¡Escanea para verificar tus resultados!</div>
-        </div>
+      <!-- QR de verificación removido: era específico de CMG. Un SaaS no sabe qué
+           marca de prueba compra cada clínica, así que no puede afirmar nada
+           sobre su desempeño ni certificarla ante ningún registro sanitario. -->
       </div>
 
       <!-- Footer: datos de la clínica, ver clinic-config.js -->
@@ -905,12 +903,10 @@
     var showEdad = type !== 'embarazo';
     var showPasaporte = type === 'antigeno';
     var showSexo = type === 'antigeno';
-    var showCorrelativo = type === 'antigeno';
 
     $id('field-edad').style.display = showEdad ? '' : 'none';
     $id('field-pasaporte').style.display = showPasaporte ? '' : 'none';
     $id('field-sexo').style.display = showSexo ? '' : 'none';
-    $id('field-correlativo').style.display = showCorrelativo ? '' : 'none';
 
     /* Show correct results section */
     document.querySelectorAll('.pr-results-section').forEach(function (s) { s.style.display = 'none'; });
@@ -940,6 +936,15 @@
     if (qDni)    $id('f-dni').value = qDni;
     if (qNombre) $id('f-nombre').value = qNombre;
     if (qFecha)  { $id('f-fechanac').value = qFecha; $id('f-edad').value = (calcAge(qFecha) + ' años'); }
+    /* El expediente guarda el sexo como 'M' / 'F'; este formulario usa
+       'Masculino' / 'Femenino'. Sin esta traducción el <select> recibe un
+       valor que no existe entre sus opciones y queda vacío, que es lo que
+       pasaba: el campo aparecía en blanco aunque el dato ya estuviera. */
+    var qSexo = getQP('sexo');
+    if (qSexo) {
+      var mapaSexo = { M: 'Masculino', F: 'Femenino', Masculino: 'Masculino', Femenino: 'Femenino' };
+      $id('f-sexo').value = mapaSexo[qSexo] || '';
+    }
   })();
 
   /* Cancel / change type */
@@ -959,7 +964,6 @@
     $id('f-sexo').value = '';
     $id('f-fecha').value = todayStr();
     $id('f-horatoma').value = nowTime();
-    $id('f-correlativo').value = '';
     resultValues = {};
     document.querySelectorAll('.pr-result-opt').forEach(function (b) {
       b.classList.remove('is-positive', 'is-negative');
@@ -1091,7 +1095,6 @@
     if (selectedType === 'antigeno') {
       data.pasaporte = $id('f-pasaporte').value.trim();
       data.sexo = $id('f-sexo').value;
-      data.correlativo = $id('f-correlativo').value.trim();
     }
 
     /* Paso 1: Vincular al expediente. Prioridad: paciente ya seleccionado en el
@@ -1250,19 +1253,8 @@
     var isAntigeno = data.tipo === 'antigeno';
     var edad = data.edad !== '' && data.edad !== null ? data.edad + ' AÑOS' : '';
 
-    /* ARSA badge */
-    $id('rs-arsa').style.display = isAntigeno ? '' : 'none';
-
-    /* Correlativo */
-    if (isAntigeno && data.correlativo) {
-      $id('rs-correlativo').style.display = '';
-      $id('rs-correlativo').setAttribute('contenteditable', 'true');
-      $id('rs-correlativo').setAttribute('data-edit-key', 'correlativo');
-      $id('rs-correlativo').textContent = data.correlativo;
-    } else {
-      $id('rs-correlativo').style.display = 'none';
-      $id('rs-correlativo').removeAttribute('contenteditable');
-    }
+    /* Sello ARSA y correlativo removidos: eran el registro de CMG ante la
+       Agencia de Regulación Sanitaria. Otra clínica no tiene ese registro. */
 
     /* Patient table */
     var pacienteHTML = '';
@@ -1320,39 +1312,10 @@
     }
     $id('rs-results-table').innerHTML = resultsHTML;
 
-    /* Sensitivity note */
-    $id('rs-sensitivity').style.display = isAntigeno ? '' : 'none';
-
     /* Extra info */
     $id('rs-extra-info').style.display = 'none';
 
-    /* QR code for antigeno */
-    if (isAntigeno && data._id) {
-      $id('rs-qr-container').style.display = '';
-      generateQR(data._id);
-    } else {
-      $id('rs-qr-container').style.display = 'none';
-    }
-
     window.scrollTo(0, 0);
-  }
-
-  /* Simple QR code generator (creates a placeholder) */
-  function generateQR(id) {
-    var canvas = $id('rs-qr-canvas');
-    var ctx = canvas.getContext('2d');
-    canvas.width = 90;
-    canvas.height = 90;
-    ctx.fillStyle = '#fff';
-    ctx.fillRect(0, 0, 90, 90);
-    ctx.fillStyle = '#242F40';
-    ctx.font = 'bold 10px sans-serif';
-    ctx.textAlign = 'center';
-    ctx.fillText('QR', 45, 40);
-    ctx.font = '7px sans-serif';
-    ctx.fillText(id.substring(0, 10), 45, 55);
-    ctx.strokeStyle = '#242F40';
-    ctx.strokeRect(2, 2, 86, 86);
   }
 
   /* ════════════════════════════════════════════════════════════
