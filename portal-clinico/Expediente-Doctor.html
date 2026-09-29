@@ -784,6 +784,29 @@ summary.ed-meds-cat { list-style: revert; }
 }
 
 /* ── Patient summary ── */
+/* Banda de alergias del paciente. Roja y con etiqueta propia a propósito:
+   antes las alergias solo salían como un dato gris más dentro de
+   .ed-patient-meta ("32 años · Sangre O+ · Penicilina"), indistinguible del
+   tipo de sangre, y solo en la pestaña Pendientes — no en las pantallas
+   donde se prescribe o se aplica algo. */
+.ed-alergias {
+  display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+  background: #FEF2F2; border: 1px solid #FECACA; border-left: 4px solid #DC2626;
+  color: #7F1D1D; border-radius: 8px; padding: 10px 14px; margin: -8px 0 16px;
+  font-size: 13.5px; font-weight: 600; line-height: 1.45;
+}
+.ed-alergias-tag {
+  flex: none; font-size: 11px; font-weight: 800; letter-spacing: .06em;
+  text-transform: uppercase; background: #DC2626; color: #fff;
+  border-radius: 4px; padding: 2px 8px;
+}
+/* "Sin alergias registradas" NO es lo mismo que "no tiene alergias": significa
+   que nadie preguntó todavía. Por eso se muestra igual, en gris, en vez de
+   omitir la banda y dejar creer que el paciente está libre de alergias. */
+.ed-alergias--none {
+  background: #F9FAFB; border-color: #E5E7EB; border-left-color: #9CA3AF;
+  color: #4B5563; font-weight: 500;
+}
 .ed-patient-summary {
   background: linear-gradient(90deg, #CCA43B 0%, #E4CE96 100%);
   border-radius: 12px;
@@ -1827,6 +1850,24 @@ summary.ed-meds-cat { list-style: revert; }
     el.textContent = msg;
     window.scrollTo({ top: 0, behavior: 'smooth' });
     setTimeout(function () { el.classList.remove('is-visible'); }, 6000);
+  }
+
+  /* Banda de alergias para las pantallas donde se toma una decisión clínica
+     (prescribir, aplicar un medicamento, completar un servicio). Devuelve
+     siempre algo: o la alergia registrada, o el aviso de que no hay ninguna
+     registrada — callarse en ese caso es lo que hace que se asuma que no las
+     tiene. */
+  function bannerAlergias(dg) {
+    var a = dg && dg.alergias ? String(dg.alergias).trim() : '';
+    if (!a) {
+      return '<div class="ed-alergias ed-alergias--none">' +
+        'Sin alergias registradas — confirmalo con el paciente antes de prescribir.' +
+        '</div>';
+    }
+    return '<div class="ed-alergias" role="alert">' +
+      '<span class="ed-alergias-tag">Alergias</span>' +
+      '<span>' + esc(a) + '</span>' +
+      '</div>';
   }
 
   function esc(s) {
@@ -4199,6 +4240,7 @@ summary.ed-meds-cat { list-style: revert; }
         '<p class="ed-patient-meta">Etapa 1 · Registrar visita, queda listo para enfermería</p></div>' +
         '<div class="ed-patient-code">' + esc(p.codigoPaciente) + '</div>' +
       '</div>' +
+      bannerAlergias(dg) +
       '<div class="ed-section-title">¿Qué necesita el paciente?</div>' +
       '<div class="ed-section">' +
         '<div style="display:flex;gap:12px;margin-bottom:12px;flex-wrap:wrap">' +
@@ -4503,6 +4545,7 @@ summary.ed-meds-cat { list-style: revert; }
         '<p class="ed-patient-meta">Etapa 2 · Enfermería · ' + (esServicio ? '' + esc(it.servicioNombre || '—') : 'Consulta médica') + '</p></div>' +
         '<div class="ed-patient-code">' + esc(p.codigoPaciente) + '</div>' +
       '</div>' +
+      bannerAlergias(dg) +
       (it.notasRegistro ? '<div style="font-size:12px;color:#374151;background:#F9FAFB;border:1px solid #E5E7EB;border-radius:8px;padding:10px 12px;margin-bottom:12px"><strong>Notas de registro (Caja):</strong> ' + esc(it.notasRegistro) + '</div>' : '') +
       '<div class="ed-section-title">Signos vitales' + (vitalesObligatorios ? ' *' : ' (opcional para este servicio)') + '</div>' +
       (esSuero ? '<p style="font-size:12px;color:#92400E;background:#FFF7ED;border:1px solid #FED7AA;border-radius:8px;padding:8px 12px;margin:0 0 10px">La glucometría es obligatoria para sueroterapias y no se puede avanzar a médico sin registrarla.</p>' : '') +
@@ -5123,6 +5166,7 @@ summary.ed-meds-cat { list-style: revert; }
         '<p class="ed-patient-meta">Completar servicio pendiente</p></div>' +
         '<div class="ed-patient-code">' + esc(p.codigoPaciente) + '</div>' +
       '</div>' +
+      bannerAlergias(dg) +
       '<div class="ed-vitals-readonly">' +
         '<div class="ed-vitals-readonly-title">Servicio: ' + esc(srv.servicioNombre || '—') +
           ' · ' + fmtDate(srv.fechaServicio) + ' · Registrado por ' + esc(srv.enfermeriaAtendidoPor || srv.servicioPor || '—') + '</div>' +
@@ -5627,6 +5671,7 @@ summary.ed-meds-cat { list-style: revert; }
         '<p class="ed-patient-meta">Etapa 2 · Consulta médica</p></div>' +
         '<div class="ed-patient-code">' + esc(p.codigoPaciente) + '</div>' +
       '</div>' +
+      bannerAlergias(dg) +
 
       '<div class="ed-vitals-readonly">' +
         '<div class="ed-vitals-readonly-title">Signos vitales (Pre clínica · ' + fmtDate(pre.fechaPreclinica) + ' · por ' + esc(pre.enfermeriaAtendidoPor || pre.preclinicaPor || '—') + ')</div>' +
