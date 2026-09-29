@@ -1191,3 +1191,139 @@ exports.resetear2FAUsuario = functions.https.onCall(async (data, context) => {
   await espejarEstado2FA(uid, false);
   return { ok: true };
 });
+
+/* ════════════════════════════════════════════════════════════════════
+ * asignarAdminClinica — pone a alguien como admin de una clínica, exista
+ * o no su cuenta de Auth. Solo superadmin.
+ *
+ * POR QUÉ EXISTE
+ * --------------
+ * portal-admin.html creaba al admin con createUserWithEmailAndPassword
+ * desde una instancia secundaria de Firebase. Eso solo funciona si el
+ * correo NO tiene cuenta todavía; si ya la tiene, Auth devuelve
+ * auth/email-already-in-use y el panel mostraba "Ese correo ya tiene una
+ * cuenta registrada" sin ninguna salida.
+ *
+ * Y ese caso no es raro: es el NORMAL cuando la clínica se dio de alta
+ * sola y eligió pagar por transferencia. crearClinicaSelfService ya creó
+ * la cuenta del dueño Y su /usuarios/{uid} con rol admin — o sea que al
+ * superadmin le rebotaba justo el correo de la persona que ya era la
+ * administradora de esa clínica.
+ *
+ * El cliente no puede resolver esto solo: no hay forma de traducir un
+ * correo a un uid desde el SDK web (a propósito, sería un oráculo de
+ * enumeración de correos). Hace falta el Admin SDK, o sea esta función.
+ *
+ * Qué hace según el caso, y qué devuelve en `resultado`:
+ *   'creado'      no existía la cuenta → la crea y crea su /usuarios
+ *   'vinculado'   la cuenta existía sin /usuarios → lo crea para esta clínica
+ *   'promovido'   ya era staff de ESTA clínica → lo sube a admin/activo
+ *   'ya-era-admin' ya era admin activo de esta clínica → no toca nada
+ *
+ * Lo que NO hace, a propósito: mover a alguien de una clínica a otra. Eso
+ * ya está prohibido en firestore.rules (el update de /usuarios exige que
+ * clinicId no cambie) y acá se rechaza igual, para que la función no sea
+ * una puerta trasera a la regla.
+ * ════════════════════════════════════════════════════════════════════ */
+exports.asignarAdminClinica = functions
+  .runWith({ enforceAppCheck: true })
+  .https.onCall(async (data, context) => {
+    if (!context.auth || context.auth.token.superadmin !== true) {
+      throw new functions.https.HttpsError(
+        'permission-denied',
+        'Solo un superadmin de R3ads puede asignar el admin de una clínica.'
+      );
+    }
+
+    const clinicId = String((data && data.clinicId) || '').trim();
+    const email = String((data && data.email) || '').trim().toLowerCase();
+    const nombre = String((data && data.nombre) || '').trim().slice(0, 120);
+
+    if (!clinicId) throw new functions.https.HttpsError('invalid-argument', 'Falta la clínica.');
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      throw new functions.https.HttpsError('invalid-argument', 'El correo no es válido.');
+    }
+    if (!nombre) throw new functions.https.HttpsError('invalid-argument', 'Falta el nombre completo.');
+
+    const clinicSnap = await db.collection('clinics').doc(clinicId).get();
+    if (!clinicSnap.exists) {
+      throw new functions.https.HttpsError('not-found', 'No existe esa clínica.');
+    }
+
+    /* ── ¿Ya tiene cuenta de Auth? ── */
+    let userRecord = null;
+    try {
+      userRecord = await admin.auth().getUserByEmail(email);
+    } catch (err) {
+      if (err.code !== 'auth/user-not-found') {
+        console.error('[asignarAdminClinica] getUserByEmail falló:', err);
+        throw new functions.https.HttpsError('internal', 'No se pudo consultar la cuenta. Intenta de nuevo.');
+      }
+    }
+
+    let resultado;
+    let cuentaNueva = false;
+
+    if (!userRecord) {
+      /* Contraseña aleatoria que nadie ve: el alta se completa con el
+         correo de "establecer contraseña" que manda el panel después. */
+      userRecord = await admin.auth().createUser({
+        email: email,
+        emailVerified: false,
+        displayName: nombre,
+        password: crypto.randomBytes(24).toString('base64url'),
+      });
+      cuentaNueva = true;
+      resultado = 'creado';
+    }
+
+    const uid = userRecord.uid;
+    const usuarioRef = db.collection('usuarios').doc(uid);
+    const usuarioSnap = await usuarioRef.get();
+
+    if (usuarioSnap.exists) {
+      const actual = usuarioSnap.data();
+      if (actual.clinicId && actual.clinicId !== clinicId) {
+        throw new functions.https.HttpsError(
+          'failed-precondition',
+          'Ese correo ya pertenece a otra clínica (' + actual.clinicId + '). ' +
+          'Una cuenta no puede administrar dos clínicas: usa un correo distinto.'
+        );
+      }
+      if (actual.rol === 'admin' && actual.estado === 'activo') {
+        resultado = 'ya-era-admin';
+      } else {
+        await usuarioRef.update({
+          rol: 'admin',
+          estado: 'activo',
+          actualizadoEn: admin.firestore.FieldValue.serverTimestamp(),
+        });
+        resultado = 'promovido';
+      }
+    } else {
+      await usuarioRef.set({
+        nombre: nombre,
+        email: email,
+        rol: 'admin',
+        estado: 'activo',
+        clinicId: clinicId,
+        uid: uid,
+        creadoEn: admin.firestore.FieldValue.serverTimestamp(),
+      });
+      if (!resultado) resultado = 'vinculado';
+    }
+
+    /* onUsuarioWrite fija los custom claims (clinicId/rol) al escribir
+       /usuarios/{uid} y avisa al cliente por /_claimsRefresh — no hace
+       falta tocarlos acá. */
+
+    return {
+      resultado: resultado,
+      uid: uid,
+      email: email,
+      /* Solo una cuenta recién creada necesita establecer contraseña. A
+         quien ya tenía cuenta NO se le manda reset: no perdió su
+         contraseña, y mandárselo parecería un intento de robo de cuenta. */
+      enviarReset: cuentaNueva,
+    };
+  });

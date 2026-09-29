@@ -108,6 +108,9 @@ body { margin: 0; background: #F4F6FB; font-family: 'Segoe UI', Arial, sans-seri
 .pa-table tbody tr:last-child td { border-bottom: none; }
 .pa-clinic-name { font-weight: 700; color: #1F2937; }
 .pa-clinic-id { font-size: 12px; color: #9CA3AF; font-family: 'Courier New', monospace; }
+.pa-admin-email { font-size: 12.5px; color: #374151; word-break: break-all; }
+.pa-admin-email--off { color: #9CA3AF; text-decoration: line-through; }
+.pa-admin-none { font-size: 12.5px; color: #9CA3AF; font-style: italic; }
 .pa-status { display: inline-flex; align-items: center; gap: 5px; font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 20px; }
 .pa-status--activa { background: #DCFCE7; color: #166534; }
 .pa-status--suspendida { background: #FEE2E2; color: #991B1B; }
@@ -303,8 +306,8 @@ body { margin: 0; background: #F4F6FB; font-family: 'Segoe UI', Arial, sans-seri
 <!-- ═══ MODAL: crear primer admin de una clínica ═══ -->
 <div class="pa-modal" id="modal-admin">
   <div class="pa-modal-box">
-    <h3 class="pa-modal-title">Crear admin de <span id="modal-clinic-name">—</span></h3>
-    <p class="pa-modal-sub">Se enviará un correo con enlace para que establezca su contraseña.</p>
+    <h3 class="pa-modal-title">Admin de <span id="modal-clinic-name">—</span></h3>
+    <p class="pa-modal-sub">Si el correo todavía no tiene cuenta, se crea y se le envía un enlace para establecer su contraseña. Si ya tiene cuenta, se vincula como admin de esta clínica y entra con la contraseña que ya usaba.</p>
     <div class="pa-error" id="modal-admin-error"></div>
     <div class="pa-field">
       <label>Nombre completo</label>
@@ -316,7 +319,7 @@ body { margin: 0; background: #F4F6FB; font-family: 'Segoe UI', Arial, sans-seri
     </div>
     <div class="pa-form-footer">
       <button class="pa-btn" id="m-admin-cancel" style="background:#F4F6FB;color:#6B7280">Cancelar</button>
-      <button class="pa-btn pa-btn--primary" id="m-admin-confirmar" style="width:auto">Crear admin</button>
+      <button class="pa-btn pa-btn--primary" id="m-admin-confirmar" style="width:auto">Asignar admin</button>
     </div>
   </div>
 </div>
@@ -614,11 +617,50 @@ body { margin: 0; background: #F4F6FB; font-family: 'Segoe UI', Arial, sans-seri
     db.collection('clinics').orderBy('creadoEn', 'desc').get().then(function (snap) {
       _clinics = [];
       snap.forEach(function (d) { _clinics.push(Object.assign({ id: d.id }, d.data())); });
+      return loadAdmins();
+    }).then(function () {
       renderClinics();
       updateStats();
     }).catch(function (err) {
       $('pa-list').innerHTML = '<div class="pa-msg" style="color:#B91C1C">Error al cargar clínicas: ' + esc(err.message) + '</div>';
     });
+  }
+
+  /* ── Quién administra cada clínica ──
+     Sin esto el panel no mostraba en ningún lado si una clínica ya tenía
+     admin, así que ante una clínica dada de alta por self-service —que
+     nace CON su admin, ver crearClinicaSelfService— lo natural era pulsar
+     "+ Admin" y chocar contra "ese correo ya tiene una cuenta". La columna
+     existe para que esa pregunta se responda mirando, no probando.
+     firestore.rules ya deja a superadmin leer /usuarios. */
+  var _admins = {}; // clinicId -> [{ email, nombre, estado }]
+  function loadAdmins() {
+    return db.collection('usuarios').where('rol', '==', 'admin').get()
+      .then(function (snap) {
+        _admins = {};
+        snap.forEach(function (d) {
+          var u = d.data();
+          if (!u.clinicId) return;
+          (_admins[u.clinicId] = _admins[u.clinicId] || []).push({
+            email: u.email || '—', nombre: u.nombre || '', estado: u.estado || 'activo'
+          });
+        });
+      })
+      // Que falle esta consulta no debe dejar el panel sin clínicas: se
+      // pierde la columna, no la pantalla.
+      .catch(function (err) {
+        console.error('[portal-admin] No se pudieron cargar los admins:', err);
+        _admins = {};
+      });
+  }
+
+  function adminsHtml(clinicId) {
+    var lista = _admins[clinicId] || [];
+    if (!lista.length) return '<span class="pa-admin-none">— sin admin —</span>';
+    return lista.map(function (a) {
+      return '<div class="pa-admin-email' + (a.estado !== 'activo' ? ' pa-admin-email--off' : '') + '">' +
+        esc(a.email) + (a.estado !== 'activo' ? ' (inactivo)' : '') + '</div>';
+    }).join('');
   }
 
   function updateStats() {
@@ -646,6 +688,7 @@ body { margin: 0; background: #F4F6FB; font-family: 'Segoe UI', Arial, sans-seri
       var plan = detectPlan(c);
       return '<tr>' +
         '<td><div class="pa-clinic-name">' + esc(c.nombre || '—') + '</div><div class="pa-clinic-id">' + esc(c.id) + '</div></td>' +
+        '<td>' + adminsHtml(c.id) + '</td>' +
         '<td>' + esc(c.prefijoCodigoPaciente || '—') + '</td>' +
         '<td>' + esc(c.subdominio || '—') + '</td>' +
         '<td>' + planBadgeHtml(plan) + '</td>' +
@@ -665,7 +708,7 @@ body { margin: 0; background: #F4F6FB; font-family: 'Segoe UI', Arial, sans-seri
       '</tr>';
     }).join('');
     $('pa-list').innerHTML =
-      '<table class="pa-table"><thead><tr><th>Clínica</th><th>Prefijo</th><th>Subdominio</th><th>Plan</th><th>Módulos</th><th>Estado</th><th>Acciones</th></tr></thead>' +
+      '<table class="pa-table"><thead><tr><th>Clínica</th><th>Admin</th><th>Prefijo</th><th>Subdominio</th><th>Plan</th><th>Módulos</th><th>Estado</th><th>Acciones</th></tr></thead>' +
       '<tbody>' + rows + '</tbody></table>';
 
     $('pa-list').querySelectorAll('[data-edit-id]').forEach(function (btn) {
@@ -767,9 +810,16 @@ body { margin: 0; background: #F4F6FB; font-family: 'Segoe UI', Arial, sans-seri
     });
   });
 
-  /* ── Modal: crear primer admin de una clínica ──
-     Mismo patrón que Admin-Usuarios.html en portal-clinico: instancia
-     secundaria de Firebase para no cerrar la sesión del superadmin. */
+  /* ── Modal: asignar el admin de una clínica ──
+     Lo resuelve la Cloud Function asignarAdminClinica, no el cliente. Antes
+     esto creaba la cuenta con createUserWithEmailAndPassword desde una
+     instancia secundaria de Firebase, que solo sirve si el correo NO tiene
+     cuenta: si ya la tenía, Auth devolvía auth/email-already-in-use y el
+     panel se quedaba sin salida. Y ese es justo el caso normal de una
+     clínica que se dio de alta sola y pidió pagar por transferencia — su
+     dueño ya tiene cuenta y ya es admin desde crearClinicaSelfService.
+     El cliente no puede arreglarlo solo porque no hay forma de traducir un
+     correo a un uid desde el SDK web; hace falta el Admin SDK. */
   var _modalClinicId = null;
   function openAdminModal(clinicId, clinicName) {
     _modalClinicId = clinicId;
@@ -790,48 +840,36 @@ body { margin: 0; background: #F4F6FB; font-family: 'Segoe UI', Arial, sans-seri
     if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { showErr('modal-admin-error', 'Ingresa un correo válido.'); return; }
 
     var btn = $('m-admin-confirmar');
-    btn.disabled = true; btn.textContent = 'Creando…';
+    btn.disabled = true; btn.textContent = 'Asignando…';
 
-    var secondaryApp = firebase.initializeApp(FIREBASE_CFG, 'secondary-' + Date.now());
-    /* App Check es por instancia de app — sin esto, esta instancia secundaria
-       queda sin token válido y se rompe en cuanto Auth pase a "Aplicar". */
-    if (firebase.appCheck) {
-      try {
-        firebase.appCheck(secondaryApp).activate(
-          new firebase.appCheck.ReCaptchaEnterpriseProvider('6LeCddAtAAAAACM_6iq-lJ8Kdl0tDVu9-Av2Rbhw'),
-          true
-        );
-      } catch (err) {
-        console.error('[portal-admin] App Check (instancia secundaria) no se pudo activar:', err);
-      }
-    }
-    var secondaryAuth = secondaryApp.auth();
-    var tempPwd = 'Rtemp!' + Math.random().toString(36).slice(2, 10);
-
-    secondaryAuth.createUserWithEmailAndPassword(email, tempPwd)
-      .then(function (cred) {
-        var uid = cred.user.uid;
-        return db.collection('usuarios').doc(uid).set({
-          nombre: nombre, email: email, rol: 'admin', estado: 'activo',
-          clinicId: _modalClinicId, uid: uid,
-          creadoEn: firebase.firestore.FieldValue.serverTimestamp()
-        });
+    firebase.functions().httpsCallable('asignarAdminClinica')({
+      clinicId: _modalClinicId, email: email, nombre: nombre
+    })
+      .then(function (res) {
+        var d = res.data || {};
+        /* Solo a una cuenta RECIÉN creada se le manda el correo de
+           establecer contraseña. A quien ya tenía cuenta no: no perdió su
+           contraseña, y un reset que nadie pidió parece un intento de robo
+           de cuenta. */
+        return (d.enviarReset ? auth.sendPasswordResetEmail(email) : Promise.resolve())
+          .then(function () { return d; });
       })
-      .then(function () { return auth.sendPasswordResetEmail(email); })
-      .then(function () {
-        secondaryAuth.signOut().catch(function () {});
-        toast('✅ Admin creado. Se envió un correo a ' + email + ' para establecer contraseña.', 'ok');
+      .then(function (d) {
+        var MSG = {
+          creado: '✅ Admin creado. Se envió un correo a ' + email + ' para que establezca su contraseña.',
+          vinculado: '✅ ' + email + ' quedó como admin de esta clínica. Entra con la contraseña que ya tenía.',
+          promovido: '✅ ' + email + ' ahora es admin de esta clínica.',
+          'ya-era-admin': 'ℹ️ ' + email + ' ya era admin de esta clínica — no hizo falta cambiar nada.'
+        };
+        toast(MSG[d.resultado] || '✅ Listo.', 'ok');
         $('modal-admin').classList.remove('is-open');
+        loadAdmins().then(renderClinics);
       })
       .catch(function (err) {
-        secondaryAuth.signOut().catch(function () {});
-        var msg = 'Error al crear el admin.';
-        if (err.code === 'auth/email-already-in-use') msg = 'Ese correo ya tiene una cuenta registrada.';
-        if (err.code === 'auth/invalid-email') msg = 'El correo no es válido.';
-        showErr('modal-admin-error', msg);
+        showErr('modal-admin-error', err.message || 'Error al asignar el admin.');
       })
       .finally(function () {
-        btn.disabled = false; btn.textContent = 'Crear admin';
+        btn.disabled = false; btn.textContent = 'Asignar admin';
       });
   });
 })();
