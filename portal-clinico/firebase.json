@@ -17,6 +17,13 @@
         "headers": [
           { "key": "Cache-Control", "value": "no-cache, must-revalidate" }
         ]
+      },
+      {
+        "//": "Los .js y .css traían el max-age=3600 por defecto de Firebase Hosting. Acá vive código sensible (r3ads-staff.js con la compuerta del segundo factor, firebase-init.js con App Check), y con una hora de caché un arreglo urgente tarda una hora en llegar a la clínica. 5 minutos revalidando es suficiente para no pegarle al hosting y corto para poder desplegar un fix y verlo aplicado.",
+        "source": "**/*.@(js|css)",
+        "headers": [
+          { "key": "Cache-Control", "value": "max-age=300, must-revalidate" }
+        ]
       }
     ]
   },

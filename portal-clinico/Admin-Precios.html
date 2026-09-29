@@ -142,6 +142,13 @@ body { margin: 0; background: #F4F6FB; font-family: system-ui,-apple-system,'Seg
   .ap-row-name { grid-column: 1 / -1; }
 }
 </style>
+</head>
+<body>
+
+<!-- Los scripts de Firebase van dentro del <body>, no en el <head>: reCAPTCHA
+     Enterprise (App Check) inyecta su badge con document.body.appendChild, y
+     desde el <head> body todavía no existe, así que App Check tiraba y no se
+     activaba nunca en esta página. Ver el comentario largo en firebase-init.js. -->
 <script src="clinic-config.js"></script>
 <script src="catalogo-servicios.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
@@ -151,8 +158,6 @@ body { margin: 0; background: #F4F6FB; font-family: system-ui,-apple-system,'Seg
 <script src="firebase-init.js"></script>
 <script src="clinic-trial-gate.js"></script>
 <script src="r3ads-staff.js"></script>
-</head>
-<body>
 
 <div class="ap-top">
   <div class="ap-top-left">

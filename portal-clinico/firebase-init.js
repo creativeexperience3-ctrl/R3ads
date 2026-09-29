@@ -33,15 +33,41 @@
   // interrumpe TODO este script antes de llegar a definir r3adsAuth/r3adsDb
   // más abajo — tumbando el login de la página entera por algo que está en
   // modo "solo monitoreo" y no debería bloquear nada (ver nota arriba).
-  if (firebase.appCheck) {
+  // activarAppCheck se llama abajo, pero SOLO cuando ya existe document.body.
+  // reCAPTCHA Enterprise inyecta su badge con document.body.appendChild, así
+  // que si este script corre desde el <head> —cuando body todavía no existe—
+  // revienta con "Cannot read properties of null (reading 'appendChild')" y
+  // App Check NUNCA se activa en esa página. Pasó de verdad en cuatro páginas
+  // que cargaban este archivo desde el <head> (Admin-Precios, Admin-Usuarios,
+  // Mi-Suscripcion, Seguridad): fallaban en silencio, porque en modo
+  // monitoreo un App Check muerto no se nota en ningún lado. Con Firestore /
+  // Storage / Functions en "Aplicar", esas páginas habrían dejado de
+  // funcionar por completo.
+  //
+  // Lo correcto sigue siendo cargar este script desde el <body> (así lo hacen
+  // las demás páginas), porque entonces App Check queda activo ANTES de que
+  // corra cualquier código de la página y no hay carrera posible. Esto es la
+  // red de seguridad para que una página nueva que se equivoque active tarde
+  // en vez de no activar nunca.
+  function activarAppCheck() {
     try {
       firebase.appCheck().activate(
         new firebase.appCheck.ReCaptchaEnterpriseProvider('6LeCddAtAAAAACM_6iq-lJ8Kdl0tDVu9-Av2Rbhw'),
         true // isTokenAutoRefreshEnabled
       );
     } catch (err) {
-      console.error('[firebase-init] App Check no se pudo activar (modo monitoreo, no debería bloquear nada):', err);
+      // try/catch a propósito: un fallo del script de reCAPTCHA (ej. bloqueado
+      // por un ad-blocker) no debe interrumpir este archivo antes de definir
+      // r3adsAuth/r3adsDb más abajo — eso tumbaría el login de la página
+      // entera. Con App Check en "Aplicar" el usuario igual no podrá leer
+      // datos, pero verá un error de permisos y no una página en blanco.
+      console.error('[firebase-init] App Check no se pudo activar:', err);
     }
+  }
+
+  if (firebase.appCheck) {
+    if (document.body) activarAppCheck();
+    else document.addEventListener('DOMContentLoaded', activarAppCheck, { once: true });
   }
   window.r3adsAuth = firebase.auth();
   window.r3adsDb   = firebase.firestore();
