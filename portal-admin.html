@@ -996,7 +996,7 @@ body { margin: 0; background: #F4F6FB; font-family: 'Segoe UI', Arial, sans-seri
           creado: '✅ Admin creado. Se envió un correo a ' + email + ' para que establezca su contraseña.',
           vinculado: '✅ ' + email + ' quedó como admin de esta clínica. Entra con la contraseña que ya tenía.',
           promovido: '✅ ' + email + ' ahora es admin de esta clínica.',
-          'ya-era-admin': 'ℹ️ ' + email + ' ya era admin de esta clínica — no hizo falta cambiar nada.'
+          'ya-era-admin': 'ℹ️ ' + email + ' ya era admin de esta clínica. Se le refrescó la sesión: si estaba viendo "Acceso restringido", su pestaña se recarga sola en unos segundos.'
         };
         toast(MSG[d.resultado] || '✅ Listo.', 'ok');
         $('modal-admin').classList.remove('is-open');

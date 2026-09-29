@@ -1292,6 +1292,18 @@ exports.asignarAdminClinica = functions
       }
       if (actual.rol === 'admin' && actual.estado === 'activo') {
         resultado = 'ya-era-admin';
+        /* No se escribe /usuarios, así que onUsuarioWrite no corre y nada
+           avisaría al cliente. Pero si el superadmin llegó hasta acá es
+           porque alguien NO está pudiendo entrar, y la causa típica es un
+           ID token viejo: se cachea hasta una hora, y el minteado antes de
+           que se fijaran los claims no los trae. Tocar /_claimsRefresh hace
+           que la pestaña de esa persona —que ya escucha este doc, ver
+           watchClaimsRefresh en r3ads-staff.js— refresque su token y se
+           recargue sola. Así el botón hace algo útil en vez de responder
+           "ya era admin" y dejarla igual de afuera. */
+        await db.collection('_claimsRefresh').doc(uid).set({
+          refreshedAt: admin.firestore.FieldValue.serverTimestamp(),
+        });
       } else {
         await usuarioRef.update({
           rol: 'admin',

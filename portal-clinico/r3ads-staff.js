@@ -151,10 +151,31 @@
     // window.R3ADS_CLINIC_ID estático (clinic-config.js), que solo servía
     // mientras existía una sola clínica desplegada. Mismo claim que ya
     // validan firestore.rules (myClinic() = request.auth.token.clinicId).
+    //
+    // Si el token NO trae clinicId se fuerza UN refresh antes de rendirse.
+    // Motivo: el ID token se cachea hasta una hora, así que el minteado
+    // ANTES de que onUsuarioWrite fijara los claims no los tiene — que es
+    // exactamente el primer login después de crear una clínica, el caso más
+    // común del alta self-service. Sin este refresh, resolveClinicId devuelve
+    // null, checkStaff compara contra null y falla, y el usuario ve "Acceso
+    // restringido" en su propia clínica recién creada, sin más salida que
+    // cerrar sesión y volver a entrar (o esperar a que el token expire solo).
+    // watchClaimsRefresh no lo cubre: ignora el primer snapshot a propósito,
+    // así que solo reacciona a cambios ocurridos con la página ya abierta.
+    //
+    // Se refresca solo cuando falta el claim, o sea como mucho una vez por
+    // carga de página, y únicamente para cuentas que hoy no resuelven nada.
     resolveClinicId: function (user, cb) {
       if (!user) { cb(null); return; }
       user.getIdTokenResult()
-        .then(function (token) { cb(token.claims.clinicId || null); })
+        .then(function (token) {
+          if (token.claims.clinicId) { cb(token.claims.clinicId); return null; }
+          return user.getIdTokenResult(true).then(function (fresco) {
+            // Si tampoco viene acá, la cuenta de verdad no pertenece a
+            // ninguna clínica — no es un token viejo.
+            cb((fresco && fresco.claims && fresco.claims.clinicId) || null);
+          });
+        })
         .catch(function () { cb(null); });
     }
   };
