@@ -8539,6 +8539,15 @@ summary.ed-meds-cat { list-style: revert; }
     if (typeof v.toDate === 'function') {
       try { return v.toDate().toISOString(); } catch (_) { return null; }
     }
+    /* GeoPoint y DocumentReference: si se dejan pasar al recorrido de abajo,
+       JSON.stringify serializa sus tripas internas (o revienta con una
+       referencia circular) en vez del dato. Ninguna colección guarda estos
+       tipos hoy, pero una exportación de portabilidad no puede depender de
+       eso: un campo nuevo no debe poder corromper el ZIP en silencio. */
+    if (typeof v.latitude === 'number' && typeof v.longitude === 'number') {
+      return { lat: v.latitude, lng: v.longitude };
+    }
+    if (v.firestore && typeof v.path === 'string') return v.path;
     if (Array.isArray(v)) return v.map(valorPlano);
     if (typeof v === 'object') {
       var out = {};
