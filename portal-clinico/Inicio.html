@@ -119,30 +119,35 @@ body {
     },
     {
       href: 'Admin-Precios.html',
+      soloAdmin: true,
       title: 'Precios y Productos',
       sub: 'Precios, descuentos y qué servicios ofrece tu clínica.',
       icon: '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>'
     },
     {
       href: 'Admin-Usuarios.html',
+      soloAdmin: true,
       title: 'Administración de Usuarios',
       sub: 'Alta, baja y roles del personal de tu clínica.',
       icon: '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>'
     },
     {
       href: 'Personal.html',
+      soloAdmin: true,
       title: 'Personal',
       sub: 'Médicos y enfermería para registrar quién atendió cada consulta.',
       icon: '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.24 12.24a6 6 0 0 0-8.49-8.49L5 10.5V19h8.5z"/><line x1="16" y1="8" x2="2" y2="22"/><line x1="17.5" y1="15" x2="9" y2="15"/></svg>'
     },
     {
       href: 'Proveedores.html',
+      soloAdmin: true,
       title: 'Proveedores',
       sub: 'Laboratorios a los que tu clínica manda las muestras.',
       icon: '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 2v6.5L4.6 17a2 2 0 0 0 1.7 3h11.4a2 2 0 0 0 1.7-3L15 8.5V2"/><line x1="8" y1="2" x2="16" y2="2"/><line x1="7" y1="14" x2="17" y2="14"/></svg>'
     },
     {
       href: 'Medicamentos.html',
+      soloAdmin: true,
       title: 'Medicamentos',
       sub: 'Catálogo de medicamentos, precios y exclusión de descuentos.',
       icon: '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.5 20.5 3.5 13.5a5 5 0 1 1 7-7l7 7a5 5 0 1 1-7 7Z"/><line x1="8.5" y1="8.5" x2="15.5" y2="15.5"/></svg>'
@@ -165,7 +170,13 @@ body {
   };
 
   function renderHub(esAdmin) {
-    var tarjetas = esAdmin ? TARJETAS.concat([TARJETA_SUSCRIPCION]) : TARJETAS;
+    /* Las páginas con soloAdmin exigen checkAdmin y devuelven a quien no lo
+       sea. Mostrarle igual la tarjeta lo manda a un rebote sin explicación:
+       clic, parpadeo, y de vuelta acá. Mejor no ofrecer lo que no puede
+       abrir. El candado real sigue siendo el de cada página y las reglas de
+       Firestore; esto es solo dejar de mentirle al menú. */
+    var visibles = TARJETAS.filter(function (t) { return esAdmin || !t.soloAdmin; });
+    var tarjetas = esAdmin ? visibles.concat([TARJETA_SUSCRIPCION]) : visibles;
     var html = '<div class="in-heading">' +
         '<div class="in-eyebrow">Portal Clínico</div>' +
         '<h1 class="in-h1">¿A dónde querés entrar?</h1>' +
