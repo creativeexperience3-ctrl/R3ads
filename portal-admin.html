@@ -268,7 +268,12 @@ body { margin: 0; background: #F4F6FB; font-family: 'Segoe UI', Arial, sans-seri
             <label>Método de pago</label>
             <select class="pa-input" id="f-metodoPago">
               <option value="paypal">PayPal (suscripción automática)</option>
-              <option value="transferencia">Transferencia bancaria (manual, por WhatsApp)</option>
+              <option value="transferencia-bac">Transferencia BAC</option>
+              <option value="transferencia-ficohsa">Transferencia Ficohsa</option>
+              <option value="transferencia-banpais">Transferencia Ban País</option>
+              <!-- Clínicas dadas de alta antes de que se registrara el banco.
+                   Se deja como opción para no inventarles uno al editarlas. -->
+              <option value="transferencia">Transferencia (banco sin especificar)</option>
             </select>
           </div>
           <div class="pa-field">
@@ -320,6 +325,43 @@ body { margin: 0; background: #F4F6FB; font-family: 'Segoe UI', Arial, sans-seri
     <div class="pa-form-footer">
       <button class="pa-btn" id="m-admin-cancel" style="background:#F4F6FB;color:#6B7280">Cancelar</button>
       <button class="pa-btn pa-btn--primary" id="m-admin-confirmar" style="width:auto">Asignar admin</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Modal: activar clínica ──
+     Activar era un confirm() pelado que solo ponía estado:'activa'. El
+     método de pago y el vencimiento solo se podían cargar entrando aparte
+     a "Editar", así que una clínica activada por transferencia quedaba sin
+     registro de por dónde pagó ni hasta cuándo — y como en transferencia no
+     hay cobro automático que la suspenda sola, el vencimiento es lo ÚNICO
+     que avisa que hay que volver a cobrarle. Ahora se piden en el mismo
+     gesto en que se activa. -->
+<div class="pa-modal" id="modal-activar">
+  <div class="pa-modal-box">
+    <h3 class="pa-modal-title">Activar <span id="modal-activar-clinic">—</span></h3>
+    <p class="pa-modal-sub">Deja registrado cómo pagó y hasta cuándo queda cubierta.</p>
+    <div class="pa-error" id="modal-activar-error"></div>
+    <div class="pa-field">
+      <label>Método de pago</label>
+      <select class="pa-input" id="m-act-metodo">
+        <option value="transferencia-bac">Transferencia BAC</option>
+        <option value="transferencia-ficohsa">Transferencia Ficohsa</option>
+        <option value="transferencia-banpais">Transferencia Ban País</option>
+        <option value="paypal">PayPal (suscripción automática)</option>
+      </select>
+    </div>
+    <div class="pa-field" id="m-act-fecha-wrap">
+      <label>Activa hasta</label>
+      <input type="date" class="pa-input" id="m-act-vence">
+      <div class="pa-hint">Fecha hasta la que ya pagó. Para la prueba gratis, 7 días; para un mes cobrado, ~30. Pasada esa fecha la clínica NO se suspende sola: el aviso es para que el equipo vuelva a cobrar.</div>
+    </div>
+    <div class="pa-hint" id="m-act-paypal-nota" style="display:none;margin-bottom:12px">
+      Con PayPal el vencimiento lo lleva la propia suscripción (paypalWebhook), así que no se carga a mano.
+    </div>
+    <div class="pa-form-footer">
+      <button class="pa-btn" id="m-act-cancel" style="background:#F4F6FB;color:#6B7280">Cancelar</button>
+      <button class="pa-btn pa-btn--primary" id="m-act-confirmar" style="width:auto">Activar clínica</button>
     </div>
   </div>
 </div>
@@ -546,6 +588,31 @@ body { margin: 0; background: #F4F6FB; font-family: 'Segoe UI', Arial, sans-seri
     var d = new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]), 12, 0, 0);
     return firebase.firestore.Timestamp.fromDate(d);
   }
+
+  /* ── Método de pago y banco ──
+     metodoPago sigue siendo 'paypal' | 'transferencia' y el banco vive
+     aparte, en `banco`. NO se codifica el banco dentro de metodoPago porque
+     ese campo se compara contra 'transferencia' en otros tres lugares fuera
+     de este panel — functions/index.js (dos veces, en el alta y el cambio de
+     suscripción de PayPal) y Mi-Suscripcion.html — y todos se romperían en
+     silencio si el valor pasara a ser 'transferencia-bac'.
+     Los <select> sí usan un valor combinado, solo para no pedir dos campos
+     donde el usuario piensa en uno; se parte al guardar. */
+  var BANCOS = { bac: 'BAC', ficohsa: 'Ficohsa', banpais: 'Ban País' };
+
+  function metodoASelect(c) {
+    if (!c || c.metodoPago !== 'transferencia') return 'paypal';
+    return BANCOS[c.banco] ? 'transferencia-' + c.banco : 'transferencia';
+  }
+  function selectAMetodo(value) {
+    if (value === 'paypal') return { metodoPago: 'paypal', banco: null };
+    var banco = value.split('-')[1] || null;
+    return { metodoPago: 'transferencia', banco: BANCOS[banco] ? banco : null };
+  }
+  function etiquetaMetodo(m) {
+    if (m.metodoPago !== 'transferencia') return 'PayPal';
+    return m.banco && BANCOS[m.banco] ? 'Transferencia ' + BANCOS[m.banco] : 'Transferencia';
+  }
   // Aviso de vencimiento para clínicas por transferencia (Mi perfil /
   // Suscripción, WhatsApp) — no hay cobro automático que las suspenda solas,
   // así que esto es lo único que le recuerda al equipo revisar el pago.
@@ -588,7 +655,7 @@ body { margin: 0; background: #F4F6FB; font-family: 'Segoe UI', Arial, sans-seri
     $('f-whatsapp').value = c.whatsapp || '';
     $('f-correo').value = c.correo || '';
     $('f-sitioWeb').value = c.sitioWeb || '';
-    $('f-metodoPago').value = c.metodoPago === 'transferencia' ? 'transferencia' : 'paypal';
+    $('f-metodoPago').value = metodoASelect(c);
     $('f-proximoVencimiento').value = tsToDateInput(c.proximoVencimiento);
     setModulosForm(c.modulos || null);
     $('create-heading').textContent = 'Editar ' + (c.nombre || c.id);
@@ -694,7 +761,9 @@ body { margin: 0; background: #F4F6FB; font-family: 'Segoe UI', Arial, sans-seri
         '<td>' + planBadgeHtml(plan) + '</td>' +
         '<td>' + modulosBadgesHtml(c) + '</td>' +
         '<td><span class="pa-status pa-status--' + esc(estado) + '">' + (estado === 'activa' ? 'Activa' : 'Suspendida') + '</span>' +
-          (c.metodoPago === 'transferencia' ? venceHtml(c) : '') +
+          (c.metodoPago === 'transferencia'
+            ? '<div style="font-size:11px;color:#6B7280;margin-top:4px">' + esc(etiquetaMetodo(c)) + '</div>' + venceHtml(c)
+            : '') +
         '</td>' +
         '<td><div class="pa-row-actions">' +
           '<button class="pa-act pa-act--edit" data-edit-id="' + esc(c.id) + '">Editar</button>' +
@@ -725,14 +794,78 @@ body { margin: 0; background: #F4F6FB; font-family: 'Segoe UI', Arial, sans-seri
     });
   }
 
+  /* Suspender sigue siendo un confirm() — no hay nada que registrar. Activar
+     abre el modal, porque ahí sí hay que saber por dónde pagó y hasta cuándo
+     (ver el comentario de #modal-activar). */
   function toggleEstado(clinicId, nuevoEstado) {
-    var label = nuevoEstado === 'activa' ? 'activar' : 'suspender';
-    if (!confirm('¿Seguro que deseas ' + label + ' esta clínica?' + (nuevoEstado === 'suspendida' ? ' Todo su personal perderá acceso de inmediato.' : ''))) return;
-    db.collection('clinics').doc(clinicId).update({ estado: nuevoEstado }).then(function () {
-      toast(nuevoEstado === 'activa' ? '✅ Clínica activada.' : '⚠️ Clínica suspendida.', 'ok');
+    if (nuevoEstado === 'activa') { openActivarModal(clinicId); return; }
+    if (!confirm('¿Seguro que deseas suspender esta clínica? Todo su personal perderá acceso de inmediato.')) return;
+    db.collection('clinics').doc(clinicId).update({ estado: 'suspendida' }).then(function () {
+      toast('⚠️ Clínica suspendida.', 'ok');
       loadClinics();
     }).catch(function (err) { toast('Error: ' + err.message, 'err'); });
   }
+
+  /* ── Activar clínica: método de pago + hasta cuándo ── */
+  var _activarClinicId = null;
+  function sumarDias(n) {
+    var d = new Date();
+    d.setDate(d.getDate() + n);
+    var mm = String(d.getMonth() + 1).padStart(2, '0');
+    var dd = String(d.getDate()).padStart(2, '0');
+    return d.getFullYear() + '-' + mm + '-' + dd;
+  }
+  function openActivarModal(clinicId) {
+    var c = _clinics.find(function (x) { return x.id === clinicId; });
+    _activarClinicId = clinicId;
+    $('modal-activar-clinic').textContent = (c && c.nombre) || clinicId;
+    /* Si ya venía con método/banco cargado, se respeta en vez de resetear a
+       BAC — al reactivar una clínica lo normal es que siga pagando igual. */
+    $('m-act-metodo').value = c ? metodoASelect(c) : 'transferencia-bac';
+    $('m-act-vence').value = (c && tsToDateInput(c.proximoVencimiento)) || sumarDias(30);
+    clearErr('modal-activar-error');
+    aplicarVistaMetodoActivar();
+    $('modal-activar').classList.add('is-open');
+  }
+  function aplicarVistaMetodoActivar() {
+    var esPaypal = $('m-act-metodo').value === 'paypal';
+    $('m-act-fecha-wrap').style.display = esPaypal ? 'none' : '';
+    $('m-act-paypal-nota').style.display = esPaypal ? '' : 'none';
+  }
+  $('m-act-metodo').addEventListener('change', aplicarVistaMetodoActivar);
+  $('m-act-cancel').addEventListener('click', function () { $('modal-activar').classList.remove('is-open'); });
+  $('modal-activar').addEventListener('click', function (e) { if (e.target === $('modal-activar')) $('modal-activar').classList.remove('is-open'); });
+
+  $('m-act-confirmar').addEventListener('click', function () {
+    clearErr('modal-activar-error');
+    var metodo = selectAMetodo($('m-act-metodo').value);
+    var esTransferencia = metodo.metodoPago === 'transferencia';
+    var fecha = $('m-act-vence').value;
+
+    if (esTransferencia && !fecha) {
+      showErr('modal-activar-error', 'Indica hasta qué fecha queda activa.');
+      return;
+    }
+
+    var update = { estado: 'activa', metodoPago: metodo.metodoPago };
+    /* El banco solo tiene sentido en transferencia: si pasa a PayPal se
+       borra, para que no quede un "BAC" viejo colgado contradiciendo el
+       método actual. */
+    update.banco = metodo.banco || firebase.firestore.FieldValue.delete();
+    if (esTransferencia) update.proximoVencimiento = dateInputToTs(fecha);
+
+    var btn = $('m-act-confirmar');
+    btn.disabled = true; btn.textContent = 'Activando…';
+    db.collection('clinics').doc(_activarClinicId).update(update).then(function () {
+      toast('✅ Clínica activada' + (esTransferencia ? ' — ' + etiquetaMetodo(metodo) + ', hasta ' + fecha + '.' : ' por PayPal.'), 'ok');
+      $('modal-activar').classList.remove('is-open');
+      loadClinics();
+    }).catch(function (err) {
+      showErr('modal-activar-error', 'Error al activar: ' + err.message);
+    }).finally(function () {
+      btn.disabled = false; btn.textContent = 'Activar clínica';
+    });
+  });
 
   /* ── Guardar clínica (alta o edición) ──
      El mapa de modulos se escribe SIEMPRE completo (las 4 claves), nunca
@@ -766,8 +899,12 @@ body { margin: 0; background: #F4F6FB; font-family: 'Segoe UI', Arial, sans-seri
       correo: $('f-correo').value.trim(),
       sitioWeb: $('f-sitioWeb').value.trim(),
       modulos: readModulosForm(),
-      metodoPago: $('f-metodoPago').value === 'transferencia' ? 'transferencia' : 'paypal'
+      metodoPago: selectAMetodo($('f-metodoPago').value).metodoPago
     };
+    // banco vive aparte de metodoPago (ver los helpers): si la clínica pasa a
+    // PayPal se borra, para no dejar un banco viejo contradiciendo el método.
+    var _bancoForm = selectAMetodo($('f-metodoPago').value).banco;
+    data.banco = _bancoForm || firebase.firestore.FieldValue.delete();
     // planElegido: se deriva de los módulos marcados, para que Mi-Suscripcion.html
     // (que lee este campo, no los módulos directo) muestre el plan correcto a
     // una clínica dada de alta o editada acá a mano. 'personalizado' (mezcla
