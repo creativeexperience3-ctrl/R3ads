@@ -408,11 +408,23 @@ exports.revisarSuscripcionPayPal = functions
     if (clinic.estado !== 'activa') {
       throw new functions.https.HttpsError('failed-precondition', 'Tu suscripción no está activa. Actívala antes de cambiar de plan.');
     }
-    if (!clinic.paypalSubscriptionId) {
-      throw new functions.https.HttpsError('failed-precondition', 'No se encontró una suscripción de PayPal para esta clínica.');
-    }
     if (clinic.planElegido === nuevoPlan) {
       throw new functions.https.HttpsError('failed-precondition', 'Ya estás en ese plan.');
+    }
+
+    // Clínicas por transferencia (activadas a mano por WhatsApp, ver
+    // portal-admin.html) no tienen suscripción de PayPal que revisar — no
+    // hay cobro automático que ajustar, así que el cambio de plan es
+    // directo. El camino de PayPal de acá para abajo queda intacto, esta
+    // rama nunca lo toca.
+    if (clinic.metodoPago === 'transferencia') {
+      const modulosManual = nuevoPlan === 'completo' ? PLAN_COMPLETO_MODULOS : PLAN_BASICO_MODULOS;
+      await clinicRef.update({ planElegido: nuevoPlan, modulos: modulosManual });
+      return { requiereAprobacion: false };
+    }
+
+    if (!clinic.paypalSubscriptionId) {
+      throw new functions.https.HttpsError('failed-precondition', 'No se encontró una suscripción de PayPal para esta clínica.');
     }
 
     let token;
@@ -458,6 +470,15 @@ exports.cancelarSuscripcionPayPal = functions
       throw new functions.https.HttpsError('not-found', 'No se encontró la clínica.');
     }
     const clinic = clinicSnap.data();
+
+    // Clínicas por transferencia: no hay suscripción de PayPal que cancelar
+    // (no hay cobro automático corriendo). "Cancelar" acá es solo dejar de
+    // estar habilitada — el camino de PayPal de acá para abajo no se toca.
+    if (clinic.metodoPago === 'transferencia') {
+      await clinicRef.update({ estado: 'cancelada', canceladaEn: admin.firestore.FieldValue.serverTimestamp() });
+      return { ok: true };
+    }
+
     if (!clinic.paypalSubscriptionId) {
       throw new functions.https.HttpsError('failed-precondition', 'No se encontró una suscripción de PayPal para esta clínica.');
     }

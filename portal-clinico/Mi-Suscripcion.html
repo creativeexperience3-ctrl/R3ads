@@ -232,10 +232,25 @@ body { margin: 0; background: #F4F6FB; font-family: system-ui,-apple-system,'Seg
     }).join('');
   }
 
+  function fmtFecha(ts) {
+    if (!ts || !ts.toDate) return null;
+    return ts.toDate().toLocaleDateString('es-HN', { day: 'numeric', month: 'long', year: 'numeric' });
+  }
+
+  function waLink(plan) {
+    var nombre = clinicData.nombre || '';
+    var planLabel = PLAN_INFO[plan] ? (PLAN_INFO[plan].nombre + ' (' + PLAN_INFO[plan].precio + ')') : '';
+    var msj = 'Hola, quiero activar/renovar mi clínica "' + nombre + '" (' + CLINIC_ID + ') en Ancla con el plan ' +
+      planLabel + ' por transferencia bancaria. ¿Me compartís los datos para hacer la transferencia?';
+    return 'https://wa.me/50495652894?text=' + encodeURIComponent(msj);
+  }
+
   function render() {
     var estado = clinicData.estado || 'prueba_bloqueada';
     var plan = PLAN_INFO[clinicData.planElegido] ? clinicData.planElegido : 'basico';
     var ei = ESTADO_INFO[estado] || ESTADO_INFO.prueba_bloqueada;
+    var esTransferencia = clinicData.metodoPago === 'transferencia';
+    var vence = fmtFecha(clinicData.proximoVencimiento);
 
     var html = '';
 
@@ -245,16 +260,19 @@ body { margin: 0; background: #F4F6FB; font-family: system-ui,-apple-system,'Seg
       '<div class="ms-plan-precio">' + esc(PLAN_INFO[plan].precio) + '</div></div>' +
       '<span class="ms-badge ' + ei.clase + '">' + esc(ei.label) + '</span>' +
       '</div>' +
-      (clinicData.paypalSubscriptionId
-        ? '<div class="ms-meta">Suscripción de PayPal: ' + esc(clinicData.paypalSubscriptionId) + '</div>'
-        : '') +
+      '<div class="ms-meta">Método de pago: ' + (esTransferencia ? 'Transferencia bancaria (verificada por WhatsApp)' : 'PayPal') + '</div>' +
+      (clinicData.paypalSubscriptionId ? '<div class="ms-meta">Suscripción de PayPal: ' + esc(clinicData.paypalSubscriptionId) + '</div>' : '') +
+      (esTransferencia && vence ? '<div class="ms-meta">Próximo vencimiento: ' + esc(vence) + ' — para renovar, escribinos por WhatsApp antes de esa fecha.</div>' : '') +
       '</div>';
 
     if (estado === 'activa') {
       // ── Tarjeta: cambiar plan ──
       html += '<div class="el-card">' +
         '<h2 class="el-card-title">Cambiar de plan</h2>' +
-        '<p class="el-card-subtitle">Subí a Completo cuando necesités laboratorio, pruebas rápidas o EKG — o bajá a Básico si por ahora no los usás. El cambio se aplica de inmediato sobre tu mismo método de pago en PayPal, sin volver a ingresar tarjeta.</p>' +
+        '<p class="el-card-subtitle">Subí a Completo cuando necesités laboratorio, pruebas rápidas o EKG — o bajá a Básico si por ahora no los usás. ' +
+        (esTransferencia
+          ? 'Como pagás por transferencia, el cambio se aplica de inmediato — el nuevo monto aplica desde tu próxima transferencia.'
+          : 'El cambio se aplica de inmediato sobre tu mismo método de pago en PayPal, sin volver a ingresar tarjeta.') + '</p>' +
         '<div class="plan-pick" id="plan-pick-cambiar">' + planPickHtml('plan-cambiar', plan) + '</div>' +
         '<button class="el-btn el-btn-primary" id="btn-cambiar-plan">Confirmar cambio de plan</button>' +
         '</div>';
@@ -262,7 +280,10 @@ body { margin: 0; background: #F4F6FB; font-family: system-ui,-apple-system,'Seg
       // ── Tarjeta: cancelar ──
       html += '<div class="el-card">' +
         '<h2 class="el-card-title">Cancelar suscripción</h2>' +
-        '<p class="ms-cancel-text">Esto <b>detiene los cobros recurrentes en PayPal</b> de inmediato. Tu clínica y tu personal van a poder seguir iniciando sesión, pero en modo vista previa: no van a poder guardar pacientes, consultas ni nada nuevo hasta que reactivés la suscripción.</p>' +
+        '<p class="ms-cancel-text">' + (esTransferencia
+          ? 'Vas a dejar de estar habilitada — como pagás por transferencia no hay ningún cobro automático que detener.'
+          : 'Esto <b>detiene los cobros recurrentes en PayPal</b> de inmediato.') +
+          ' Tu clínica y tu personal van a poder seguir iniciando sesión, pero en modo vista previa: no van a poder guardar pacientes, consultas ni nada nuevo hasta que reactivés la suscripción.</p>' +
         '<button class="el-btn el-btn-danger" id="btn-abrir-cancelar">Cancelar mi suscripción</button>' +
         '</div>';
     } else {
@@ -271,10 +292,11 @@ body { margin: 0; background: #F4F6FB; font-family: system-ui,-apple-system,'Seg
       html += '<div class="el-card">' +
         '<h2 class="el-card-title">' + (esReactivacion ? 'Reactivar tu suscripción' : 'Activar tu prueba gratis de 7 días') + '</h2>' +
         '<p class="el-card-subtitle">' + (esReactivacion
-          ? 'Elegí el plan y confirmá con PayPal para volver a tener acceso completo.'
-          : 'Elegí un plan, confirmá con PayPal y arrancás con 7 días gratis — el primer cobro es hasta el día 8.') + '</p>' +
+          ? 'Elegí el plan y confirmá con PayPal para volver a tener acceso completo, o pedí activarla por transferencia bancaria.'
+          : 'Elegí un plan y confirmá con PayPal para arrancar con 7 días gratis — el primer cobro es hasta el día 8. Si preferís pagar por transferencia, escribinos por WhatsApp y lo activamos a mano.') + '</p>' +
         '<div class="plan-pick" id="plan-pick-activar">' + planPickHtml('plan-activar', plan) + '</div>' +
         '<button class="el-btn el-btn-primary" id="btn-activar">' + (esReactivacion ? 'Continuar con PayPal' : 'Activar prueba gratis con PayPal') + '</button>' +
+        '<button class="el-btn el-btn-ghost" id="btn-activar-transferencia" style="margin-top:10px;width:100%">💬 Prefiero pagar por transferencia (WhatsApp)</button>' +
         '</div>';
     }
 
@@ -291,6 +313,10 @@ body { margin: 0; background: #F4F6FB; font-family: system-ui,-apple-system,'Seg
       $('btn-abrir-cancelar').addEventListener('click', function () { $('modal-cancelar').classList.add('is-open'); });
     } else {
       $('btn-activar').addEventListener('click', onActivar);
+      $('btn-activar-transferencia').addEventListener('click', function () {
+        var plan = planSeleccionado('plan-activar') || clinicData.planElegido || 'basico';
+        window.open(waLink(plan), '_blank', 'noopener');
+      });
     }
   }
 

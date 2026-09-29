@@ -589,13 +589,25 @@
             Tu clínica ya se creó. Para poder guardar pacientes, consultas y
             todo lo demás, agrega una tarjeta con PayPal — hoy no se cobra
             nada. Tienes <strong>7 días gratis</strong>; si no cancelas, el
-            día 8 se cobra el plan <strong id="activate-plan-name">Básico ($75/mes)</strong>.
+            día 8 se cobra el plan <strong id="activate-plan-name">Básico ($40/mes)</strong>.
           </p>
           <div id="activate-error" class="auth-error"></div>
           <button type="button" class="auth-submit" id="btn-activate-trial">
             <div class="auth-spinner"></div>
             <span class="auth-btn-text">Continuar con PayPal</span>
           </button>
+          <!-- Alternativa sin PayPal: no llama a ninguna función ni cobra
+               nada — solo abre WhatsApp para que el equipo de Ancla verifique
+               a la clínica y comparta los datos de la cuenta a mano. La
+               activación real la hace un superadmin desde portal-admin.html
+               (mismo candado de firestore.rules que ya protege /clinics),
+               nunca este botón. -->
+          <a
+            id="link-activate-transfer"
+            class="auth-aux-link"
+            style="display:block;text-align:center;margin-top:14px;padding:12px;border:1.5px solid #E5E7EB;border-radius:10px;text-decoration:none;font-weight:600"
+            target="_blank" rel="noopener"
+          >💬 Prefiero pagar por transferencia (WhatsApp)</a>
           <a href="#" class="auth-aux-link" id="link-skip-activate">Prefiero solo mirar por ahora</a>
         </form>
 
@@ -660,10 +672,12 @@
         // pero eligió "solo mirar" antes, volviendo a activar más tarde.
         if (params.get('activar') === '1') {
           var clinicId = snap.data().clinicId;
+          activatingClinicId = clinicId || '';
           r3adsDb.collection('clinics').doc(clinicId).get().then(function (clinicSnap) {
             var plan = (clinicSnap.exists && clinicSnap.data().planElegido) || 'basico';
-            goToActivate(plan);
-          }).catch(function () { goToActivate('basico'); });
+            var nombre = (clinicSnap.exists && clinicSnap.data().nombre) || '';
+            goToActivate(plan, nombre);
+          }).catch(function () { goToActivate('basico', ''); });
           return;
         }
         window.location.href = returnTo;
@@ -970,13 +984,16 @@
       nombreAdmin: user.displayName || '',
       plan: plan
     })
-      .then(function () { return user.getIdToken(true); }) // trae el clinicId/rol recién asignados
-      .then(function () { goToActivate(plan); })
+      .then(function (result) {
+        activatingClinicId = (result.data && result.data.clinicId) || '';
+        return user.getIdToken(true); // trae el clinicId/rol recién asignados
+      })
+      .then(function () { goToActivate(plan, nombreClinica); })
       .catch(function (err) {
         setLoading('btn-create-clinic', false);
         // already-exists: alguien ya completó esta alta (doble clic, back/forward) — no es un error real, solo sigue.
         if (err.code === 'already-exists' || err.code === 'functions/already-exists') {
-          user.getIdToken(true).then(function () { goToActivate(plan); });
+          user.getIdToken(true).then(function () { goToActivate(plan, nombreClinica); });
           return;
         }
         showError(err.message || 'No se pudo crear la clínica. Intenta de nuevo.');
@@ -1005,8 +1022,15 @@
   }
 
   var PLAN_LABELS_ACTIVATE = { basico: 'Básico ($40/mes, Fundador)', completo: 'Completo ($65/mes, Fundador)' };
-  function goToActivate(plan) {
+  var activatingClinicId = ''; // fijado justo después de crearClinicaSelfService — ver arriba
+  function goToActivate(plan, nombreClinica) {
     document.getElementById('activate-plan-name').textContent = PLAN_LABELS_ACTIVATE[plan] || PLAN_LABELS_ACTIVATE.basico;
+    var msj = 'Hola, quiero activar mi clínica "' + (nombreClinica || '') + '"' +
+      (activatingClinicId ? ' (' + activatingClinicId + ')' : '') +
+      ' en Ancla con el plan ' + (PLAN_LABELS_ACTIVATE[plan] || PLAN_LABELS_ACTIVATE.basico) +
+      ' por transferencia bancaria. ¿Me compartís los datos para hacer la transferencia?';
+    document.getElementById('link-activate-transfer').href =
+      'https://wa.me/50495652894?text=' + encodeURIComponent(msj);
     switchView('activate');
   }
   document.getElementById('btn-activate-trial').addEventListener('click', function () {

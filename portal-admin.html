@@ -261,6 +261,18 @@ body { margin: 0; background: #F4F6FB; font-family: 'Segoe UI', Arial, sans-seri
             <label>Sitio web</label>
             <input type="text" class="pa-input" id="f-sitioWeb">
           </div>
+          <div class="pa-field">
+            <label>Método de pago</label>
+            <select class="pa-input" id="f-metodoPago">
+              <option value="paypal">PayPal (suscripción automática)</option>
+              <option value="transferencia">Transferencia bancaria (manual, por WhatsApp)</option>
+            </select>
+          </div>
+          <div class="pa-field">
+            <label>Próximo vencimiento (solo transferencia)</label>
+            <input type="date" class="pa-input" id="f-proximoVencimiento">
+            <div class="pa-hint">Fecha hasta la que la clínica ya pagó. Al activar por transferencia, dejalo en 7 días para la prueba gratis; al renovar, sumale ~30 días.</div>
+          </div>
           <div class="pa-field full">
             <label>Módulos contratados</label>
             <div class="pa-modulos-row">
@@ -399,6 +411,7 @@ body { margin: 0; background: #F4F6FB; font-family: 'Segoe UI', Arial, sans-seri
     if (!confirm('¿Seguro que deseas ' + verbo + ' "' + (c ? (c.nombre || c.id) : clinicId) + '" a plan ' + PLAN_LABELS[tier] + '? Esto reemplaza sus módulos contratados por los del plan ' + PLAN_LABELS[tier] + '.')) return;
     db.collection('clinics').doc(clinicId).update({
       modulos: PLAN_MODULOS[tier],
+      planElegido: tier,
       actualizadoEn: firebase.firestore.FieldValue.serverTimestamp()
     }).then(function () {
       toast('✅ Plan actualizado a ' + PLAN_LABELS[tier] + '.', 'ok');
@@ -491,6 +504,8 @@ body { margin: 0; background: #F4F6FB; font-family: 'Segoe UI', Arial, sans-seri
 
   function clearForm() {
     FORM_FIELDS.forEach(function (id) { $(id).value = ''; });
+    $('f-metodoPago').value = 'paypal';
+    $('f-proximoVencimiento').value = '';
     setModulosForm(null);
   }
   function setModulosForm(modulosMap) {
@@ -504,6 +519,35 @@ body { margin: 0; background: #F4F6FB; font-family: 'Segoe UI', Arial, sans-seri
     var m = {};
     MODULOS_KEYS.forEach(function (k) { m[k] = $('f-mod-' + k).checked; });
     return m;
+  }
+  // yyyy-mm-dd para <input type="date"> — el input trabaja en fecha local,
+  // no en el offset del Timestamp de Firestore, por eso se arma a mano en
+  // vez de usar toISOString() (que puede correr un día por la zona horaria).
+  function tsToDateInput(ts) {
+    if (!ts || !ts.toDate) return '';
+    var d = ts.toDate();
+    var mm = String(d.getMonth() + 1).padStart(2, '0');
+    var dd = String(d.getDate()).padStart(2, '0');
+    return d.getFullYear() + '-' + mm + '-' + dd;
+  }
+  function dateInputToTs(value) {
+    if (!value) return null;
+    var parts = value.split('-');
+    var d = new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]), 12, 0, 0);
+    return firebase.firestore.Timestamp.fromDate(d);
+  }
+  // Aviso de vencimiento para clínicas por transferencia (Mi perfil /
+  // Suscripción, WhatsApp) — no hay cobro automático que las suspenda solas,
+  // así que esto es lo único que le recuerda al equipo revisar el pago.
+  function venceHtml(c) {
+    if (!c.proximoVencimiento || !c.proximoVencimiento.toDate) {
+      return '<div style="font-size:11px;color:#9CA3AF;margin-top:4px">Sin fecha de vencimiento</div>';
+    }
+    var d = c.proximoVencimiento.toDate();
+    var diasRestantes = Math.ceil((d - new Date()) / 86400000);
+    var color = diasRestantes < 0 ? '#B91C1C' : (diasRestantes <= 3 ? '#92400E' : '#6B7280');
+    var texto = diasRestantes < 0 ? 'Venció hace ' + Math.abs(diasRestantes) + ' día(s)' : 'Vence en ' + diasRestantes + ' día(s)';
+    return '<div style="font-size:11px;color:' + color + ';margin-top:4px;font-weight:700">' + esc(texto) + ' (' + esc(tsToDateInput(c.proximoVencimiento)) + ')</div>';
   }
 
   function openCreatePanel() {
@@ -534,6 +578,8 @@ body { margin: 0; background: #F4F6FB; font-family: 'Segoe UI', Arial, sans-seri
     $('f-whatsapp').value = c.whatsapp || '';
     $('f-correo').value = c.correo || '';
     $('f-sitioWeb').value = c.sitioWeb || '';
+    $('f-metodoPago').value = c.metodoPago === 'transferencia' ? 'transferencia' : 'paypal';
+    $('f-proximoVencimiento').value = tsToDateInput(c.proximoVencimiento);
     setModulosForm(c.modulos || null);
     $('create-heading').textContent = 'Editar ' + (c.nombre || c.id);
     $('btn-save-clinic').textContent = 'Guardar cambios';
@@ -597,7 +643,9 @@ body { margin: 0; background: #F4F6FB; font-family: 'Segoe UI', Arial, sans-seri
         '<td>' + esc(c.subdominio || '—') + '</td>' +
         '<td>' + planBadgeHtml(plan) + '</td>' +
         '<td>' + modulosBadgesHtml(c) + '</td>' +
-        '<td><span class="pa-status pa-status--' + esc(estado) + '">' + (estado === 'activa' ? 'Activa' : 'Suspendida') + '</span></td>' +
+        '<td><span class="pa-status pa-status--' + esc(estado) + '">' + (estado === 'activa' ? 'Activa' : 'Suspendida') + '</span>' +
+          (c.metodoPago === 'transferencia' ? venceHtml(c) : '') +
+        '</td>' +
         '<td><div class="pa-row-actions">' +
           '<button class="pa-act pa-act--edit" data-edit-id="' + esc(c.id) + '">Editar</button>' +
           '<button class="pa-act pa-act--admin" data-admin-id="' + esc(c.id) + '" data-admin-name="' + esc(c.nombre || c.id) + '">+ Admin</button>' +
@@ -667,8 +715,22 @@ body { margin: 0; background: #F4F6FB; font-family: 'Segoe UI', Arial, sans-seri
       whatsapp: $('f-whatsapp').value.trim(),
       correo: $('f-correo').value.trim(),
       sitioWeb: $('f-sitioWeb').value.trim(),
-      modulos: readModulosForm()
+      modulos: readModulosForm(),
+      metodoPago: $('f-metodoPago').value === 'transferencia' ? 'transferencia' : 'paypal'
     };
+    // planElegido: se deriva de los módulos marcados, para que Mi-Suscripcion.html
+    // (que lee este campo, no los módulos directo) muestre el plan correcto a
+    // una clínica dada de alta o editada acá a mano. 'personalizado' (mezcla
+    // que no calza con ningún preset) cae a 'completo' — mismo criterio que
+    // el badge de la tabla (detectPlan), da más acceso que de menos.
+    var planDetectado = detectPlan({ modulos: data.modulos });
+    data.planElegido = planDetectado === 'basico' ? 'basico' : 'completo';
+    var vencInput = $('f-proximoVencimiento').value;
+    if (vencInput) {
+      data.proximoVencimiento = dateInputToTs(vencInput);
+    } else if (editing) {
+      data.proximoVencimiento = firebase.firestore.FieldValue.delete();
+    }
 
     var op;
     if (editing) {
