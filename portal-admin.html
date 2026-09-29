@@ -345,13 +345,12 @@ body { margin: 0; background: #F4F6FB; font-family: 'Segoe UI', Arial, sans-seri
   // — no es secreta, es pública por diseño. Panel de superadmin, mismo motivo
   // para protegerlo que el resto del proyecto.
   //
-  // OJO: este panel se sirve desde r3ads.com (GitHub Pages), y ese dominio NO
-  // está autorizado en la llave de reCAPTCHA Enterprise, así que acá App Check
-  // siempre falla con appCheck/recaptcha-error. Hoy es inofensivo porque
-  // Firestore/Storage están en "Sin aplicar"; el día que se enciendan, este
-  // panel deja de funcionar por completo hasta agregar el dominio a la llave.
-  // Detalle completo en portal-clinico/firebase-init.js (probado y revertido
-  // el 2026-09-29).
+  // OJO: este panel se sirve desde r3ads.com (GitHub Pages), NO desde Firebase
+  // Hosting como el resto — es el que más fácil se olvida al tocar la llave de
+  // reCAPTCHA Enterprise. r3ads.com tiene que seguir en la lista de dominios
+  // autorizados de esa llave: desde el 2026-09-29 Firestore y Storage están en
+  // "Aplicar", así que sin token este panel recibe 403 en todo y queda
+  // inservible. Ya pasó una vez. Detalle en portal-clinico/firebase-init.js.
   // try/catch a propósito — ver portal-clinico/firebase-init.js: sin esto,
   // un fallo del script de reCAPTCHA Enterprise (ej. bloqueado por un
   // ad-blocker) tumba TODO este bloque antes de definir auth/db, rompiendo

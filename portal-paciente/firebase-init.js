@@ -13,13 +13,13 @@
    app web registrada en Firebase para todo el proyecto) — ver el
    comentario completo en portal-clinico/firebase-init.js.
 
-   OJO: este dominio (ancla-paciente.web.app) NO está autorizado en la llave
-   de reCAPTCHA Enterprise, así que acá App Check nunca consigue token — el
-   exchange responde 403 y el SDK se auto-bloquea 24 h. Hoy da igual porque
-   Firestore/Storage están en "Sin aplicar", pero significa que encender
-   "Aplicar" deja el portal del paciente muerto. Ver el detalle y la lista de
-   dominios que faltan en portal-clinico/firebase-init.js (probado y
-   revertido el 2026-09-29).
+   OJO: este dominio (ancla-paciente.web.app) tiene que estar autorizado en
+   la llave de reCAPTCHA Enterprise, y desde el 2026-09-29 Firestore y
+   Storage están en "Aplicar" — o sea que si alguien lo saca de esa lista,
+   este portal deja de funcionar por completo, no se degrada. Ya pasó una
+   vez: el exchange responde 403 y el SDK se auto-bloquea 24 h
+   (appCheck/throttled), un bloqueo que sobrevive a deshacer el cambio.
+   Ver el detalle en portal-clinico/firebase-init.js.
    ============================================================ */
 (function () {
   var config = {

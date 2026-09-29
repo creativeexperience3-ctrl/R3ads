@@ -10,36 +10,46 @@
 
    App Check (2026-09-26): activado con Fraud Defense (reCAPTCHA
    Enterprise) — la site key NO es secreta (pública por diseño, como el
-   apiKey de arriba). Registrado en Firebase Console en modo "Sin aplicar"
-   (monitoreo) para Firestore, Storage e Identity Toolkit: no bloquea nada,
-   solo mide tráfico verificado vs no verificado. Las Cloud Functions son la
-   excepción — cuatro callables SÍ exigen token, ver functions/index.js.
+   apiKey de arriba).
 
-   NO PASAR FIRESTORE/STORAGE A "APLICAR" TODAVÍA (probado 2026-09-29)
-   -------------------------------------------------------------------
-   Se intentó y hubo que revertirlo a los tres minutos. La llave de
-   reCAPTCHA Enterprise de arriba solo tiene autorizado el dominio
-   r3ads-clinic-crm.web.app, así que con "Aplicar" encendido:
+   ESTADO (2026-09-29): Firestore y Storage en "Aplicar". Identity Toolkit
+   (Auth) queda a propósito en "Sin aplicar": si App Check fallara ahí, el
+   usuario no podría ni entrar ni pedir un reset de contraseña — se quedaría
+   sin ninguna forma de recuperarse solo. Las Cloud Functions tienen su
+   propio criterio, por callable, en functions/index.js.
 
-     · https://r3ads.com/portal-admin.html (panel de superadmin, servido
-       desde GitHub Pages, no desde Firebase Hosting)
-         → appCheck/recaptcha-error, ni un token; Firestore le respondía
-           403 a todo y el panel quedaba inservible.
-     · https://ancla-paciente.web.app (portal del paciente)
-         → 403 del exchange de App Check y, peor, el SDK se auto-bloquea
-           24 horas (appCheck/throttled) después de ese 403. O sea que el
-           daño sobrevive al rollback en el navegador de quien lo pisó.
+   LO QUE COSTÓ LLEGAR ACÁ — no repetir el atajo
+   ----------------------------------------------
+   El primer intento de encenderlo hubo que revertirlo a los tres minutos.
+   La llave de reCAPTCHA Enterprise solo tenía autorizado el dominio
+   r3ads-clinic-crm.web.app, así que con "Aplicar" encendido se cayeron:
 
-   Solo r3ads-clinic-crm.web.app conseguía token (verificado: con token, una
-   lectura de /clinics/demo/catalogoConfig — `allow read: if true` — pasa;
-   sin token, 403).
+     · https://r3ads.com/portal-admin.html — el panel de superadmin se sirve
+       desde GitHub Pages, no desde Firebase Hosting. Fácil de olvidar.
+     · https://ancla-paciente.web.app — el portal del paciente. Y algo peor:
+       tras el 403 del exchange, el SDK se auto-bloquea 24 h
+       (appCheck/throttled). Ese daño SOBREVIVE al rollback en el navegador
+       de quien lo pisó.
 
-   El requisito antes de volver a intentarlo NO es mirar las métricas, es
-   agregar los dominios que faltan a la llave de reCAPTCHA Enterprise en
-   Cloud Console (reCAPTCHA → la llave → Domains): r3ads.com, www.r3ads.com,
-   ancla-paciente.web.app, ancla-paciente.firebaseapp.com,
-   r3ads-clinic-crm.firebaseapp.com y ancla.r3ads.com cuando exista. Recién
-   entonces se prueba cada portal uno por uno ANTES de encender, no después.
+   Se arregló agregando los dominios en Cloud Console (reCAPTCHA → la llave →
+   Domains). Si mañana aparece un portal en un dominio nuevo —ancla.r3ads.com,
+   por ejemplo— hay que agregarlo ANTES de que se publique, o ese portal nace
+   roto.
+
+   CÓMO SE VERIFICA (hacerlo así, no de memoria)
+   ----------------------------------------------
+   /clinics/{id}/catalogoConfig es `allow read: if true` en las reglas, así
+   que sirve de sonda limpia: lo único que puede hacerla fallar es App Check.
+     · Desde cada portal en el navegador: debe leer OK.
+     · Con curl sin token: debe dar 403.
+   Ambas direcciones comprobadas el 2026-09-29 en los tres portales.
+
+   Un fetch() directo a una download URL de Storage (…?alt=media&token=…)
+   NO lleva token de App Check y sigue funcionando igual — comprobado. De eso
+   depende que exportarExpedienteZip pueda meter los adjuntos al ZIP.
+
+   Para revertir: Firebase Console → App Check → APIs → "Unenforce" en Cloud
+   Firestore y Cloud Storage.
    ============================================================ */
 (function () {
   var config = {
