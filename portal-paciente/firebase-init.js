@@ -12,6 +12,14 @@
    App Check (2026-09-26): misma site key que portal-clinico (una sola
    app web registrada en Firebase para todo el proyecto) — ver el
    comentario completo en portal-clinico/firebase-init.js.
+
+   OJO: este dominio (ancla-paciente.web.app) NO está autorizado en la llave
+   de reCAPTCHA Enterprise, así que acá App Check nunca consigue token — el
+   exchange responde 403 y el SDK se auto-bloquea 24 h. Hoy da igual porque
+   Firestore/Storage están en "Sin aplicar", pero significa que encender
+   "Aplicar" deja el portal del paciente muerto. Ver el detalle y la lista de
+   dominios que faltan en portal-clinico/firebase-init.js (probado y
+   revertido el 2026-09-29).
    ============================================================ */
 (function () {
   var config = {

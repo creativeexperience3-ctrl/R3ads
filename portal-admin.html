@@ -344,6 +344,14 @@ body { margin: 0; background: #F4F6FB; font-family: 'Segoe UI', Arial, sans-seri
   // App Check (2026-09-26): misma site key que portal-clinico/firebase-init.js
   // — no es secreta, es pública por diseño. Panel de superadmin, mismo motivo
   // para protegerlo que el resto del proyecto.
+  //
+  // OJO: este panel se sirve desde r3ads.com (GitHub Pages), y ese dominio NO
+  // está autorizado en la llave de reCAPTCHA Enterprise, así que acá App Check
+  // siempre falla con appCheck/recaptcha-error. Hoy es inofensivo porque
+  // Firestore/Storage están en "Sin aplicar"; el día que se enciendan, este
+  // panel deja de funcionar por completo hasta agregar el dominio a la llave.
+  // Detalle completo en portal-clinico/firebase-init.js (probado y revertido
+  // el 2026-09-29).
   // try/catch a propósito — ver portal-clinico/firebase-init.js: sin esto,
   // un fallo del script de reCAPTCHA Enterprise (ej. bloqueado por un
   // ad-blocker) tumba TODO este bloque antes de definir auth/db, rompiendo

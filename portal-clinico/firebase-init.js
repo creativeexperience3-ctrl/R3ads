@@ -11,10 +11,35 @@
    App Check (2026-09-26): activado con Fraud Defense (reCAPTCHA
    Enterprise) — la site key NO es secreta (pública por diseño, como el
    apiKey de arriba). Registrado en Firebase Console en modo "Sin aplicar"
-   (monitoreo): todavía no bloquea nada, solo mide tráfico verificado vs
-   no verificado. Pasar Firestore/Storage/Functions a "Aplicar" es un paso
-   aparte, manual, solo cuando se confirme en las métricas que el tráfico
-   real ya llega verificado.
+   (monitoreo) para Firestore, Storage e Identity Toolkit: no bloquea nada,
+   solo mide tráfico verificado vs no verificado. Las Cloud Functions son la
+   excepción — cuatro callables SÍ exigen token, ver functions/index.js.
+
+   NO PASAR FIRESTORE/STORAGE A "APLICAR" TODAVÍA (probado 2026-09-29)
+   -------------------------------------------------------------------
+   Se intentó y hubo que revertirlo a los tres minutos. La llave de
+   reCAPTCHA Enterprise de arriba solo tiene autorizado el dominio
+   r3ads-clinic-crm.web.app, así que con "Aplicar" encendido:
+
+     · https://r3ads.com/portal-admin.html (panel de superadmin, servido
+       desde GitHub Pages, no desde Firebase Hosting)
+         → appCheck/recaptcha-error, ni un token; Firestore le respondía
+           403 a todo y el panel quedaba inservible.
+     · https://ancla-paciente.web.app (portal del paciente)
+         → 403 del exchange de App Check y, peor, el SDK se auto-bloquea
+           24 horas (appCheck/throttled) después de ese 403. O sea que el
+           daño sobrevive al rollback en el navegador de quien lo pisó.
+
+   Solo r3ads-clinic-crm.web.app conseguía token (verificado: con token, una
+   lectura de /clinics/demo/catalogoConfig — `allow read: if true` — pasa;
+   sin token, 403).
+
+   El requisito antes de volver a intentarlo NO es mirar las métricas, es
+   agregar los dominios que faltan a la llave de reCAPTCHA Enterprise en
+   Cloud Console (reCAPTCHA → la llave → Domains): r3ads.com, www.r3ads.com,
+   ancla-paciente.web.app, ancla-paciente.firebaseapp.com,
+   r3ads-clinic-crm.firebaseapp.com y ancla.r3ads.com cuando exista. Recién
+   entonces se prueba cada portal uno por uno ANTES de encender, no después.
    ============================================================ */
 (function () {
   var config = {
