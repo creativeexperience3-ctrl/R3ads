@@ -1467,6 +1467,9 @@ summary.ed-meds-cat { list-style: revert; }
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <!-- docx.js para generar Word del expediente -->
 <script src="https://unpkg.com/docx@8.5.0/build/index.umd.js"></script>
+<!-- JSZip para exportar el expediente completo en un solo ZIP
+     (portabilidad prometida en Privacidad.html, secciones 10 y 11) -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 
 <script>
 (function () {
@@ -7012,6 +7015,7 @@ summary.ed-meds-cat { list-style: revert; }
       '</div>' +
       '<div style="margin-bottom:16px;display:flex;gap:10px;flex-wrap:wrap">' +
         '<button class="ed-btn ed-btn-yellow" id="btn-gen-word">Generar Word del expediente principal</button>' +
+        '<button class="ed-btn ed-btn-primary" id="btn-exportar-zip">Descargar expediente completo (ZIP)</button>' +
       '</div>' +
       '<div id="historial-lista"><div class="ed-empty"><div class="ed-overlay-spinner" style="margin:0 auto"></div></div></div>';
 
@@ -7020,6 +7024,7 @@ summary.ed-meds-cat { list-style: revert; }
       renderHistorialTab();
     });
     $id('btn-gen-word').addEventListener('click', generarWordExpediente);
+    $id('btn-exportar-zip').addEventListener('click', exportarExpedienteZip);
 
     var codigo = p.codigoPaciente;
     Promise.all([
@@ -8486,6 +8491,438 @@ summary.ed-meds-cat { list-style: revert; }
       showAlert('Error al generar Word: ' + err.message, 'error');
     });
   }
+
+
+  /* ════════════════════════════════════════════════════════════
+     EXPORTAR EXPEDIENTE COMPLETO A UN SOLO ZIP
+
+     Existe para cumplir de verdad lo que promete Privacidad.html:
+     "obtener una copia completa y descargable de tu información o la de
+     tu expediente, en un formato utilizable (PDF, Word o el formato
+     original del archivo)" (sección 10, Portabilidad) y que "todos los
+     archivos pueden descargarse" (sección 11). Antes de esto solo se
+     podía bajar UN PDF o UN Word a la vez, así que la política prometía
+     más de lo que el producto hacía.
+
+     El ZIP lleva tres capas, a propósito:
+       · EXPEDIENTE.html  → todo el expediente legible en cualquier
+         navegador, sin Ancla y sin internet (e imprimible a PDF).
+       · datos/*.json     → los mismos datos en crudo, campo por campo,
+         para que otra clínica o sistema pueda importarlos.
+       · archivos/**      → cada PDF, Word o imagen tal como se subió
+         (el "formato original" que promete la política).
+
+     Un archivo que no se pueda bajar NO tumba la exportación: se anota
+     en ARCHIVOS-NO-INCLUIDOS.txt con su URL, para que quede constancia
+     de qué falta y se pueda pedir a mano. Vale más un ZIP completo al
+     95 % con la lista de lo que falta que un error genérico.
+     ════════════════════════════════════════════════════════════ */
+
+  /* Las seis colecciones que cuelgan de un paciente. Todas llevan
+     clinicId + codigoPaciente (ver firestore.rules), así que se consultan
+     todas igual y el filtro por clinicId mantiene el aislamiento entre
+     clínicas incluso acá. */
+  var COLECCIONES_PACIENTE = [
+    { col: 'consultas',           titulo: 'Consultas y procedimientos' },
+    { col: 'examenesLaboratorio', titulo: 'Exámenes de laboratorio' },
+    { col: 'resultadosPruebas',   titulo: 'Pruebas rápidas' },
+    { col: 'electrocardiogramas', titulo: 'Electrocardiogramas' },
+    { col: 'constancias',         titulo: 'Constancias médicas' },
+    { col: 'referencias',         titulo: 'Referencias médicas' }
+  ];
+
+  /* Timestamp de Firestore → texto ISO. Sin esto JSON.stringify escupe
+     {"seconds":…,"nanoseconds":…}, que no le sirve a nadie que quiera
+     leer el ZIP en otro sistema. */
+  function valorPlano(v) {
+    if (v == null) return v;
+    if (typeof v.toDate === 'function') {
+      try { return v.toDate().toISOString(); } catch (_) { return null; }
+    }
+    if (Array.isArray(v)) return v.map(valorPlano);
+    if (typeof v === 'object') {
+      var out = {};
+      Object.keys(v).forEach(function (k) { out[k] = valorPlano(v[k]); });
+      return out;
+    }
+    return v;
+  }
+
+  /* Cualquier campo que termine en "Url" y apunte a http(s) es un archivo
+     guardado en Storage (pdfUrl, imagenUrl, wordExpedienteUrl,
+     facturaPdfUrl…). Se detecta por el nombre del campo en vez de una
+     lista fija para que un campo nuevo entre solo en la exportación. */
+  function archivosDeRegistro(reg, prefijo) {
+    var encontrados = [];
+    Object.keys(reg || {}).forEach(function (k) {
+      var v = reg[k];
+      if (typeof v === 'string' && /url$/i.test(k) && /^https?:\/\//.test(v)) {
+        encontrados.push({ campo: k, url: v, prefijo: prefijo });
+      }
+    });
+    return encontrados;
+  }
+
+  /* Extensión real del archivo. La URL de descarga de Firebase Storage
+     trae el path codificado (…/o/clinics%2F…%2Falgo.pdf?alt=media&token=…),
+     así que la extensión sale de ahí; si no se puede, .bin antes que
+     inventar una. */
+  function extensionDeUrl(url) {
+    try {
+      var sinQuery = String(url).split('?')[0];
+      var m = decodeURIComponent(sinQuery).match(/\.([a-zA-Z0-9]{1,5})$/);
+      return m ? m[1].toLowerCase() : 'bin';
+    } catch (_) { return 'bin'; }
+  }
+
+  /* Nombre de archivo seguro para un ZIP en Windows, macOS y Linux. */
+  function nombreSeguro(s) {
+    return String(s || '')
+      .replace(/[\\/:*?"<>|]/g, '-')
+      .replace(/\s+/g, ' ')
+      .trim()
+      .slice(0, 80) || 'sin-nombre';
+  }
+
+  /* Fecha corta (YYYY-MM-DD) para ordenar los registros y nombrar los
+     archivos dentro del ZIP. Toma el primer campo de fecha que exista. */
+  function fechaDeRegistro(reg) {
+    var candidatos = ['fecha', 'fechaConsulta', 'emitidoEn', 'emitidaEn', 'createdAt', 'creadoEn'];
+    for (var i = 0; i < candidatos.length; i++) {
+      var v = reg[candidatos[i]];
+      if (!v) continue;
+      if (typeof v === 'string' && v.length >= 10) return v.slice(0, 10);
+      if (typeof v === 'object' && typeof v.toDate === 'function') {
+        try { return v.toDate().toISOString().slice(0, 10); } catch (_) { /* sigue buscando */ }
+      }
+    }
+    return 'sin-fecha';
+  }
+
+  /* Los que fallaron al bajarse se marcan con este prefijo para poder
+     contarlos aparte de los errores de lectura de una colección entera. */
+  var MARCA_ARCHIVO_FALLIDO = /^\[archivo\]/;
+
+  /* ─── EXPEDIENTE.html: el expediente legible sin Ancla ───────────
+     Se renderiza genéricamente (todos los campos de cada registro,
+     anidados incluidos) a propósito: en una exportación de portabilidad,
+     omitir un campo en silencio es peor que mostrar uno de más. */
+  function etiquetaCampo(k) {
+    var mapa = {
+      ta: 'Tensión arterial', fc: 'Frecuencia cardíaca', fr: 'Frecuencia respiratoria',
+      temp: 'Temperatura', peso: 'Peso', talla: 'Talla', spo2: 'Saturación O₂',
+      glucosa: 'Glucosa', imc: 'IMC', motivoConsulta: 'Motivo de consulta',
+      exploracion: 'Exploración física', diagnostico: 'Diagnóstico',
+      tratamiento: 'Tratamiento', indicaciones: 'Indicaciones',
+      proximaCita: 'Próxima cita', doctorNombre: 'Médico', doctorEmail: 'Correo del médico',
+      codigoPaciente: 'Código de paciente', signosVitales: 'Signos vitales',
+      sintomas: 'Síntomas', numeroIdentidad: 'Número de identidad'
+    };
+    if (mapa[k]) return mapa[k];
+    /* camelCase → "Camel case" */
+    return k.replace(/([A-Z])/g, ' $1').replace(/^./, function (c) { return c.toUpperCase(); });
+  }
+
+  function filasDeObjeto(obj, nivel) {
+    var html = '';
+    Object.keys(obj || {}).forEach(function (k) {
+      if (k === '_id' || k === 'clinicId') return; /* ruido interno, no del paciente */
+      var v = obj[k];
+      if (v == null || v === '') return;
+
+      /* Objeto anidado (signosVitales, etc.): encabezado + sus propias filas. */
+      if (typeof v === 'object' && typeof v.toDate !== 'function' && !Array.isArray(v)) {
+        var interno = filasDeObjeto(v, (nivel || 0) + 1);
+        if (interno) {
+          html += '<tr><th colspan="2" class="sub">' + esc(etiquetaCampo(k)) + '</th></tr>' + interno;
+        }
+        return;
+      }
+
+      var texto;
+      if (Array.isArray(v)) {
+        texto = v.map(function (x) {
+          return x && typeof x === 'object' ? JSON.stringify(valorPlano(x)) : String(x);
+        }).join(', ');
+      } else if (typeof v === 'object' && typeof v.toDate === 'function') {
+        try { texto = v.toDate().toLocaleString('es-HN'); } catch (_) { texto = ''; }
+      } else if (typeof v === 'boolean') {
+        texto = v ? 'Sí' : 'No';
+      } else {
+        texto = String(v);
+      }
+      if (!texto) return;
+
+      var esUrl = /^https?:\/\//.test(texto);
+      html += '<tr><th' + ((nivel || 0) > 0 ? ' class="anidado"' : '') + '>' + esc(etiquetaCampo(k)) + '</th>' +
+        '<td>' + (esUrl
+          ? '<a href="' + esc(texto) + '">' + esc(texto.slice(0, 70)) + '…</a>'
+          : esc(texto).replace(/\n/g, '<br>')) + '</td></tr>';
+    });
+    return html;
+  }
+
+  function antecedentesHtml(data) {
+    var filas = '';
+    Object.keys(data || {}).forEach(function (k) {
+      var item = data[k] || {};
+      filas += '<tr><th>' + esc(k) + '</th><td>' +
+        (item.tiene ? '<b style="color:#B91C1C">SÍ</b>' : 'No') +
+        (item.detalle ? ' — ' + esc(item.detalle) : '') + '</td></tr>';
+    });
+    return filas || '<tr><td colspan="2">— sin registrar —</td></tr>';
+  }
+
+  function construirExpedienteHtml(p, porColeccion) {
+    var dg = p.datosGenerales || {};
+    var nombreClinica = CLINIC.razonSocial || CLINIC.nombre || 'Clínica';
+    var h = [];
+    h.push('<!doctype html><html lang="es"><head><meta charset="utf-8">');
+    h.push('<meta name="viewport" content="width=device-width,initial-scale=1">');
+    h.push('<title>Expediente ' + esc(p.codigoPaciente) + ' — ' + esc(dg.nombreCompleto || '') + '</title>');
+    h.push('<style>' +
+      'body{font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;color:#1F2937;max-width:900px;margin:0 auto;padding:32px 20px;line-height:1.5}' +
+      'h1{font-size:22px;margin:0 0 4px;color:#242F40}' +
+      'h2{font-size:16px;margin:32px 0 10px;padding-bottom:6px;border-bottom:2px solid #242F40;color:#242F40}' +
+      'h3{font-size:14px;margin:18px 0 8px;color:#374151}' +
+      '.cab{text-align:center;border-bottom:3px solid #242F40;padding-bottom:16px;margin-bottom:8px}' +
+      '.cod{display:inline-block;background:#242F40;color:#fff;padding:4px 12px;border-radius:6px;font-weight:700;letter-spacing:1px}' +
+      'table{width:100%;border-collapse:collapse;margin:8px 0 18px;font-size:13px}' +
+      'th,td{border:1px solid #E5E7EB;padding:6px 9px;text-align:left;vertical-align:top}' +
+      'th{background:#F9FAFB;width:34%;font-weight:600}' +
+      'th.sub{background:#EEF2F7;width:auto;color:#242F40}' +
+      'th.anidado{padding-left:22px;font-weight:500;color:#4B5563}' +
+      '.reg{border:1px solid #D1D5DB;border-radius:8px;padding:2px 14px 6px;margin-bottom:16px;page-break-inside:avoid}' +
+      '.vacio{color:#6B7280;font-style:italic;font-size:13px}' +
+      '.pie{margin-top:40px;padding-top:14px;border-top:1px solid #E5E7EB;font-size:11px;color:#6B7280;text-align:center}' +
+      'a{color:#1D4ED8;word-break:break-all}' +
+      '@media print{body{padding:0}.reg{border-color:#999}}' +
+      '</style></head><body>');
+
+    h.push('<div class="cab"><h1>' + esc(nombreClinica.toUpperCase()) + '</h1>' +
+      '<p style="margin:2px 0 10px;font-size:13px">EXPEDIENTE CLÍNICO COMPLETO</p>' +
+      '<span class="cod">' + esc(p.codigoPaciente) + '</span></div>');
+    h.push('<p class="vacio">Copia generada el ' + esc(new Date().toLocaleString('es-HN')) +
+      '. Este archivo contiene el expediente completo y se abre en cualquier navegador, ' +
+      'sin conexión y sin Ancla. Los archivos originales (PDF, Word, imágenes) están en la ' +
+      'carpeta <b>archivos/</b> del ZIP; los mismos datos en crudo, en <b>datos/</b>.</p>');
+
+    h.push('<h2>1. Datos generales</h2><table>' +
+      (filasDeObjeto(dg, 0) || '<tr><td colspan="2">— sin registrar —</td></tr>') + '</table>');
+    h.push('<h2>2. Antecedentes personales patológicos</h2><table>' +
+      antecedentesHtml(p.antecedentesPatologicos) + '</table>');
+    h.push('<h2>3. Antecedentes personales no patológicos</h2><table>' +
+      antecedentesHtml(p.antecedentesNoPatologicos) + '</table>');
+    h.push('<h2>4. Antecedentes familiares</h2><p>' +
+      (p.antecedentesFamiliares
+        ? esc(p.antecedentesFamiliares).replace(/\n/g, '<br>')
+        : '<span class="vacio">— sin registrar —</span>') + '</p>');
+
+    var n = 5;
+    COLECCIONES_PACIENTE.forEach(function (def) {
+      var lista = porColeccion[def.col] || [];
+      h.push('<h2>' + (n++) + '. ' + esc(def.titulo) + ' (' + lista.length + ')</h2>');
+      if (!lista.length) { h.push('<p class="vacio">— sin registros —</p>'); return; }
+      lista.forEach(function (reg, i) {
+        h.push('<div class="reg"><h3>' + esc(def.titulo.replace(/s$/, '')) + ' ' + (i + 1) + ' · ' +
+          esc(fechaDeRegistro(reg)) + '</h3><table>' + filasDeObjeto(reg, 0) + '</table></div>');
+      });
+    });
+
+    h.push('<div class="pie">' + esc(nombreClinica) + ' · Expediente ' + esc(p.codigoPaciente) +
+      ' · Exportado desde Ancla el ' + esc(new Date().toLocaleString('es-HN')) + '</div>');
+    h.push('</body></html>');
+    return h.join('\n');
+  }
+
+  /* ─── La exportación ───────────────────────────────────────────── */
+  function exportarExpedienteZip() {
+    if (!pacienteActual) return;
+    if (!window.JSZip) {
+      showAlert('Librería JSZip no cargada. Recargá la página e intentá de nuevo.', 'error');
+      return;
+    }
+
+    var p = pacienteActual;
+    var codigo = p.codigoPaciente;
+    var zip = new JSZip();
+    var noIncluidos = [];  /* líneas para ARCHIVOS-NO-INCLUIDOS.txt */
+    var porColeccion = {};
+    var pendientes = [];   /* {campo, url, prefijo} de todo el expediente */
+
+    showOverlay('Reuniendo el expediente completo…');
+
+    /* Una consulta por colección. Si una falla (módulo apagado, permisos,
+       red) se anota y el ZIP sigue: mejor incompleto y avisando que nada. */
+    function leerColeccion(def) {
+      return r3adsDb.collection(def.col)
+        .where('clinicId', '==', CLINIC_ID)
+        .where('codigoPaciente', '==', codigo)
+        .get()
+        .then(function (snap) {
+          var lista = [];
+          snap.forEach(function (d) {
+            var reg = d.data() || {};
+            reg._id = d.id;
+            lista.push(reg);
+          });
+          /* Orden cronológico para que el ZIP se lea como una historia. */
+          lista.sort(function (a, b) { return fechaDeRegistro(a) < fechaDeRegistro(b) ? -1 : 1; });
+          porColeccion[def.col] = lista;
+        })
+        .catch(function (err) {
+          porColeccion[def.col] = [];
+          noIncluidos.push('[coleccion ' + def.col + '] No se pudo leer: ' + (err.message || err));
+        });
+    }
+
+    Promise.all(COLECCIONES_PACIENTE.map(leerColeccion))
+      .then(function () {
+        /* ── datos/ en crudo ── */
+        zip.file('datos/expediente.json', JSON.stringify(valorPlano(p), null, 2));
+        COLECCIONES_PACIENTE.forEach(function (def) {
+          zip.file('datos/' + def.col + '.json',
+            JSON.stringify(valorPlano(porColeccion[def.col] || []), null, 2));
+        });
+
+        /* ── EXPEDIENTE.html legible ── */
+        zip.file('EXPEDIENTE.html', construirExpedienteHtml(p, porColeccion));
+
+        /* ── Qué archivos hay que bajar ── */
+        archivosDeRegistro(p, 'archivos/expediente').forEach(function (a) { pendientes.push(a); });
+        COLECCIONES_PACIENTE.forEach(function (def) {
+          (porColeccion[def.col] || []).forEach(function (reg) {
+            var base = 'archivos/' + def.col + '/' + fechaDeRegistro(reg) + '-' + nombreSeguro(reg._id);
+            archivosDeRegistro(reg, base).forEach(function (a) { pendientes.push(a); });
+          });
+        });
+
+        /* ── Bajarlos uno por uno. Secuencial a propósito: no conviene
+              abrir 40 descargas a la vez desde el navegador de una clínica
+              con internet lento. ── */
+        var i = 0;
+        function siguiente() {
+          if (i >= pendientes.length) return Promise.resolve();
+          var a = pendientes[i];
+          i++;
+          showOverlay('Descargando archivos adjuntos… ' + i + ' de ' + pendientes.length);
+          return fetch(a.url)
+            .then(function (res) {
+              if (!res.ok) throw new Error('HTTP ' + res.status);
+              return res.blob();
+            })
+            .then(function (blob) {
+              var sufijo = /^pdfUrl$/i.test(a.campo) ? '' : '-' + a.campo.replace(/Url$/i, '');
+              zip.file(a.prefijo + sufijo + '.' + extensionDeUrl(a.url), blob);
+            })
+            .catch(function (err) {
+              /* CORS, token vencido, archivo borrado del bucket… Queda la URL
+                 para bajarlo a mano desde el navegador con sesión iniciada. */
+              noIncluidos.push('[archivo] ' + a.campo + ' → ' + a.url +
+                '\n    Motivo: ' + (err.message || err));
+            })
+            .then(siguiente);
+        }
+        return siguiente();
+      })
+      .then(function () {
+        var fallidos = noIncluidos.filter(function (l) { return MARCA_ARCHIVO_FALLIDO.test(l); }).length;
+        var dg = p.datosGenerales || {};
+
+        /* ── LEEME.txt: qué es cada cosa dentro del ZIP ── */
+        var leeme = [
+          'EXPEDIENTE CLÍNICO COMPLETO',
+          '===========================',
+          '',
+          'Paciente : ' + (dg.nombreCompleto || '—'),
+          'Código   : ' + codigo,
+          'Clínica  : ' + (CLINIC.razonSocial || CLINIC.nombre || '—'),
+          'Generado : ' + new Date().toLocaleString('es-HN'),
+          '',
+          'QUÉ HAY EN ESTE ZIP',
+          '-------------------',
+          'EXPEDIENTE.html',
+          '    El expediente completo, legible en cualquier navegador, sin',
+          '    internet y sin Ancla. Se puede imprimir o guardar como PDF',
+          '    desde el navegador (Archivo > Imprimir > Guardar como PDF).',
+          '',
+          'datos/',
+          '    Los mismos datos en crudo (JSON), campo por campo, para que',
+          '    otra clínica o sistema pueda importarlos sin perder nada.',
+          '      expediente.json            Hoja principal y antecedentes',
+          COLECCIONES_PACIENTE.map(function (def) {
+            var lista = porColeccion[def.col] || [];
+            return '      ' + (def.col + '.json                           ').slice(0, 27) +
+              lista.length + ' registro(s) — ' + def.titulo;
+          }).join('\n'),
+          '',
+          'archivos/',
+          '    Cada PDF, Word o imagen tal como se subió (formato original),',
+          '    ordenado por colección y fecha.',
+          '',
+          'RESUMEN',
+          '-------',
+          'Archivos adjuntos encontrados : ' + pendientes.length,
+          'Incluidos en este ZIP         : ' + (pendientes.length - fallidos),
+          'No incluidos                  : ' + fallidos,
+          '',
+          noIncluidos.length
+            ? 'Hubo elementos que no se pudieron incluir. Ver ARCHIVOS-NO-INCLUIDOS.txt.'
+            : 'Se incluyó todo lo que el expediente tiene registrado.',
+          '',
+          'AVISO',
+          '-----',
+          'Este ZIP contiene datos de salud. Guardalo en un lugar seguro y',
+          'compartilo solo con el paciente o con quien él autorice por',
+          'escrito (ver la Política de Privacidad de Ancla, sección 10).',
+          ''
+        ].join('\n');
+        zip.file('LEEME.txt', leeme);
+
+        if (noIncluidos.length) {
+          zip.file('ARCHIVOS-NO-INCLUIDOS.txt', [
+            'ELEMENTOS QUE NO SE PUDIERON INCLUIR',
+            '====================================',
+            '',
+            'Cada bloque indica qué faltó y por qué. Los que traen una URL se',
+            'pueden abrir a mano desde el navegador con la sesión iniciada en',
+            'Ancla, y agregarse al ZIP después.',
+            '',
+            noIncluidos.join('\n\n'),
+            ''
+          ].join('\n'));
+        }
+
+        showOverlay('Comprimiendo el ZIP…');
+        return zip.generateAsync({ type: 'blob', compression: 'DEFLATE' });
+      })
+      .then(function (blob) {
+        var nombreArchivo = 'Expediente-' + nombreSeguro(codigo) + '-' +
+          new Date().toISOString().slice(0, 10) + '.zip';
+        var url = URL.createObjectURL(blob);
+        var a = document.createElement('a');
+        a.href = url;
+        a.download = nombreArchivo;
+        document.body.appendChild(a);
+        a.click();
+        setTimeout(function () { URL.revokeObjectURL(url); a.remove(); }, 2000);
+
+        hideOverlay();
+        var fallidos = noIncluidos.filter(function (l) { return MARCA_ARCHIVO_FALLIDO.test(l); }).length;
+        showAlert(
+          fallidos
+            ? 'ZIP descargado, pero ' + fallidos + ' archivo(s) no se pudieron incluir — ver ARCHIVOS-NO-INCLUIDOS.txt dentro del ZIP.'
+            : 'Expediente completo descargado en ZIP.',
+          fallidos ? 'info' : 'success'
+        );
+      })
+      .catch(function (err) {
+        hideOverlay();
+        console.error('[Portal Clínico] Error exportando ZIP:', err);
+        showAlert('No se pudo generar el ZIP: ' + (err.message || err), 'error');
+      });
+  }
+
 
 })();
 </script>

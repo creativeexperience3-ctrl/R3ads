@@ -190,11 +190,18 @@ firebase deploy --only storage
 
 ## 🎨 Personalizaciones futuras (opcional)
 
+> **Ya implementado:** *Exportar historial completo a un solo ZIP.* Vive en
+> `Expediente-Doctor.html` (`exportarExpedienteZip`), en el historial del
+> paciente, botón «Descargar expediente completo (ZIP)». El ZIP trae
+> `EXPEDIENTE.html` (legible e imprimible sin Ancla), `datos/*.json` (las seis
+> colecciones del paciente en crudo) y `archivos/**` (cada PDF/Word/imagen en
+> su formato original). Es lo que hace cierta la promesa de portabilidad de
+> `Privacidad.html`, secciones 10 y 11 — no quitarlo sin ajustar esa política.
+
 - **Notificaciones por correo** cuando se registra una nueva consulta
 - **Recordatorios automáticos** de próximas citas
 - **Subida de archivos adjuntos** (resultados de laboratorio, radiografías)
 - **Firma digital** en los PDFs
-- **Exportar historial completo** a un solo ZIP
 - **Búsqueda avanzada** por nombre, diagnóstico, fecha
 
 ---
