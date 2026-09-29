@@ -466,6 +466,34 @@
           <a href="#" class="auth-aux-link" id="link-forgot">¿Olvidaste tu contraseña?</a>
         </form>
 
+        <!-- ── Segundo factor (2FA) ──
+             Se muestra entre la contraseña y el destino final, y SOLO a quien
+             ya activó su segundo factor (ver afterAuthSuccess). El candado de
+             verdad no está acá sino en firestore.rules (mfaVigente): esta
+             vista es la forma cómoda de renovar el claim, no la que protege
+             los datos. ── -->
+        <form id="view-twofa" class="auth-view" novalidate>
+          <h1>Verificación en dos pasos</h1>
+          <div class="auth-email-chip">
+            <span id="twofa-email-display"></span>
+            <button type="button" id="btn-twofa-cambiar">Salir</button>
+          </div>
+          <div class="auth-fgroup">
+            <label class="auth-label" for="twofa-code">Código de tu app de autenticación</label>
+            <input type="text" id="twofa-code" class="auth-input"
+              placeholder="000000" inputmode="numeric" autocomplete="one-time-code"
+              maxlength="11" autofocus>
+          </div>
+          <button type="submit" class="auth-submit" id="btn-twofa">
+            <div class="auth-spinner"></div>
+            <span class="auth-btn-text">Verificar y entrar</span>
+          </button>
+          <p style="margin:14px 0 0;font-size:12.5px;color:#6B7280;text-align:center;line-height:1.5">
+            ¿Perdiste el teléfono? Usá uno de tus códigos de recuperación acá mismo.<br>
+            Si tampoco los tenés, pedile al admin de tu clínica que te reinicie la verificación.
+          </p>
+        </form>
+
         <!-- ── Confirmar reset de contraseña (llega por el link del correo,
              ver actionCodeSettings en el handler de link-forgot) ── -->
         <form id="view-reset" class="auth-view" novalidate>
@@ -647,7 +675,76 @@
      cuenta nueva (self-service): se le pide crear su clínica antes de
      entrar. Si falla la lectura por lo que sea, no se bloquea el login —
      se deja pasar al returnTo normal, que ya tiene sus propios guards. */
+  /* ── Compuerta del segundo factor ──────────────────────────────
+     Corre despues de la contraseña y antes de mandar al portal. Solo
+     detiene a quien tiene el claim `mfa == true` (o sea, ya terminó de
+     activar su 2FA) y cuyo `mfaUntil` ya venció; a todos los demás los
+     deja pasar igual que antes, así que esto no puede bloquear a nadie
+     que no se haya enrolado.
+
+     Si getIdTokenResult falla, se deja pasar a propósito: firestore.rules
+     sigue exigiendo el claim, así que el usuario no vería datos sin
+     verificar de todos modos. Es mejor que un error de red acá se sienta
+     como "no carga el expediente" y no como "no puedo entrar nunca". */
+  var usuarioEsperando2FA = null;
+
   function afterAuthSuccess(user) {
+    user.getIdTokenResult()
+      .then(function (res) {
+        var claims = (res && res.claims) || {};
+        var vigente = Number(claims.mfaUntil || 0) > Date.now();
+        if (claims.mfa === true && !vigente) {
+          usuarioEsperando2FA = user;
+          document.getElementById('twofa-email-display').textContent = user.email || '';
+          document.getElementById('twofa-code').value = '';
+          switchView('twofa');
+          setTimeout(function () { document.getElementById('twofa-code').focus(); }, 60);
+          return;
+        }
+        continuarDespuesDeAuth(user);
+      })
+      .catch(function () { continuarDespuesDeAuth(user); });
+  }
+
+  document.getElementById('btn-twofa-cambiar').addEventListener('click', function () {
+    usuarioEsperando2FA = null;
+    r3adsAuth.signOut().then(function () { switchView('email'); });
+  });
+
+  document.getElementById('view-twofa').addEventListener('submit', function (e) {
+    e.preventDefault();
+    clearMessages();
+    var user = usuarioEsperando2FA || r3adsAuth.currentUser;
+    if (!user) { switchView('email'); return; }
+
+    var codigo = document.getElementById('twofa-code').value.trim();
+    if (!codigo) { showError('Escribí el código de tu app de autenticación.'); return; }
+
+    setLoading('btn-twofa', true);
+    firebase.functions().httpsCallable('verificar2FA')({ codigo: codigo })
+      .then(function (res) {
+        /* getIdToken(true) es obligatorio: la función acaba de fijar
+           mfaUntil como custom claim, y sin refrescar el token el cliente
+           seguiría mandando el viejo y Firestore lo seguiría rechazando. */
+        return user.getIdToken(true).then(function () { return res.data; });
+      })
+      .then(function (data) {
+        if (data && data.usoRecuperacion) {
+          showNotice('Entraste con un código de recuperación. Te quedan ' +
+            (data.codigosRestantes != null ? data.codigosRestantes : '—') +
+            '. Generá códigos nuevos desde Seguridad.');
+        }
+        usuarioEsperando2FA = null;
+        continuarDespuesDeAuth(user);
+      })
+      .catch(function (err) {
+        setLoading('btn-twofa', false);
+        document.getElementById('twofa-code').value = '';
+        showError((err && err.message) || 'No se pudo verificar el código.');
+      });
+  });
+
+  function continuarDespuesDeAuth(user) {
     r3adsDb.collection('usuarios').doc(user.uid).get().then(function (snap) {
       if (snap.exists) {
         // Vuelta de PayPal sin completar: no seguir de largo, dejar ver el aviso y ofrecer reintentar.
@@ -716,7 +813,7 @@
     document.querySelectorAll('.auth-view').forEach(function (v) {
       v.classList.toggle('is-active', v.id === 'view-' + name);
     });
-    document.getElementById('signup-hint').style.display = (name === 'register' || name === 'clinic' || name === 'activate' || name === 'confirming' || name === 'reset') ? 'none' : '';
+    document.getElementById('signup-hint').style.display = (name === 'register' || name === 'clinic' || name === 'activate' || name === 'confirming' || name === 'reset' || name === 'twofa') ? 'none' : '';
     document.getElementById('btn-clinic-logout').style.display = (name === 'clinic') ? '' : 'none';
     clearMessages();
   }

@@ -32,13 +32,33 @@ service cloud.firestore {
     function myRole() {
       return request.auth.token.rol;
     }
+
+    // ── Segundo factor (2FA) ──────────────────────────────────────
+    // Los claims `mfa` y `mfaUntil` los fija verificar2FA/confirmar2FA
+    // (functions/index.js) al validar un código TOTP. Acá está el candado
+    // real: sin esto el 2FA sería solo interfaz, y cualquiera con la
+    // contraseña podría hablarle a Firestore directo con el SDK y saltárselo.
+    //
+    // Clave del diseño: solo exige algo si el token YA trae `mfa == true`,
+    // o sea solo a quien terminó de activar su segundo factor. Quien no lo
+    // activó no tiene ese claim y estas reglas se comportan igual que antes
+    // — activar esta función NO puede dejar afuera a nadie que no se haya
+    // enrolado él mismo. Por eso el .get() con default en vez de leer el
+    // campo directo: un token sin el claim no debe tronar la evaluación.
+    function mfaVigente() {
+      return request.auth.token.get('mfa', false) != true
+        || request.auth.token.get('mfaUntil', 0) > request.time.toMillis();
+    }
     // Cuentas internas de R3ads (soporte/operación de la plataforma), NO de
     // ninguna clínica. Se otorga a mano una sola vez por Firebase Admin SDK
     // al crear la cuenta del equipo de R3ads — nunca por una lista de correos
     // en este archivo. Alcance limitado a administrar /clinics y bootstrap de
     // /usuarios; NO da acceso a expedientes/consultas de ninguna clínica.
+    // mfaVigente(): la cuenta que administra TODAS las clínicas es la que más
+    // conviene proteger con segundo factor. Igual que arriba, solo aplica si
+    // ese superadmin ya activó su 2FA.
     function isSuperAdmin() {
-      return isAuth() && request.auth.token.superadmin == true;
+      return isAuth() && request.auth.token.superadmin == true && mfaVigente();
     }
 
     // Clínica con la suscripción vigente. Si una clínica se suspende por falta
@@ -49,8 +69,11 @@ service cloud.firestore {
         && get(/databases/$(database)/documents/clinics/$(clinicId)).data.estado == 'activa';
     }
     // El usuario pertenece a esa clínica Y esa clínica está activa.
+    // mfaVigente() va acá —y no en cada rol— porque TODOS los roles
+    // (isDoctor/isCaja/isAdmin/isEnfermeria/isMedicoTratante) pasan por esta
+    // función: un solo punto de control en vez de cinco que se desincronizan.
     function sameClinic(clinicId) {
-      return isAuth() && myClinic() == clinicId && clinicActiva(clinicId);
+      return isAuth() && mfaVigente() && myClinic() == clinicId && clinicActiva(clinicId);
     }
 
     // ── Roles (idéntica jerarquía al sistema original de CMG) ───────
@@ -468,6 +491,18 @@ service cloud.firestore {
       // id que no existe todavía no debe tronar la evaluación de la regla.
       allow read: if (resource == null && isAuth()) || isDoctor(resource.data.clinicId) || isCaja(resource.data.clinicId);
       allow write: if isDoctor(request.resource.data.clinicId) || isAdmin(request.resource.data.clinicId);
+    }
+
+    // ═══ /seguridad2FA/{uid} ═════════════════════════════════════════
+    // Secreto TOTP y hashes de los códigos de recuperación de cada usuario
+    // (functions/index.js, bloque 2FA). CERRADO por completo al cliente: solo
+    // el Admin SDK entra acá. Si el propio usuario pudiera leer su secreto,
+    // cualquier XSS en el portal se llevaría el segundo factor junto con la
+    // sesión, y el 2FA dejaría de sumar nada sobre la contraseña.
+    // El estado (sin el secreto) se espeja en /usuarios/{uid}.dosFactoresActivo,
+    // que sí es legible, para que la interfaz sepa si está activo.
+    match /seguridad2FA/{uid} {
+      allow read, write: if false;
     }
 
     // ═══ /loginAttempts/{email} ══════════════════════════════════════

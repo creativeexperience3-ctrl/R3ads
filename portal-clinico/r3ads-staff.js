@@ -48,8 +48,52 @@
           .catch(function () {});
       }, function () { /* sin acceso o error de red: no bloquea la página */ });
   }
+  /* ── Segundo factor vencido ────────────────────────────────────
+     Los claims `mfa`/`mfaUntil` los fija verificar2FA (functions/index.js)
+     y los exige firestore.rules (mfaVigente) dentro de sameClinic(), por
+     donde pasan todos los roles. Pasadas las 12 horas, Firestore deja de
+     responder: sin esto el usuario vería "missing or insufficient
+     permissions" en cada pantalla, sin ninguna pista de que lo único que
+     necesita es volver a meter su código.
+
+     Solo actúa sobre quien YA activó su 2FA (claim mfa == true). Quien no
+     lo activó no tiene el claim y esto no lo toca nunca.
+
+     Antes de redirigir se fuerza UN refresh del token: si el usuario
+     acaba de verificarse en otra pestaña, el token cacheado de esta
+     todavía diría que venció y lo mandaríamos a Auth.html sin necesidad. */
+  var _mfaRedirigiendo = false;
+
+  function checkMfaVigente(user) {
+    if (!user || _mfaRedirigiendo) return;
+
+    function vencido(claims) {
+      return claims && claims.mfa === true && Number(claims.mfaUntil || 0) <= Date.now();
+    }
+    function aVerificar() {
+      _mfaRedirigiendo = true;
+      var pagina = window.location.pathname.split('/').pop() || 'Inicio.html';
+      window.location.href = 'Auth.html?returnTo=' + encodeURIComponent(pagina + window.location.search);
+    }
+
+    user.getIdTokenResult()
+      .then(function (res) {
+        if (!vencido(res && res.claims)) return null;
+        return user.getIdTokenResult(true).then(function (fresco) {
+          if (vencido(fresco && fresco.claims)) aVerificar();
+        });
+      })
+      /* Un fallo acá no debe sacar a nadie de la página: firestore.rules
+         sigue siendo la que decide, así que en el peor caso el usuario ve
+         un error de permisos en vez de un redirect — nunca lo contrario. */
+      .catch(function () {});
+  }
+
   if (typeof window.r3adsAuth !== 'undefined') {
-    window.r3adsAuth.onAuthStateChanged(function (user) { watchClaimsRefresh(user); });
+    window.r3adsAuth.onAuthStateChanged(function (user) {
+      watchClaimsRefresh(user);
+      checkMfaVigente(user);
+    });
   }
 
   function userDoc(uid, cb) {

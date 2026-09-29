@@ -65,8 +65,24 @@ exports.onUsuarioWrite = functions.firestore
       return null; // sin cambios reales — evita escrituras/refrescos innecesarios
     }
 
+    /* setCustomUserClaims REEMPLAZA el conjunto entero de claims. Los que no
+       salen de /usuarios hay que arrastrarlos a mano:
+         · mfa / mfaUntil — el segundo factor (ver el bloque 2FA al final).
+           Sin esto, cualquier escritura en /usuarios/{uid} (cambiar un rol,
+           desactivar y reactivar a alguien) le apagaría el 2FA al usuario sin
+           que nadie se enterara, y firestore.rules volvería a dejarlo pasar
+           con sola la contraseña.
+         · superadmin — se otorga una sola vez por Admin SDK y no vive en
+           ningún doc, así que también se perdía en la primera escritura. */
+    const nuevosClaims = { clinicId: clinicId, rol: rol };
+    if (current.mfa === true) {
+      nuevosClaims.mfa = true;
+      nuevosClaims.mfaUntil = current.mfaUntil || 0;
+    }
+    if (current.superadmin === true) nuevosClaims.superadmin = true;
+
     try {
-      await admin.auth().setCustomUserClaims(uid, { clinicId: clinicId, rol: rol });
+      await admin.auth().setCustomUserClaims(uid, nuevosClaims);
     } catch (err) {
       console.error('[onUsuarioWrite] Error fijando claims de', uid, err);
       return null;
@@ -678,4 +694,454 @@ exports.verificarCodigoReset = functions.https.onCall(async (data, context) => {
   const email = info.data && info.data.email;
   if (email) await loginAttemptsRef(email).delete().catch(() => {});
   return { ok: true, email: email || null };
+});
+
+/* ════════════════════════════════════════════════════════════════
+   SEGUNDO FACTOR (2FA) POR TOTP — 2026-09-29
+
+   Por qué a mano y no con el MFA nativo de Firebase: el MFA de Firebase
+   Auth (TOTP y SMS) exige subir el proyecto a Identity Platform, que es
+   un cambio de facturación y de superficie de Auth. Esto hace lo mismo
+   con TOTP estándar (RFC 6238) — Google Authenticator, Authy, 1Password,
+   Microsoft Authenticator y cualquier otra app sirven — sin tocar el plan.
+
+   CÓMO SE HACE CUMPLIR DE VERDAD (lo importante)
+   Un 2FA que solo esconde botones en el cliente no protege nada: quien
+   tenga la contraseña puede hablarle a Firestore directo con el SDK y
+   saltarse la interfaz entera. Acá el candado está en firestore.rules:
+
+     · Al verificar el código, esta función fija dos custom claims en el
+       token del usuario: `mfa: true` y `mfaUntil: <epoch ms>`.
+     · firestore.rules exige, dentro de sameClinic() —por donde pasan TODOS
+       los roles— que si el token trae `mfa == true`, entonces `mfaUntil`
+       siga en el futuro. Ver mfaVigente() en ese archivo.
+     · Pasadas MFA_VENTANA_HORAS el claim vence y Firestore deja de
+       responder hasta que el usuario vuelva a meter un código.
+
+   POR QUÉ NO PUEDE DEJAR A NADIE AFUERA
+   mfaVigente() solo exige algo si el token YA trae `mfa == true`, o sea
+   solo a quien terminó de activar su 2FA. Un usuario que nunca lo activó
+   no tiene ese claim y las reglas se comportan igual que antes. Activar
+   esto no puede bloquear a nadie que no se haya enrolado él mismo.
+
+   RECUPERACIÓN
+   Al activar se entregan MFA_CODIGOS_RECUPERACION códigos de un solo uso
+   (se guardan solo como SHA-256, nunca en claro). Si además se pierden,
+   el admin de la clínica o un superadmin resetea el 2FA del usuario con
+   resetear2FAUsuario — nadie queda encerrado fuera de su propia cuenta.
+
+   DÓNDE VIVE EL SECRETO
+   /seguridad2FA/{uid}, colección con `allow read, write: if false` en
+   firestore.rules: solo el Admin SDK (estas funciones) la toca. El
+   cliente nunca ve el secreto después del enrolamiento. Se refleja un
+   booleano `dosFactoresActivo` en /usuarios/{uid} —que sí es legible por
+   el propio usuario y por el admin de su clínica— para que la interfaz
+   sepa el estado sin poder leer nada sensible.
+   ════════════════════════════════════════════════════════════════ */
+const crypto = require('crypto');
+
+const MFA_VENTANA_HORAS        = 12;  /* cuánto dura una verificación */
+const MFA_INTENTOS_MAX         = 5;   /* códigos errados antes de bloquear */
+const MFA_LOCK_MINUTOS         = 15;
+const MFA_CODIGOS_RECUPERACION = 8;
+const MFA_DERIVA_PASOS         = 1;   /* ±1 paso de 30 s, por reloj desfasado */
+
+function seguridad2FARef(uid) {
+  return db.collection('seguridad2FA').doc(uid);
+}
+
+/* ─── Base32 (RFC 4648, sin padding) ──────────────────────────────
+   Es el formato que piden las apps de autenticación para el secreto. */
+const B32_ALFABETO = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
+
+function base32Encode(buf) {
+  let bits = 0;
+  let valor = 0;
+  let salida = '';
+  for (const byte of buf) {
+    valor = (valor << 8) | byte;
+    bits += 8;
+    while (bits >= 5) {
+      salida += B32_ALFABETO[(valor >>> (bits - 5)) & 31];
+      bits -= 5;
+    }
+  }
+  if (bits > 0) salida += B32_ALFABETO[(valor << (5 - bits)) & 31];
+  return salida;
+}
+
+function base32Decode(texto) {
+  const limpio = String(texto || '').toUpperCase().replace(/[^A-Z2-7]/g, '');
+  let bits = 0;
+  let valor = 0;
+  const bytes = [];
+  for (const c of limpio) {
+    const idx = B32_ALFABETO.indexOf(c);
+    if (idx === -1) continue;
+    valor = (valor << 5) | idx;
+    bits += 5;
+    if (bits >= 8) {
+      bytes.push((valor >>> (bits - 8)) & 255);
+      bits -= 8;
+    }
+  }
+  return Buffer.from(bytes);
+}
+
+/* ─── TOTP (RFC 6238): HMAC-SHA1, 6 dígitos, pasos de 30 s ────────
+   Implementado con el crypto de Node en vez de una dependencia nueva:
+   son treinta líneas de un estándar cerrado, y así el login de segundo
+   factor no queda atado a que alguien mantenga un paquete de npm. */
+function totpCodigo(secretoBuf, contador) {
+  const mensaje = Buffer.alloc(8);
+  mensaje.writeUInt32BE(Math.floor(contador / 0x100000000), 0);
+  mensaje.writeUInt32BE(contador % 0x100000000, 4);
+
+  const hmac = crypto.createHmac('sha1', secretoBuf).update(mensaje).digest();
+  /* Truncamiento dinámico: los 4 bits bajos del último byte dicen desde
+     dónde leer los 4 bytes que forman el número. */
+  const offset = hmac[hmac.length - 1] & 0x0f;
+  const binario = ((hmac[offset] & 0x7f) << 24)
+    | (hmac[offset + 1] << 16)
+    | (hmac[offset + 2] << 8)
+    | hmac[offset + 3];
+  return String(binario % 1000000).padStart(6, '0');
+}
+
+function comparaSegura(a, b) {
+  const ba = Buffer.from(String(a));
+  const bb = Buffer.from(String(b));
+  if (ba.length !== bb.length) return false;
+  return crypto.timingSafeEqual(ba, bb);
+}
+
+/**
+ * Valida un código TOTP contra un secreto base32.
+ * Devuelve el contador (paso de 30 s) que casó, o null si ninguno casa.
+ *
+ * `contadorMinimo` rechaza un código de un paso ya usado: sin eso, el
+ * mismo código sirve durante toda su ventana de validez y alguien que lo
+ * vea de reojo (o lo intercepte) puede reusarlo.
+ */
+function verificarTotp(secretoBase32, codigo, contadorMinimo) {
+  const limpio = String(codigo || '').replace(/\D/g, '');
+  if (limpio.length !== 6) return null;
+
+  const secreto = base32Decode(secretoBase32);
+  if (!secreto.length) return null;
+
+  const ahora = Math.floor(Date.now() / 1000 / 30);
+  for (let d = -MFA_DERIVA_PASOS; d <= MFA_DERIVA_PASOS; d++) {
+    const contador = ahora + d;
+    if (typeof contadorMinimo === 'number' && contador <= contadorMinimo) continue;
+    if (comparaSegura(totpCodigo(secreto, contador), limpio)) return contador;
+  }
+  return null;
+}
+
+/* ─── Códigos de recuperación ─────────────────────────────────────
+   Alfabeto sin 0/O/1/I/L para que nadie los transcriba mal al teléfono. */
+const REC_ALFABETO = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';
+
+function nuevoCodigoRecuperacion() {
+  const bytes = crypto.randomBytes(10);
+  let salida = '';
+  for (let i = 0; i < 10; i++) {
+    salida += REC_ALFABETO[bytes[i] % REC_ALFABETO.length];
+    if (i === 4) salida += '-';
+  }
+  return salida;
+}
+
+function hashRecuperacion(codigo) {
+  return crypto.createHash('sha256')
+    .update(String(codigo || '').toUpperCase().replace(/[^A-Z0-9]/g, ''))
+    .digest('hex');
+}
+
+/* ─── Claims ──────────────────────────────────────────────────────
+   SIEMPRE se leen los claims actuales y se escribe el conjunto completo:
+   setCustomUserClaims REEMPLAZA todo. Escribir solo {mfa, mfaUntil}
+   borraría clinicId/rol/superadmin y dejaría al usuario sin acceso a
+   nada. Es el mismo cuidado que ahora tiene onUsuarioWrite del otro lado. */
+async function fijarClaimsMfa(uid, activo) {
+  const user = await admin.auth().getUser(uid);
+  const claims = Object.assign({}, user.customClaims || {});
+
+  if (activo) {
+    claims.mfa = true;
+    claims.mfaUntil = Date.now() + MFA_VENTANA_HORAS * 60 * 60 * 1000;
+  } else {
+    delete claims.mfa;
+    delete claims.mfaUntil;
+  }
+
+  await admin.auth().setCustomUserClaims(uid, claims);
+  /* El cliente escucha /_claimsRefresh/{uid} (ver r3ads-staff.js) y fuerza
+     el refresh del ID token — sin esto seguiría usando el token viejo, sin
+     el claim nuevo, hasta una hora. */
+  await db.collection('_claimsRefresh').doc(uid).set({
+    refreshedAt: admin.firestore.FieldValue.serverTimestamp()
+  });
+  return claims.mfaUntil || null;
+}
+
+/* Espeja el estado (nunca el secreto) en /usuarios/{uid} para que la
+   interfaz y Admin-Usuarios.html sepan quién tiene 2FA activo. */
+async function espejarEstado2FA(uid, activo) {
+  await db.collection('usuarios').doc(uid).set({
+    dosFactoresActivo: !!activo,
+    dosFactoresActualizadoEn: admin.firestore.FieldValue.serverTimestamp()
+  }, { merge: true });
+}
+
+function exigeAuth(context) {
+  if (!context.auth || !context.auth.uid) {
+    throw new functions.https.HttpsError('unauthenticated', 'Iniciá sesión primero.');
+  }
+  return context.auth.uid;
+}
+
+/* Bloqueo por fuerza bruta. Un código TOTP son 6 dígitos: sin esto,
+   probar el millón de combinaciones es cuestión de tiempo. */
+function revisarBloqueo(datos) {
+  const lockedUntil = datos && datos.lockedUntil;
+  if (lockedUntil && lockedUntil.toMillis() > Date.now()) {
+    const minutos = Math.ceil((lockedUntil.toMillis() - Date.now()) / 60000);
+    throw new functions.https.HttpsError(
+      'resource-exhausted',
+      'Demasiados códigos incorrectos. Probá de nuevo en ' + minutos + ' minuto(s).'
+    );
+  }
+}
+
+async function registrarFallo(ref, datos) {
+  const intentos = ((datos && datos.intentos) || 0) + 1;
+  if (intentos >= MFA_INTENTOS_MAX) {
+    await ref.set({
+      intentos: 0,
+      lockedUntil: admin.firestore.Timestamp.fromMillis(Date.now() + MFA_LOCK_MINUTOS * 60 * 1000)
+    }, { merge: true });
+    throw new functions.https.HttpsError(
+      'resource-exhausted',
+      'Demasiados códigos incorrectos. Tu cuenta queda bloqueada ' + MFA_LOCK_MINUTOS + ' minutos.'
+    );
+  }
+  await ref.set({ intentos }, { merge: true });
+  throw new functions.https.HttpsError(
+    'invalid-argument',
+    'Código incorrecto. Te quedan ' + (MFA_INTENTOS_MAX - intentos) + ' intento(s).'
+  );
+}
+
+/**
+ * iniciar2FA: genera un secreto nuevo y lo deja PENDIENTE (sin activar).
+ * Hasta que confirmar2FA valide un código, el 2FA no está activo — así un
+ * enrolamiento a medias (el usuario cierra la pestaña al ver el QR) no lo
+ * deja sin poder entrar.
+ */
+exports.iniciar2FA = functions.https.onCall(async (data, context) => {
+  const uid = exigeAuth(context);
+  const ref = seguridad2FARef(uid);
+  const snap = await ref.get();
+
+  if (snap.exists && snap.data().activo) {
+    throw new functions.https.HttpsError(
+      'failed-precondition',
+      'Ya tenés el segundo factor activo. Desactivalo antes de configurar uno nuevo.'
+    );
+  }
+
+  const secretoBase32 = base32Encode(crypto.randomBytes(20)); /* 160 bits, lo que recomienda el RFC */
+  await ref.set({
+    secretoPendiente: secretoBase32,
+    activo: false,
+    intentos: 0,
+    lockedUntil: null,
+    iniciadoEn: admin.firestore.FieldValue.serverTimestamp()
+  }, { merge: true });
+
+  const email = (context.auth.token && context.auth.token.email) || uid;
+  const etiqueta = encodeURIComponent('Ancla:' + email);
+  const otpauthUri = 'otpauth://totp/' + etiqueta +
+    '?secret=' + secretoBase32 +
+    '&issuer=Ancla&algorithm=SHA1&digits=6&period=30';
+
+  return { secretoBase32, otpauthUri };
+});
+
+/**
+ * confirmar2FA: valida el primer código contra el secreto pendiente y, si
+ * casa, activa el 2FA y entrega los códigos de recuperación (única vez que
+ * se ven en claro — de ahí en adelante solo existen sus hashes).
+ */
+exports.confirmar2FA = functions.https.onCall(async (data, context) => {
+  const uid = exigeAuth(context);
+  const ref = seguridad2FARef(uid);
+  const snap = await ref.get();
+  const datos = snap.exists ? snap.data() : null;
+
+  if (!datos || !datos.secretoPendiente) {
+    throw new functions.https.HttpsError('failed-precondition', 'Empezá la configuración de nuevo.');
+  }
+  revisarBloqueo(datos);
+
+  const contador = verificarTotp(datos.secretoPendiente, data && data.codigo, null);
+  if (contador === null) return registrarFallo(ref, datos);
+
+  const codigos = [];
+  for (let i = 0; i < MFA_CODIGOS_RECUPERACION; i++) codigos.push(nuevoCodigoRecuperacion());
+
+  await ref.set({
+    secreto: datos.secretoPendiente,
+    secretoPendiente: admin.firestore.FieldValue.delete(),
+    activo: true,
+    ultimoContador: contador,
+    intentos: 0,
+    lockedUntil: null,
+    codigosRecuperacion: codigos.map(hashRecuperacion),
+    activadoEn: admin.firestore.FieldValue.serverTimestamp()
+  }, { merge: true });
+
+  const mfaUntil = await fijarClaimsMfa(uid, true);
+  await espejarEstado2FA(uid, true);
+
+  return { ok: true, codigosRecuperacion: codigos, mfaUntil };
+});
+
+/**
+ * verificar2FA: el paso que corre después de la contraseña en cada login.
+ * Acepta un código TOTP o uno de recuperación (que se consume).
+ */
+exports.verificar2FA = functions.https.onCall(async (data, context) => {
+  const uid = exigeAuth(context);
+  const ref = seguridad2FARef(uid);
+  const snap = await ref.get();
+  const datos = snap.exists ? snap.data() : null;
+
+  if (!datos || !datos.activo || !datos.secreto) {
+    throw new functions.https.HttpsError('failed-precondition', 'No tenés segundo factor configurado.');
+  }
+  revisarBloqueo(datos);
+
+  const contador = verificarTotp(datos.secreto, data && data.codigo, datos.ultimoContador);
+  if (contador !== null) {
+    await ref.set({ ultimoContador: contador, intentos: 0, lockedUntil: null }, { merge: true });
+    const mfaUntil = await fijarClaimsMfa(uid, true);
+    return { ok: true, mfaUntil, usoRecuperacion: false };
+  }
+
+  /* ¿Era un código de recuperación? Se consume: un código de un solo uso
+     que sigue sirviendo no es de un solo uso. */
+  const hash = hashRecuperacion(data && data.codigo);
+  const restantes = (datos.codigosRecuperacion || []).filter((h) => h !== hash);
+  if (restantes.length !== (datos.codigosRecuperacion || []).length) {
+    await ref.set({
+      codigosRecuperacion: restantes,
+      ultimoContador: datos.ultimoContador || null,
+      intentos: 0,
+      lockedUntil: null
+    }, { merge: true });
+    const mfaUntil = await fijarClaimsMfa(uid, true);
+    return { ok: true, mfaUntil, usoRecuperacion: true, codigosRestantes: restantes.length };
+  }
+
+  return registrarFallo(ref, datos);
+});
+
+/**
+ * desactivar2FA: exige un código válido (TOTP o de recuperación) antes de
+ * apagarlo. Si no lo exigiera, alguien con solo la contraseña —justo lo
+ * que el segundo factor viene a cubrir— podría quitarlo y seguir de largo.
+ */
+exports.desactivar2FA = functions.https.onCall(async (data, context) => {
+  const uid = exigeAuth(context);
+  const ref = seguridad2FARef(uid);
+  const snap = await ref.get();
+  const datos = snap.exists ? snap.data() : null;
+
+  if (!datos || !datos.activo) return { ok: true }; /* ya estaba apagado */
+  revisarBloqueo(datos);
+
+  const porTotp = verificarTotp(datos.secreto, data && data.codigo, datos.ultimoContador) !== null;
+  const porRecuperacion = (datos.codigosRecuperacion || []).indexOf(hashRecuperacion(data && data.codigo)) !== -1;
+  if (!porTotp && !porRecuperacion) return registrarFallo(ref, datos);
+
+  await ref.delete();
+  await fijarClaimsMfa(uid, false);
+  await espejarEstado2FA(uid, false);
+  return { ok: true };
+});
+
+/**
+ * regenerarCodigos2FA: entrega un juego nuevo de códigos de recuperación y
+ * anula los viejos. Exige un código TOTP válido (no uno de recuperación: si
+ * un código de recuperación robado pudiera generar ocho nuevos, quien lo
+ * tenga se queda con la cuenta para siempre).
+ */
+exports.regenerarCodigos2FA = functions.https.onCall(async (data, context) => {
+  const uid = exigeAuth(context);
+  const ref = seguridad2FARef(uid);
+  const snap = await ref.get();
+  const datos = snap.exists ? snap.data() : null;
+
+  if (!datos || !datos.activo || !datos.secreto) {
+    throw new functions.https.HttpsError('failed-precondition', 'No tenés segundo factor configurado.');
+  }
+  revisarBloqueo(datos);
+
+  const contador = verificarTotp(datos.secreto, data && data.codigo, datos.ultimoContador);
+  if (contador === null) return registrarFallo(ref, datos);
+
+  const codigos = [];
+  for (let i = 0; i < MFA_CODIGOS_RECUPERACION; i++) codigos.push(nuevoCodigoRecuperacion());
+
+  await ref.set({
+    codigosRecuperacion: codigos.map(hashRecuperacion),
+    ultimoContador: contador,
+    intentos: 0,
+    lockedUntil: null
+  }, { merge: true });
+
+  return { ok: true, codigosRecuperacion: codigos };
+});
+
+/**
+ * resetear2FAUsuario: escape hatch para un teléfono perdido sin códigos de
+ * recuperación a mano. Lo puede hacer el admin de la MISMA clínica o un
+ * superadmin de R3ads — nunca el propio usuario (si pudiera resetearse
+ * solo con la contraseña, el segundo factor no sería un segundo factor).
+ */
+exports.resetear2FAUsuario = functions.https.onCall(async (data, context) => {
+  const solicitanteUid = exigeAuth(context);
+  const uid = String((data && data.uid) || '').trim();
+  if (!uid) throw new functions.https.HttpsError('invalid-argument', 'Falta el usuario.');
+  if (uid === solicitanteUid) {
+    throw new functions.https.HttpsError(
+      'permission-denied',
+      'No podés resetear tu propio segundo factor. Pedíselo al admin de tu clínica.'
+    );
+  }
+
+  const token = context.auth.token || {};
+  const esSuperAdmin = token.superadmin === true;
+
+  if (!esSuperAdmin) {
+    /* Admin de la misma clínica: se compara contra el doc del objetivo, no
+       contra lo que mande el cliente. */
+    const objetivo = await db.collection('usuarios').doc(uid).get();
+    if (!objetivo.exists) throw new functions.https.HttpsError('not-found', 'No existe ese usuario.');
+    const mismaClinica = token.clinicId && objetivo.data().clinicId === token.clinicId;
+    if (token.rol !== 'admin' || !mismaClinica) {
+      throw new functions.https.HttpsError(
+        'permission-denied',
+        'Solo un admin de la misma clínica puede resetear el segundo factor de otro usuario.'
+      );
+    }
+  }
+
+  await seguridad2FARef(uid).delete().catch(() => {});
+  await fijarClaimsMfa(uid, false);
+  await espejarEstado2FA(uid, false);
+  return { ok: true };
 });

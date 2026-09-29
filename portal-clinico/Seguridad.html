@@ -1,0 +1,529 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Seguridad de tu cuenta · Portal Clínico</title>
+<!-- Favicon: pendiente por clínica (Fase 5 del plan). -->
+<link rel="stylesheet" href="assets/portal-tokens.css">
+<style>
+*, *::before, *::after { box-sizing: border-box; }
+body { margin: 0; background: #F4F6FB; font-family: system-ui,-apple-system,'Segoe UI',Arial,sans-serif; color: #1F2937; }
+
+/* ── Topbar (mismo patrón que Mi-Suscripcion.html) ── */
+.ap-top {
+  background: #242F40; color: #fff;
+  padding: 14px 24px;
+  display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap;
+  position: sticky; top: 0; z-index: 20;
+}
+.ap-top-left { display: flex; align-items: center; gap: 12px; }
+.ap-top-title { font-size: 16px; font-weight: 900; letter-spacing: .3px; }
+.ap-top-title small { display: block; font-size: 11px; font-weight: 600; color: rgba(255,255,255,.6); letter-spacing: .5px; }
+.ap-top-right { display: flex; align-items: center; gap: 12px; font-size: 13px; flex-wrap: wrap; }
+.ap-top-right .ap-email { color: rgba(255,255,255,.75); }
+.ap-link {
+  color: #242F40; background: #CCA43B; text-decoration: none;
+  padding: 7px 14px; border-radius: 8px; font-weight: 800; font-size: 13px;
+}
+.ap-link.ghost { background: transparent; color: #fff; border: 1px solid rgba(255,255,255,.3); }
+.ap-link.active { background: #fff; color: #242F40; }
+.ap-link:hover { filter: brightness(.95); }
+
+.ap-wrap { max-width: 720px; margin: 0 auto; padding: 24px; }
+
+.el-card { background: #fff; border-radius: 14px; box-shadow: 0 4px 18px rgba(33,60,125,.08); padding: 26px; margin-bottom: 20px; }
+.el-card-title { font-size: 17px; font-weight: 800; color: #242F40; margin: 0 0 4px; }
+.el-card-subtitle { font-size: 13px; color: #6B7280; margin: 0 0 18px; line-height: 1.55; }
+
+.sg-estado-row { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+.sg-badge { display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px; border-radius: 100px; font-size: 12.5px; font-weight: 800; }
+.sg-badge::before { content: ''; width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+.sg-badge.is-ok  { background: #D1FAE5; color: #065F46; }
+.sg-badge.is-off { background: #FEF3C7; color: #92400E; }
+
+.sg-btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  height: 44px; padding: 0 22px; border: none; border-radius: 10px;
+  font-family: inherit; font-size: 14px; font-weight: 800; cursor: pointer;
+  background: #242F40; color: #fff; transition: filter .15s;
+}
+.sg-btn:hover { filter: brightness(1.12); }
+.sg-btn.ghost { background: #fff; color: #242F40; border: 1.5px solid #E5E7EB; }
+.sg-btn.ghost:hover { border-color: #242F40; filter: none; }
+.sg-btn.danger { background: #FEE2E2; color: #991B1B; border: 1.5px solid #FECACA; }
+.sg-btn:disabled { opacity: .5; cursor: not-allowed; }
+.sg-btn-row { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 4px; }
+
+.sg-label { display: block; font-size: 12.5px; font-weight: 700; color: #374151; margin: 0 0 6px; }
+.sg-input {
+  width: 100%; height: 46px; padding: 0 14px; border: 1.5px solid #E5E7EB;
+  border-radius: 10px; font-family: inherit; font-size: 16px; color: #1F2937; background: #fff;
+}
+.sg-input:focus { outline: none; border-color: #CCA43B; }
+.sg-input.codigo { letter-spacing: 3px; font-weight: 700; text-align: center; font-variant-numeric: tabular-nums; }
+.sg-fgroup { margin-bottom: 16px; }
+
+/* ── Pasos del enrolamiento ── */
+.sg-paso { display: none; }
+.sg-paso.is-active { display: block; }
+.sg-pasos-guia { counter-reset: paso; margin: 0 0 20px; padding: 0; list-style: none; }
+.sg-pasos-guia li {
+  counter-increment: paso; position: relative; padding-left: 34px;
+  margin-bottom: 12px; font-size: 13.5px; line-height: 1.55; color: #374151;
+}
+.sg-pasos-guia li::before {
+  content: counter(paso); position: absolute; left: 0; top: -1px;
+  width: 24px; height: 24px; border-radius: 50%; background: #242F40; color: #fff;
+  font-size: 12px; font-weight: 800; display: flex; align-items: center; justify-content: center;
+}
+
+#sg-qr {
+  display: flex; align-items: center; justify-content: center;
+  padding: 18px; background: #fff; border: 1.5px solid #E5E7EB; border-radius: 12px;
+  min-height: 200px;
+}
+#sg-qr img, #sg-qr canvas { display: block; }
+
+.sg-secreto {
+  margin-top: 12px; padding: 12px 14px; background: #F9FAFB; border: 1.5px dashed #D1D5DB;
+  border-radius: 10px; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 14px; font-weight: 700; letter-spacing: 1.5px; word-break: break-all; text-align: center; color: #242F40;
+}
+
+/* ── Códigos de recuperación ── */
+.sg-codigos {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
+  margin: 16px 0; padding: 18px; background: #F9FAFB; border: 1.5px solid #E5E7EB; border-radius: 12px;
+}
+@media (max-width: 480px) { .sg-codigos { grid-template-columns: 1fr; } }
+.sg-codigos code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 15px; font-weight: 700; letter-spacing: 1px; color: #242F40; text-align: center;
+}
+
+.sg-alerta { padding: 14px 16px; border-radius: 10px; font-size: 13px; line-height: 1.55; margin-bottom: 18px; }
+.sg-alerta.err  { background: #FEE2E2; color: #991B1B; border: 1px solid #FECACA; }
+.sg-alerta.ok   { background: #D1FAE5; color: #065F46; border: 1px solid #A7F3D0; }
+.sg-alerta.warn { background: #FEF3C7; color: #92400E; border: 1px solid #FDE68A; }
+.sg-alerta.info { background: #EFF6FF; color: #1E40AF; border: 1px solid #BFDBFE; }
+.sg-alerta[hidden] { display: none; }
+
+.sg-msg { text-align: center; padding: 50px 20px; color: #6B7280; }
+.sg-spinner {
+  width: 26px; height: 26px; border: 3px solid #E5E7EB; border-top-color: #242F40;
+  border-radius: 50%; animation: sg-spin .8s linear infinite;
+}
+@keyframes sg-spin { to { transform: rotate(360deg); } }
+.sg-btn .sg-spinner { display: none; width: 16px; height: 16px; border-width: 2px; border-top-color: #fff; }
+.sg-btn.is-loading .sg-spinner { display: block; }
+.sg-btn.is-loading .sg-btn-text { opacity: .7; }
+</style>
+<script src="clinic-config.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-check-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-functions-compat.js"></script>
+<script src="firebase-init.js"></script>
+<script src="clinic-trial-gate.js"></script>
+<script src="r3ads-staff.js"></script>
+<!-- QR en el navegador a propósito: generarlo con un servicio externo
+     (api.qrserver, chart.googleapis) mandaría el secreto TOTP a un tercero
+     en la URL de la imagen, que es justo lo que no puede pasar. -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+</head>
+<body>
+
+<div class="ap-top">
+  <div class="ap-top-left">
+    <div class="ap-top-title" id="ap-clinic-name">Seguridad<small>Verificación en dos pasos</small></div>
+  </div>
+  <div class="ap-top-right">
+    <span class="ap-email" id="ap-user-email">—</span>
+    <a class="ap-link ghost" href="Inicio.html">Inicio</a>
+    <a class="ap-link active" href="Seguridad.html">Seguridad</a>
+    <a class="ap-link ghost" href="#" id="ap-logout">Salir</a>
+  </div>
+</div>
+
+<div class="ap-wrap" id="sg-content">
+  <div class="sg-msg"><div class="sg-spinner" style="margin:0 auto 14px"></div>Cargando…</div>
+</div>
+
+<script>
+/* ════════════════════════════════════════════════════════════════
+   Seguridad.html — verificación en dos pasos (2FA) de la propia cuenta
+
+   Todo el trabajo real lo hacen las Cloud Functions (iniciar2FA,
+   confirmar2FA, desactivar2FA, regenerarCodigos2FA — ver
+   functions/index.js): esta página nunca ve el secreto guardado ni puede
+   leer /seguridad2FA, que está cerrada al cliente en firestore.rules.
+   Lo único que llega acá es el secreto NUEVO durante el enrolamiento, el
+   tiempo justo para pintar el QR.
+
+   El candado que de verdad protege los datos está en firestore.rules
+   (mfaVigente): esta pantalla solo activa o desactiva el segundo factor.
+   ════════════════════════════════════════════════════════════════ */
+(function () {
+  'use strict';
+
+  var CLINIC_ID = null;
+  var usuario = null;
+  var estadoActivo = false;
+  var secretoEnrolando = null;   /* solo en memoria, solo durante el alta */
+
+  function $(id) { return document.getElementById(id); }
+  function esc(s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  }
+  function fn(nombre, datos) {
+    return firebase.functions().httpsCallable(nombre)(datos || {}).then(function (r) { return r.data; });
+  }
+  function setLoading(id, on) {
+    var b = $(id);
+    if (!b) return;
+    b.classList.toggle('is-loading', on);
+    b.disabled = on;
+  }
+  function alerta(texto, tipo) {
+    var el = $('sg-alerta');
+    if (!el) return;
+    if (!texto) { el.hidden = true; el.textContent = ''; return; }
+    el.hidden = false;
+    el.className = 'sg-alerta ' + (tipo || 'info');
+    el.textContent = texto;
+  }
+
+  /* ── Pantalla principal ────────────────────────────────────────── */
+  function render() {
+    $('sg-content').innerHTML =
+      '<div class="el-card">' +
+        '<div class="sg-estado-row">' +
+          '<div>' +
+            '<p class="el-card-title">Verificación en dos pasos</p>' +
+            '<p class="el-card-subtitle" style="margin:0">' +
+              'Un código de 6 dígitos de tu teléfono, además de tu contraseña. ' +
+              'Sin esto, quien consiga tu contraseña entra a los expedientes de tus pacientes.' +
+            '</p>' +
+          '</div>' +
+          '<span class="sg-badge ' + (estadoActivo ? 'is-ok">Activa' : 'is-off">Desactivada') + '</span>' +
+        '</div>' +
+      '</div>' +
+      '<div class="el-card">' +
+        '<div class="sg-alerta info" id="sg-alerta" hidden></div>' +
+        (estadoActivo ? vistaActiva() : vistaInactiva()) +
+      '</div>';
+
+    if (estadoActivo) conectarActiva();
+    else conectarInactiva();
+  }
+
+  /* ── Sin 2FA: enrolamiento en tres pasos ───────────────────────── */
+  function vistaInactiva() {
+    return '' +
+      '<div class="sg-paso is-active" id="paso-1">' +
+        '<p class="el-card-title">Activá la verificación en dos pasos</p>' +
+        '<p class="el-card-subtitle">Necesitás una app de autenticación en tu teléfono. ' +
+          'Cualquiera sirve: Google Authenticator, Microsoft Authenticator, Authy, 1Password, Bitwarden.</p>' +
+        '<ol class="sg-pasos-guia">' +
+          '<li>Instalá una app de autenticación, si todavía no tenés.</li>' +
+          '<li>Escaneá el código que te vamos a mostrar.</li>' +
+          '<li>Escribí el código de 6 dígitos que aparezca, para confirmar.</li>' +
+        '</ol>' +
+        '<div class="sg-btn-row"><button class="sg-btn" id="btn-empezar">' +
+          '<div class="sg-spinner"></div><span class="sg-btn-text">Empezar</span></button></div>' +
+      '</div>' +
+
+      '<div class="sg-paso" id="paso-2">' +
+        '<p class="el-card-title">Escaneá este código</p>' +
+        '<p class="el-card-subtitle">Abrí tu app de autenticación y agregá una cuenta nueva escaneando esto.</p>' +
+        '<div id="sg-qr"><div class="sg-spinner"></div></div>' +
+        '<p class="el-card-subtitle" style="margin:14px 0 0">' +
+          '¿No podés escanear? Escribí esta clave a mano en la app:</p>' +
+        '<div class="sg-secreto" id="sg-secreto">—</div>' +
+        '<div class="sg-btn-row" style="margin-top:18px">' +
+          '<button class="sg-btn" id="btn-ya-escanee">Ya lo agregué</button>' +
+          '<button class="sg-btn ghost" id="btn-cancelar-2">Cancelar</button>' +
+        '</div>' +
+      '</div>' +
+
+      '<div class="sg-paso" id="paso-3">' +
+        '<p class="el-card-title">Confirmá con un código</p>' +
+        '<p class="el-card-subtitle">Escribí los 6 dígitos que muestra tu app en este momento. ' +
+          'Cambian cada 30 segundos; si está por cambiar, esperá el siguiente.</p>' +
+        '<div class="sg-fgroup">' +
+          '<label class="sg-label" for="sg-codigo-confirmar">Código de 6 dígitos</label>' +
+          '<input type="text" class="sg-input codigo" id="sg-codigo-confirmar" placeholder="000000" ' +
+            'inputmode="numeric" autocomplete="one-time-code" maxlength="7">' +
+        '</div>' +
+        '<div class="sg-btn-row">' +
+          '<button class="sg-btn" id="btn-confirmar">' +
+            '<div class="sg-spinner"></div><span class="sg-btn-text">Activar</span></button>' +
+          '<button class="sg-btn ghost" id="btn-volver-qr">Volver al código</button>' +
+        '</div>' +
+      '</div>' +
+
+      '<div class="sg-paso" id="paso-4">' +
+        '<p class="el-card-title">Guardá tus códigos de recuperación</p>' +
+        '<div class="sg-alerta warn">Esta es la única vez que se muestran. Si perdés el teléfono y no ' +
+          'tenés estos códigos, vas a necesitar que el admin de tu clínica te reinicie la verificación.</div>' +
+        '<div class="sg-codigos" id="sg-codigos"></div>' +
+        '<div class="sg-btn-row">' +
+          '<button class="sg-btn ghost" id="btn-descargar-codigos">Descargar como archivo</button>' +
+          '<button class="sg-btn ghost" id="btn-copiar-codigos">Copiar</button>' +
+          '<button class="sg-btn" id="btn-listo">Ya los guardé</button>' +
+        '</div>' +
+      '</div>';
+  }
+
+  function mostrarPaso(n) {
+    ['paso-1', 'paso-2', 'paso-3', 'paso-4'].forEach(function (id, i) {
+      var el = $(id);
+      if (el) el.classList.toggle('is-active', i === n - 1);
+    });
+  }
+
+  function pintarQr(uri) {
+    var cont = $('sg-qr');
+    cont.innerHTML = '';
+    if (!window.QRCode) {
+      /* Sin la librería (CDN bloqueado, sin red) el alta no se cae: la clave
+         a mano de abajo alcanza para agregar la cuenta en cualquier app. */
+      cont.innerHTML = '<p style="margin:0;font-size:13px;color:#92400E;text-align:center;line-height:1.5">' +
+        'No se pudo dibujar el código QR.<br>Agregá la cuenta a mano con la clave de abajo.</p>';
+      return;
+    }
+    try {
+      new window.QRCode(cont, { text: uri, width: 200, height: 200, correctLevel: window.QRCode.CorrectLevel.M });
+    } catch (e) {
+      cont.innerHTML = '<p style="margin:0;font-size:13px;color:#92400E;text-align:center">' +
+        'No se pudo dibujar el QR. Usá la clave de abajo.</p>';
+    }
+  }
+
+  var codigosMostrados = [];
+
+  function pintarCodigos(codigos) {
+    codigosMostrados = codigos || [];
+    $('sg-codigos').innerHTML = codigosMostrados.map(function (c) {
+      return '<code>' + esc(c) + '</code>';
+    }).join('');
+  }
+
+  function textoCodigos() {
+    return [
+      'Códigos de recuperación — Ancla (Portal Clínico)',
+      'Cuenta: ' + (usuario && usuario.email ? usuario.email : ''),
+      'Generados: ' + new Date().toLocaleString('es-HN'),
+      '',
+      'Cada código sirve UNA sola vez, para entrar si perdés el teléfono.',
+      'Guardalos en un lugar seguro y fuera del teléfono.',
+      ''
+    ].concat(codigosMostrados).join('\n');
+  }
+
+  function descargarCodigos() {
+    var blob = new Blob([textoCodigos()], { type: 'text/plain;charset=utf-8' });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = 'ancla-codigos-recuperacion.txt';
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(function () { URL.revokeObjectURL(url); a.remove(); }, 1500);
+  }
+
+  function conectarInactiva() {
+    $('btn-empezar').addEventListener('click', function () {
+      alerta('');
+      setLoading('btn-empezar', true);
+      fn('iniciar2FA')
+        .then(function (d) {
+          setLoading('btn-empezar', false);
+          secretoEnrolando = d.secretoBase32;
+          mostrarPaso(2);
+          pintarQr(d.otpauthUri);
+          $('sg-secreto').textContent = d.secretoBase32.replace(/(.{4})/g, '$1 ').trim();
+        })
+        .catch(function (err) {
+          setLoading('btn-empezar', false);
+          alerta(err.message || 'No se pudo empezar la configuración.', 'err');
+        });
+    });
+
+    $('btn-ya-escanee').addEventListener('click', function () {
+      alerta('');
+      mostrarPaso(3);
+      setTimeout(function () { $('sg-codigo-confirmar').focus(); }, 60);
+    });
+    $('btn-volver-qr').addEventListener('click', function () { alerta(''); mostrarPaso(2); });
+    $('btn-cancelar-2').addEventListener('click', function () { secretoEnrolando = null; alerta(''); mostrarPaso(1); });
+
+    $('btn-confirmar').addEventListener('click', function () {
+      var codigo = $('sg-codigo-confirmar').value.trim();
+      if (!codigo) { alerta('Escribí el código de 6 dígitos que muestra tu app.', 'err'); return; }
+      alerta('');
+      setLoading('btn-confirmar', true);
+      fn('confirmar2FA', { codigo: codigo })
+        .then(function (d) {
+          /* getIdToken(true): confirmar2FA acabó de fijar los claims mfa/
+             mfaUntil. Sin refrescar, el token seguiría sin ellos y las
+             reglas de Firestore empezarían a rechazar al usuario en la
+             siguiente pantalla. */
+          return usuario.getIdToken(true).then(function () { return d; });
+        })
+        .then(function (d) {
+          setLoading('btn-confirmar', false);
+          secretoEnrolando = null;
+          estadoActivo = true;
+          pintarCodigos(d.codigosRecuperacion);
+          mostrarPaso(4);
+        })
+        .catch(function (err) {
+          setLoading('btn-confirmar', false);
+          $('sg-codigo-confirmar').value = '';
+          alerta(err.message || 'No se pudo confirmar el código.', 'err');
+        });
+    });
+
+    $('btn-descargar-codigos').addEventListener('click', descargarCodigos);
+    $('btn-copiar-codigos').addEventListener('click', function () {
+      var texto = codigosMostrados.join('\n');
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(texto)
+          .then(function () { alerta('Códigos copiados.', 'ok'); })
+          .catch(function () { alerta('No se pudieron copiar. Descargalos como archivo.', 'warn'); });
+      } else {
+        alerta('Tu navegador no deja copiar automáticamente. Descargalos como archivo.', 'warn');
+      }
+    });
+    $('btn-listo').addEventListener('click', function () {
+      codigosMostrados = [];
+      render();
+      alerta('Verificación en dos pasos activada. Te la vamos a pedir cada vez que inicies sesión.', 'ok');
+    });
+  }
+
+  /* ── Con 2FA activo: desactivar o renovar códigos ───────────────── */
+  function vistaActiva() {
+    return '' +
+      '<p class="el-card-title">Ya está activa</p>' +
+      '<p class="el-card-subtitle">Cada vez que inicies sesión te vamos a pedir un código de tu app ' +
+        'de autenticación. La verificación vale 12 horas; después se pide de nuevo.</p>' +
+
+      '<div class="sg-alerta info" style="margin-bottom:22px">' +
+        'Si cambiás de teléfono, desactivá la verificación desde acá y volvé a activarla en el ' +
+        'teléfono nuevo. Si ya lo perdiste, usá un código de recuperación al iniciar sesión, o pedile ' +
+        'al admin de tu clínica que te la reinicie.' +
+      '</div>' +
+
+      '<div class="sg-fgroup">' +
+        '<label class="sg-label" for="sg-codigo-activo">Código de 6 dígitos de tu app</label>' +
+        '<input type="text" class="sg-input codigo" id="sg-codigo-activo" placeholder="000000" ' +
+          'inputmode="numeric" autocomplete="one-time-code" maxlength="7">' +
+        '<p style="margin:8px 0 0;font-size:12px;color:#6B7280">' +
+          'Se pide para cualquiera de las dos acciones: sin un código válido, alguien con solo tu ' +
+          'contraseña podría quitarte la verificación.</p>' +
+      '</div>' +
+      '<div class="sg-btn-row">' +
+        '<button class="sg-btn ghost" id="btn-regenerar">' +
+          '<div class="sg-spinner"></div><span class="sg-btn-text">Generar códigos de recuperación nuevos</span></button>' +
+        '<button class="sg-btn danger" id="btn-desactivar">' +
+          '<div class="sg-spinner"></div><span class="sg-btn-text">Desactivar</span></button>' +
+      '</div>' +
+      '<div class="sg-codigos" id="sg-codigos-nuevos" style="display:none"></div>' +
+      '<div class="sg-btn-row" id="sg-acciones-nuevos" style="display:none">' +
+        '<button class="sg-btn ghost" id="btn-descargar-nuevos">Descargar como archivo</button>' +
+      '</div>';
+  }
+
+  function conectarActiva() {
+    $('btn-regenerar').addEventListener('click', function () {
+      var codigo = $('sg-codigo-activo').value.trim();
+      if (!codigo) { alerta('Escribí un código de tu app para confirmar que sos vos.', 'err'); return; }
+      alerta('');
+      setLoading('btn-regenerar', true);
+      fn('regenerarCodigos2FA', { codigo: codigo })
+        .then(function (d) {
+          setLoading('btn-regenerar', false);
+          $('sg-codigo-activo').value = '';
+          codigosMostrados = d.codigosRecuperacion || [];
+          var cont = $('sg-codigos-nuevos');
+          cont.style.display = '';
+          cont.innerHTML = codigosMostrados.map(function (c) { return '<code>' + esc(c) + '</code>'; }).join('');
+          $('sg-acciones-nuevos').style.display = '';
+          alerta('Códigos nuevos generados. Los anteriores ya no sirven — guardá estos ahora.', 'warn');
+        })
+        .catch(function (err) {
+          setLoading('btn-regenerar', false);
+          $('sg-codigo-activo').value = '';
+          alerta(err.message || 'No se pudieron generar códigos nuevos.', 'err');
+        });
+    });
+
+    $('btn-descargar-nuevos').addEventListener('click', descargarCodigos);
+
+    $('btn-desactivar').addEventListener('click', function () {
+      var codigo = $('sg-codigo-activo').value.trim();
+      if (!codigo) { alerta('Escribí un código de tu app para confirmar que sos vos.', 'err'); return; }
+      if (!window.confirm('¿Desactivar la verificación en dos pasos? Tu cuenta va a quedar protegida solo por la contraseña.')) return;
+      alerta('');
+      setLoading('btn-desactivar', true);
+      fn('desactivar2FA', { codigo: codigo })
+        .then(function () { return usuario.getIdToken(true); })
+        .then(function () {
+          setLoading('btn-desactivar', false);
+          estadoActivo = false;
+          render();
+          alerta('Verificación en dos pasos desactivada.', 'warn');
+        })
+        .catch(function (err) {
+          setLoading('btn-desactivar', false);
+          $('sg-codigo-activo').value = '';
+          alerta(err.message || 'No se pudo desactivar.', 'err');
+        });
+    });
+  }
+
+  /* ════════════════════════════════════════════════════════════
+     AUTH GUARD
+     Cualquier miembro del staff de la clínica (médico, enfermería, caja,
+     admin) administra su propio segundo factor — no solo el admin.
+     ════════════════════════════════════════════════════════════ */
+  r3adsAuth.onAuthStateChanged(function (user) {
+    if (!user) { window.location.href = 'Auth.html?returnTo=Seguridad.html'; return; }
+    usuario = user;
+    r3adsStaff.resolveClinicId(user, function (clinicId) {
+      CLINIC_ID = clinicId;
+      r3adsStaff.checkStaff(user, CLINIC_ID, function (ok) {
+        if (!ok) { window.location.href = 'Auth.html'; return; }
+        $('ap-user-email').textContent = user.email || '';
+
+        /* El estado sale de /usuarios/{uid}.dosFactoresActivo, que el propio
+           usuario sí puede leer (firestore.rules). El secreto vive en
+           /seguridad2FA, cerrada al cliente, y nunca llega acá. */
+        r3adsDb.collection('usuarios').doc(user.uid).get()
+          .then(function (snap) {
+            estadoActivo = !!(snap.exists && snap.data().dosFactoresActivo);
+            render();
+          })
+          .catch(function () {
+            estadoActivo = false;
+            render();
+            alerta('No se pudo leer el estado de tu verificación. Lo que ves puede estar desactualizado.', 'warn');
+          });
+      });
+    });
+  });
+
+  $('ap-logout').addEventListener('click', function (e) {
+    e.preventDefault();
+    r3adsAuth.signOut().then(function () { window.location.href = 'Auth.html'; });
+  });
+})();
+</script>
+</body>
+</html>

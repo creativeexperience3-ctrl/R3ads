@@ -188,6 +188,14 @@ body { margin: 0; background: #F4F6FB; font-family: system-ui,-apple-system,'Seg
 .au-act--off:hover  { background: #FDE68A; }
 .au-act--on         { background: #DCFCE7; color: #166534; }
 .au-act--on:hover   { background: #BBF7D0; }
+.au-act--2fa        { background: #FEF3C7; color: #92400E; }
+.au-act--2fa:hover  { background: #FDE68A; }
+.au-2fa {
+  display: block; margin-top: 5px; font-size: 10.5px; font-weight: 800;
+  letter-spacing: .3px; text-transform: uppercase;
+}
+.au-2fa--on  { color: #166534; }
+.au-2fa--off { color: #B45309; }
 .au-act--del        { background: #FEE2E2; color: #991B1B; }
 .au-act--del:hover  { background: #FECACA; }
 
@@ -221,6 +229,7 @@ body { margin: 0; background: #F4F6FB; font-family: system-ui,-apple-system,'Seg
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-check-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-functions-compat.js"></script>
 <script src="firebase-init.js"></script>
 <script src="clinic-trial-gate.js"></script>
 <script src="r3ads-staff.js"></script>
@@ -429,12 +438,23 @@ body { margin: 0; background: #F4F6FB; font-family: system-ui,-apple-system,'Seg
             return '<option value="' + k + '"' + (k === rolKey ? ' selected' : '') + '>' + esc(ROL_LABELS[k]) + '</option>';
           }).join('') +
         '</select></td>' +
-        '<td><span class="au-status au-status--' + esc(estado) + '">' + (estado === 'activo' ? 'Activo' : 'Inactivo') + '</span></td>' +
+        /* dosFactoresActivo lo espeja la Cloud Function del 2FA (nunca el
+           secreto, que vive en /seguridad2FA y está cerrada al cliente).
+           Sirve para que el admin vea a quién le falta, y a quién puede
+           reiniciarle la verificación si perdió el teléfono. */
+        '<td><span class="au-status au-status--' + esc(estado) + '">' + (estado === 'activo' ? 'Activo' : 'Inactivo') + '</span>' +
+          (u.dosFactoresActivo
+            ? '<span class="au-2fa au-2fa--on">2FA activo</span>'
+            : '<span class="au-2fa au-2fa--off">Sin 2FA</span>') +
+        '</td>' +
         '<td><div class="au-row-actions">' +
           '<button class="au-act au-act--reset" onclick="resetPwd(\'' + esc(u.id) + '\',\'' + esc(u.email) + '\')">Restablecer contraseña</button>' +
           (estado === 'activo'
             ? '<button class="au-act au-act--off" onclick="toggleStatus(\'' + esc(u.id) + '\',\'inactivo\')">Desactivar</button>'
             : '<button class="au-act au-act--on"  onclick="toggleStatus(\'' + esc(u.id) + '\',\'activo\')">Activar</button>') +
+          (u.dosFactoresActivo
+            ? '<button class="au-act au-act--2fa" onclick="reiniciar2FA(\'' + esc(u.id) + '\',\'' + esc(u.nombre) + '\')">Reiniciar 2FA</button>'
+            : '') +
           '<button class="au-act au-act--del" onclick="deleteUser(\'' + esc(u.id) + '\',\'' + esc(u.nombre) + '\')">Eliminar</button>' +
         '</div></td>' +
       '</tr>';
@@ -563,6 +583,26 @@ body { margin: 0; background: #F4F6FB; font-family: system-ui,-apple-system,'Seg
     r3adsAuth.sendPasswordResetEmail(email)
       .then(function () { toast('Correo de restablecimiento enviado a ' + email, 'ok'); })
       .catch(function (err) { toast('Error: ' + err.message, 'err'); });
+  };
+
+  /* ── Reiniciar el segundo factor de otro usuario ──
+     Para el caso real de "perdí el teléfono y no tengo los códigos de
+     recuperación". Lo hace una Cloud Function (resetear2FAUsuario) y NO una
+     escritura directa, porque hay que borrar el secreto de /seguridad2FA
+     —cerrada al cliente— y limpiar los custom claims: dos cosas que solo
+     puede el Admin SDK. La función vuelve a comprobar del lado del servidor
+     que quien pide sea admin de la MISMA clínica, así que este botón es la
+     puerta, no el control de acceso. */
+  window.reiniciar2FA = function (id, nombre) {
+    if (!confirm('¿Reiniciar la verificación en dos pasos de ' + nombre + '?' + '\n' + '\n' +
+      'Su cuenta va a quedar protegida solo por la contraseña hasta que la vuelva a activar ' +
+      'desde Seguridad. Hacelo solo si confirmaste que es esa persona la que te lo pidió.')) return;
+    firebase.functions().httpsCallable('resetear2FAUsuario')({ uid: id })
+      .then(function () {
+        toast('Verificación en dos pasos reiniciada para ' + nombre + '. Pedile que la vuelva a activar.', 'ok');
+        load();
+      })
+      .catch(function (err) { toast('Error: ' + (err.message || err), 'err'); });
   };
 
   /* ── Cambiar rol (select inline en la tabla) ──

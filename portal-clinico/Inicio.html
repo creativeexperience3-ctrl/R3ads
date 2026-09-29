@@ -142,6 +142,15 @@ body {
       icon: '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.5 20.5 3.5 13.5a5 5 0 1 1 7-7l7 7a5 5 0 1 1-7 7Z"/><line x1="8.5" y1="8.5" x2="15.5" y2="15.5"/></svg>'
     }
   ];
+  /* Seguridad va en la lista de todos: cada quien administra su propio
+     segundo factor, no solo el admin de la clínica. */
+  TARJETAS.push({
+    href: 'Seguridad.html',
+    title: 'Seguridad de tu cuenta',
+    sub: 'Verificación en dos pasos: un código de tu teléfono además de la contraseña.',
+    icon: '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>'
+  });
+
   var TARJETA_SUSCRIPCION = {
     href: 'Mi-Suscripcion.html',
     title: 'Mi Perfil / Suscripción',
@@ -174,6 +183,42 @@ body {
       '<a href="Auth.html" style="background:var(--ink);color:#fff;padding:12px 24px;border-radius:10px;text-decoration:none;font-weight:700">Volver al inicio de sesión</a></div>';
   }
 
+  /* Aviso para quien todavía no activó el segundo factor. No bloquea nada
+     —el 2FA es opcional hasta que cada quien lo active, ver mfaVigente() en
+     firestore.rules— pero un 2FA que nadie enciende no protege a nadie, así
+     que al menos se pide una vez por sesión a quien ve expedientes.
+     Solo se avisa a rol medico | enf | admin: caja no abre expedientes. */
+  function avisar2FAPendiente(user) {
+    if (sessionStorage.getItem('r3ads2faAvisado') === '1') return;
+    r3adsStaff.checkDoctor(user, CLINIC_ID, function (veExpedientes) {
+      if (!veExpedientes) return;
+      r3adsDb.collection('usuarios').doc(user.uid).get().then(function (snap) {
+        if (snap.exists && snap.data().dosFactoresActivo) return;
+        var aviso = document.createElement('div');
+        aviso.style.cssText = 'max-width:960px;margin:0 auto 22px;padding:16px 18px;background:#FEF3C7;' +
+          'border:1px solid #FDE68A;border-radius:12px;color:#92400E;font-size:13.5px;line-height:1.55;' +
+          'display:flex;gap:14px;align-items:center;flex-wrap:wrap;justify-content:space-between';
+        aviso.innerHTML =
+          '<span><b>Tu cuenta no tiene verificación en dos pasos.</b> ' +
+          'Ves expedientes de pacientes: si alguien consigue tu contraseña, entra a todos. ' +
+          'Activarla toma dos minutos.</span>' +
+          '<span style="display:flex;gap:8px;flex-wrap:wrap">' +
+          '<a href="Seguridad.html" style="background:#242F40;color:#fff;padding:9px 16px;border-radius:8px;' +
+          'text-decoration:none;font-weight:800;white-space:nowrap">Activar ahora</a>' +
+          '<button type="button" id="in-2fa-luego" style="background:transparent;border:1px solid #D97706;' +
+          'color:#92400E;padding:9px 14px;border-radius:8px;font-weight:700;cursor:pointer;font-family:inherit">Más tarde</button>' +
+          '</span>';
+        var cont = $('in-content');
+        cont.insertBefore(aviso, cont.firstChild);
+        var luego = document.getElementById('in-2fa-luego');
+        if (luego) luego.addEventListener('click', function () {
+          sessionStorage.setItem('r3ads2faAvisado', '1');
+          aviso.remove();
+        });
+      }).catch(function () { /* sin permiso o sin red: no molestar */ });
+    });
+  }
+
   /* ════════════════════════════════════════════════════════════
      AUTH GUARD
      ════════════════════════════════════════════════════════════ */
@@ -186,7 +231,10 @@ body {
       r3adsStaff.checkStaff(user, CLINIC_ID, function (ok) {
         if (!ok) { mostrarRestringido(); return; }
         $('in-email').textContent = user.email;
-        r3adsStaff.checkAdmin(user, CLINIC_ID, function (esAdmin) { renderHub(esAdmin); });
+        r3adsStaff.checkAdmin(user, CLINIC_ID, function (esAdmin) {
+          renderHub(esAdmin);
+          avisar2FAPendiente(user);
+        });
       });
     });
   });
