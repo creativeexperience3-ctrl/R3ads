@@ -239,6 +239,11 @@ html, body { margin: 0; }
 
 .auth-aux-link { text-align: center; font-size: 13px; color: var(--jet); text-decoration: none; font-weight: 600; }
 .auth-aux-link:hover { color: var(--bronze); }
+.auth-terms { display: flex; gap: 10px; align-items: flex-start; margin: 0 0 16px; font-size: 13px; line-height: 1.5; color: #6B7280; cursor: pointer; }
+.auth-terms input { margin-top: 2px; width: 16px; height: 16px; accent-color: var(--jet); flex: none; cursor: pointer; }
+.auth-terms a { color: var(--jet); font-weight: 600; text-decoration: underline; }
+.auth-terms a:hover { color: var(--bronze); }
+
 .auth-switch { text-align: center; font-size: 14px; color: #6B7280; }
 .auth-switch a { color: var(--jet); font-weight: 600; text-decoration: none; }
 .auth-switch a:hover { color: var(--bronze); }
@@ -400,6 +405,13 @@ html, body { margin: 0; }
             <input type="password" id="reg-pass" class="auth-input"
               placeholder="Mínimo 6 caracteres" autocomplete="new-password">
           </div>
+          <label class="auth-terms" for="reg-acepta">
+            <input type="checkbox" id="reg-acepta">
+            <span>Acepto los
+              <a href="Terminos.html" target="_blank" rel="noopener">Términos de Uso</a> y la
+              <a href="https://ancla.r3ads.com/Privacidad.html" target="_blank" rel="noopener">Política de Privacidad</a>.
+            </span>
+          </label>
           <button type="submit" class="auth-submit" id="btn-register">
             <div class="auth-spinner"></div>
             <span class="auth-btn-text">Crear Cuenta</span>
@@ -633,13 +645,49 @@ html, body { margin: 0; }
     });
   }
 
+  /* Versión de los términos que se está aceptando. Cambiarla cuando se
+     publique una revisión sustancial de Terminos.html, para poder saber
+     después qué texto aceptó cada paciente y no solo que aceptó "algo". */
+  var TERMINOS_VERSION = '2026-10-02';
+
+  /* Deja constancia de la aceptación en el perfil del paciente. Va con
+     merge porque Mi-Historial.html escribe en el mismo documento (los
+     códigos vinculados), y un registro nuevo no debe pisar nada.
+     No bloquea el acceso: si falla, la cuenta ya existe y el paciente no
+     se puede quedar afuera por esto — queda el error en consola. */
+  function registrarAceptacion(user) {
+    if (!user) return Promise.resolve();
+    return r3adsDb.collection('users').doc(user.uid).set({
+      email: user.email,
+      aceptacion: {
+        terminos: TERMINOS_VERSION,
+        fecha: firebase.firestore.FieldValue.serverTimestamp()
+      },
+      updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+    }, { merge: true }).catch(function (err) {
+      console.error('[Ancla] No se pudo registrar la aceptación de términos:', err);
+    });
+  }
+
   /* ── Google Sign-In (compartido entre correo y registro) ── */
   function handleGoogleSignIn(btn) {
     clearMessages();
+    /* El botón de Google vive en las dos vistas. En la de registro cuenta
+       como alta de cuenta, así que exige la misma casilla que el formulario
+       de al lado — si no, se podría crear una cuenta sin aceptar nada. */
+    var enRegistro = document.getElementById('view-register').classList.contains('is-active');
+    if (enRegistro && !document.getElementById('reg-acepta').checked) {
+      showError('Para crear tu cuenta tenés que aceptar los Términos de Uso y la Política de Privacidad.');
+      return;
+    }
     btn.disabled = true;
     var provider = new firebase.auth.GoogleAuthProvider();
     r3adsAuth.signInWithPopup(provider)
-      .then(function (result) { afterAuthSuccess(result.user); })
+      .then(function (result) {
+        var esNueva = result.additionalUserInfo && result.additionalUserInfo.isNewUser;
+        var paso = (enRegistro || esNueva) ? registrarAceptacion(result.user) : Promise.resolve();
+        return paso.then(function () { afterAuthSuccess(result.user); });
+      })
       .catch(function (err) {
         btn.disabled = false;
         if (err.code !== 'auth/popup-closed-by-user') {
@@ -659,6 +707,10 @@ html, body { margin: 0; }
     var pass  = document.getElementById('reg-pass').value;
     if (!name || !email || !pass) { showError('Por favor completa todos los campos.'); return; }
     if (pass.length < 6) { showError('La contraseña debe tener al menos 6 caracteres.'); return; }
+    if (!document.getElementById('reg-acepta').checked) {
+      showError('Para crear tu cuenta tenés que aceptar los Términos de Uso y la Política de Privacidad.');
+      return;
+    }
     setLoading('btn-register', true);
     r3adsAuth.createUserWithEmailAndPassword(email, pass)
       .then(function (cred) {
@@ -676,6 +728,7 @@ html, body { margin: 0; }
            se puede reenviar desde Mi-Historial.html. */
         return user.sendEmailVerification()
           .catch(function (err) { console.error('[Ancla] No se pudo enviar la verificación:', err); })
+          .then(function () { return registrarAceptacion(user); })
           .then(function () { return user; });
       })
       .then(function (user) { afterAuthSuccess(user); })

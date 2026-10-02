@@ -314,6 +314,102 @@ demás ya filtraban por `clinicId` o por propiedad.
    el paciente legítimo pueda reclamar de nuevo.
 3. Desplegar los dos portales (`firebase deploy --only hosting`).
 
+### ✅ Hecho — términos de uso del portal de paciente (2026-10-02)
+
+`portal-paciente/Terminos.html`, redactado sobre la Política de Privacidad
+(misma hoja de estilo, mismo registro, referencias cruzadas a sus secciones
+02, 07, 09, 10, 11, 12 y 15). Hasta ahora el paciente era usuario directo de
+R3ads sin ningún documento que definiera la relación: solo existía la
+política de privacidad, escrita cuando el producto era "solo staff".
+
+Lo que delimita, además del encuadre normal (qué es el portal, qué no es,
+uso aceptable, disponibilidad sin SLA, ley hondureña):
+- **De qué no responde R3ads**: lo que el paciente divulgue — código,
+  credenciales o archivos descargados —, el acceso de alguien a quien él
+  mismo se lo aprobó, el contenido clínico que carga la clínica, y las
+  decisiones médicas tomadas leyendo el portal.
+- El texto describe el código **como lo que es desde el cambio de reglas**:
+  un identificador, no una contraseña, que por sí solo no abre nada. Decir lo
+  contrario sería describir un producto que ya no existe.
+- La limitación no pretende excluir dolo, culpa grave ni los derechos
+  irrenunciables de la Ley de Protección al Consumidor, que no se pueden
+  excluir por contrato.
+
+La aceptación se registra: casilla obligatoria en el alta (también cuando el
+alta es con Google) y constancia en `/users/{uid}.aceptacion`
+(`{ terminos: '2026-10-02', fecha }`). Al publicar una revisión sustancial
+hay que subir `TERMINOS_VERSION` en `portal-paciente/Auth.html`, para saber
+qué texto aceptó cada paciente y no solo que aceptó algo.
+
+**Pendiente:** completar el correo de contacto y la dirección física (los dos
+quedaron como `[Completar: ...]`, igual que en `Privacidad.html`, que sigue
+publicada con esos huecos), y hacerlo revisar por un abogado en Honduras
+antes de tratarlo como definitivo.
+
+### ✅ Hecho — bitácora de acceso a expedientes (2026-10-02)
+
+Hasta ahora no quedaba rastro de ninguna lectura: ante un reclamo de
+filtración no había forma de decir quién vio un expediente, ni —lo que más
+se necesita— de demostrar que nadie lo vio. La Política de Privacidad ya
+afirmaba en su sección 02 que el acceso de soporte queda registrado.
+
+**Colección `/accesos`**, append-only. `allow update, delete: if false` para
+todos, incluidos el admin de la clínica y el superadmin: una bitácora que se
+puede corregir no prueba nada. Solo el Admin SDK, que no pasa por las
+reglas, podría purgarla. Las reglas además clavan `uid` al token y exigen
+`ts == request.time`, así que nadie puede escribir una entrada a nombre de
+otro ni fecharla a mano.
+
+**Qué se registra** (`r3adsStaff.registrarAcceso` en `r3ads-staff.js`, y su
+gemela dentro de `portal-paciente/Mi-Historial.html`):
+
+| Acción | Dónde |
+|---|---|
+| `ver_expediente` | ficha del paciente en Buscar · y apertura desde el portal de paciente |
+| `ver_historial` | historial clínico completo (consultas, pruebas, labs) |
+| `exportar_zip` | descarga del expediente completo |
+| `generar_word` | Word del expediente principal |
+
+Guarda quién-qué-cuándo (`uid`, `email`, `rol`, `origen`, `codigoPaciente`),
+nunca datos clínicos: la bitácora se conserva más que su utilidad inmediata
+y no tiene sentido que duplique el expediente. El `rol` sale del custom
+claim ya cacheado, no de una lectura de `/usuarios` — la bitácora no debe
+costar un read por expediente abierto. Deduplica por (código, acción)
+durante 10 minutos, porque si no cada re-render de una pestaña escribiría
+otra entrada.
+
+**Nunca interrumpe la atención.** Si la escritura falla, queda en consola y
+la página sigue. Una bitácora que impide atender a un paciente se apaga el
+primer día.
+
+**`Bitacora.html`** — pantalla de solo lectura para el admin de la clínica
+(tarjeta en `Inicio.html`, `soloAdmin`), con filtro por código de paciente y
+paginación de 100. El médico y caja no entran: saber a qué expediente entró
+un compañero no hace falta para atender, y esa pantalla cuenta dónde estuvo
+cada quien durante el día.
+
+**Qué prueba esto y qué no.** La escribe el mismo cliente que hace la
+lectura, así que registra el uso del producto a través de sus pantallas — no
+a alguien que hable con Firestore directo por el SDK y simplemente no
+escriba la entrada. El complemento a prueba de manipulación son los **Data
+Access logs de Google Cloud** (`DATA_READ` sobre Firestore), que se activan
+en la consola del proyecto, viven fuera del alcance del cliente y **siguen
+pendientes**. Esta bitácora es la que la clínica puede leer; aquella es la
+que nadie puede tocar.
+
+**Pendiente:**
+- Activar los Data Access logs de Firestore en la consola de Google Cloud.
+- Política de retención: hoy `/accesos` crece sin techo. Definir la ventana
+  (2 años es lo razonable) y configurar un TTL de Firestore sobre un campo
+  de vencimiento, o purgar con el Admin SDK.
+- Que el paciente pueda ver quién abrió su propio expediente. Hoy la lectura
+  es solo del admin de su clínica y de R3ads; dárselo al titular exige una
+  query que no se puede validar barato con las reglas actuales.
+- El acceso de soporte de R3ads no entra acá, pero tampoco existe: las
+  reglas no le dan al superadmin ningún acceso a expedientes (ver la nota en
+  `firestore.rules`). La sección 02 de la política describe un acceso que el
+  sistema no permite — vale ajustar ese texto.
+
 ### ⚠️ Gaps conocidos (revisar antes de la primera clínica de pago)
 - **Qué servicios registra Caja directo sin preclínica de enfermería**:
   documentado en `firestore.rules` (sección `consultas` → create) y con

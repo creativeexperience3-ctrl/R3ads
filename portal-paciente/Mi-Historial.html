@@ -500,6 +500,13 @@ body {
 .mh-pending-remove:hover { border-color: #DC2626; color: #DC2626; }
 
 /* Toast */
+.mh-legal {
+  display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; align-items: center;
+  padding: 28px 16px 36px; font-size: 12.5px; color: #8A8A8A;
+}
+.mh-legal a { color: #6B7280; text-decoration: none; font-weight: 600; }
+.mh-legal a:hover { color: var(--bronze, #CCA43B); text-decoration: underline; }
+
 .mh-toast {
   position: fixed;
   bottom: 30px;
@@ -769,6 +776,15 @@ body {
   </div>
 </div>
 
+<!-- Pie legal -->
+<footer class="mh-legal">
+  <a href="Terminos.html">Términos de Uso</a>
+  <span aria-hidden="true">·</span>
+  <a href="https://ancla.r3ads.com/Privacidad.html" target="_blank" rel="noopener">Política de Privacidad</a>
+  <span aria-hidden="true">·</span>
+  <span>Ancla, un producto de R3ads</span>
+</footer>
+
 <!-- Toast -->
 <div class="mh-toast" id="mh-toast">—</div>
 
@@ -935,6 +951,7 @@ body {
           return;
         }
         var exp = snap.data();
+        registrarAcceso(codigo, exp, 'ver_expediente');
         renderExpediente(codigo, exp);
         cargarConsultas(codigo);
         cargarPruebas(codigo, exp);
@@ -976,6 +993,44 @@ body {
     }).catch(function (err) {
       console.error('[Ancla] Error al leer la solicitud propia:', err);
     });
+  }
+
+  /* ════════════════════════════════════════════════════════════
+     BITÁCORA DE ACCESO (2026-10-02)
+
+     La misma bitácora que escribe el portal clínico (ver registrarAcceso en
+     portal-clinico/r3ads-staff.js). Acá importa sobre todo el acceso
+     COMPARTIDO: el familiar al que el titular le aprobó ver su expediente
+     queda registrado igual que un médico, y así el titular puede saber
+     después quién lo abrió y cuándo.
+
+     Nunca interrumpe la carga del expediente: si la escritura falla, queda
+     en consola y la página sigue mostrando el historial.
+     ════════════════════════════════════════════════════════════ */
+  var _accesosRegistrados = {};
+
+  function registrarAcceso(codigo, exp, accion) {
+    try {
+      if (!currentUser || !exp || !exp.clinicId) return;
+      var llave = codigo + '|' + accion;
+      if (_accesosRegistrados[llave]) return; /* una vez por carga de página */
+      _accesosRegistrados[llave] = true;
+
+      r3adsDb.collection('accesos').add({
+        clinicId: exp.clinicId,
+        codigoPaciente: codigo,
+        accion: accion,
+        uid: currentUser.uid,
+        email: currentUser.email || '',
+        rol: exp.ownerUid === currentUser.uid ? 'titular' : 'compartido',
+        origen: 'portal-paciente',
+        ts: firebase.firestore.FieldValue.serverTimestamp()
+      }).catch(function (err) {
+        console.error('[Ancla] No se pudo registrar el acceso en la bitácora:', err);
+      });
+    } catch (err) {
+      console.error('[Ancla] Error inesperado al registrar el acceso:', err);
+    }
   }
 
   /* Las solicitudes de acceso viven en /expedientes/{codigo}/solicitudes/{uid}

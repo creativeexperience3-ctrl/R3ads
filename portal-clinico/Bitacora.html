@@ -1,0 +1,276 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bitácora de accesos · Portal Clínico</title>
+<link rel="stylesheet" href="assets/portal-tokens.css">
+<style>
+*, *::before, *::after { box-sizing: border-box; }
+body { margin: 0; background: #F4F6FB; font-family: system-ui,-apple-system,'Segoe UI',Arial,sans-serif; color: #1F2937; }
+
+/* ── Topbar ── */
+.bt-top {
+  background: #242F40; color: #fff;
+  padding: 14px 24px;
+  display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap;
+  position: sticky; top: 0; z-index: 20;
+}
+.bt-top-title { font-size: 16px; font-weight: 900; letter-spacing: .3px; }
+.bt-top-title small { display: block; font-size: 11px; font-weight: 600; color: rgba(255,255,255,.6); letter-spacing: .5px; }
+.bt-top-right { display: flex; align-items: center; gap: 12px; font-size: 13px; flex-wrap: wrap; }
+.bt-top-right .bt-email { color: rgba(255,255,255,.75); }
+.bt-link {
+  color: #fff; text-decoration: none; background: transparent;
+  border: 1px solid rgba(255,255,255,.3);
+  padding: 7px 14px; border-radius: 8px; font-weight: 800; font-size: 13px;
+}
+.bt-link:hover { filter: brightness(.95); }
+
+/* ── Wrap ── */
+.bt-wrap { max-width: 1040px; margin: 0 auto; padding: 24px; }
+.bt-note {
+  background: #EFF6FF; border: 1px solid #BFDBFE; color: #1E40AF;
+  border-radius: 10px; padding: 12px 16px; font-size: 13px; line-height: 1.6;
+  margin-bottom: 18px;
+}
+.bt-note b { font-weight: 800; }
+
+/* ── Filtros ── */
+.bt-filters {
+  background: #fff; border-radius: 14px; box-shadow: 0 2px 12px rgba(33,60,125,.07);
+  padding: 14px 18px; margin-bottom: 18px;
+  display: flex; gap: 10px; align-items: center; flex-wrap: wrap;
+}
+.bt-input {
+  height: 40px; border: 1.5px solid #E5E7EB; border-radius: 8px; padding: 0 12px;
+  font-family: inherit; font-size: 14px; outline: none; background: #fff; min-width: 200px;
+}
+.bt-input:focus { border-color: #242F40; }
+.bt-btn {
+  height: 40px; padding: 0 18px; border: none; border-radius: 8px;
+  background: #242F40; color: #fff; font-family: inherit; font-size: 13px; font-weight: 800; cursor: pointer;
+}
+.bt-btn:hover { opacity: .92; }
+.bt-btn-ghost { background: none; color: #242F40; border: 1.5px solid #E5E7EB; }
+
+/* ── Tabla ── */
+.bt-card { background: #fff; border-radius: 14px; box-shadow: 0 2px 12px rgba(33,60,125,.07); overflow: hidden; }
+.bt-row {
+  display: grid; grid-template-columns: 160px 1fr 200px 130px;
+  gap: 14px; align-items: center;
+  padding: 12px 20px; border-bottom: 1px solid #F3F4F6; font-size: 13.5px;
+}
+.bt-row:last-child { border-bottom: none; }
+.bt-row-h { background: #FAFBFF; font-size: 11.5px; font-weight: 800; color: #6B7280; letter-spacing: .4px; text-transform: uppercase; }
+@media (max-width: 820px) {
+  .bt-row { grid-template-columns: 1fr; gap: 4px; padding: 14px 18px; }
+  .bt-row-h { display: none; }
+  .bt-cell::before { content: attr(data-l) ": "; font-weight: 800; color: #9CA3AF; font-size: 11.5px; text-transform: uppercase; }
+}
+.bt-when { color: #6B7280; font-variant-numeric: tabular-nums; }
+.bt-who { font-weight: 700; overflow-wrap: anywhere; }
+.bt-who small { display: block; font-weight: 600; color: #9CA3AF; font-size: 11.5px; }
+.bt-code { font-family: ui-monospace, 'SF Mono', Menlo, monospace; font-weight: 700; color: #242F40; }
+.bt-tag {
+  display: inline-block; padding: 3px 9px; border-radius: 999px;
+  font-size: 11.5px; font-weight: 800; background: #F3F4F6; color: #4B5563;
+}
+.bt-tag--export { background: #FEF3C7; color: #92400E; }
+.bt-tag--paciente { background: #E0E7FF; color: #3730A3; }
+
+.bt-msg { text-align: center; padding: 34px 20px; color: #6B7280; font-size: 13px; line-height: 1.6; }
+.bt-spinner { width: 30px; height: 30px; border: 3px solid #E5E7EB; border-top-color: #242F40; border-radius: 50%; animation: btspin .7s linear infinite; margin: 0 auto 14px; }
+@keyframes btspin { to { transform: rotate(360deg); } }
+.bt-more { text-align: center; padding: 16px; }
+</style>
+</head>
+<body>
+
+<div class="bt-top">
+  <div class="bt-top-title" id="bt-clinic-name">Bitácora de accesos<small>Quién abrió cada expediente</small></div>
+  <div class="bt-top-right">
+    <span class="bt-email" id="bt-user-email">—</span>
+    <a class="bt-link" href="Inicio.html">Inicio</a>
+    <a class="bt-link" href="Admin-Usuarios.html">Usuarios</a>
+    <a class="bt-link" href="#" id="bt-logout">Salir</a>
+  </div>
+</div>
+
+<div class="bt-wrap">
+  <div class="bt-note">
+    Cada vez que alguien abre, exporta o descarga el expediente de un paciente queda una línea acá.
+    Sirve para contestar <b>quién vio este expediente</b> si un paciente lo pregunta o si hay un reclamo
+    — y, con la misma importancia, para demostrar que <b>nadie lo vio</b>.
+    <br><br>
+    <b>Nadie puede editarla ni borrarla</b>, ni vos ni R3ads, desde ninguna pantalla del sistema: una
+    bitácora que se puede corregir no prueba nada. Lo que sí registra es el uso normal del sistema a
+    través de sus pantallas.
+  </div>
+
+  <div class="bt-filters">
+    <input type="text" class="bt-input" id="bt-filtro-codigo" placeholder="Filtrar por código de paciente (ej. CLI-A7K2M9)">
+    <button type="button" class="bt-btn" id="bt-buscar">Filtrar</button>
+    <button type="button" class="bt-btn bt-btn-ghost" id="bt-limpiar">Ver todo</button>
+  </div>
+
+  <div class="bt-card" id="bt-lista">
+    <div class="bt-msg"><div class="bt-spinner"></div>Cargando bitácora…</div>
+  </div>
+</div>
+
+<!-- Firebase compat SDK -->
+<script src="clinic-config.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-check-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="firebase-init.js"></script>
+<script src="clinic-trial-gate.js"></script>
+<script src="r3ads-staff.js"></script>
+
+<script>
+(function () {
+  /* Lector de /accesos, la bitácora que escriben Expediente-Doctor.html (vía
+     r3adsStaff.registrarAcceso) y el portal de paciente. Solo lee: las
+     reglas de Firestore no permiten update ni delete sobre esa colección
+     desde ningún cliente, a propósito.
+
+     Solo admin. El médico y caja no entran: saber a qué expediente entró un
+     compañero no hace falta para atender, y esta pantalla cuenta dónde
+     estuvo cada quien durante el día. */
+  var CLINIC_ID = null;
+  var PAGINA = 100;
+  var _ultimoDoc = null;      /* cursor de paginación */
+  var _filtroCodigo = '';
+  var _filas = [];
+
+  function $(id) { return document.getElementById(id); }
+  function esc(s) { return String(s || '').replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+
+  var ACCIONES = {
+    ver_expediente: 'Abrió el expediente',
+    ver_historial: 'Abrió el historial completo',
+    exportar_zip: 'Exportó el expediente (ZIP)',
+    generar_word: 'Generó el Word del expediente'
+  };
+  var ROLES = {
+    medico: 'Médico', enf: 'Enfermería', caja: 'Caja', admin: 'Admin',
+    titular: 'Paciente titular', compartido: 'Acceso compartido'
+  };
+
+  function pintarBranding(nombre) {
+    var clinicName = nombre || (window.R3ADS_CLINIC_FALLBACK && window.R3ADS_CLINIC_FALLBACK.nombre) || 'tu clínica';
+    $('bt-clinic-name').innerHTML = 'Bitácora de accesos<small>' + esc(clinicName) + '</small>';
+  }
+  pintarBranding();
+  function cargarBrandingReal() {
+    if (!CLINIC_ID) return;
+    r3adsDb.collection('clinics').doc(CLINIC_ID).get().then(function (snap) {
+      if (snap.exists && snap.data().nombre) pintarBranding(snap.data().nombre);
+    }).catch(function () {});
+  }
+
+  /* ── Auth ── */
+  r3adsAuth.onAuthStateChanged(function (user) {
+    if (!user) { window.location.href = 'Auth.html?returnTo=Bitacora.html'; return; }
+    r3adsStaff.resolveClinicId(user, function (clinicId) {
+      CLINIC_ID = clinicId;
+      r3adsTrialGate.cargar(CLINIC_ID).then(function (estado) { if (estado === 'prueba_bloqueada' || estado === 'suspendida' || estado === 'cancelada') r3adsTrialGate.mostrarBanner(estado); });
+      cargarBrandingReal();
+      r3adsStaff.checkAdmin(user, CLINIC_ID, function (ok) {
+        if (!ok) { window.location.href = 'Auth.html'; return; }
+        $('bt-user-email').textContent = user.email;
+        cargar(true);
+      });
+    });
+  });
+  $('bt-logout').addEventListener('click', function (e) {
+    e.preventDefault();
+    r3adsAuth.signOut().then(function () { window.location.href = 'Auth.html'; });
+  });
+
+  /* ── Carga ── */
+  function construirQuery() {
+    var q = r3adsDb.collection('accesos').where('clinicId', '==', CLINIC_ID);
+    if (_filtroCodigo) q = q.where('codigoPaciente', '==', _filtroCodigo);
+    q = q.orderBy('ts', 'desc').limit(PAGINA);
+    if (_ultimoDoc) q = q.startAfter(_ultimoDoc);
+    return q;
+  }
+
+  function cargar(reiniciar) {
+    if (reiniciar) { _filas = []; _ultimoDoc = null; }
+    construirQuery().get().then(function (snap) {
+      snap.forEach(function (doc) { _filas.push(doc.data()); });
+      _ultimoDoc = snap.docs.length ? snap.docs[snap.docs.length - 1] : null;
+      render(snap.docs.length === PAGINA);
+    }).catch(function (err) {
+      /* El índice compuesto se crea en firestore.indexes.json, pero si
+         alguna vez falta, Firebase devuelve el enlace para crearlo en el
+         mensaje de error — por eso se muestra completo en vez de resumirlo. */
+      $('bt-lista').innerHTML = '<div class="bt-msg" style="color:#B91C1C">No se pudo cargar la bitácora.<br>' + esc(err.message) + '</div>';
+      console.error('[Ancla] Error al cargar la bitácora:', err);
+    });
+  }
+
+  function fmtFecha(ts) {
+    if (!ts || !ts.toDate) return '—';
+    var d = ts.toDate();
+    return d.toLocaleDateString('es-HN', { day: '2-digit', month: '2-digit', year: '2-digit' }) +
+      ' · ' + d.toLocaleTimeString('es-HN', { hour: '2-digit', minute: '2-digit' });
+  }
+
+  function render(hayMas) {
+    if (!_filas.length) {
+      $('bt-lista').innerHTML = '<div class="bt-msg">' +
+        (_filtroCodigo
+          ? 'No hay accesos registrados para <b>' + esc(_filtroCodigo) + '</b>.<br>Nadie abrió ese expediente desde que la bitácora existe.'
+          : 'Todavía no hay accesos registrados.<br>Las entradas aparecen a medida que el personal abre expedientes.') +
+        '</div>';
+      return;
+    }
+
+    var filas = _filas.map(function (a) {
+      var esPaciente = a.origen === 'portal-paciente';
+      var esExport = a.accion === 'exportar_zip' || a.accion === 'generar_word';
+      return '<div class="bt-row">' +
+        '<div class="bt-cell bt-when" data-l="Cuándo">' + esc(fmtFecha(a.ts)) + '</div>' +
+        '<div class="bt-cell bt-who" data-l="Quién">' + esc(a.email || a.uid) +
+          '<small>' + esc(ROLES[a.rol] || a.rol || 'Sin rol') +
+          (esPaciente ? ' · portal del paciente' : '') + '</small></div>' +
+        '<div class="bt-cell" data-l="Qué hizo">' +
+          '<span class="bt-tag' + (esExport ? ' bt-tag--export' : (esPaciente ? ' bt-tag--paciente' : '')) + '">' +
+          esc(ACCIONES[a.accion] || a.accion) + '</span></div>' +
+        '<div class="bt-cell bt-code" data-l="Paciente">' + esc(a.codigoPaciente) + '</div>' +
+      '</div>';
+    }).join('');
+
+    $('bt-lista').innerHTML =
+      '<div class="bt-row bt-row-h">' +
+        '<div>Cuándo</div><div>Quién</div><div>Qué hizo</div><div>Paciente</div>' +
+      '</div>' + filas +
+      (hayMas ? '<div class="bt-more"><button type="button" class="bt-btn bt-btn-ghost" id="bt-mas">Cargar 100 más</button></div>' : '');
+
+    if (hayMas) $('bt-mas').addEventListener('click', function () { cargar(false); });
+  }
+
+  /* ── Filtros ── */
+  $('bt-buscar').addEventListener('click', function () {
+    _filtroCodigo = ($('bt-filtro-codigo').value || '').trim().toUpperCase();
+    $('bt-lista').innerHTML = '<div class="bt-msg"><div class="bt-spinner"></div>Buscando…</div>';
+    cargar(true);
+  });
+  $('bt-filtro-codigo').addEventListener('keydown', function (e) {
+    if (e.key === 'Enter') { e.preventDefault(); $('bt-buscar').click(); }
+  });
+  $('bt-limpiar').addEventListener('click', function () {
+    $('bt-filtro-codigo').value = '';
+    _filtroCodigo = '';
+    $('bt-lista').innerHTML = '<div class="bt-msg"><div class="bt-spinner"></div>Cargando bitácora…</div>';
+    cargar(true);
+  });
+})();
+</script>
+</body>
+</html>

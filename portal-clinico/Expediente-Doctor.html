@@ -3499,6 +3499,10 @@ summary.ed-meds-cat { list-style: revert; }
   function renderBuscarResultado() {
     var p = pacienteActual;
     var dg = p.datosGenerales || {};
+    /* Bitácora: acá es donde los datos del paciente aparecen en pantalla,
+       así que acá se registra el acceso — no en la búsqueda, que puede
+       devolver diez resultados y no significa que se haya abierto ninguno. */
+    r3adsStaff.registrarAcceso(CLINIC_ID, p.codigoPaciente, 'ver_expediente');
     $id('buscar-resultado').innerHTML =
       '<div class="ed-patient-summary">' +
         '<div>' +
@@ -7124,6 +7128,9 @@ summary.ed-meds-cat { list-style: revert; }
   function renderHistorialPacienteView(cont) {
     var p = pacienteActual;
     var dg = p.datosGenerales || {};
+    /* Distinto de 'ver_expediente': esto abre TODO el historial clínico
+       (consultas, pruebas, laboratorios), no la ficha del paciente. */
+    r3adsStaff.registrarAcceso(CLINIC_ID, p.codigoPaciente, 'ver_historial');
     cont.innerHTML =
       '<button type="button" class="ed-btn ed-btn-ghost" id="btn-volver-calendario" style="margin-bottom:16px;height:38px;padding:0 16px;font-size:12px">← Volver al calendario</button>' +
       '<div class="ed-patient-summary">' +
@@ -8478,6 +8485,7 @@ summary.ed-meds-cat { list-style: revert; }
     if (!pacienteActual) return;
     var p = pacienteActual;
     var dg = p.datosGenerales || {};
+    r3adsStaff.registrarAcceso(CLINIC_ID, p.codigoPaciente, 'generar_word');
 
     if (!window.docx) {
       showAlert('Librería docx no cargada. Recarga la página.', 'error');
@@ -8938,6 +8946,10 @@ summary.ed-meds-cat { list-style: revert; }
 
     var p = pacienteActual;
     var codigo = p.codigoPaciente;
+    /* La exportación saca el expediente completo del sistema en un archivo
+       que ya nadie controla. Si hay una acción que tiene que quedar
+       registrada sí o sí, es esta. */
+    r3adsStaff.registrarAcceso(CLINIC_ID, codigo, 'exportar_zip');
     var zip = new JSZip();
     var noIncluidos = [];  /* líneas para ARCHIVOS-NO-INCLUIDOS.txt */
     var porColeccion = {};

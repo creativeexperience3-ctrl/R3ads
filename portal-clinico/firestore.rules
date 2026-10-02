@@ -577,6 +577,63 @@ service cloud.firestore {
       allow read, write: if false;
     }
 
+    // ═══ /accesos/{id} ═══════════════════════════════════════════════
+    // Bitácora de acceso a expedientes (2026-10-02). Registra quién abrió,
+    // exportó o descargó el expediente de un paciente: staff de la clínica
+    // desde el portal clínico, y paciente o familiar autorizado desde el
+    // portal de paciente.
+    //
+    // Por qué existe: sin esto no hay forma de contestar "quién vio este
+    // expediente" después de un incidente — ni de demostrar que NADIE lo
+    // vio, que es la pregunta que de verdad le hacen a uno. La Política de
+    // Privacidad (sección 02) ya afirmaba que el acceso queda registrado.
+    //
+    // Append-only, a propósito: una bitácora que se puede editar o borrar
+    // no sirve como evidencia de nada. Ni siquiera el admin de la clínica
+    // ni el superadmin pueden modificarla desde la app; solo el Admin SDK,
+    // que no pasa por estas reglas, para purgar entradas vencidas.
+    //
+    // Límites honestos de lo que esto prueba: la escribe el mismo cliente
+    // que hace la lectura, así que registra el uso normal del producto, no
+    // a un atacante que hable con Firestore directo por el SDK y
+    // simplemente no escriba la entrada. Para eso están los Data Access
+    // logs de Google Cloud, que se activan en la consola del proyecto y
+    // viven fuera del alcance del cliente. Esta bitácora es la que la
+    // clínica puede leer; aquella es la que nadie puede tocar.
+    match /accesos/{accesoId} {
+      // Nadie puede escribir una entrada a nombre de otro (uid clavado al
+      // token) ni fecharla a mano (ts tiene que ser la hora del servidor).
+      allow create: if isAuth()
+        && request.resource.data.uid == request.auth.uid
+        && request.resource.data.ts == request.time
+        && request.resource.data.codigoPaciente is string
+        && request.resource.data.accion is string
+        && (
+          // Staff: solo en la bitácora de SU clínica. Se usa token.get() y no
+          // myClinic() porque el token de un paciente no trae el claim
+          // clinicId, y leer una clave ausente es un error de evaluación:
+          // tronaría acá y la rama del paciente, que viene después, no se
+          // llegaría a evaluar nunca.
+          request.resource.data.clinicId == request.auth.token.get('clinicId', '')
+          // Paciente o familiar autorizado: solo sobre un expediente al que
+          // de verdad tiene acceso, y con el clinicId de ese expediente, no
+          // uno inventado que ensucie la bitácora de otra clínica.
+          || (
+            accesoPaciente(request.resource.data.codigoPaciente)
+            && request.resource.data.clinicId ==
+               get(/databases/$(database)/documents/expedientes/$(request.resource.data.codigoPaciente)).data.clinicId
+          )
+        );
+
+      // La lee el admin de la clínica (es quien responde por su expediente)
+      // y R3ads. El médico y caja no: saber quién más abrió un expediente no
+      // hace falta para atender, y la bitácora dice dónde estuvo cada
+      // compañero de trabajo.
+      allow read: if isSuperAdmin() || isAdmin(resource.data.clinicId);
+
+      allow update, delete: if false;
+    }
+
     // ═══ /loginAttempts/{email} ══════════════════════════════════════
     // Rate limiting de login (functions/index.js: registrarIntentoLogin,
     // registrarLoginExitoso, verificarCodigoReset). Lectura pública a

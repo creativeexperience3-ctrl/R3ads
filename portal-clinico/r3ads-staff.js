@@ -106,7 +106,63 @@
       .catch(function () { cb(null); });
   }
 
+  /* ── Bitácora de acceso a expedientes (2026-10-02) ──────────────
+     Deja constancia de quién abrió, exportó o descargó el expediente de un
+     paciente. Antes no quedaba rastro de ninguna lectura: ante un reclamo
+     de filtración no había forma de decir quién lo vio, ni de demostrar que
+     nadie lo vio.
+
+     Tres decisiones que vale la pena entender antes de tocar esto:
+
+     1. Nunca rechaza ni demora lo que el usuario está haciendo. Si la
+        escritura falla —sin red, reglas, lo que sea— se anota en consola y
+        la página sigue. Una bitácora que impide atender a un paciente se
+        apaga el primer día, y entonces no hay bitácora.
+     2. Deduplica por (código, acción) durante 10 minutos dentro de la misma
+        carga de página. Sin esto, cada re-render de una pestaña escribiría
+        otra entrada y la bitácora terminaría siendo ilegible y cara.
+     3. No guarda datos clínicos, solo quién-qué-cuándo. La bitácora se
+        conserva más tiempo que su utilidad inmediata; no tiene sentido que
+        además duplique información del expediente. */
+  var ACCESO_DEDUPE_MS = 10 * 60 * 1000;
+  var _accesosRecientes = {}; /* 'codigo|accion' -> timestamp */
+
+  function registrarAcceso(clinicId, codigoPaciente, accion, extra) {
+    try {
+      var user = global.r3adsAuth && global.r3adsAuth.currentUser;
+      if (!user || !clinicId || !codigoPaciente) return;
+
+      var llave = codigoPaciente + '|' + accion;
+      var ahora = Date.now();
+      if (_accesosRecientes[llave] && ahora - _accesosRecientes[llave] < ACCESO_DEDUPE_MS) return;
+      _accesosRecientes[llave] = ahora;
+
+      /* El rol sale del token ya cacheado (getIdTokenResult sin forzar no
+         va a la red), no de una lectura extra de /usuarios: la bitácora no
+         debería costar un read por cada expediente que alguien abre. */
+      user.getIdTokenResult().then(function (token) {
+        var entrada = {
+          clinicId: clinicId,
+          codigoPaciente: codigoPaciente,
+          accion: accion,
+          uid: user.uid,
+          email: user.email || '',
+          rol: (token && token.claims && token.claims.rol) || '',
+          origen: 'portal-clinico',
+          ts: firebase.firestore.FieldValue.serverTimestamp()
+        };
+        if (extra && extra.detalle) entrada.detalle = String(extra.detalle).slice(0, 200);
+        return global.r3adsDb.collection('accesos').add(entrada);
+      }).catch(function (err) {
+        console.error('[Ancla] No se pudo registrar el acceso en la bitácora:', err);
+      });
+    } catch (err) {
+      console.error('[Ancla] Error inesperado al registrar el acceso:', err);
+    }
+  }
+
   global.r3adsStaff = {
+    registrarAcceso: registrarAcceso,
     checkAdmin: function (user, clinicId, cb) {
       if (!user) { cb(false); return; }
       userDoc(user.uid, function (data) {

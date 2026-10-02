@@ -1,0 +1,470 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Términos de Uso · Portal de Pacientes · Ancla</title>
+<meta name="description" content="Términos de uso del portal de pacientes de Ancla: qué es este portal, de qué respondés vos, de qué responde R3ads y cómo funciona el acceso compartido con un familiar.">
+<meta name="robots" content="index,follow">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Términos de Uso · Portal de Pacientes · Ancla">
+<meta property="og:description" content="Las condiciones bajo las que un paciente usa el portal de Ancla para ver el expediente que su clínica llevó sobre él.">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 22 26'%3E%3Ccircle cx='11' cy='5' r='4' fill='none' stroke='%23242F40' stroke-width='2.4'/%3E%3Cpath d='M11 9v15M4 24h14' stroke='%23242F40' stroke-width='2.4' stroke-linecap='round'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --jet:        #242F40;
+  --jet-deep:   #1c2534;
+  --graphite:   #363636;
+  --bronze:     #CCA43B;
+  --bg:         #F6F6F7;
+  --card:       #FFFFFF;
+  --txt-2:      #4a4a4a;
+  --txt-3:      #5a5a5a;
+  --txt-4:      #6b6b6b;
+  --line:       rgba(36,47,64,0.12);
+  --maxw:       1200px;
+  --pad:        clamp(20px,5vw,64px);
+  --ease-decel: cubic-bezier(.22,1,.36,1);
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  margin: 0;
+  font-family: 'IBM Plex Sans', system-ui, sans-serif;
+  background: var(--bg);
+  color: var(--graphite);
+  -webkit-font-smoothing: antialiased;
+}
+a { color: var(--jet); text-decoration: none; }
+a:hover { color: var(--bronze); }
+a:focus-visible { outline: 2px solid var(--bronze); outline-offset: 3px; border-radius: 4px; }
+
+.wrap { max-width: var(--maxw); margin: 0 auto; padding-left: var(--pad); padding-right: var(--pad); }
+.eyebrow {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 13px; font-weight: 600; letter-spacing: 0.08em;
+  text-transform: uppercase; color: var(--txt-4); margin-bottom: 10px;
+}
+
+.btn {
+  display: inline-block; border-radius: 10px; font-weight: 600;
+  font-size: 15px; padding: 14px 26px; border: 1.5px solid transparent;
+  transition: background-color .15s ease, color .15s ease, border-color .15s ease, transform .15s ease;
+}
+.btn-primary { background: var(--jet); color: #fff; }
+.btn-primary:hover { background: var(--jet-deep); color: #fff; transform: translateY(-1px); }
+.btn-outline { border-color: var(--jet); color: var(--jet); }
+.btn-outline:hover { background: var(--jet); color: #fff; }
+.btn-sm { padding: 10px 20px; font-size: 14px; }
+
+.logo { display: flex; align-items: center; gap: 10px; }
+.logo-mark { flex-shrink: 0; }
+.logo-word { font-size: 20px; font-weight: 700; color: var(--jet); letter-spacing: -0.01em; }
+
+.nav {
+  position: sticky; top: 0; z-index: 20;
+  background: rgba(246,246,247,0.92); backdrop-filter: blur(8px);
+  border-bottom: 1px solid rgba(36,47,64,0.1);
+}
+.nav-row {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 16px; flex-wrap: wrap; padding-top: 16px; padding-bottom: 16px;
+}
+.nav-links { display: flex; align-items: center; gap: 28px; flex-wrap: wrap; }
+.nav-links a { color: var(--graphite); font-size: 15px; font-weight: 500; }
+.nav-links a:hover { color: var(--bronze); }
+
+/* ── Encabezado del documento ── */
+.doc-hero { padding-top: clamp(40px,6vw,72px); padding-bottom: clamp(28px,4vw,40px); border-bottom: 1px solid var(--line); }
+.doc-hero h1 { font-size: clamp(1.9rem,4vw,2.75rem); font-weight: 700; color: var(--jet); margin: 0 0 14px; letter-spacing: -0.01em; }
+.doc-meta { display: flex; gap: 18px; flex-wrap: wrap; font-size: 13.5px; color: var(--txt-4); font-family: 'IBM Plex Mono', monospace; }
+.doc-meta strong { color: var(--txt-2); font-weight: 600; }
+
+/* ── Layout de dos columnas: TOC + contenido ── */
+.legal-layout {
+  display: grid; grid-template-columns: 240px minmax(0,1fr); gap: 56px;
+  padding-top: clamp(32px,5vw,48px); padding-bottom: clamp(56px,8vw,96px); align-items: start;
+}
+@media (max-width: 880px) { .legal-layout { grid-template-columns: 1fr; } }
+
+.toc { position: sticky; top: 84px; }
+.toc-h { font-family: 'IBM Plex Mono', monospace; font-size: 12px; font-weight: 600; letter-spacing: 0.05em; color: var(--txt-4); margin-bottom: 14px; text-transform: uppercase; }
+.toc ol { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 2px; border-left: 1px solid var(--line); }
+.toc a {
+  display: block; padding: 7px 0 7px 16px; font-size: 13.5px; color: var(--txt-3);
+  border-left: 2px solid transparent; margin-left: -1px; transition: color .15s ease, border-color .15s ease;
+}
+.toc a:hover { color: var(--jet); border-left-color: var(--bronze); }
+@media (max-width: 880px) {
+  .toc { position: static; margin-bottom: 8px; }
+  .toc ol { display: grid; grid-template-columns: repeat(auto-fill,minmax(220px,1fr)); border-left: none; gap: 4px 20px; }
+  .toc a { border-left: none; padding: 4px 0; }
+}
+
+/* ── Callout de rol (Responsable / Encargado) ── */
+.callout {
+  background: var(--card); border: 1px solid var(--line); border-left: 4px solid var(--bronze);
+  border-radius: 10px; padding: 22px 24px; margin: 0 0 40px;
+  font-size: 15px; line-height: 1.65; color: var(--txt-2);
+}
+.callout strong { color: var(--jet); }
+
+/* ── Prosa legal ── */
+.doc { max-width: 760px; font-size: 15.5px; line-height: 1.75; color: var(--txt-2); }
+.doc section { padding-top: 8px; margin-bottom: 44px; scroll-margin-top: 96px; }
+.doc h2 {
+  font-size: clamp(1.25rem,2.2vw,1.55rem); font-weight: 700; color: var(--jet);
+  margin: 0 0 16px; letter-spacing: -0.005em; display: flex; align-items: baseline; gap: 10px;
+}
+.doc h2 .num { font-family: 'IBM Plex Mono', monospace; font-size: 14px; font-weight: 600; color: var(--bronze); }
+.doc h3 { font-size: 16px; font-weight: 600; color: var(--jet); margin: 24px 0 10px; }
+.doc p { margin: 0 0 14px; }
+.doc ul, .doc ol.legal-list { margin: 0 0 14px; padding-left: 22px; }
+.doc li { margin-bottom: 8px; }
+.doc a.inline-link { text-decoration: underline; text-underline-offset: 2px; }
+
+table.data-table { width: 100%; border-collapse: collapse; margin: 4px 0 20px; font-size: 14px; }
+table.data-table th, table.data-table td { text-align: left; padding: 10px 14px; border: 1px solid var(--line); vertical-align: top; }
+table.data-table th { background: rgba(36,47,64,0.04); font-weight: 600; color: var(--jet); font-size: 13px; }
+table.data-table td { color: var(--txt-3); }
+
+.legal-note {
+  font-size: 13.5px; color: var(--txt-4); background: rgba(36,47,64,0.035);
+  border: 1px dashed rgba(36,47,64,0.18); border-radius: 8px; padding: 14px 16px; margin: 10px 0 20px;
+}
+.legal-note strong { color: var(--txt-2); }
+
+.contact-card {
+  border: 1px solid var(--line); border-radius: 12px; background: var(--card);
+  padding: 26px 28px; margin-top: 8px;
+}
+.contact-card dl { display: grid; grid-template-columns: 140px 1fr; gap: 10px 16px; margin: 0; font-size: 14.5px; }
+.contact-card dt { font-weight: 600; color: var(--jet); }
+.contact-card dd { margin: 0; color: var(--txt-3); }
+
+.back-top { display: inline-block; margin-top: 8px; font-size: 13.5px; }
+
+/* ── Footer (idéntico al resto del sitio) ── */
+.footer { position: relative; overflow: hidden; background: var(--jet-deep); padding: 48px var(--pad) 28px; }
+.footer-inner { position: relative; z-index: 1; max-width: var(--maxw); margin: 0 auto; }
+.footer-top { display: flex; flex-wrap: wrap; gap: 40px; justify-content: space-between; margin-bottom: 32px; }
+.footer .logo-word { color: #fff; font-size: 18px; }
+.footer-about { max-width: 320px; }
+.footer-about p { font-size: 13.5px; line-height: 1.6; color: rgba(255,255,255,0.6); margin: 14px 0 0; }
+.footer-cols { display: flex; gap: 48px; flex-wrap: wrap; }
+.footer-col-h { font-family: 'IBM Plex Mono', monospace; font-size: 12px; font-weight: 600; color: rgba(255,255,255,0.5); letter-spacing: 0.05em; margin-bottom: 14px; }
+.footer-col a { display: block; color: rgba(255,255,255,0.75); font-size: 14px; margin-bottom: 10px; }
+.footer-col a:hover { color: var(--bronze); }
+.footer-bottom {
+  border-top: 1px solid rgba(255,255,255,0.12); padding-top: 20px;
+  display: flex; justify-content: space-between; flex-wrap: wrap; gap: 10px;
+  font-size: 12.5px; color: rgba(255,255,255,0.5);
+}
+</style>
+</head>
+<body>
+
+<!-- ═══ NAV ═══ -->
+<nav class="nav">
+  <div class="wrap nav-row">
+    <a href="Mi-Historial.html" class="logo">
+      <svg class="logo-mark" width="22" height="26" viewBox="0 0 22 26" fill="none" aria-hidden="true">
+        <circle cx="11" cy="5" r="4" stroke="#242F40" stroke-width="2"/>
+        <path d="M11 9v15M4 24h14" stroke="#242F40" stroke-width="2" stroke-linecap="round"/>
+      </svg>
+      <span class="logo-word">Ancla</span>
+    </a>
+    <div class="nav-links">
+      <a href="Mi-Historial.html">Mi historial</a>
+      <a href="https://ancla.r3ads.com/Privacidad.html">Privacidad</a>
+      <a href="Auth.html">Acceder</a>
+    </div>
+    <a href="Auth.html?view=register" class="btn btn-primary btn-sm">Crear cuenta</a>
+  </div>
+</nav>
+
+<!-- ═══ ENCABEZADO ═══ -->
+<div class="doc-hero">
+  <div class="wrap">
+    <div class="eyebrow">Aviso legal · Ancla, un producto de R3ads</div>
+    <h1>Términos de Uso — Portal de Pacientes</h1>
+    <div class="doc-meta">
+      <span><strong>Última actualización:</strong> 2 de octubre de 2026</span>
+      <span><strong>Aplica a:</strong> el portal de pacientes de Ancla</span>
+      <span><strong>Idioma oficial:</strong> español</span>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ CONTENIDO ═══ -->
+<div class="wrap legal-layout">
+
+  <!-- TOC -->
+  <aside class="toc" aria-label="Tabla de contenido">
+    <div class="toc-h">En esta página</div>
+    <ol>
+      <li><a href="#que-es">1. Qué es este portal y qué no es</a></li>
+      <li><a href="#cuenta">2. Tu cuenta</a></li>
+      <li><a href="#codigo">3. El código de expediente</a></li>
+      <li><a href="#compartir">4. Acceso compartido con un familiar</a></li>
+      <li><a href="#contenido">5. El contenido clínico es de tu clínica</a></li>
+      <li><a href="#descargas">6. Lo que descargás</a></li>
+      <li><a href="#disponibilidad">7. Disponibilidad del portal</a></li>
+      <li><a href="#uso">8. Uso aceptable</a></li>
+      <li><a href="#responsabilidad">9. De qué respondemos y de qué no</a></li>
+      <li><a href="#cierre">10. Cerrar tu cuenta</a></li>
+      <li><a href="#cambios">11. Cambios a estos términos</a></li>
+      <li><a href="#contacto-legal">12. Ley aplicable y contacto</a></li>
+    </ol>
+  </aside>
+
+  <!-- DOC -->
+  <article class="doc">
+
+    <div class="callout">
+      <strong>En una frase:</strong> este portal te deja mirar el expediente que tu clínica llevó sobre vos.
+      El contenido clínico es de tu clínica; la cuenta con la que entrás y las personas a las que les
+      aprobás acceso son tuyas, y de eso respondés vos.
+    </div>
+
+    <section id="que-es">
+      <h2><span class="num">01</span> Qué es este portal y qué no es</h2>
+      <p>
+        El portal de pacientes de <strong>Ancla</strong> es una ventana de lectura al expediente clínico que
+        tu clínica creó y mantiene en el sistema. Te deja ver tus consultas, resultados de laboratorio,
+        pruebas rápidas y los demás registros que esa clínica haya cargado.
+      </p>
+      <p>
+        <strong>No es un servicio médico.</strong> No reemplaza una consulta, no interpreta resultados, no
+        da diagnósticos ni indicaciones, y <strong>no sirve para urgencias</strong>: ante una emergencia
+        llamá a tu clínica o acudí a un servicio de emergencias, no entres acá.
+      </p>
+      <p>
+        R3ads administra la infraestructura; la relación médica es entre vos y tu clínica. Esa distinción
+        está explicada en detalle en la sección 02 de la
+        <a class="inline-link" href="https://ancla.r3ads.com/Privacidad.html">Política de Privacidad</a>,
+        que forma parte de estos términos.
+      </p>
+    </section>
+
+    <section id="cuenta">
+      <h2><span class="num">02</span> Tu cuenta</h2>
+      <p>
+        La cuenta es <strong>personal e intransferible</strong>. La creás con tu correo, y antes de poder
+        vincular un expediente tenés que confirmar ese correo abriendo el enlace que te mandamos: es lo
+        único que nos permite saber que el buzón es tuyo y no de otra persona que escribió tu dirección.
+      </p>
+      <p>
+        Sos responsable de tu contraseña y de mantener cerrada tu sesión en dispositivos compartidos.
+        Si creés que alguien más entró a tu cuenta, cambiá la contraseña y avisanos o avisale a tu clínica
+        cuanto antes.
+      </p>
+      <p>
+        Para usar el portal por tu cuenta tenés que ser mayor de edad. El expediente de una persona menor
+        lo maneja su madre, padre o representante legal, en los términos de la sección 12 de la Política
+        de Privacidad.
+      </p>
+    </section>
+
+    <section id="codigo">
+      <h2><span class="num">03</span> El código de expediente</h2>
+      <p>
+        Tu clínica te entrega un <strong>código de expediente</strong> (por ejemplo, <code>CLI-A7K2M9</code>).
+        Sirve para señalar cuál expediente es el tuyo cuando lo vinculás a tu cuenta.
+      </p>
+      <p>
+        <strong>El código no es una contraseña y por sí solo no abre nada.</strong> Para que un expediente
+        quede vinculado a una cuenta, el correo verificado de esa cuenta tiene que coincidir con el correo
+        que la clínica registró en ese expediente. Quien tenga tu código y no tu correo no puede ver tu
+        historial ni quedarse con tu expediente.
+      </p>
+      <p>
+        Aun así, el código es información de tu expediente: no lo publiques ni lo compartas sin
+        necesidad. <strong>R3ads no responde por las consecuencias de que vos divulgues tu código de
+        expediente, tus credenciales de acceso o los archivos que hayas descargado</strong>, ni por el uso
+        que un tercero haga de esa información una vez que salió de tus manos.
+      </p>
+    </section>
+
+    <section id="compartir">
+      <h2><span class="num">04</span> Acceso compartido con un familiar</h2>
+      <p>
+        Podés aprobar que otra persona vea tu expediente — típicamente un familiar que te acompaña en el
+        tratamiento. Funciona así: esa persona pide acceso desde su propia cuenta, y vos lo aprobás o lo
+        rechazás. Nadie entra a tu historial sin que vos lo hayas aprobado.
+      </p>
+      <p>
+        Mientras ese acceso esté aprobado, esa persona ve <strong>tu historial completo</strong>, igual que
+        vos. Es una decisión tuya y una responsabilidad tuya: no verificamos el parentesco, no mediamos en
+        esa relación y <strong>no respondemos por lo que haga con tu información alguien a quien vos le
+        diste acceso</strong>.
+      </p>
+      <p>
+        Para retirar un acceso que ya aprobaste, escribile a tu clínica o a soporte y lo quitamos.
+      </p>
+    </section>
+
+    <section id="contenido">
+      <h2><span class="num">05</span> El contenido clínico es de tu clínica</h2>
+      <p>
+        Todo lo que leés en el portal lo escribió tu clínica: diagnósticos, indicaciones, resultados,
+        fechas. R3ads no redacta, no corrige y no interpreta contenido clínico.
+      </p>
+      <p>
+        Si algo está equivocado o incompleto, la corrección se pide a la clínica que lo registró — es
+        quien decide sobre ese expediente y quien puede modificarlo. Tus derechos de acceso, rectificación
+        y entrega de una copia completa, y cómo ejercerlos, están en las secciones 10 y 11 de la Política
+        de Privacidad.
+      </p>
+    </section>
+
+    <section id="descargas">
+      <h2><span class="num">06</span> Lo que descargás</h2>
+      <p>
+        El portal te permite descargar documentos de tu expediente. En el momento en que un archivo queda
+        en tu teléfono, tu computadora o tu correo, <strong>sale del entorno protegido de Ancla y pasa a tu
+        custodia</strong>: lo que ocurra con esa copia depende de cómo la guardes y con quién la compartas.
+      </p>
+    </section>
+
+    <section id="disponibilidad">
+      <h2><span class="num">07</span> Disponibilidad del portal</h2>
+      <p>
+        Procuramos que el portal esté disponible de forma continua, pero <strong>no comprometemos un
+        porcentaje de disponibilidad frente al paciente</strong>: puede haber mantenimientos, cortes del
+        proveedor de nube o interrupciones no previstas. No uses este portal como tu única vía para algo
+        urgente.
+      </p>
+      <p>
+        Que el portal esté caído no afecta tu expediente: sigue existiendo en el sistema y tu clínica
+        sigue teniendo acceso a él.
+      </p>
+    </section>
+
+    <section id="uso">
+      <h2><span class="num">08</span> Uso aceptable</h2>
+      <p>Al usar el portal te comprometés a no:</p>
+      <ul>
+        <li>intentar ver expedientes que no sean el tuyo o uno que te hayan aprobado;</li>
+        <li>probar códigos ajenos, automatizar peticiones o usar herramientas para extraer información en volumen;</li>
+        <li>intentar vulnerar los controles de seguridad del sistema, ni usar una cuenta que no sea tuya;</li>
+        <li>usar la información de otra persona que hayas visto por un acceso compartido para un fin distinto del que motivó ese acceso.</li>
+      </ul>
+      <p>
+        Podemos suspender una cuenta que esté haciendo cualquiera de estas cosas, y avisarle a la clínica
+        involucrada.
+      </p>
+    </section>
+
+    <section id="responsabilidad">
+      <h2><span class="num">09</span> De qué respondemos y de qué no</h2>
+      <p>
+        R3ads responde por el funcionamiento y la seguridad de la infraestructura que opera: mantener tu
+        información protegida, respaldada y disponible según lo descrito en las secciones 07 y 15 de la
+        Política de Privacidad.
+      </p>
+      <p><strong>R3ads no responde por:</strong></p>
+      <ul>
+        <li>la divulgación que vos hagas de tu código de expediente, tu contraseña o los archivos que descargues, ni por el uso posterior que un tercero haga de ellos;</li>
+        <li>el acceso de una persona a la que vos le aprobaste ver tu expediente, ni por lo que esa persona haga con lo que vio;</li>
+        <li>el uso de tu cuenta por alguien a quien le diste tus credenciales, o que las obtuvo porque dejaste la sesión abierta en un dispositivo compartido;</li>
+        <li>el contenido clínico cargado por la clínica: su exactitud, su integridad y su actualización son responsabilidad de quien lo registró;</li>
+        <li>las decisiones que tomes a partir de lo que leíste en el portal sin consultar a tu médico;</li>
+        <li>fallas de tu dispositivo, tu conexión, tu proveedor de correo o tu navegador.</li>
+      </ul>
+      <p class="legal-note">
+        Nada de lo anterior excluye ni limita la responsabilidad que la legislación hondureña no permite
+        excluir — en particular la que surge del dolo o la culpa grave, y los derechos que la Ley de
+        Protección al Consumidor (Decreto 24-2008) reconoce de forma irrenunciable.
+      </p>
+    </section>
+
+    <section id="cierre">
+      <h2><span class="num">10</span> Cerrar tu cuenta</h2>
+      <p>
+        Podés pedir que cerremos tu cuenta del portal cuando quieras. Eso desvincula tu acceso, pero
+        <strong>no borra tu expediente</strong>: ese expediente es de la clínica, que tiene obligaciones de
+        conservación propias del registro clínico. Los plazos están en la sección 09 de la Política de
+        Privacidad.
+      </p>
+    </section>
+
+    <section id="cambios">
+      <h2><span class="num">11</span> Cambios a estos términos</h2>
+      <p>
+        Podemos actualizar estos términos. Cuando el cambio sea sustancial lo anunciaremos en el portal
+        antes de que entre en vigencia, y la fecha de arriba siempre indica la versión vigente. Si seguís
+        usando el portal después de esa fecha, se entiende que aceptás la versión nueva.
+      </p>
+    </section>
+
+    <section id="contacto-legal">
+      <h2><span class="num">12</span> Ley aplicable y contacto</h2>
+      <p>
+        Estos términos se rigen por la legislación de la República de Honduras, y cualquier controversia
+        se somete a los tribunales competentes de ese país.
+      </p>
+      <div class="contact-card">
+        <dl>
+          <dt>Empresa</dt><dd>R3ads — operadora de Ancla · Inversiones REWA · RTN 0801-2000-01030-1</dd>
+          <dt>Correo</dt><dd>[Completar: correo de contacto / soporte]</dd>
+          <dt>WhatsApp</dt><dd><a class="inline-link" href="https://wa.me/50495652894" target="_blank" rel="noopener">+504 9565 2894</a></dd>
+          <dt>Dirección</dt><dd>[Completar: dirección física de la Empresa en Honduras]</dd>
+        </dl>
+      </div>
+      <p class="legal-note" style="margin-top:20px">
+        <strong>Nota interna:</strong> completar correo de contacto y dirección física, igual que en la
+        Política de Privacidad, y hacer revisar este documento por un abogado en Honduras antes de
+        tratarlo como definitivo.
+      </p>
+      <a class="back-top" href="#top">Volver arriba ↑</a>
+    </section>
+
+  </article>
+</div>
+
+<!-- ═══ FOOTER ═══ -->
+<footer class="footer">
+  <div class="footer-inner">
+    <div class="footer-top">
+      <div class="footer-about">
+        <div class="logo">
+          <svg class="logo-mark" width="20" height="24" viewBox="0 0 22 26" fill="none" aria-hidden="true">
+            <circle cx="11" cy="5" r="4" stroke="#ffffff" stroke-width="2"/>
+            <path d="M11 9v15M4 24h14" stroke="#ffffff" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+          <span class="logo-word">Ancla</span>
+        </div>
+        <p>Sistema de gestión clínica para clínicas pequeñas y medianas de Centroamérica.</p>
+      </div>
+      <div class="footer-cols">
+        <div class="footer-col">
+          <div class="footer-col-h">PORTAL</div>
+          <a href="Mi-Historial.html">Mi historial</a>
+          <a href="Auth.html">Acceder</a>
+        </div>
+        <div class="footer-col">
+          <div class="footer-col-h">EMPRESA</div>
+          <a href="https://r3ads.com" target="_blank" rel="noopener">R3ads</a>
+          <a href="https://ancla.r3ads.com/index.html#contacto">Contacto</a>
+        </div>
+        <div class="footer-col">
+          <div class="footer-col-h">LEGAL</div>
+          <a href="https://ancla.r3ads.com/Privacidad.html">Política de Privacidad</a>
+          <a href="Terminos.html">Términos de Uso</a>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2026 Ancla, un producto de R3ads. Hecho en Centroamérica.</span>
+      <span>Identidad en desarrollo.</span>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>
