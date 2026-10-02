@@ -397,11 +397,32 @@ en la consola del proyecto, viven fuera del alcance del cliente y **siguen
 pendientes**. Esta bitácora es la que la clínica puede leer; aquella es la
 que nadie puede tocar.
 
+**La mitad que no se puede manipular ya está activa (2026-10-02).** Los Data
+Access logs de Firestore (`ADMIN_READ`, `DATA_READ`, `DATA_WRITE` sobre
+`firestore.googleapis.com`) quedaron encendidos en IAM → Registros de
+auditoría, y los registros se enrutan a un bucket propio
+(`auditoria-accesos`, retención **730 días**) por un sink filtrado a
+`cloudaudit.googleapis.com/data_access` + `serviceName` de Firestore. El
+`_Default` los sigue viendo 30 días; pasado eso hay que cambiar el alcance
+del Logs Explorer a ese bucket para encontrarlos.
+
+Esos logs los escribe Google, no el cliente, e identifican a quien leyó por
+el token de Firebase (`protoPayload.authenticationInfo.thirdPartyPrincipal`
+trae el header y el payload del JWT). Verificado el 2026-10-02 con una
+lectura real desde el portal.
+
+Consulta para buscarlos:
+
+```
+logName="projects/r3ads-clinic-crm/logs/cloudaudit.googleapis.com%2Fdata_access"
+protoPayload.serviceName="firestore.googleapis.com"
+```
+
 **Pendiente:**
-- Activar los Data Access logs de Firestore en la consola de Google Cloud.
-- Política de retención: hoy `/accesos` crece sin techo. Definir la ventana
-  (2 años es lo razonable) y configurar un TTL de Firestore sobre un campo
-  de vencimiento, o purgar con el Admin SDK.
+- Política de retención de `/accesos` (la bitácora de dentro de la app): hoy
+  crece sin techo. La de Google ya tiene su ventana de 730 días; falta la
+  equivalente acá, con un TTL de Firestore sobre un campo de vencimiento o
+  una purga con el Admin SDK.
 - Que el paciente pueda ver quién abrió su propio expediente. Hoy la lectura
   es solo del admin de su clínica y de R3ads; dárselo al titular exige una
   query que no se puede validar barato con las reglas actuales.
