@@ -245,6 +245,12 @@ async function slugTieneRestos(candidato) {
   return false;
 }
 
+/* Versión de los Términos del Servicio (portal-clinico/Terminos.html) que
+   está vigente. Subirla al publicar una revisión sustancial: lo que queda
+   grabado en /clinics/{id}.aceptacion es esta cadena, y es lo que permite
+   saber después qué texto aceptó cada clínica. */
+const TERMINOS_VERSION = '2026-10-02';
+
 exports.crearClinicaSelfService = functions
   .runWith({ enforceAppCheck: true })
   .https.onCall(async (data, context) => {
@@ -265,6 +271,17 @@ exports.crearClinicaSelfService = functions
   }
   if (!prefijo) {
     throw new functions.https.HttpsError('invalid-argument', 'Falta el prefijo de código de paciente.');
+  }
+  /* Aceptación de los Términos del Servicio y su Anexo A (encargado del
+     tratamiento). Se exige acá y no solo en la casilla de Auth.html porque
+     esta función es el único camino para crear una clínica: lo que quede
+     escrito en /clinics es la constancia de que hubo contrato, y una
+     constancia que el cliente podría saltarse no sirve de constancia. */
+  if (!(data && data.aceptaTerminos === true)) {
+    throw new functions.https.HttpsError(
+      'failed-precondition',
+      'Hay que aceptar los Términos del Servicio y la Política de Privacidad para crear la clínica.'
+    );
   }
 
   // Un uid solo pasa por acá una vez: si ya tiene /usuarios/{uid} (staff de
@@ -309,6 +326,17 @@ exports.crearClinicaSelfService = functions
           planElegido: planElegido,
           estado: 'prueba_bloqueada',
           origenAlta: 'self-service',
+          /* Constancia del contrato: qué versión del texto se aceptó, quién
+             la aceptó y cuándo. La versión importa — "aceptó los términos"
+             no dice nada si no se sabe cuáles. Se escribe acá, con el Admin
+             SDK, así que no depende de lo que mande el cliente salvo el
+             propio consentimiento. */
+          aceptacion: {
+            terminos: TERMINOS_VERSION,
+            uid: uid,
+            email: authEmail,
+            fecha: ahora
+          },
           creadoEn: ahora
         });
         tx.set(usuarioRef, {

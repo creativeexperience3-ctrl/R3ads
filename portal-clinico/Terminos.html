@@ -1,0 +1,667 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Términos del Servicio · Ancla</title>
+<meta name="description" content="Términos del servicio de Ancla para las clínicas: qué incluye la suscripción, de qué responde cada parte, propiedad y exportación de los datos, y el acuerdo de encargado del tratamiento.">
+<meta name="robots" content="index,follow">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Términos del Servicio · Ancla">
+<meta property="og:description" content="El contrato entre R3ads y cada clínica que usa Ancla, con el acuerdo de encargado del tratamiento como anexo.">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 22 26'%3E%3Ccircle cx='11' cy='5' r='4' fill='none' stroke='%23242F40' stroke-width='2.4'/%3E%3Cpath d='M11 9v15M4 24h14' stroke='%23242F40' stroke-width='2.4' stroke-linecap='round'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --jet:        #242F40;
+  --jet-deep:   #1c2534;
+  --graphite:   #363636;
+  --bronze:     #CCA43B;
+  --bg:         #F6F6F7;
+  --card:       #FFFFFF;
+  --txt-2:      #4a4a4a;
+  --txt-3:      #5a5a5a;
+  --txt-4:      #6b6b6b;
+  --line:       rgba(36,47,64,0.12);
+  --maxw:       1200px;
+  --pad:        clamp(20px,5vw,64px);
+  --ease-decel: cubic-bezier(.22,1,.36,1);
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  margin: 0;
+  font-family: 'IBM Plex Sans', system-ui, sans-serif;
+  background: var(--bg);
+  color: var(--graphite);
+  -webkit-font-smoothing: antialiased;
+}
+a { color: var(--jet); text-decoration: none; }
+a:hover { color: var(--bronze); }
+a:focus-visible { outline: 2px solid var(--bronze); outline-offset: 3px; border-radius: 4px; }
+
+.wrap { max-width: var(--maxw); margin: 0 auto; padding-left: var(--pad); padding-right: var(--pad); }
+.eyebrow {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 13px; font-weight: 600; letter-spacing: 0.08em;
+  text-transform: uppercase; color: var(--txt-4); margin-bottom: 10px;
+}
+
+.btn {
+  display: inline-block; border-radius: 10px; font-weight: 600;
+  font-size: 15px; padding: 14px 26px; border: 1.5px solid transparent;
+  transition: background-color .15s ease, color .15s ease, border-color .15s ease, transform .15s ease;
+}
+.btn-primary { background: var(--jet); color: #fff; }
+.btn-primary:hover { background: var(--jet-deep); color: #fff; transform: translateY(-1px); }
+.btn-outline { border-color: var(--jet); color: var(--jet); }
+.btn-outline:hover { background: var(--jet); color: #fff; }
+.btn-sm { padding: 10px 20px; font-size: 14px; }
+
+.logo { display: flex; align-items: center; gap: 10px; }
+.logo-mark { flex-shrink: 0; }
+.logo-word { font-size: 20px; font-weight: 700; color: var(--jet); letter-spacing: -0.01em; }
+
+.nav {
+  position: sticky; top: 0; z-index: 20;
+  background: rgba(246,246,247,0.92); backdrop-filter: blur(8px);
+  border-bottom: 1px solid rgba(36,47,64,0.1);
+}
+.nav-row {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 16px; flex-wrap: wrap; padding-top: 16px; padding-bottom: 16px;
+}
+.nav-links { display: flex; align-items: center; gap: 28px; flex-wrap: wrap; }
+.nav-links a { color: var(--graphite); font-size: 15px; font-weight: 500; }
+.nav-links a:hover { color: var(--bronze); }
+
+/* ── Encabezado del documento ── */
+.doc-hero { padding-top: clamp(40px,6vw,72px); padding-bottom: clamp(28px,4vw,40px); border-bottom: 1px solid var(--line); }
+.doc-hero h1 { font-size: clamp(1.9rem,4vw,2.75rem); font-weight: 700; color: var(--jet); margin: 0 0 14px; letter-spacing: -0.01em; }
+.doc-meta { display: flex; gap: 18px; flex-wrap: wrap; font-size: 13.5px; color: var(--txt-4); font-family: 'IBM Plex Mono', monospace; }
+.doc-meta strong { color: var(--txt-2); font-weight: 600; }
+
+/* ── Layout de dos columnas: TOC + contenido ── */
+.legal-layout {
+  display: grid; grid-template-columns: 240px minmax(0,1fr); gap: 56px;
+  padding-top: clamp(32px,5vw,48px); padding-bottom: clamp(56px,8vw,96px); align-items: start;
+}
+@media (max-width: 880px) { .legal-layout { grid-template-columns: 1fr; } }
+
+.toc { position: sticky; top: 84px; }
+.toc-h { font-family: 'IBM Plex Mono', monospace; font-size: 12px; font-weight: 600; letter-spacing: 0.05em; color: var(--txt-4); margin-bottom: 14px; text-transform: uppercase; }
+.toc ol { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 2px; border-left: 1px solid var(--line); }
+.toc a {
+  display: block; padding: 7px 0 7px 16px; font-size: 13.5px; color: var(--txt-3);
+  border-left: 2px solid transparent; margin-left: -1px; transition: color .15s ease, border-color .15s ease;
+}
+.toc a:hover { color: var(--jet); border-left-color: var(--bronze); }
+@media (max-width: 880px) {
+  .toc { position: static; margin-bottom: 8px; }
+  .toc ol { display: grid; grid-template-columns: repeat(auto-fill,minmax(220px,1fr)); border-left: none; gap: 4px 20px; }
+  .toc a { border-left: none; padding: 4px 0; }
+}
+
+/* ── Callout de rol (Responsable / Encargado) ── */
+.callout {
+  background: var(--card); border: 1px solid var(--line); border-left: 4px solid var(--bronze);
+  border-radius: 10px; padding: 22px 24px; margin: 0 0 40px;
+  font-size: 15px; line-height: 1.65; color: var(--txt-2);
+}
+.callout strong { color: var(--jet); }
+
+/* ── Prosa legal ── */
+.doc { max-width: 760px; font-size: 15.5px; line-height: 1.75; color: var(--txt-2); }
+.doc section { padding-top: 8px; margin-bottom: 44px; scroll-margin-top: 96px; }
+.doc h2 {
+  font-size: clamp(1.25rem,2.2vw,1.55rem); font-weight: 700; color: var(--jet);
+  margin: 0 0 16px; letter-spacing: -0.005em; display: flex; align-items: baseline; gap: 10px;
+}
+.doc h2 .num { font-family: 'IBM Plex Mono', monospace; font-size: 14px; font-weight: 600; color: var(--bronze); }
+.doc h3 { font-size: 16px; font-weight: 600; color: var(--jet); margin: 24px 0 10px; }
+.doc p { margin: 0 0 14px; }
+.doc ul, .doc ol.legal-list { margin: 0 0 14px; padding-left: 22px; }
+.doc li { margin-bottom: 8px; }
+.doc a.inline-link { text-decoration: underline; text-underline-offset: 2px; }
+
+table.data-table { width: 100%; border-collapse: collapse; margin: 4px 0 20px; font-size: 14px; }
+table.data-table th, table.data-table td { text-align: left; padding: 10px 14px; border: 1px solid var(--line); vertical-align: top; }
+table.data-table th { background: rgba(36,47,64,0.04); font-weight: 600; color: var(--jet); font-size: 13px; }
+table.data-table td { color: var(--txt-3); }
+
+.legal-note {
+  font-size: 13.5px; color: var(--txt-4); background: rgba(36,47,64,0.035);
+  border: 1px dashed rgba(36,47,64,0.18); border-radius: 8px; padding: 14px 16px; margin: 10px 0 20px;
+}
+.legal-note strong { color: var(--txt-2); }
+
+.contact-card {
+  border: 1px solid var(--line); border-radius: 12px; background: var(--card);
+  padding: 26px 28px; margin-top: 8px;
+}
+.contact-card dl { display: grid; grid-template-columns: 140px 1fr; gap: 10px 16px; margin: 0; font-size: 14.5px; }
+.contact-card dt { font-weight: 600; color: var(--jet); }
+.contact-card dd { margin: 0; color: var(--txt-3); }
+
+.back-top { display: inline-block; margin-top: 8px; font-size: 13.5px; }
+
+/* ── Footer (idéntico al resto del sitio) ── */
+.footer { position: relative; overflow: hidden; background: var(--jet-deep); padding: 48px var(--pad) 28px; }
+.footer-inner { position: relative; z-index: 1; max-width: var(--maxw); margin: 0 auto; }
+.footer-top { display: flex; flex-wrap: wrap; gap: 40px; justify-content: space-between; margin-bottom: 32px; }
+.footer .logo-word { color: #fff; font-size: 18px; }
+.footer-about { max-width: 320px; }
+.footer-about p { font-size: 13.5px; line-height: 1.6; color: rgba(255,255,255,0.6); margin: 14px 0 0; }
+.footer-cols { display: flex; gap: 48px; flex-wrap: wrap; }
+.footer-col-h { font-family: 'IBM Plex Mono', monospace; font-size: 12px; font-weight: 600; color: rgba(255,255,255,0.5); letter-spacing: 0.05em; margin-bottom: 14px; }
+.footer-col a { display: block; color: rgba(255,255,255,0.75); font-size: 14px; margin-bottom: 10px; }
+.footer-col a:hover { color: var(--bronze); }
+.footer-bottom {
+  border-top: 1px solid rgba(255,255,255,0.12); padding-top: 20px;
+  display: flex; justify-content: space-between; flex-wrap: wrap; gap: 10px;
+  font-size: 12.5px; color: rgba(255,255,255,0.5);
+}
+</style>
+</head>
+<body>
+
+<!-- ═══ NAV ═══ -->
+<nav class="nav">
+  <div class="wrap nav-row">
+    <a href="index.html" class="logo">
+      <svg class="logo-mark" width="22" height="26" viewBox="0 0 22 26" fill="none" aria-hidden="true">
+        <circle cx="11" cy="5" r="4" stroke="#242F40" stroke-width="2"/>
+        <path d="M11 9v15M4 24h14" stroke="#242F40" stroke-width="2" stroke-linecap="round"/>
+      </svg>
+      <span class="logo-word">Ancla</span>
+    </a>
+    <div class="nav-links">
+      <a href="index.html#modulos">Módulos</a>
+      <a href="Precios.html">Precios</a>
+      <a href="Privacidad.html">Privacidad</a>
+      <a href="Auth.html">Acceder</a>
+    </div>
+    <a href="Auth.html?view=register" class="btn btn-primary btn-sm">Registrarte</a>
+  </div>
+</nav>
+
+<!-- ═══ ENCABEZADO ═══ -->
+<div class="doc-hero">
+  <div class="wrap">
+    <div class="eyebrow">Aviso legal · Ancla, un producto de R3ads</div>
+    <h1>Términos del Servicio</h1>
+    <div class="doc-meta">
+      <span><strong>Última actualización:</strong> 2 de octubre de 2026</span>
+      <span><strong>Aplica a:</strong> las clínicas que contratan Ancla</span>
+      <span><strong>Idioma oficial:</strong> español</span>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ CONTENIDO ═══ -->
+<div class="wrap legal-layout">
+
+  <!-- TOC -->
+  <aside class="toc" aria-label="Tabla de contenido">
+    <div class="toc-h">En esta página</div>
+    <ol>
+      <li><a href="#partes">1. Partes, objeto y aceptación</a></li>
+      <li><a href="#servicio">2. Qué incluye el servicio</a></li>
+      <li><a href="#cuentas">3. Las cuentas de tu personal</a></li>
+      <li><a href="#contenido">4. El contenido clínico es tuyo</a></li>
+      <li><a href="#precio">5. Precio, facturación y renovación</a></li>
+      <li><a href="#impago">6. Prueba, impago y suspensión</a></li>
+      <li><a href="#disponibilidad">7. Disponibilidad, mantenimiento y soporte</a></li>
+      <li><a href="#respaldos">8. Respaldos y recuperación</a></li>
+      <li><a href="#seguridad">9. Seguridad y control de accesos</a></li>
+      <li><a href="#datos">10. Propiedad de los datos, exportación y salida</a></li>
+      <li><a href="#confidencialidad">11. Confidencialidad</a></li>
+      <li><a href="#propiedad">12. Propiedad del software</a></li>
+      <li><a href="#responsabilidad">13. Límite de responsabilidad</a></li>
+      <li><a href="#cambios">14. Cambios al servicio y a estos términos</a></li>
+      <li><a href="#terminacion">15. Terminación</a></li>
+      <li><a href="#ley">16. Ley aplicable y contacto</a></li>
+      <li><a href="#anexo-a">Anexo A. Encargado del tratamiento</a></li>
+    </ol>
+  </aside>
+
+  <!-- DOC -->
+  <article class="doc">
+
+    <div class="callout">
+      <strong>En una frase:</strong> vos seguís siendo el dueño del expediente de tus pacientes y el
+      responsable de lo que se escribe en él; nosotros respondemos por la infraestructura que lo guarda,
+      lo protege y te lo devuelve entero cuando lo pidas.
+    </div>
+
+    <section id="partes">
+      <h2><span class="num">01</span> Partes, objeto y aceptación</h2>
+      <p>
+        Este contrato es entre <strong>R3ads</strong> (Inversiones REWA, RTN 0801-2000-01030-1, en adelante
+        "R3ads" o "nosotros") y la <strong>clínica</strong> que contrata Ancla (en adelante, "la Clínica" o
+        "vos"). Su objeto es el acceso a <strong>Ancla</strong>, el sistema de gestión clínica de R3ads, bajo
+        la modalidad de suscripción.
+      </p>
+      <p>
+        Estos términos se aceptan electrónicamente al crear la clínica en el sistema, y esa aceptación queda
+        registrada con la versión del texto y la fecha. La
+        <a class="inline-link" href="Privacidad.html">Política de Privacidad</a> y el
+        <a class="inline-link" href="#anexo-a">Anexo A</a> forman parte de este contrato.
+      </p>
+      <p>
+        La aceptación electrónica tiene validez conforme a la <strong>Ley Sobre Firmas Electrónicas
+        (Decreto 149-2013)</strong> y a las disposiciones del Código de Comercio en materia de contratación
+        electrónica. Quien acepta declara tener facultades para obligar a la Clínica.
+      </p>
+    </section>
+
+    <section id="servicio">
+      <h2><span class="num">02</span> Qué incluye el servicio</h2>
+      <p>
+        Ancla se entrega como software en la nube: no se instala nada, no se compra una licencia perpetua y
+        no hay servidor propio que mantener. Cada clínica trabaja sobre su propia información, aislada de
+        las demás.
+      </p>
+      <p>
+        El plan contratado determina qué módulos quedan habilitados. Expedientes, consultas, búsqueda,
+        historial y caja están siempre incluidos; los módulos de laboratorio, pruebas rápidas, constancias,
+        electrocardiograma y el calendario de atenciones dependen del plan, según se describe en
+        <a class="inline-link" href="Precios.html">Precios</a>.
+      </p>
+      <p>
+        Dar de baja un módulo deja de permitir registros nuevos de ese tipo, pero <strong>nunca oculta lo ya
+        registrado</strong>: son datos clínicos de tus pacientes y no se te pueden esconder por una decisión
+        comercial.
+      </p>
+    </section>
+
+    <section id="cuentas">
+      <h2><span class="num">03</span> Las cuentas de tu personal</h2>
+      <p>
+        Vos das de alta, asignás rol y das de baja a las cuentas de tu personal, desde tu propio panel de
+        administración. R3ads no decide quién de tu equipo entra ni con qué permisos.
+      </p>
+      <p>
+        En consecuencia, respondés por el uso que tu personal haga del sistema y por retirar a tiempo el
+        acceso de quien deja de trabajar con vos. Recomendamos exigir segundo factor (2FA) al menos a las
+        cuentas con rol de médico y de administrador; el sistema lo soporta y cada usuario lo activa desde
+        su pantalla de seguridad.
+      </p>
+      <p>
+        Si detectás un acceso no autorizado, avisanos de inmediato por los canales de la sección 16.
+      </p>
+    </section>
+
+    <section id="contenido">
+      <h2><span class="num">04</span> El contenido clínico es tuyo</h2>
+      <p>
+        Todo lo que se registra en Ancla —diagnósticos, indicaciones, resultados, recetas, montos— lo escribe
+        tu personal. R3ads no redacta, no revisa, no corrige ni interpreta contenido clínico, y no practica
+        acto médico alguno.
+      </p>
+      <p>
+        Respondés por la exactitud de ese contenido, por el cumplimiento de la normativa sanitaria aplicable
+        a tu actividad, y por informar a tus pacientes sobre el tratamiento de sus datos y obtener el
+        consentimiento que corresponda, tal como se explica en la
+        <a class="inline-link" href="Privacidad.html">Política de Privacidad</a> y en el
+        <a class="inline-link" href="#anexo-a">Anexo A</a>.
+      </p>
+    </section>
+
+    <section id="precio">
+      <h2><span class="num">05</span> Precio, facturación y renovación</h2>
+      <p>
+        El precio es el del plan vigente al contratar, publicado en
+        <a class="inline-link" href="Precios.html">Precios</a>. La suscripción es mensual y se
+        <strong>renueva automáticamente</strong> hasta que se cancele.
+      </p>
+      <p>
+        El cobro se procesa a través de <strong>PayPal</strong>. R3ads no almacena números completos de
+        tarjeta. Los impuestos que correspondan conforme a la legislación hondureña se aplican según la
+        normativa vigente, y el comprobante se emite conforme a las obligaciones fiscales aplicables en el
+        momento del cobro.
+      </p>
+      <p>
+        Podés cancelar cuando quieras, desde tu propio panel de suscripción. La cancelación surte efecto al
+        final del período ya pagado: no hay devolución proporcional de la mensualidad en curso, y seguís
+        teniendo acceso hasta que ese período termine.
+      </p>
+    </section>
+
+    <section id="impago">
+      <h2><span class="num">06</span> Prueba, impago y suspensión</h2>
+      <p>
+        Las clínicas nuevas entran en estado de prueba hasta activar su suscripción. Durante ese estado el
+        acceso puede estar limitado.
+      </p>
+      <p>
+        Si un cobro es rechazado, si la suscripción se suspende o si se cancela desde PayPal, el acceso al
+        sistema puede suspenderse. <strong>Una suspensión por impago no borra ni un solo dato</strong>: tu
+        información sigue existiendo, respaldada, y el acceso se restablece al regularizar el pago. La
+        eliminación de datos solo ocurre en los supuestos de la sección 10.
+      </p>
+      <p>
+        Avisanos si un cobro falló por un motivo que podés resolver; nos interesa mucho más que vuelvas a
+        operar que cortarte el servicio.
+      </p>
+    </section>
+
+    <section id="disponibilidad">
+      <h2><span class="num">07</span> Disponibilidad, mantenimiento y soporte</h2>
+      <p>
+        Ponemos empeño razonable en que Ancla esté disponible de forma continua, pero
+        <strong>no comprometemos un porcentaje de disponibilidad con penalidad asociada</strong>, y así lo
+        decimos en vez de prometer un número que no podríamos sostener hoy. Puede haber mantenimientos,
+        cortes del proveedor de nube o interrupciones no previstas.
+      </p>
+      <p>
+        El soporte se presta en días y horarios hábiles por los canales de la sección 16. No es un servicio
+        de guardia 24/7.
+      </p>
+      <p>
+        Mantené siempre una alternativa para la atención si el sistema no estuviera disponible en un momento
+        dado. Que Ancla esté caído no afecta la existencia de tus expedientes.
+      </p>
+    </section>
+
+    <section id="respaldos">
+      <h2><span class="num">08</span> Respaldos y recuperación</h2>
+      <p>Tu información está protegida con varias redes a la vez:</p>
+      <ul>
+        <li><strong>Recuperación a un punto en el tiempo (PITR) de 7 días</strong>, con resolución de un minuto: ante un borrado o una corrupción se puede volver a cómo estaba la base en un minuto exacto.</li>
+        <li><strong>Respaldo diario</strong> conservado 14 días y <strong>respaldo semanal</strong> conservado 14 semanas.</li>
+        <li><strong>Protección contra borrado</strong> de la base de datos.</li>
+        <li>Los archivos (PDF, Word, imágenes) tienen <strong>borrado suave de 30 días</strong>, que cubre también los sobrescritos.</li>
+      </ul>
+      <p>
+        Recuperar nunca sobrescribe lo que está en producción: la restauración se hace sobre una copia y
+        después se traslada lo que falte, para que una recuperación no pueda empeorar la situación.
+      </p>
+    </section>
+
+    <section id="seguridad">
+      <h2><span class="num">09</span> Seguridad y control de accesos</h2>
+      <p>Las medidas vigentes, descritas con más detalle en el <a class="inline-link" href="#anexo-a">Anexo A</a>:</p>
+      <ul>
+        <li><strong>Aislamiento entre clínicas</strong> impuesto por las reglas de seguridad de la base de datos, no solo por la interfaz: el personal de una clínica no puede leer ni escribir datos de otra.</li>
+        <li><strong>Segundo factor (2FA)</strong> disponible para todas las cuentas, con códigos de recuperación.</li>
+        <li><strong>Límite de intentos de inicio de sesión</strong> por correo.</li>
+        <li><strong>Bitácora de accesos a expedientes</strong> que tu administrador puede consultar, y que <strong>nadie puede editar ni borrar</strong>, tampoco R3ads.</li>
+        <li><strong>Registros de auditoría de la infraestructura</strong> (Google Cloud), escritos por el proveedor y fuera del alcance de cualquier usuario de la plataforma.</li>
+        <li><strong>Cifrado en tránsito y en reposo</strong> por la plataforma de nube.</li>
+      </ul>
+      <p>
+        <strong>El personal de R3ads no tiene acceso a expedientes, consultas ni resultados de ninguna
+        clínica.</strong> No es una política interna: las reglas del sistema no lo permiten. Cualquier acceso
+        técnico excepcional requiere tu autorización expresa y queda en los dos registros de arriba.
+      </p>
+    </section>
+
+    <section id="datos">
+      <h2><span class="num">10</span> Propiedad de los datos, exportación y salida</h2>
+      <p>
+        <strong>Los datos son tuyos.</strong> R3ads no adquiere ningún derecho sobre los expedientes de tus
+        pacientes, no los usa para fines propios, no los vende y no los cede a terceros fuera de lo necesario
+        para prestarte el servicio.
+      </p>
+      <p>
+        Podés exportar en cualquier momento, sin pedir permiso y sin costo: el expediente completo de un
+        paciente se descarga en un ZIP desde el propio portal, con los datos y los documentos. Para una
+        exportación masiva de toda la clínica, pedila por los canales de la sección 16 y la entregamos en un
+        formato legible por máquina.
+      </p>
+      <p>
+        <strong>Al terminar el contrato</strong>, tenés derecho a solicitar la exportación completa de tu
+        información <strong>antes</strong> de su eliminación de nuestros sistemas activos. Vamos a avisarte
+        antes de eliminar nada y a darte una oportunidad razonable de llevarte tus datos. R3ads conserva la
+        información durante los plazos de la sección 09 de la Política de Privacidad.
+      </p>
+      <p>
+        Como responsable del historial médico, sos vos quien debe asegurar que la información se conserve
+        por el plazo que exija la normativa de la Secretaría de Salud, también después de dejar de usar
+        Ancla.
+      </p>
+    </section>
+
+    <section id="confidencialidad">
+      <h2><span class="num">11</span> Confidencialidad</h2>
+      <p>
+        Cada parte guardará confidencialidad sobre la información de la otra a la que acceda con motivo de
+        este contrato, y la usará solo para cumplirlo. La obligación sigue vigente después de terminado el
+        contrato. No alcanza a la información que sea pública sin culpa de quien la recibió, ni a la que deba
+        entregarse por orden de autoridad competente.
+      </p>
+    </section>
+
+    <section id="propiedad">
+      <h2><span class="num">12</span> Propiedad del software</h2>
+      <p>
+        Ancla, su código, su diseño y su marca son de R3ads. El contrato te da un derecho de uso del
+        servicio mientras dure la suscripción; no te transfiere el software ni te autoriza a copiarlo,
+        descompilarlo, revenderlo ni ofrecerlo como servicio a terceros.
+      </p>
+      <p>
+        Si nos hacés llegar sugerencias de mejora, podemos incorporarlas al producto sin que eso genere
+        obligación de pago ni derecho sobre el software.
+      </p>
+    </section>
+
+    <section id="responsabilidad">
+      <h2><span class="num">13</span> Límite de responsabilidad</h2>
+      <p>
+        R3ads responde por el incumplimiento de sus obligaciones bajo este contrato. Dentro de lo permitido
+        por la ley, <strong>la responsabilidad total acumulada de R3ads se limita al monto efectivamente
+        pagado por la Clínica en los doce (12) meses anteriores al hecho</strong> que origine el reclamo.
+      </p>
+      <p>Dentro de ese mismo límite legal, R3ads no responde por:</p>
+      <ul>
+        <li>el contenido clínico registrado por tu personal, ni por las decisiones médicas tomadas a partir de él;</li>
+        <li>el uso que haga tu personal de sus cuentas, ni el acceso de alguien a quien no se le retiró el permiso a tiempo;</li>
+        <li>la divulgación de información que salga del sistema por exportaciones o impresiones hechas por tu clínica;</li>
+        <li>el lucro cesante, la pérdida de clientela o los daños indirectos;</li>
+        <li>fallas de tu conexión, tus equipos o servicios de terceros ajenos a R3ads.</li>
+      </ul>
+      <p class="legal-note">
+        Nada de lo anterior excluye ni limita la responsabilidad que la legislación hondureña no permite
+        excluir, en particular la que surge del dolo o la culpa grave.
+      </p>
+    </section>
+
+    <section id="cambios">
+      <h2><span class="num">14</span> Cambios al servicio y a estos términos</h2>
+      <p>
+        El producto evoluciona: podemos agregar, modificar o retirar funciones. No vamos a retirar una
+        función esencial de tu plan sin avisarte con antelación razonable.
+      </p>
+      <p>
+        Podemos actualizar estos términos. Cuando el cambio sea sustancial lo avisaremos antes de que entre
+        en vigencia; si no estás de acuerdo, podés cancelar sin penalidad antes de esa fecha. La fecha de
+        arriba indica siempre la versión vigente.
+      </p>
+      <p>
+        Los cambios de precio se avisan con al menos <strong>30 días</strong> de antelación y se aplican a
+        partir del período de facturación siguiente.
+      </p>
+    </section>
+
+    <section id="terminacion">
+      <h2><span class="num">15</span> Terminación</h2>
+      <p>
+        Podés terminar cuando quieras cancelando tu suscripción. R3ads puede terminar el contrato con aviso
+        previo razonable, o de inmediato si hay un uso que vulnere la seguridad del sistema, un
+        incumplimiento grave o un impago sostenido.
+      </p>
+      <p>
+        <strong>Si R3ads discontinúa Ancla</strong>, te avisaremos con al menos <strong>90 días</strong> de
+        antelación, no cobraremos períodos posteriores al aviso y te entregaremos la exportación completa de
+        tu información antes del cierre. Es el escenario que más le preocupa a cualquier clínica que confía
+        su historial a un proveedor, y es razonable que esté por escrito.
+      </p>
+    </section>
+
+    <section id="ley">
+      <h2><span class="num">16</span> Ley aplicable y contacto</h2>
+      <p>
+        Este contrato se rige por la legislación de la República de Honduras, y cualquier controversia se
+        somete a los tribunales competentes de ese país.
+      </p>
+      <div class="contact-card">
+        <dl>
+          <dt>Empresa</dt><dd>R3ads — operadora de Ancla · Inversiones REWA · RTN 0801-2000-01030-1</dd>
+          <dt>Correo</dt><dd>[Completar: correo de contacto / soporte]</dd>
+          <dt>WhatsApp</dt><dd><a class="inline-link" href="https://wa.me/50495652894" target="_blank" rel="noopener">+504 9565 2894</a></dd>
+          <dt>Dirección</dt><dd>[Completar: dirección física de la Empresa en Honduras]</dd>
+        </dl>
+      </div>
+    </section>
+
+    <section id="anexo-a">
+      <h2><span class="num">A</span> Anexo A — Acuerdo de Encargado del Tratamiento</h2>
+      <p>
+        Este anexo forma parte del contrato y regula el tratamiento de datos personales —incluidos datos de
+        salud— que R3ads realiza por cuenta de la Clínica.
+      </p>
+
+      <h3>A.1 Roles</h3>
+      <p>
+        La <strong>Clínica es la Responsable</strong> del tratamiento: decide qué datos se recolectan, para
+        qué y por cuánto tiempo. <strong>R3ads es el Encargado</strong>: almacena y procesa esos datos
+        siguiendo las instrucciones de la Clínica y no los usa para fines propios.
+      </p>
+
+      <h3>A.2 Objeto, duración y alcance</h3>
+      <ul>
+        <li><strong>Objeto y finalidad:</strong> prestar el servicio Ancla — guardar, resguardar y poner a disposición de la Clínica la información clínica y administrativa de sus pacientes.</li>
+        <li><strong>Duración:</strong> mientras dure el contrato, más los plazos de conservación de la sección 09 de la Política de Privacidad.</li>
+        <li><strong>Tipos de datos:</strong> identificación del paciente, datos de contacto, y <strong>datos de salud</strong> (antecedentes, signos vitales, diagnósticos, tratamientos, resultados de laboratorio, EKG, recetas, tipo de sangre, alergias).</li>
+        <li><strong>Categorías de titulares:</strong> pacientes de la Clínica, personal de la Clínica y, cuando el paciente lo autoriza, el familiar al que le comparte acceso.</li>
+      </ul>
+
+      <h3>A.3 Instrucciones</h3>
+      <p>
+        R3ads trata los datos únicamente conforme a las instrucciones documentadas de la Clínica —el uso
+        normal del sistema y lo pactado en este contrato— salvo que una norma le exija otra cosa, en cuyo
+        caso informará a la Clínica antes, si la ley se lo permite.
+      </p>
+
+      <h3>A.4 Confidencialidad del personal</h3>
+      <p>
+        Quien tenga acceso técnico a la infraestructura por parte de R3ads está obligado a confidencialidad.
+        Como se explica en la sección 09, <strong>las reglas del sistema no dan al personal de R3ads acceso
+        a expedientes de ninguna clínica</strong>.
+      </p>
+
+      <h3>A.5 Medidas de seguridad</h3>
+      <p>
+        Las enumeradas en la sección 09: aislamiento por clínica impuesto en la base de datos, segundo
+        factor, límite de intentos de login, bitácora de accesos inalterable, registros de auditoría de la
+        infraestructura, cifrado en tránsito y en reposo, respaldos y recuperación a un punto en el tiempo.
+        R3ads puede sustituir una medida por otra equivalente o mejor, nunca por una que baje el nivel de
+        protección.
+      </p>
+
+      <h3>A.6 Subencargados</h3>
+      <p>
+        R3ads se apoya en <strong>Google Cloud / Firebase</strong> (hospedaje, base de datos, archivos,
+        autenticación) y en <strong>PayPal</strong> (cobro de la suscripción). Puede usarse
+        <strong>WhatsApp</strong> como canal de soporte. La Clínica autoriza estos subencargados al aceptar
+        este anexo; si R3ads incorpora otro que trate datos de pacientes, lo avisará con antelación
+        razonable y la Clínica podrá terminar el contrato sin penalidad si se opone.
+      </p>
+
+      <h3>A.7 Transferencias fuera de Honduras</h3>
+      <p>
+        Parte de la infraestructura se ubica fuera del país. R3ads exige a sus proveedores compromisos
+        contractuales de confidencialidad y seguridad equivalentes a los de este anexo antes de transferir o
+        almacenar información en el extranjero.
+      </p>
+
+      <h3>A.8 Derechos de los pacientes</h3>
+      <p>
+        El paciente ejerce sus derechos ante la Clínica, que es la Responsable. R3ads asiste con los medios
+        técnicos: exportación completa del expediente en un ZIP desde el portal, exportación masiva a
+        pedido, y las correcciones que la Clínica realice por sí misma en el sistema. Si un paciente se
+        dirige directamente a R3ads, lo derivaremos a su clínica y te lo haremos saber.
+      </p>
+
+      <h3>A.9 Incidentes de seguridad</h3>
+      <p>
+        Si R3ads detecta una violación de seguridad que afecte datos personales de la Clínica, se lo
+        notificará <strong>sin demora indebida y a más tardar dentro de las 72 horas siguientes al momento
+        en que tenga conocimiento</strong>, con la información disponible: qué pasó, qué datos y cuántos
+        titulares pueden estar afectados, qué consecuencias se prevén y qué medidas se tomaron. La
+        notificación a los pacientes y a las autoridades, cuando corresponda, la decide y la hace la
+        Clínica como Responsable, con nuestra asistencia.
+      </p>
+
+      <h3>A.10 Devolución o eliminación</h3>
+      <p>
+        Terminado el contrato, y según lo que la Clínica elija, R3ads entregará la exportación completa de
+        la información y luego la eliminará de sus sistemas activos, salvo la que deba conservar por
+        obligación legal. La eliminación no se ejecuta sin aviso previo.
+      </p>
+
+      <h3>A.11 Información y auditoría</h3>
+      <p>
+        A pedido razonable, R3ads pondrá a disposición de la Clínica la información necesaria para acreditar
+        el cumplimiento de este anexo, incluida la bitácora de accesos a sus propios expedientes, que su
+        administrador puede además consultar por sí mismo en cualquier momento.
+      </p>
+
+      <p class="legal-note" style="margin-top:20px">
+        <strong>Nota interna:</strong> completar correo de contacto y dirección física, igual que en la
+        Política de Privacidad, y hacer revisar este documento y su anexo por un abogado en Honduras antes
+        de tratarlos como definitivos.
+      </p>
+      <a class="back-top" href="#top">Volver arriba ↑</a>
+    </section>
+
+  </article>
+</div>
+
+<!-- ═══ FOOTER ═══ -->
+<footer class="footer">
+  <div class="footer-inner">
+    <div class="footer-top">
+      <div class="footer-about">
+        <div class="logo">
+          <svg class="logo-mark" width="20" height="24" viewBox="0 0 22 26" fill="none" aria-hidden="true">
+            <circle cx="11" cy="5" r="4" stroke="#ffffff" stroke-width="2"/>
+            <path d="M11 9v15M4 24h14" stroke="#ffffff" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+          <span class="logo-word">Ancla</span>
+        </div>
+        <p>Sistema de gestión clínica para clínicas pequeñas y medianas de Centroamérica.</p>
+      </div>
+      <div class="footer-cols">
+        <div class="footer-col">
+          <div class="footer-col-h">PRODUCTO</div>
+          <a href="index.html#modulos">Módulos</a>
+          <a href="Precios.html">Precios</a>
+          <a href="index.html#nosotros">Nosotros</a>
+          <a href="Auth.html">Acceder</a>
+        </div>
+        <div class="footer-col">
+          <div class="footer-col-h">EMPRESA</div>
+          <a href="https://r3ads.com" target="_blank" rel="noopener">R3ads</a>
+          <a href="index.html#contacto">Contacto</a>
+        </div>
+        <div class="footer-col">
+          <div class="footer-col-h">LEGAL</div>
+          <a href="Privacidad.html">Política de Privacidad</a>
+          <a href="Terminos.html">Términos del Servicio</a>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2026 Ancla, un producto de R3ads. Hecho en Centroamérica.</span>
+      <span>Identidad en desarrollo.</span>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>

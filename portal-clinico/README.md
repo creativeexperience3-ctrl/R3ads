@@ -431,6 +431,54 @@ protoPayload.serviceName="firestore.googleapis.com"
   `firestore.rules`). La sección 02 de la política describe un acceso que el
   sistema no permite — vale ajustar ese texto.
 
+### ✅ Hecho — contrato con la clínica y encargado del tratamiento (2026-10-02)
+
+`portal-clinico/Terminos.html`: términos del servicio para la clínica que
+paga, con el **Anexo A de encargado del tratamiento** dentro del mismo
+documento. Hasta ahora el paciente tenía documento y el cliente que paga no
+tenía nada — ni límite de responsabilidad, ni propiedad de los datos, ni qué
+pasa si Ancla cierra, ni reparto de responsabilidades ante un incidente.
+
+Decisiones que vale la pena no deshacer sin pensarlas:
+
+- **Responsabilidad acotada a 12 meses de mensualidades**, con exclusión de
+  lucro cesante y daños indirectos, y sin pretender excluir dolo ni culpa
+  grave (una cláusula que llega tan lejos suele arrastrar al resto).
+- **Sin SLA con penalidad.** Se dice explícitamente en vez de prometer un
+  porcentaje que hoy no se podría sostener: no hay monitoreo ni alertas
+  (punto 9 de la lista de riesgos).
+- **Respaldos con los números reales** de `RESPALDOS.md` (PITR 7 días,
+  diario 14 días, semanal 14 semanas, soft delete 30 días). Es cierto, y es
+  de lo mejor que se puede mostrar en una venta.
+- **Suspensión por impago no borra nada**, y así queda por escrito.
+- **Salida**: exportación completa antes de eliminar, con aviso previo; y si
+  R3ads discontinúa Ancla, 90 días de aviso. Es lo que más le preocupa a una
+  clínica que entrega su historial a un proveedor de un solo operador.
+- **Anexo A**: roles, instrucciones, subencargados (Google Cloud, PayPal,
+  WhatsApp), transferencias fuera de Honduras, derechos de los pacientes,
+  **notificación de incidentes dentro de las 72 h desde que R3ads tenga
+  conocimiento**, devolución o eliminación al terminar, y derecho de la
+  clínica a pedir información de cumplimiento.
+
+**La aceptación se valida en el servidor, no solo en la casilla.**
+`crearClinicaSelfService` exige `aceptaTerminos === true` y escribe
+`/clinics/{id}.aceptacion` con `{ terminos, uid, email, fecha }` usando el
+Admin SDK. Es el único camino para crear una clínica, así que no hay alta
+sin constancia. Al publicar una revisión sustancial hay que subir
+`TERMINOS_VERSION` en `functions/index.js`.
+
+**Pendiente:**
+- Completar correo de contacto y dirección física (quedaron como
+  `[Completar: ...]`, igual que en `Privacidad.html` y en los términos del
+  paciente), y revisión por un abogado en Honduras.
+- **Facturación**: la sección 05 dice que el comprobante se emite "conforme
+  a las obligaciones fiscales aplicables", a propósito — sin RTN de empresa
+  ni CAI no se puede prometer una factura deducible, que es justo lo que una
+  clínica necesita para registrar el gasto. Es el punto 1 de la lista de
+  riesgos y sigue abierto.
+- Las clínicas creadas antes de hoy no tienen `aceptacion` en su documento.
+  Si alguna llega a ser de pago, hay que recoger su aceptación aparte.
+
 ### ⚠️ Gaps conocidos (revisar antes de la primera clínica de pago)
 - **Qué servicios registra Caja directo sin preclínica de enfermería**:
   documentado en `firestore.rules` (sección `consultas` → create) y con

@@ -313,6 +313,11 @@
   font-weight: 600;
 }
 .auth-aux-link:hover { color: var(--bronze); }
+.auth-terms { display: flex; gap: 10px; align-items: flex-start; margin: 0 0 16px; font-size: 13px; line-height: 1.5; color: #6B7280; cursor: pointer; }
+.auth-terms input { margin-top: 2px; width: 16px; height: 16px; accent-color: var(--jet); flex: none; cursor: pointer; }
+.auth-terms a { color: var(--jet); font-weight: 600; text-decoration: underline; }
+.auth-terms a:hover { color: var(--bronze); }
+
 .auth-switch {
   text-align: center;
   font-size: 14px;
@@ -624,6 +629,15 @@
             </div>
             <div style="font-size:12px;color:#9CA3AF">7 días de prueba gratis. No se cobra nada hoy — el plan elegido se cobra hasta el día 8, y puedes cancelar antes.</div>
           </div>
+          <label class="auth-terms" for="clinic-acepta">
+            <input type="checkbox" id="clinic-acepta">
+            <span>He leído y acepto los
+              <a href="Terminos.html" target="_blank" rel="noopener">Términos del Servicio</a>,
+              incluido el Anexo A de encargado del tratamiento, y la
+              <a href="Privacidad.html" target="_blank" rel="noopener">Política de Privacidad</a>.
+              Declaro tener facultades para obligar a la clínica.
+            </span>
+          </label>
           <button type="submit" class="auth-submit" id="btn-create-clinic">
             <div class="auth-spinner"></div>
             <span class="auth-btn-text">Crear mi clínica</span>
@@ -1122,6 +1136,13 @@
     var prefijo = document.getElementById('clinic-prefijo').value.trim();
     if (!nombreClinica) { showError('Ingresa el nombre de tu clínica.'); return; }
     if (!prefijo) { showError('Ingresa el prefijo de código de paciente.'); return; }
+    /* La casilla también se valida del lado del servidor (ver
+       crearClinicaSelfService): este chequeo es para dar un mensaje claro,
+       no es el que manda. */
+    if (!document.getElementById('clinic-acepta').checked) {
+      showError('Para crear tu clínica tenés que aceptar los Términos del Servicio y la Política de Privacidad.');
+      return;
+    }
     var user = r3adsAuth.currentUser;
     if (!user) { showError('Tu sesión expiró. Vuelve a iniciar sesión.'); switchView('email'); return; }
 
@@ -1134,7 +1155,8 @@
       nombreClinica: nombreClinica,
       prefijoCodigoPaciente: prefijo,
       nombreAdmin: user.displayName || '',
-      plan: plan
+      plan: plan,
+      aceptaTerminos: true
     })
       .then(function (result) {
         activatingClinicId = (result.data && result.data.clinicId) || '';
