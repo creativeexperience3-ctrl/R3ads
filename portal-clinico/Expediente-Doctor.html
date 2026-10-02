@@ -1269,6 +1269,7 @@ summary.ed-meds-cat { list-style: revert; }
           <div class="ed-code-label">Código del Paciente</div>
           <div class="ed-code-value" id="nuevo-codigo-generado">—</div>
           <p class="ed-code-help">Comparte este código con el paciente. Lo usará para vincular su cuenta en "Mi Historial Médico".</p>
+          <p class="ed-code-help" id="nuevo-codigo-aviso" style="display:none;color:#B45309"></p>
           <button class="ed-copy-btn" id="btn-copiar-codigo">Copiar código</button>
         </div>
         <div style="text-align:center">
@@ -3072,6 +3073,21 @@ summary.ed-meds-cat { list-style: revert; }
             }));
             limpiarFormularioNuevoExpediente();
             $id('nuevo-codigo-generado').textContent = codigo;
+            /* El código ya no alcanza para que el paciente vea su
+               expediente en línea: desde el 2026-10-02 las reglas exigen
+               que el correo registrado acá coincida con el de su cuenta
+               (antes bastaba con conocer el código, y eso dejaba a
+               cualquiera leer el expediente de cualquier clínica). Si el
+               expediente nació sin correo, conviene decirlo ahora y no
+               cuando el paciente llame porque no puede entrar. */
+            var _avisoEmail = $id('nuevo-codigo-aviso');
+            if (!(expediente.datosGenerales || {}).email) {
+              _avisoEmail.textContent = 'Este expediente no tiene correo registrado, así que el paciente ' +
+                'no podrá verlo en línea. Agrégalo desde su expediente cuando lo tengas.';
+              _avisoEmail.style.display = '';
+            } else {
+              _avisoEmail.style.display = 'none';
+            }
             $id('nuevo-resultado').style.display = '';
             $id('nuevo-resultado').scrollIntoView({ behavior: 'smooth', block: 'center' });
             showAlert('Expediente creado exitosamente. Código: ' + codigo, 'success');

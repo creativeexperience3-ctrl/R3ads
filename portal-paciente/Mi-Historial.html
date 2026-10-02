@@ -571,6 +571,18 @@ body {
       <button class="mh-add-btn" id="btn-vincular">+ Vincular código</button>
     </div>
 
+    <!-- Correo sin verificar: no se puede vincular un expediente hasta que
+         el paciente confirme que el buzón es suyo (ver las reglas de
+         /expedientes → update). -->
+    <div class="mh-empty" id="mh-aviso-verificar" style="display:none;text-align:left;padding:16px 18px">
+      <strong>Confirma tu correo</strong><br>
+      Te enviamos un enlace a <span id="mh-verificar-email"></span>. Hasta que lo abras no
+      podrás vincular tu expediente — es lo que nos prueba que ese correo es tuyo.
+      <button class="mh-add-btn" id="btn-reenviar-verificacion" style="margin-top:12px">
+        Reenviar el correo
+      </button>
+    </div>
+
     <!-- Loading -->
     <div id="mh-loading"><div class="mh-spinner"></div></div>
 
@@ -834,7 +846,30 @@ body {
     $id('mh-user-chip').style.display = '';
     $id('mh-avatar').textContent = name.charAt(0).toUpperCase();
     $id('mh-user-name').textContent = name;
+    mostrarAvisoVerificacion(user);
     cargarPerfilUsuario();
+  });
+
+  /* Las cuentas de Google llegan ya verificadas; las de correo/contraseña
+     solo después de abrir el enlace que manda Auth.html. Sin verificar, las
+     reglas no dejan reclamar un expediente, así que conviene decirlo acá y
+     no dejar que lo descubra con un error al vincular. */
+  function mostrarAvisoVerificacion(user) {
+    if (user.emailVerified) { $id('mh-aviso-verificar').style.display = 'none'; return; }
+    $id('mh-verificar-email').textContent = user.email;
+    $id('mh-aviso-verificar').style.display = '';
+  }
+
+  $id('btn-reenviar-verificacion').addEventListener('click', function () {
+    var btn = this;
+    btn.disabled = true;
+    currentUser.sendEmailVerification()
+      .then(function () { toast('✓ Te reenviamos el correo. Revisa tu bandeja.'); })
+      .catch(function (err) {
+        console.error('[Ancla] Error al reenviar la verificación:', err);
+        toast('No pudimos reenviar el correo. Intenta en unos minutos.');
+      })
+      .then(function () { btn.disabled = false; });
   });
 
   $id('mh-logout').addEventListener('click', function () {
@@ -907,9 +942,48 @@ body {
       })
       .catch(function (err) {
         $id('mh-loading').style.display = 'none';
+        /* Desde el 2026-10-02 las reglas solo dejan leer un expediente al
+           dueño y a quien esté en compartidoCon. Un permission-denied acá
+           no es un error: es el caso normal de un expediente que todavía
+           está esperando aprobación del titular (o que fue rechazado).
+           Antes el portal SÍ podía leerlo y solo escondía los datos con
+           display:none — o sea que el historial completo ya había llegado
+           al navegador de quien no tenía acceso. */
+        if (err && err.code === 'permission-denied') { mostrarSinAcceso(codigo); return; }
         console.error('[Ancla] Error expediente:', err);
         toast('Error al cargar el expediente');
       });
+  }
+
+  /* Pantalla de "no podés ver esto todavía". No lee el expediente (no
+     puede): decide el mensaje mirando SU propia solicitud, que es el único
+     documento de esa subcolección que las reglas le dejan leer. */
+  function mostrarSinAcceso(codigo) {
+    $id('mh-expediente-data').style.display = 'none';
+    $id('mh-topbar').style.display = 'none';
+    $id('mh-pending-state').style.display = '';
+    $id('mh-pending-icon').textContent = '⏳';
+    $id('mh-pending-title').textContent = 'Solicitud pendiente de aprobación';
+    $id('mh-pending-msg').innerHTML = 'El titular de este expediente debe aprobar tu solicitud<br>para que puedas ver su historial médico.';
+    $id('btn-remove-pending').textContent = 'Cancelar solicitud';
+
+    solicitudRef(codigo, currentUser.uid).get().then(function (snap) {
+      if (snap.exists) return;
+      $id('mh-pending-icon').textContent = '🚫';
+      $id('mh-pending-title').textContent = 'Sin acceso a este expediente';
+      $id('mh-pending-msg').innerHTML = 'Tu solicitud fue rechazada o aún no has solicitado acceso.<br>Puedes quitar este expediente de tu lista.';
+      $id('btn-remove-pending').textContent = 'Quitar de mi lista';
+    }).catch(function (err) {
+      console.error('[Ancla] Error al leer la solicitud propia:', err);
+    });
+  }
+
+  /* Las solicitudes de acceso viven en /expedientes/{codigo}/solicitudes/{uid}
+     — el id del documento es el uid del solicitante, así que las reglas
+     pueden exigir que cada uno toque solo la suya. Antes era un array dentro
+     del expediente, que cualquiera con el código podía reescribir completo. */
+  function solicitudRef(codigo, uid) {
+    return r3adsDb.collection('expedientes').doc(codigo).collection('solicitudes').doc(uid);
   }
 
   /* Un doctor puede eliminar un expediente por completo (Expediente-Doctor.html
@@ -936,9 +1010,6 @@ body {
     var dg = exp.datosGenerales || {};
     var esPropio = userProfile.codigoExpediente && codigo === userProfile.codigoExpediente;
     var esOwner = exp.ownerUid === currentUser.uid;
-    var enCompartidoCon = exp.compartidoCon && exp.compartidoCon.indexOf(currentUser.uid) !== -1;
-    var solicitudes = exp.solicitudesAcceso || [];
-    var solicitudPendiente = solicitudes.some(function (s) { return s.uid === currentUser.uid; });
 
     /* Topbar solo si es propio */
     if (esPropio || esOwner) {
@@ -948,23 +1019,10 @@ body {
       $id('mh-topbar').style.display = 'none';
     }
 
-    /* Si es compartido y NO aprobado → mostrar estado pendiente */
-    if (!esPropio && !esOwner && !enCompartidoCon) {
-      $id('mh-expediente-data').style.display = 'none';
-      $id('mh-pending-state').style.display = '';
-      if (solicitudPendiente) {
-        $id('mh-pending-icon').textContent = '⏳';
-        $id('mh-pending-title').textContent = 'Solicitud pendiente de aprobación';
-        $id('mh-pending-msg').innerHTML = 'El titular de este expediente debe aprobar tu solicitud<br>para que puedas ver su historial médico.';
-        $id('btn-remove-pending').textContent = 'Cancelar solicitud';
-      } else {
-        $id('mh-pending-icon').textContent = '🚫';
-        $id('mh-pending-title').textContent = 'Sin acceso a este expediente';
-        $id('mh-pending-msg').innerHTML = 'Tu solicitud fue rechazada o aún no has solicitado acceso.<br>Puedes quitar este expediente de tu lista.';
-        $id('btn-remove-pending').textContent = 'Quitar de mi lista';
-      }
-      return;
-    }
+    /* Ya no hace falta decidir acá si tiene acceso: si el expediente llegó
+       hasta este punto, las reglas lo dejaron leerlo (es el dueño o está en
+       compartidoCon). El caso sin acceso lo maneja mostrarSinAcceso(), desde
+       el permission-denied de cargarExpediente(). */
 
     /* Ocultar estado pendiente, mostrar datos */
     $id('mh-pending-state').style.display = 'none';
@@ -987,36 +1045,8 @@ body {
     }
 
     /* Solicitudes de acceso pendientes (solo visible al dueño) */
-    if ((esPropio || esOwner) && solicitudes.length > 0) {
-      $id('mh-requests-box').style.display = '';
-      $id('mh-requests-list').innerHTML = solicitudes.map(function (sol) {
-        return '<div class="mh-request-item">' +
-          '<div class="mh-request-info">' +
-            '<div class="mh-request-email">' + esc(sol.displayName || sol.email) + '</div>' +
-            '<div class="mh-request-date">' + esc(sol.email) + (sol.fecha ? ' · ' + fmtDate(sol.fecha) : '') + '</div>' +
-          '</div>' +
-          '<div class="mh-request-actions">' +
-            '<button class="mh-request-btn mh-request-btn-approve" data-uid="' + esc(sol.uid) + '" data-codigo="' + esc(codigo) + '">✓ Aprobar</button>' +
-            '<button class="mh-request-btn mh-request-btn-deny" data-uid="' + esc(sol.uid) + '" data-codigo="' + esc(codigo) + '">✗ Rechazar</button>' +
-          '</div>' +
-        '</div>';
-      }).join('');
-
-      /* Event delegation para aprobar/rechazar */
-      $id('mh-requests-list').onclick = function (e) {
-        var btn = e.target.closest('.mh-request-btn');
-        if (!btn) return;
-        var uid = btn.getAttribute('data-uid');
-        var cod = btn.getAttribute('data-codigo');
-        if (btn.classList.contains('mh-request-btn-approve')) {
-          aprobarSolicitud(cod, uid);
-        } else if (btn.classList.contains('mh-request-btn-deny')) {
-          rechazarSolicitud(cod, uid);
-        }
-      };
-    } else {
-      $id('mh-requests-box').style.display = 'none';
-    }
+    if (esOwner) cargarSolicitudes(codigo);
+    else $id('mh-requests-box').style.display = 'none';
 
     /* Datos generales grid */
     var items = [
@@ -1474,108 +1504,90 @@ body {
     $id('modal-confirmar').disabled = true;
     $id('modal-confirmar').textContent = 'Verificando...';
 
-    /* Verificar que existe el expediente */
-    r3adsDb.collection('expedientes').doc(codigo).get()
-      .then(function (snap) {
-        if (!snap.exists) {
-          mostrarErrorModal('No existe un expediente con ese código. Verifica que esté correcto.');
-          resetModalBtn();
-          return null;
-        }
-        var exp = snap.data();
-        /* Determinar si es propio o compartido:
-           - Si el expediente NO tiene ownerUid → vincular como propio
-           - Si el expediente tiene ownerUid === currentUser.uid → ya es mío
-           - Si el expediente tiene otro ownerUid → es compartido
-        */
-        if (!exp.ownerUid && !userProfile.codigoExpediente) {
-          /* Vincular como propio */
-          return r3adsDb.collection('expedientes').doc(codigo).update({
-            ownerUid: currentUser.uid,
-            ownerVinculado: true,
-            ownerEmail: currentUser.email,
-            updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-          }).then(function () {
-            return r3adsDb.collection('users').doc(currentUser.uid).set({
-              email: currentUser.email,
-              codigoExpediente: codigo,
-              codigosCompartidos: userProfile.codigosCompartidos || [],
-              updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-            }, { merge: true });
-          }).then(function () {
-            toast('✓ Expediente vinculado como tuyo');
-            closeModal();
-            cargarPerfilUsuario();
-          });
-        } else if (exp.ownerUid === currentUser.uid) {
-          mostrarErrorModal('Este expediente ya está vinculado a tu cuenta.');
-          resetModalBtn();
-          return null;
-        } else {
-          /* Solicitar acceso compartido (requiere aprobación del titular) */
-          /* Verificar si ya tiene acceso aprobado */
-          if (exp.compartidoCon && exp.compartidoCon.indexOf(currentUser.uid) !== -1) {
-            if (userProfile.codigosCompartidos.indexOf(codigo) !== -1) {
-              mostrarErrorModal('Ya tienes acceso a este expediente compartido.');
-              resetModalBtn();
-              return null;
-            }
-            var nuevosAprobados = (userProfile.codigosCompartidos || []).concat([codigo]);
-            return r3adsDb.collection('users').doc(currentUser.uid).set({
-              email: currentUser.email,
-              codigoExpediente: userProfile.codigoExpediente || null,
-              codigosCompartidos: nuevosAprobados,
-              updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-            }, { merge: true }).then(function () {
-              toast('✓ Expediente compartido agregado');
-              closeModal();
-              cargarPerfilUsuario();
-            });
-          }
-          /* Verificar si ya tiene solicitud pendiente */
-          var solicitudes = exp.solicitudesAcceso || [];
-          var yaSolicitado = solicitudes.some(function (s) { return s.uid === currentUser.uid; });
-          if (yaSolicitado) {
-            mostrarErrorModal('Ya enviaste una solicitud de acceso. Espera a que el titular la apruebe.');
-            resetModalBtn();
-            return null;
-          }
-          if (userProfile.codigosCompartidos.indexOf(codigo) !== -1) {
-            mostrarErrorModal('Ya tienes este expediente en tu lista. Espera a que el titular apruebe tu solicitud.');
-            resetModalBtn();
-            return null;
-          }
-          /* Crear solicitud de acceso */
-          var nuevaSolicitud = {
-            uid: currentUser.uid,
-            email: currentUser.email,
-            displayName: currentUser.displayName || currentUser.email.split('@')[0],
-            fecha: new Date().toISOString()
-          };
-          var nuevos = (userProfile.codigosCompartidos || []).concat([codigo]);
-          return r3adsDb.collection('expedientes').doc(codigo).update({
-            solicitudesAcceso: firebase.firestore.FieldValue.arrayUnion(nuevaSolicitud),
-            updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-          }).then(function () {
-            return r3adsDb.collection('users').doc(currentUser.uid).set({
-              email: currentUser.email,
-              codigoExpediente: userProfile.codigoExpediente || null,
-              codigosCompartidos: nuevos,
-              updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-            }, { merge: true });
-          }).then(function () {
-            toast('✓ Solicitud enviada. El titular debe aprobar tu acceso.');
-            closeModal();
-            cargarPerfilUsuario();
-          });
-        }
-      })
-      .catch(function (err) {
-        console.error('[Ancla] Vincular error:', err);
-        mostrarErrorModal('Error: ' + err.message);
-        resetModalBtn();
-      });
+    /* Ya está en mi lista: se resuelve sin tocar la red. */
+    if (userProfile.codigoExpediente === codigo) {
+      mostrarErrorModal('Este expediente ya está vinculado a tu cuenta.');
+      resetModalBtn();
+      return;
+    }
+    if ((userProfile.codigosCompartidos || []).indexOf(codigo) !== -1) {
+      mostrarErrorModal('Ya tienes este expediente en tu lista.');
+      resetModalBtn();
+      return;
+    }
+
+    /* Sin correo verificado el reclamo no puede pasar las reglas, y el
+       intento terminaría mandándole una solicitud de acceso al titular —
+       que puede ser él mismo. Mejor cortar acá con el motivo real. */
+    if (!currentUser.emailVerified) {
+      mostrarErrorModal('Primero confirma tu correo. Te enviamos un enlace a ' +
+        currentUser.email + ' — sin eso no podemos saber que el expediente es tuyo.');
+      resetModalBtn();
+      return;
+    }
+
+    /* Vinculación a ciegas (2026-10-02). Antes esto empezaba leyendo el
+       expediente para decidir si vincularlo como propio o pedir acceso —
+       y poder leerlo era justamente el agujero: cualquiera con el código
+       veía el historial de cualquier clínica.
+
+       Ahora no se lee nada. Se intenta el reclamo directo: las reglas lo
+       dejan pasar solo si la clínica anotó ESTE correo en el expediente y
+       el correo está verificado. Si no pasa, se manda una solicitud al
+       titular. Un permission-denied no distingue entre "ese código no
+       existe", "es de otra persona" y "tu correo no está registrado" — a
+       propósito: así el código no sirve para averiguar nada. Por eso el
+       mensaje de abajo cubre los tres casos sin decir cuál fue. */
+    r3adsDb.collection('expedientes').doc(codigo).update({
+      ownerUid: currentUser.uid,
+      ownerVinculado: true,
+      ownerEmail: currentUser.email,
+      updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+    }).then(function () {
+      return r3adsDb.collection('users').doc(currentUser.uid).set({
+        email: currentUser.email,
+        codigoExpediente: codigo,
+        codigosCompartidos: userProfile.codigosCompartidos || [],
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+      }, { merge: true });
+    }).then(function () {
+      toast('✓ Expediente vinculado como tuyo');
+      closeModal();
+      cargarPerfilUsuario();
+    }).catch(function (err) {
+      console.error('[Ancla] Reclamo rechazado, se intenta solicitud:', err);
+      pedirAccesoCompartido(codigo);
+    });
   });
+
+  /* Pide acceso al titular. Crear la solicitud no requiere poder leer el
+     expediente: el documento se llama con el uid del solicitante y el
+     titular es el único que puede listarlas y aprobar. */
+  function pedirAccesoCompartido(codigo) {
+    solicitudRef(codigo, currentUser.uid).set({
+      uid: currentUser.uid,
+      email: currentUser.email,
+      displayName: currentUser.displayName || currentUser.email.split('@')[0],
+      fecha: new Date().toISOString()
+    }).then(function () {
+      var nuevos = (userProfile.codigosCompartidos || []).concat([codigo]);
+      return r3adsDb.collection('users').doc(currentUser.uid).set({
+        email: currentUser.email,
+        codigoExpediente: userProfile.codigoExpediente || null,
+        codigosCompartidos: nuevos,
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+      }, { merge: true });
+    }).then(function () {
+      toast('Solicitud enviada. Si el código es correcto, el titular la verá.');
+      closeModal();
+      cargarPerfilUsuario();
+    }).catch(function (err) {
+      console.error('[Ancla] Error al solicitar acceso:', err);
+      mostrarErrorModal('No pudimos vincular ese código. Si es tu propio expediente, ' +
+        'pedile a tu clínica que registre el correo ' + currentUser.email + ' en él.');
+      resetModalBtn();
+    });
+  }
 
   function mostrarErrorModal(msg) {
     var el = $id('modal-error');
@@ -1590,21 +1602,59 @@ body {
   /* ════════════════════════════════════════════════════════════
      APROBAR / RECHAZAR SOLICITUDES DE ACCESO
      ════════════════════════════════════════════════════════════ */
-  function aprobarSolicitud(codigo, uid) {
-    r3adsDb.collection('expedientes').doc(codigo).get().then(function (snap) {
-      if (!snap.exists) return;
-      var exp = snap.data();
-      var solicitudes = exp.solicitudesAcceso || [];
-      var solicitante = solicitudes.find(function (s) { return s.uid === uid; });
-      if (!solicitante) { toast('Solicitud no encontrada'); return; }
+  /* Lista las solicitudes pendientes del expediente. Solo el titular puede
+     leer la subcolección completa, así que esto se llama únicamente cuando
+     esOwner — y si igual fallara, se esconde la caja en silencio en vez de
+     mostrarle un error a quien no tenía por qué ver esto. */
+  function cargarSolicitudes(codigo) {
+    r3adsDb.collection('expedientes').doc(codigo).collection('solicitudes').get()
+      .then(function (snap) {
+        if (snap.empty) { $id('mh-requests-box').style.display = 'none'; return; }
 
-      /* Remover de solicitudesAcceso y agregar a compartidoCon */
-      var nuevasSolicitudes = solicitudes.filter(function (s) { return s.uid !== uid; });
-      return r3adsDb.collection('expedientes').doc(codigo).update({
-        solicitudesAcceso: nuevasSolicitudes,
-        compartidoCon: firebase.firestore.FieldValue.arrayUnion(uid),
-        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+        $id('mh-requests-box').style.display = '';
+        $id('mh-requests-list').innerHTML = snap.docs.map(function (doc) {
+          var sol = doc.data();
+          return '<div class="mh-request-item">' +
+            '<div class="mh-request-info">' +
+              '<div class="mh-request-email">' + esc(sol.displayName || sol.email) + '</div>' +
+              '<div class="mh-request-date">' + esc(sol.email) + (sol.fecha ? ' · ' + fmtDate(sol.fecha) : '') + '</div>' +
+            '</div>' +
+            '<div class="mh-request-actions">' +
+              '<button class="mh-request-btn mh-request-btn-approve" data-uid="' + esc(doc.id) + '" data-codigo="' + esc(codigo) + '">✓ Aprobar</button>' +
+              '<button class="mh-request-btn mh-request-btn-deny" data-uid="' + esc(doc.id) + '" data-codigo="' + esc(codigo) + '">✗ Rechazar</button>' +
+            '</div>' +
+          '</div>';
+        }).join('');
+
+        /* Event delegation para aprobar/rechazar */
+        $id('mh-requests-list').onclick = function (e) {
+          var btn = e.target.closest('.mh-request-btn');
+          if (!btn) return;
+          var uid = btn.getAttribute('data-uid');
+          var cod = btn.getAttribute('data-codigo');
+          if (btn.classList.contains('mh-request-btn-approve')) {
+            aprobarSolicitud(cod, uid);
+          } else if (btn.classList.contains('mh-request-btn-deny')) {
+            rechazarSolicitud(cod, uid);
+          }
+        };
+      })
+      .catch(function (err) {
+        $id('mh-requests-box').style.display = 'none';
+        console.error('[Ancla] Error al listar solicitudes:', err);
       });
+  }
+
+  /* Aprobar = agregar el uid a compartidoCon (lo que las reglas miran para
+     dar lectura) y borrar la solicitud, en ese orden: si fallara el borrado,
+     el acceso ya quedó dado y la solicitud se puede rechazar de nuevo; al
+     revés, el familiar perdería la solicitud sin obtener el acceso. */
+  function aprobarSolicitud(codigo, uid) {
+    r3adsDb.collection('expedientes').doc(codigo).update({
+      compartidoCon: firebase.firestore.FieldValue.arrayUnion(uid),
+      updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+    }).then(function () {
+      return solicitudRef(codigo, uid).delete();
     }).then(function () {
       toast('✓ Acceso aprobado');
       cargarExpediente(codigoActual);
@@ -1615,17 +1665,7 @@ body {
   }
 
   function rechazarSolicitud(codigo, uid) {
-    r3adsDb.collection('expedientes').doc(codigo).get().then(function (snap) {
-      if (!snap.exists) return;
-      var exp = snap.data();
-      var solicitudes = exp.solicitudesAcceso || [];
-      var nuevasSolicitudes = solicitudes.filter(function (s) { return s.uid !== uid; });
-
-      return r3adsDb.collection('expedientes').doc(codigo).update({
-        solicitudesAcceso: nuevasSolicitudes,
-        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-      });
-    }).then(function () {
+    solicitudRef(codigo, uid).delete().then(function () {
       toast('Solicitud rechazada');
       cargarExpediente(codigoActual);
     }).catch(function (err) {
@@ -1637,20 +1677,10 @@ body {
   /* Botón "Cancelar solicitud" / "Quitar de mi lista" */
   $id('btn-remove-pending').addEventListener('click', function () {
     if (!codigoActual || !currentUser) return;
-    r3adsDb.collection('expedientes').doc(codigoActual).get().then(function (snap) {
-      if (!snap.exists) return Promise.resolve();
-      var exp = snap.data();
-      var solicitudes = exp.solicitudesAcceso || [];
-      var miSolicitud = solicitudes.some(function (s) { return s.uid === currentUser.uid; });
-      if (miSolicitud) {
-        var nuevas = solicitudes.filter(function (s) { return s.uid !== currentUser.uid; });
-        return r3adsDb.collection('expedientes').doc(codigoActual).update({
-          solicitudesAcceso: nuevas,
-          updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-        });
-      }
-      return Promise.resolve();
-    }).then(function () {
+    /* Borra SU propia solicitud. Ya no hace falta leer el expediente antes
+       (no puede, si está acá es porque no tiene acceso): si la solicitud no
+       existe, el delete no hace nada y se sigue limpiando la lista. */
+    solicitudRef(codigoActual, currentUser.uid).delete().then(function () {
       /* Remover de codigosCompartidos del usuario */
       var codigos = (userProfile.codigosCompartidos || []).filter(function (c) { return c !== codigoActual; });
       return r3adsDb.collection('users').doc(currentUser.uid).set({

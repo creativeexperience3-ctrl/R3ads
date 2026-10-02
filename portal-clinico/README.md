@@ -255,6 +255,65 @@ doc real de `/clinics/{clinicId}`, y para los documentos impresos.
 paso que sigue es el piloto de la Fase 7 (alta real de 1-2 clínicas vía
 `portal-admin.html` y validar que no hay fuga de datos entre tenants).
 
+### ✅ Hecho — aislamiento entre clínicas en `/expedientes` (2026-10-02)
+
+**El portal de paciente existe y está en producción**, a pesar de lo que dice
+más arriba la nota del 2026-09-21 sobre el autoservicio removido:
+`web/portal-paciente/` se despliega como el target de hosting
+`ancla-paciente` del mismo proyecto `r3ads-clinic-crm`, con su propio login
+(correo/contraseña y Google) y `Mi-Historial.html`. Esa nota describe el
+borrado original; el portal se reconstruyó aparte el 2026-09-25.
+
+**El agujero.** Hasta el 2026-10-02 la regla de lectura de
+`/expedientes/{codigo}` cerraba con un `|| isAuth()` suelto, heredado de
+CMG, donde el código de 6 caracteres hacía de control de acceso. En CMG era
+una sola clínica; acá es un Firestore multi-tenant, así que esa rama dejaba
+a **cualquier cuenta logueada leer el expediente de cualquier clínica** con
+solo conocer el código — y el código va impreso en los PDF, viaja por
+WhatsApp, no expira y no se puede rotar. Peor: la rama de reclamo permitía a
+cualquiera ponerse como `ownerUid` de un expediente sin dueño, y con eso
+quedaba leyendo también sus consultas, pruebas y laboratorios vía
+`accesoPaciente()`. Era la única colección que rompía el aislamiento: las
+demás ya filtraban por `clinicId` o por propiedad.
+
+**El arreglo: la credencial pasa a ser el correo, no el código.**
+- `firestore.rules` → lectura solo para staff de la clínica, el dueño
+  (`ownerUid`) y quien esté en `compartidoCon`.
+- Reclamar un expediente exige que el correo **verificado** de la cuenta
+  coincida con `datosGenerales.email`, el campo que la clínica llena al
+  abrir el expediente. El paciente no puede tocar ese campo (no está en el
+  `hasOnly()` de su rama), así que quien vincula es, en efecto, la clínica.
+- `email_verified` es parte del candado, no un extra: Firebase deja crear
+  una cuenta con el correo de otro sin probar nada, así que
+  `portal-paciente/Auth.html` ahora manda la verificación al registrarse y
+  `Mi-Historial.html` muestra un aviso con botón de reenvío.
+- Las solicitudes de acceso de un familiar se movieron del array
+  `solicitudesAcceso` (que cualquiera con el código podía reescribir
+  completo — las reglas no pueden validar el contenido de un `arrayUnion`)
+  a la subcolección `/expedientes/{codigo}/solicitudes/{uid}`, donde el id
+  del documento **es** el solicitante y la regla queda exacta.
+- `Mi-Historial.html` ya no lee el expediente antes de vincular: intenta el
+  reclamo a ciegas y, si las reglas lo rechazan, manda una solicitud. Un
+  `permission-denied` no distingue entre "ese código no existe", "es de otra
+  persona" y "tu correo no está registrado", a propósito. De paso se arregla
+  que la pantalla de "solicitud pendiente" era cosmética: el expediente
+  completo ya había llegado al navegador y solo se escondía con
+  `display:none`.
+- `Expediente-Doctor.html` avisa al entregar el código si el expediente
+  nació sin correo, porque ese paciente no podrá verlo en línea.
+
+**Pendiente de correr, en este orden:**
+1. `firebase deploy --only firestore:rules` — las reglas nuevas compilan
+   (verificado con `firebase deploy --dry-run`), pero **todavía no están
+   desplegadas**: hasta que lo estén, el agujero sigue abierto en producción
+   y el portal de paciente sigue funcionando con las reglas viejas.
+2. `node functions/auditar-vinculaciones-paciente.js` — informa qué
+   vinculaciones hechas con la regla vieja no habrían pasado la nueva
+   (compara contra el correo de Firebase Auth, no contra `ownerEmail`, que
+   lo escribió el propio cliente). Con `--aplicar` las desvincula para que
+   el paciente legítimo pueda reclamar de nuevo.
+3. Desplegar los dos portales (`firebase deploy --only hosting`).
+
 ### ⚠️ Gaps conocidos (revisar antes de la primera clínica de pago)
 - **Qué servicios registra Caja directo sin preclínica de enfermería**:
   documentado en `firestore.rules` (sección `consultas` → create) y con

@@ -150,13 +150,16 @@ service cloud.firestore {
     // separado web/portal-paciente/ para leer consultas/pruebas/laboratorio
     // de SU propio expediente (o el de un familiar que le compartió acceso),
     // sin necesitar clinicId — el paciente no tiene ese custom claim.
+    // Usa .get('campo', default) y no .campo: los expedientes creados antes
+    // de que existiera el portal de paciente no tienen ninguno de los dos
+    // campos, y leer un campo ausente es un error de evaluación.
     function accesoPaciente(codigo) {
       return exists(/databases/$(database)/documents/expedientes/$(codigo))
         && (
-          get(/databases/$(database)/documents/expedientes/$(codigo)).data.ownerUid == request.auth.uid
+          get(/databases/$(database)/documents/expedientes/$(codigo)).data.get('ownerUid', null) == request.auth.uid
           || (
-            get(/databases/$(database)/documents/expedientes/$(codigo)).data.compartidoCon is list
-            && request.auth.uid in get(/databases/$(database)/documents/expedientes/$(codigo)).data.compartidoCon
+            get(/databases/$(database)/documents/expedientes/$(codigo)).data.get('compartidoCon', []) is list
+            && request.auth.uid in get(/databases/$(database)/documents/expedientes/$(codigo)).data.get('compartidoCon', [])
           )
         );
     }
@@ -282,19 +285,31 @@ service cloud.firestore {
       // null, y un error de evaluación en las reglas se trata como negado —
       // bloqueaba crear expedientes nuevos. No expone nada: no hay data que
       // devolver para un documento que no existe.
-      // Autoservicio de paciente (portal separado web/portal-paciente/,
-      // 2026-09-25): el código de 6 caracteres actúa como control de
-      // acceso, igual que en el CMG original — cualquier usuario
-      // autenticado que lo conozca puede leer ese expediente. En Ancla
-      // esto cruza clínicas (una sola base de Firestore multi-tenant), a
-      // diferencia de CMG que era una sola clínica — decisión consciente,
-      // aceptada igual que el modelo de CMG en vez de bloquear lectura por
-      // clinicId.
+      // Autoservicio de paciente (portal separado web/portal-paciente/):
+      // el paciente lee su expediente por ser su DUEÑO (ownerUid) o por
+      // estar en compartidoCon, no por conocer el código.
+      //
+      // Hasta el 2026-10-02 esta regla cerraba con un `|| isAuth()` suelto,
+      // heredado del CMG original, donde el código de 6 caracteres hacía de
+      // control de acceso. En CMG era una sola clínica; acá es un Firestore
+      // multi-tenant, así que esa rama dejaba a cualquier cuenta logueada
+      // leer el expediente de cualquier clínica con solo saber el código —
+      // y el código viaja impreso en PDFs y por WhatsApp, no expira y no se
+      // puede rotar. Era la única colección que rompía el aislamiento entre
+      // clínicas: consultas/resultadosPruebas/examenesLaboratorio ya
+      // filtraban por accesoPaciente(), que es por propiedad.
+      //
+      // Se usa .get('campo', default) y no .campo porque los expedientes
+      // viejos no tienen estos campos, y leer un campo ausente es un error
+      // de evaluación — que Firestore trata como denegado, pero también
+      // corta las ramas de doctor/caja que vienen después.
       allow read: if (resource == null && isAuth())
         || isDoctor(resource.data.clinicId)
         || isCaja(resource.data.clinicId)
         || sameClinic(resource.data.clinicId)
-        || isAuth();
+        || (isAuth() && resource.data.get('ownerUid', null) == request.auth.uid)
+        || (isAuth() && resource.data.get('compartidoCon', []) is list
+            && request.auth.uid in resource.data.get('compartidoCon', []));
 
       // Solo el doctor de esa clínica crea expedientes, y el documento debe
       // nacer con el clinicId de quien lo crea (nunca "en blanco" ni de otra
@@ -304,39 +319,83 @@ service cloud.firestore {
 
       // Update:
       //   - Doctor de esa clínica: siempre, sin poder cambiar el clinicId.
-      //   - Paciente sin owner asignado: puede reclamar (set ownerUid),
-      //     solo tocando los campos de vinculación.
-      //   - Paciente ya owner: solo puede tocar compartidoCon/solicitudesAcceso
-      //     (aprobar/rechazar solicitudes de acceso de terceros).
-      //   - Cualquier autenticado: solo puede agregarse a sí mismo a
-      //     solicitudesAcceso (pedir acceso compartido) o quitar su propia
-      //     solicitud — nunca tocar datos clínicos ni el clinicId.
-      // Restaurado del modelo original de CMG (Mi-Historial.html), con el
-      // invariante de clinicId agregado porque este Firestore es multi-tenant.
+      //   - Paciente que reclama su expediente: solo si la CLÍNICA ya anotó
+      //     su correo en datosGenerales.email y el paciente demostró que ese
+      //     buzón es suyo (email_verified). Ver la nota de abajo.
+      //   - Paciente ya owner: solo puede tocar compartidoCon (aprobar o
+      //     revocar el acceso de un familiar).
+      //
+      // Vinculación por correo verificado (2026-10-02). Antes bastaba con
+      // conocer el código y encontrar el expediente sin ownerUid: cualquier
+      // cuenta logueada podía quedar dueña permanente del expediente de un
+      // desconocido, y con eso leer sus consultas, pruebas y laboratorios
+      // vía accesoPaciente(). Ahora la credencial no es el código sino el
+      // correo que la clínica registró al abrir el expediente — un campo que
+      // el paciente no puede tocar, porque datosGenerales no está en el
+      // hasOnly() de esta rama.
+      //
+      // email_verified es imprescindible, no un extra: Firebase deja crear
+      // una cuenta con el correo de otra persona sin probar que es tuyo, así
+      // que sin este chequeo el correo no probaría nada.
+      //
+      // Las solicitudes de acceso de un familiar ya no se escriben en un
+      // array de este documento (ver la subcolección /solicitudes de abajo).
       allow update: if request.resource.data.clinicId == resource.data.clinicId
         && (
           isDoctor(resource.data.clinicId)
           || (
             isAuth()
-            && resource.data.ownerUid == null
+            && request.auth.token.email_verified == true
+            && resource.data.get('ownerUid', null) == null
+            && resource.data.get('datosGenerales', {}).get('email', '').lower()
+                == request.auth.token.email.lower()
             && request.resource.data.ownerUid == request.auth.uid
             && request.resource.data.diff(resource.data).affectedKeys()
                 .hasOnly(['ownerUid', 'ownerVinculado', 'ownerEmail', 'updatedAt'])
           )
           || (
             isAuth()
-            && resource.data.ownerUid == request.auth.uid
+            && resource.data.get('ownerUid', null) == request.auth.uid
             && request.resource.data.diff(resource.data).affectedKeys()
-                .hasOnly(['compartidoCon', 'solicitudesAcceso', 'updatedAt'])
-          )
-          || (
-            isAuth()
-            && request.resource.data.diff(resource.data).affectedKeys()
-                .hasOnly(['solicitudesAcceso', 'updatedAt'])
+                .hasOnly(['compartidoCon', 'updatedAt'])
           )
         );
 
       allow delete: if isDoctor(resource.data.clinicId);
+
+      // ═══ /expedientes/{codigo}/solicitudes/{solicitanteUid} ══════
+      // Un familiar pide acceso al expediente de otro. El id del documento
+      // ES el uid del solicitante, y eso es el punto: la regla puede exigir
+      // request.auth.uid == solicitanteUid y queda exacta.
+      //
+      // Antes esto vivía en un array `solicitudesAcceso` dentro del
+      // expediente, con una rama de update que permitía a cualquier
+      // autenticado reescribirlo completo — las reglas no pueden validar el
+      // contenido de un arrayUnion, así que cualquiera que conociera el
+      // código podía borrar las solicitudes de otros o inventar entradas.
+      //
+      // Pedir acceso no revela nada: crear este documento no requiere poder
+      // leer el expediente, y el titular (único que puede leerlo) decide.
+      // Aprobar = el titular agrega el uid a compartidoCon (rama de update
+      // de arriba) y borra la solicitud.
+      match /solicitudes/{solicitanteUid} {
+        allow read: if isAuth() && (
+          request.auth.uid == solicitanteUid
+          || get(/databases/$(database)/documents/expedientes/$(codigo))
+               .data.get('ownerUid', null) == request.auth.uid
+        );
+        // El solicitante crea y cancela la suya; el titular borra la que
+        // rechaza o ya aprobó. Nadie edita una existente.
+        allow create: if isAuth()
+          && request.auth.uid == solicitanteUid
+          && request.resource.data.uid == request.auth.uid;
+        allow delete: if isAuth() && (
+          request.auth.uid == solicitanteUid
+          || get(/databases/$(database)/documents/expedientes/$(codigo))
+               .data.get('ownerUid', null) == request.auth.uid
+        );
+        allow update: if false;
+      }
     }
 
     // ═══ /consultas/{id} ═══════════════════════════════════════════

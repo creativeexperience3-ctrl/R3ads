@@ -664,6 +664,20 @@ html, body { margin: 0; }
       .then(function (cred) {
         return cred.user.updateProfile({ displayName: name }).then(function () { return cred.user; });
       })
+      .then(function (user) {
+        /* Verificación de correo (2026-10-02). Firebase deja crear una
+           cuenta con el correo de cualquiera sin probar que es tuyo, y
+           desde el 2026-10-02 el correo es lo que las reglas de Firestore
+           miran para dejar vincular un expediente (tiene que coincidir con
+           el que la clínica anotó). Sin este paso, el correo no probaría
+           nada y bastaría con registrarse como la víctima.
+
+           El fallo no bloquea el registro: la cuenta ya existe y el correo
+           se puede reenviar desde Mi-Historial.html. */
+        return user.sendEmailVerification()
+          .catch(function (err) { console.error('[Ancla] No se pudo enviar la verificación:', err); })
+          .then(function () { return user; });
+      })
       .then(function (user) { afterAuthSuccess(user); })
       .catch(function (err) {
         setLoading('btn-register', false);
