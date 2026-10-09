@@ -602,10 +602,6 @@ trámite o código por escribir.
   `r3ads-clinic-crm.web.app`. Funciona, pero conviene darle su propio
   target antes de que el proyecto tenga un tercer site: hoy, equivocarse de
   carpeta al desplegar sobrescribe el portal que no era.
-- **Primer `superadmin`** — sin él `portal-admin.html` no deja entrar a
-  nadie. El script `functions/otorgar-superadmin.js` ya está escrito para
-  correrlo con el Admin SDK (a propósito no existe un camino desde la app).
-  **(runtime)**
 - **Exportar Firebase Auth periódicamente** (`firebase auth:export`) — las
   cuentas no entran en el PITR ni en los respaldos de Firestore, ver
   `RESPALDOS.md`.
