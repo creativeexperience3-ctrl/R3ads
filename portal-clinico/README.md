@@ -8,6 +8,11 @@ comprar el software una sola vez.
 Plan completo (fases, arquitectura, riesgos):
 `C:\Users\Ruben Wainwright\.claude\plans\misty-meandering-possum.md`
 
+**¿Qué falta?** → [lista consolidada al final de este
+archivo](#qué-falta--lista-consolidada-al-2026-10-08). Las secciones de
+"Estado de la migración" están ordenadas por fecha de cada avance, así que
+sirven para entender cómo se llegó acá, no para saber qué queda.
+
 ## Ubicación
 
 Esta carpeta vive **dentro del repo de GitHub de R3ads**
@@ -64,8 +69,10 @@ Consecuencias:
 **`r3ads.com` ya está en vivo (2026-09-22)** — DNS configurado en Hostinger
 (4 A records de GitHub Pages en el apex + `www` como CNAME al apex) y el
 archivo `CNAME` está en `R3ads/web/`. Apex y `www` responden por HTTPS con
-certificado válido. Falta configurar `ancla.r3ads.com` en Firebase Hosting
-del proyecto `r3ads-clinic-crm`.
+certificado válido.
+
+El reparto de dominios entre los sites de Hosting se administra en la
+consola y se decide en producción; no es un pendiente de este repo.
 
 El panel de administración interno de R3ads (Fase 4) vive aparte, dentro de
 `r3ads.com`, y solo se conecta a `r3ads-clinic-crm` vía SDK — no necesita
@@ -79,8 +86,8 @@ puede escribir** (es decisión de facturación, no de la clínica; las reglas
 de `/clinics` ya son `allow write: if isSuperAdmin()`):
 
 ```
-modulos: { laboratorio: true, pruebasRapidas: false,
-           constancias: true, ekg: false }
+modulos: { laboratorio: true, pruebasRapidas: false, constancias: true,
+           ekg: false, historialCalendario: false }
 ```
 
 **Semántica** (igual en cliente y en reglas, a propósito):
@@ -89,8 +96,15 @@ modulos: { laboratorio: true, pruebasRapidas: false,
 - Mapa presente → solo lo que está en `true`. Una clave ausente cuenta como
   apagada. El panel de alta (Fase 4) debe escribir siempre el mapa completo.
 
-**Los 4 módulos opcionales:** `laboratorio`, `pruebasRapidas`, `constancias`,
-`ekg`.
+**Los 5 módulos opcionales:** `laboratorio`, `pruebasRapidas`, `constancias`,
+`ekg`, `historialCalendario` (la vista de calendario dentro de Historial).
+
+**Planes (en `portal-admin.html`, `MODULOS_PLANES`):** `basico` deja solo
+`constancias` encendido; `completo` enciende los cinco. Son atajos del
+formulario de alta para no marcar casilla por casilla — lo que se guarda en
+`/clinics/{id}.modulos` sigue siendo el mapa completo de cinco claves, no
+el nombre del plan. El panel también registra cómo pagó la clínica y hasta
+cuándo, y muestra los días que faltan para el vencimiento.
 
 **Lo que NO es opcional:** expedientes, consultas/pendientes, búsqueda,
 edición, historial, unificación y **caja**. Caja parece un módulo pero es el
@@ -130,6 +144,25 @@ firebase deploy --only firestore:rules,firestore:indexes,storage,functions
 `firebase.json`/`.firebaserc` en esta carpeta son independientes de los de
 `R3ads/web` (la carpeta hermana) — cada uno despliega a su propio proyecto.
 
+**⚠️ Nunca despliegues desde la raíz del repo.** `R3ads/web/.firebaserc`
+apunta a `r3ads-59bd8` (el sitio de la agencia) y la raíz tiene su propio
+`firestore.rules`: un `firebase deploy --only firestore:rules` corrido ahí
+le mete a la agencia las reglas equivocadas. Por eso conviene pasar
+`--project r3ads-clinic-crm` siempre, aunque el `.firebaserc` de esta
+carpeta ya lo tenga — es el seguro contra correrlo en el directorio
+equivocado. Antes del primer deploy de una sesión:
+
+```bash
+pwd && cat .firebaserc    # debe decir r3ads-clinic-crm, NO r3ads-59bd8
+```
+
+El orden que funciona, con los dos portales: `firestore,functions` desde
+esta carpeta, luego `--only hosting` desde acá y desde `portal-paciente/`.
+Nota para Windows: el CLI y npm se instalan como shims de npm, así que
+PowerShell puede bloquearlos por política de ejecución
+(`Set-ExecutionPolicy -Scope CurrentUser RemoteSigned`, una vez), y
+`firebase deploy --dry-run` compila todo sin aplicar nada.
+
 ## Estado de la migración (2026-09-21)
 
 Este código nace como copia genericizada del módulo clínico de
@@ -163,6 +196,13 @@ quedan fuera, ver el plan).
   branding desde `clinic-config.js`, y escriben/leen `clinicId` en cada
   documento. **Portado completo** — ver "Gaps conocidos" abajo para lo que
   queda pendiente de reconciliar, no de portar.
+- **Páginas agregadas después del port** (no vienen de CMG, o vienen con
+  cambios propios de Ancla): `Inicio.html` (hub), `Referencia-Medica.html`,
+  `Medicamentos.html`, `Personal.html`, `Proveedores.html`,
+  `Bitacora.html`, `Mi-Suscripcion.html`, `Precios.html`, `anuncio.html`
+  (landing), `Terminos.html`, `Privacidad.html`, `Seguridad.html`. El
+  conteo de "9 páginas portadas" describe el port original, no el tamaño
+  actual del portal.
 - **Autoservicio de paciente removido (2026-09-21)**: `Cotizador.html`,
   `Cotizacion-Sistema.html`, `Mis-Cotizaciones.html` y `Mi-Historial.html`
   se borraron por completo — el producto todavía no tiene clínicas de pago
@@ -228,19 +268,30 @@ quedan fuera, ver el plan).
   patrón de instancia secundaria de Firebase que `Admin-Usuarios.html`, para
   no cerrar la sesión del superadmin al crear el `Auth` del nuevo admin).
   El formulario de alta/edición siempre escribe el mapa `modulos` completo
-  (las 4 claves, nunca parcial ni ausente) — ver "Módulos contratados" arriba.
+  (las 5 claves, nunca parcial ni ausente) — ver "Módulos contratados" arriba.
+
+### ✅ Hecho — suscripción y cobro (Fase 6, 2026-09-26/29)
+
+PayPal Subscriptions en **Live** (decidido 2026-09-24 — no Stripe, que no
+opera con empresas domiciliadas en Honduras): `crearSuscripcionPayPal`,
+`revisarSuscripcionPayPal`, `cancelarSuscripcionPayPal` y `paypalWebhook` en
+`functions/index.js`, los planes creados con
+`functions/crear-planes-paypal-live.js`, la pantalla `Mi-Suscripcion.html`,
+el gate de prueba en `clinic-trial-gate.js`, y transferencia bancaria como
+alternativa para quien no use PayPal. El alta pasa por
+`crearClinicaSelfService`, que exige `aceptaTerminos === true` y deja
+constancia en `/clinics/{id}.aceptacion`.
+
+Lo que sigue abierto de esta fase no es código: **legalizar la empresa ante
+el SAR (RTN de empresa + CAI)** para poder emitir factura deducible — ver
+"Qué falta" abajo. Mientras tanto se opera con RTN personal y cuenta PayPal
+Business a título personal.
 
 ### ⏳ Pendiente
-- **Otorgar el primer `superadmin`** — no hay forma de hacerlo desde la app
-  a propósito (ver nota de seguridad en `firestore.rules`); se hace una
-  sola vez con el Admin SDK / `firebase-admin` desde una consola local,
-  nunca vía un endpoint que el cliente pueda alcanzar. Sin esto, el panel
-  de administración R3ads (arriba) no deja entrar a nadie.
-- **Suscripción/cobro** (PayPal Subscriptions, decidido 2026-09-24 — no
-  Stripe, que no opera con empresas domiciliadas en Honduras) y gating por
-  `clinics/{clinicId}.estado` (Fase 6). Requiere además legalizar la empresa
-  ante el SAR (RTN de empresa + CAI) para poder facturar; mientras tanto se
-  opera con RTN personal y cuenta PayPal Business a título personal.
+Ver la **lista consolidada al final de este archivo** — las secciones de
+abajo están ordenadas por cuándo se hizo cada cosa, no por qué queda, y los
+pendientes quedaron repartidos entre ellas. El cierre del archivo los junta
+en un solo lugar.
 
 ### ✅ Hecho — `clinicId` desde la sesión, no desde un archivo estático
 (2026-09-24; reemplaza a la vieja Fase 5, ver "Dominio" arriba). Las 11
@@ -302,17 +353,30 @@ demás ya filtraban por `clinicId` o por propiedad.
 - `Expediente-Doctor.html` avisa al entregar el código si el expediente
   nació sin correo, porque ese paciente no podrá verlo en línea.
 
-**Pendiente de correr, en este orden:**
-1. `firebase deploy --only firestore:rules` — las reglas nuevas compilan
-   (verificado con `firebase deploy --dry-run`), pero **todavía no están
-   desplegadas**: hasta que lo estén, el agujero sigue abierto en producción
-   y el portal de paciente sigue funcionando con las reglas viejas.
-2. `node functions/auditar-vinculaciones-paciente.js` — informa qué
-   vinculaciones hechas con la regla vieja no habrían pasado la nueva
-   (compara contra el correo de Firebase Auth, no contra `ownerEmail`, que
-   lo escribió el propio cliente). Con `--aplicar` las desvincula para que
-   el paciente legítimo pueda reclamar de nuevo.
-3. Desplegar los dos portales (`firebase deploy --only hosting`).
+**Desplegado y verificado (2026-10-08).** Esta sección decía "pendiente de
+correr" y quedó así por no tacharla: las reglas se desplegaron el mismo
+2026-10-02 (el log de auditoría de Cloud Functions lo registra a las
+19:11Z, con `callerSuppliedUserAgent: FirebaseCLI/15.18.0
+agent-name/claude_code`). El 2026-10-08 se volvió a correr el ciclo
+completo para confirmarlo, y el CLI respondió `latest version of
+firestore.rules already up to date, skipping upload` — o sea que el
+agujero estaba cerrado en producción desde el día del cambio.
+
+Lo que sí faltaba y se aplicó el 2026-10-08:
+1. **Índices** — los dos compuestos de `/accesos` (`clinicId + ts` y
+   `clinicId + codigoPaciente + ts`). Sin ellos `Bitacora.html` no carga.
+2. **Functions** — 15 actualizadas; `crearClinicaSelfService` salió
+   `Skipped (No changes detected)` porque ya estaba al día desde el 2 oct.
+3. **Hosting de los dos portales** — staff en
+   `https://r3ads-clinic-crm.web.app` (31 archivos, site por defecto) y
+   paciente en `https://ancla-paciente.web.app` (target `paciente`).
+4. **Auditoría de vinculaciones** — `node
+   functions/auditar-vinculaciones-paciente.js` reportó **0 expedientes con
+   dueño vinculado**, así que no hubo nada que corregir y `--aplicar` no se
+   corrió. El agujero viejo nunca llegó a usarse. Vale repetir el script si
+   alguna clínica de pago entra con pacientes ya vinculados de antes.
+
+`firebase functions:log` quedó sin un solo error tras el despliegue.
 
 ### ✅ Hecho — términos de uso del portal de paciente (2026-10-02)
 
@@ -341,10 +405,9 @@ alta es con Google) y constancia en `/users/{uid}.aceptacion`
 hay que subir `TERMINOS_VERSION` en `portal-paciente/Auth.html`, para saber
 qué texto aceptó cada paciente y no solo que aceptó algo.
 
-**Pendiente:** completar el correo de contacto y la dirección física (los dos
-quedaron como `[Completar: ...]`, igual que en `Privacidad.html`, que sigue
-publicada con esos huecos), y hacerlo revisar por un abogado en Honduras
-antes de tratarlo como definitivo.
+**Pendiente:** hacerlo revisar por un abogado en Honduras antes de tratarlo
+como definitivo. El correo de contacto y la dirección física se completaron
+el 2026-10-09 — ver la lista consolidada al final.
 
 ### ✅ Hecho — bitácora de acceso a expedientes (2026-10-02)
 
@@ -468,9 +531,8 @@ sin constancia. Al publicar una revisión sustancial hay que subir
 `TERMINOS_VERSION` en `functions/index.js`.
 
 **Pendiente:**
-- Completar correo de contacto y dirección física (quedaron como
-  `[Completar: ...]`, igual que en `Privacidad.html` y en los términos del
-  paciente), y revisión por un abogado en Honduras.
+- Revisión por un abogado en Honduras. El correo de contacto y la dirección
+  física se completaron el 2026-10-09 — ver la lista consolidada al final.
 - **Facturación**: la sección 05 dice que el comprobante se emite "conforme
   a las obligaciones fiscales aplicables", a propósito — sin RTN de empresa
   ni CAI no se puede prometer una factura deducible, que es justo lo que una
@@ -495,7 +557,11 @@ sin constancia. Al publicar una revisión sustancial hay que subir
   ("vincular pruebas/exámenes viejos sin código de paciente") ahora llevan
   `.where('clinicId', ...)` — antes no tenían ningún filtro; probar ese
   flujo específico una vez exista una clínica de prueba real.
-- **⚠️ `firestore.rules` editado (2026-09-21) pero NO redesplegado** — se
+- **⚠️ `firestore.rules` editado (2026-09-21) pero NO redesplegado**
+  — *nota 2026-10-08: advertencia superada. El archivo se editó y desplegó
+  varias veces después, y el 2026-10-08 el CLI confirmó que lo desplegado
+  coincide exactamente con lo que está en el repo. No queda nada pendiente
+  de desplegar en reglas.* Se
   quitaron la colección `/quotations/{id}`, el doc `/users/{uid}` (perfil de
   paciente, sin código que lo creara ni lo leyera), y las ramas
   `ownerUid`/`compartidoCon`/`solicitudesAcceso` en `expedientes`,
@@ -511,3 +577,99 @@ sin constancia. Al publicar una revisión sustancial hay que subir
 datos original de CMG (útil para portar cada página), pero ya no describe
 el esquema real de este repo una vez agregado `clinicId` — ver
 `firestore.rules` como fuente de verdad del esquema multi-tenant.
+
+---
+
+## Qué falta — lista consolidada (al 2026-10-08)
+
+Esta lista junta los pendientes que estaban repartidos por las secciones de
+arriba. Lo marcado **(runtime)** no se puede verificar leyendo el repo: son
+despliegues, scripts de una sola corrida y ajustes de consola. Si ya se
+hicieron, tacharlos acá en vez de dejar que la duda se repita cada sesión.
+
+**Nada queda pendiente de desplegar.** El 2026-10-08 se corrió el ciclo
+completo (reglas, índices, functions, hosting de los dos portales) y la
+auditoría de vinculaciones de paciente — ver el detalle en la sección del
+2026-10-02 más arriba. Lo que sigue es todo configuración de consola,
+trámite o código por escribir.
+
+### 1. Infraestructura
+
+- **`portal-clinico/firebase.json` no declara ningún `target` de hosting**,
+  mientras `portal-paciente/.firebaserc` sí tiene `paciente → ancla-paciente`.
+  Así, un `firebase deploy --only hosting` desde esta carpeta va al site por
+  defecto del proyecto — confirmado el 2026-10-08: publicó 31 archivos en
+  `r3ads-clinic-crm.web.app`. Funciona, pero conviene darle su propio
+  target antes de que el proyecto tenga un tercer site: hoy, equivocarse de
+  carpeta al desplegar sobrescribe el portal que no era.
+- **Primer `superadmin`** — sin él `portal-admin.html` no deja entrar a
+  nadie. El script `functions/otorgar-superadmin.js` ya está escrito para
+  correrlo con el Admin SDK (a propósito no existe un camino desde la app).
+  **(runtime)**
+- **Exportar Firebase Auth periódicamente** (`firebase auth:export`) — las
+  cuentas no entran en el PITR ni en los respaldos de Firestore, ver
+  `RESPALDOS.md`.
+- **Sin monitoreo ni alertas** — que un respaldo falle, o que el portal se
+  caiga, hoy no avisa a nadie. Es la razón por la que `Terminos.html` dice
+  explícitamente que no hay SLA con penalidad, y por la que hay que revisar
+  `firebase firestore:backups:list` a mano.
+
+### 2. Legal y fiscal
+
+- **Revisión por un abogado en Honduras** de los tres documentos antes de
+  tratarlos como definitivos. Es el único pendiente que les queda: el
+  2026-10-09 se completaron los seis `[Completar: ...]` con
+  `soporte@r3ads.com` (buzón ya montado) y con el domicilio completo
+  —Residencial El Sauce, Villa Los Geranios, Bloque 44, Lote 3,
+  Comayagüela, Francisco Morazán, Honduras—, se quitaron las tres "Nota
+  interna" que se renderizaban a la vista del lector (la clase
+  `.legal-note` no está oculta) y los dos portales se desplegaron.
+- **RTN de empresa + CAI ante el SAR.** Sin eso no se puede prometer una
+  factura deducible, que es justo lo que la clínica necesita para registrar
+  el gasto. La sección 05 de `Terminos.html` está redactada a propósito sin
+  prometerla.
+- **Las clínicas creadas antes del 2026-10-02 no tienen `aceptacion`** en su
+  documento. Si alguna pasa a ser de pago, hay que recoger su aceptación
+  aparte.
+- **La sección 02 de `Privacidad.html` describe un acceso de soporte de
+  R3ads que las reglas no permiten** (el superadmin no tiene acceso a
+  expedientes). Ajustar el texto para que describa el sistema real.
+
+### 3. Producto y código
+
+- **`SERVICIOS_SIN_PRECLINICA` sigue hardcodeado** en
+  `Expediente-Doctor.html` (~línea 1588), con los 18 servicios del catálogo
+  de CMG. Falta el campo de catálogo equivalente a `enfermeriaCompletable`
+  para esta distinción.
+- **Los 5 nombres de servicio siguen sin reconciliar** entre esa lista y
+  `catalogo-servicios.js`: el catálogo tiene `Cirugía menor · pequeña/media/
+  grande`, `Curación pequeña/mediana/grande`, `Retiro de puntos (cada uno)`
+  y `Sueroterapia Glutatión`; la lista interna dice `Cirugía menor`,
+  `Curación`, `Retiro de puntos` y `Aplicación de Suero`. Falla en modo
+  seguro (exige médico), pero enfermería nunca podrá completarlos.
+- **Las dos consultas de migración de datos legacy** de
+  `Expediente-Doctor.html` ("vincular pruebas/exámenes viejos sin código de
+  paciente") llevan `.where('clinicId', ...)` sin haberse probado nunca con
+  una clínica real.
+- **Retención de `/accesos`** — la bitácora de dentro de la app crece sin
+  techo. La de Google ya tiene su ventana de 730 días; falta la equivalente
+  acá, con un TTL de Firestore o una purga con el Admin SDK.
+- **Que el paciente vea quién abrió su propio expediente.** Hoy
+  `Bitacora.html` es solo para el admin de la clínica; dárselo al titular
+  exige una query que las reglas actuales no validan barato.
+- **Logo de Ancla** — la identidad de color está en
+  `assets/portal-tokens.css`; el logo se diseñará con un diseñador.
+
+### 4. Fases que quedan del plan
+
+- **Fase 7 — piloto.** Dar de alta 1-2 clínicas reales (no CMG) por
+  `portal-admin.html` y validar el aislamiento entre tenants colección por
+  colección, con el Rules Playground o el emulador, antes de vender más
+  suscripciones. No hay bloqueo técnico para la clínica #2 desde el
+  2026-09-24.
+- **Fase 8 — futuro.** Migrar CMG desde `clinica-medica-general` para ser el
+  tenant #1 de Ancla, y reincorporar Doctor 365 como módulo opcional si
+  alguna otra clínica lo pide.
+
+*(La Fase 5 original —resolutor de subdominio por clínica— quedó eliminada
+del plan el 2026-09-22, ver "Dominio" arriba.)*

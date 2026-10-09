@@ -13,13 +13,17 @@ service cloud.firestore {
     // tiene su propio staff, y ningún correo puede estar "quemado" aquí.
     //
     // Aquí el rol y la clínica del usuario vienen SOLO de custom claims de
-    // Firebase Auth (`rol`, `clinicId`), fijados por una Cloud Function al
-    // escribir /usuarios/{uid} (ver Fase 3 del plan — pendiente de crear esa
-    // función en este repo). Cada documento clínico lleva su propio
-    // `clinicId`, y toda regla de rol exige ADEMÁS que el clinicId del token
-    // coincida con el clinicId del documento. Sin esa coincidencia, no hay
-    // rol que valga — así es imposible que el staff de una clínica lea o
-    // escriba datos de otra, incluso si el rol coincide.
+    // Firebase Auth (`rol`, `clinicId`), fijados por la Cloud Function
+    // `onUsuarioWrite` (functions/index.js) al escribir /usuarios/{uid} —
+    // activa en `r3ads-clinic-crm` desde el 2026-09-21. Esa función además
+    // escribe /_claimsRefresh/{uid} para que `r3ads-staff.js` recargue el ID
+    // token en vez de esperar a que expire solo.
+    //
+    // Cada documento clínico lleva su propio `clinicId`, y toda regla de rol
+    // exige ADEMÁS que el clinicId del token coincida con el clinicId del
+    // documento. Sin esa coincidencia, no hay rol que valga — así es
+    // imposible que el staff de una clínica lea o escriba datos de otra,
+    // incluso si el rol coincide.
     // ═══════════════════════════════════════════════════════════════
 
     // ── Identidad básica ──────────────────────────────────────────
