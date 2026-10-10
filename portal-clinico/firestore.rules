@@ -68,9 +68,30 @@ service cloud.firestore {
     // Clínica con la suscripción vigente. Si una clínica se suspende por falta
     // de pago (Fase 6 del plan), esto corta el acceso de todo su staff a la
     // vez, sin tener que tocar ninguna otra regla.
+    //
+    // Dos formas de estar vigente (2026-10-10):
+    //  - 'activa': pagando, o dentro del ciclo de prueba del plan de PayPal.
+    //  - 'prueba_libre': se auto-registró y todavía no metió tarjeta, pero
+    //    su `pruebaExpira` no pasó. Acceso COMPLETO durante esos días — ver
+    //    crearClinicaSelfService en functions/index.js y FUNNEL.md (Fase 2).
+    //    Es el reloj del servidor de Firestore (request.time) el que corta,
+    //    no el del navegador: clinic-trial-gate.js solo dibuja la banda que
+    //    avisa, y una banda no es un candado.
+    // El estado viejo 'prueba_bloqueada' NO entra acá a propósito: las
+    // clínicas dadas de alta antes de este cambio siguen necesitando activar
+    // con PayPal, igual que siempre.
     function clinicActiva(clinicId) {
       return exists(/databases/$(database)/documents/clinics/$(clinicId))
-        && get(/databases/$(database)/documents/clinics/$(clinicId)).data.estado == 'activa';
+        && clinicVigente(get(/databases/$(database)/documents/clinics/$(clinicId)).data);
+    }
+    // `'pruebaExpira' in c` antes de comparar: una clínica en 'prueba_libre'
+    // sin esa fecha (dato a medio escribir) debe denegar, no reventar la
+    // evaluación de la regla.
+    function clinicVigente(c) {
+      return c.estado == 'activa'
+        || (c.estado == 'prueba_libre'
+            && 'pruebaExpira' in c
+            && request.time < c.pruebaExpira);
     }
     // El usuario pertenece a esa clínica Y esa clínica está activa.
     // mfaVigente() va acá —y no en cada rol— porque TODOS los roles

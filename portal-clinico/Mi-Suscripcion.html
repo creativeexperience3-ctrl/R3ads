@@ -181,11 +181,23 @@ body { margin: 0; background: #F4F6FB; font-family: system-ui,-apple-system,'Seg
     completo: { nombre: 'Completo', precio: '$65/mes · Precio Fundador', desc: 'Todo lo de Básico + laboratorio, pruebas rápidas, EKG y calendario de atenciones.' }
   };
   var ESTADO_INFO = {
-    activa:            { label: 'Activa',                clase: 'is-ok' },
-    prueba_bloqueada:  { label: 'Vista previa (sin activar)', clase: 'is-warn' },
-    suspendida:        { label: 'Suspendida',             clase: 'is-bad' },
-    cancelada:         { label: 'Cancelada',              clase: 'is-bad' }
+    activa:            { label: 'Activa',                     clase: 'is-ok' },
+    // Se auto-registró y está usando el portal completo sin tarjeta hasta
+    // `pruebaExpira` (ver crearClinicaSelfService). No es un estado de
+    // alarma: la clínica está trabajando normal.
+    prueba_libre:      { label: 'Prueba gratis',               clase: 'is-ok' },
+    prueba_vencida:    { label: 'Prueba terminada',            clase: 'is-warn' },
+    // Clínicas anteriores al 2026-10-10: nunca tuvieron prueba sin tarjeta.
+    prueba_bloqueada:  { label: 'Vista previa (sin activar)',  clase: 'is-warn' },
+    suspendida:        { label: 'Suspendida',                  clase: 'is-bad' },
+    cancelada:         { label: 'Cancelada',                   clase: 'is-bad' }
   };
+
+  // Fecha de fin de la prueba libre como Date, o null.
+  function pruebaExpiraDate() {
+    var t = clinicData && clinicData.pruebaExpira;
+    return (t && typeof t.toDate === 'function') ? t.toDate() : null;
+  }
 
   function $(id) { return document.getElementById(id); }
   function esc(s) { return String(s || '').replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
@@ -252,6 +264,13 @@ body { margin: 0; background: #F4F6FB; font-family: system-ui,-apple-system,'Seg
 
   function render() {
     var estado = clinicData.estado || 'prueba_bloqueada';
+    /* Mismo corte que hace clinicActiva() en firestore.rules: una prueba
+       libre con la fecha pasada ya no da acceso, así que no puede seguir
+       mostrándose como "Prueba gratis". */
+    var expira = pruebaExpiraDate();
+    if (estado === 'prueba_libre' && (!expira || expira.getTime() <= Date.now())) {
+      estado = 'prueba_vencida';
+    }
     var plan = PLAN_INFO[clinicData.planElegido] ? clinicData.planElegido : 'basico';
     var ei = ESTADO_INFO[estado] || ESTADO_INFO.prueba_bloqueada;
     var esTransferencia = clinicData.metodoPago === 'transferencia';
@@ -266,6 +285,9 @@ body { margin: 0; background: #F4F6FB; font-family: system-ui,-apple-system,'Seg
       '<span class="ms-badge ' + ei.clase + '">' + esc(ei.label) + '</span>' +
       '</div>' +
       '<div class="ms-meta">Método de pago: ' + (esTransferencia ? 'Transferencia bancaria (verificada por WhatsApp)' : 'PayPal') + '</div>' +
+      (estado === 'prueba_libre' && expira
+        ? '<div class="ms-meta">Tu prueba gratis termina el ' + esc(fmtFecha(clinicData.pruebaExpira)) + ' — no hace falta tarjeta hasta entonces.</div>'
+        : '') +
       (clinicData.paypalSubscriptionId ? '<div class="ms-meta">Suscripción de PayPal: ' + esc(clinicData.paypalSubscriptionId) + '</div>' : '') +
       (esTransferencia && vence ? '<div class="ms-meta">Próximo vencimiento: ' + esc(vence) + ' — para renovar, escribinos por WhatsApp antes de esa fecha.</div>' : '') +
       '</div>';
@@ -294,13 +316,25 @@ body { margin: 0; background: #F4F6FB; font-family: system-ui,-apple-system,'Seg
     } else {
       // ── Tarjeta: activar / reactivar ──
       var esReactivacion = estado === 'suspendida' || estado === 'cancelada';
+      /* La clínica que vino de una prueba libre YA tuvo sus días gratis sin
+         tarjeta, así que ofrecerle "activá tu prueba gratis" sonaría a que
+         no pasó nada. Lo que sí sigue siendo cierto es que el plan de PayPal
+         trae su propio ciclo de prueba, y por eso el primer cobro no es hoy
+         (ver la nota del solape en crearClinicaSelfService). */
+      var vinoDePruebaLibre = estado === 'prueba_libre' || estado === 'prueba_vencida';
+      var tituloActivar = esReactivacion
+        ? 'Reactivar tu suscripción'
+        : (vinoDePruebaLibre ? 'Activar tu suscripción' : 'Activar tu prueba gratis de 7 días');
+      var subtituloActivar = esReactivacion
+        ? 'Elegí el plan y confirmá con PayPal para volver a tener acceso completo, o pedí activarla por transferencia bancaria.'
+        : (vinoDePruebaLibre
+          ? 'Elegí tu plan y confirmá con PayPal para no perder el acceso cuando termine la prueba — el primer cobro recién es al día 8. Si preferís pagar por transferencia, escribinos por WhatsApp y lo activamos a mano.'
+          : 'Elegí un plan y confirmá con PayPal para arrancar con 7 días gratis — el primer cobro es hasta el día 8. Si preferís pagar por transferencia, escribinos por WhatsApp y lo activamos a mano.');
       html += '<div class="el-card">' +
-        '<h2 class="el-card-title">' + (esReactivacion ? 'Reactivar tu suscripción' : 'Activar tu prueba gratis de 7 días') + '</h2>' +
-        '<p class="el-card-subtitle">' + (esReactivacion
-          ? 'Elegí el plan y confirmá con PayPal para volver a tener acceso completo, o pedí activarla por transferencia bancaria.'
-          : 'Elegí un plan y confirmá con PayPal para arrancar con 7 días gratis — el primer cobro es hasta el día 8. Si preferís pagar por transferencia, escribinos por WhatsApp y lo activamos a mano.') + '</p>' +
+        '<h2 class="el-card-title">' + tituloActivar + '</h2>' +
+        '<p class="el-card-subtitle">' + subtituloActivar + '</p>' +
         '<div class="plan-pick" id="plan-pick-activar">' + planPickHtml('plan-activar', plan) + '</div>' +
-        '<button class="el-btn el-btn-primary" id="btn-activar">' + (esReactivacion ? 'Continuar con PayPal' : 'Activar prueba gratis con PayPal') + '</button>' +
+        '<button class="el-btn el-btn-primary" id="btn-activar">' + (esReactivacion || vinoDePruebaLibre ? 'Continuar con PayPal' : 'Activar prueba gratis con PayPal') + '</button>' +
         '<button class="el-btn el-btn-ghost" id="btn-activar-transferencia" style="margin-top:10px;width:100%">💬 Prefiero pagar por transferencia (WhatsApp)</button>' +
         '</div>';
     }
@@ -408,7 +442,7 @@ body { margin: 0; background: #F4F6FB; font-family: system-ui,-apple-system,'Seg
     if (!user) { window.location.href = 'Auth.html?returnTo=Mi-Suscripcion.html'; return; }
     r3adsStaff.resolveClinicId(user, function (clinicId) {
       CLINIC_ID = clinicId;
-      r3adsTrialGate.cargar(CLINIC_ID).then(function (estado) { if (estado === 'prueba_bloqueada' || estado === 'suspendida' || estado === 'cancelada') r3adsTrialGate.mostrarBanner(estado); });
+      r3adsTrialGate.evaluar(CLINIC_ID);
       r3adsStaff.checkAdmin(user, CLINIC_ID, function (ok) {
         if (!ok) { window.location.href = 'Auth.html'; return; }
         $('ap-user-email').textContent = user.email;

@@ -182,7 +182,7 @@ body { margin: 0; background: #F4F6FB; font-family: system-ui,-apple-system,'Seg
     if (!user) { window.location.href = 'Auth.html?returnTo=Medicamentos.html'; return; }
     r3adsStaff.resolveClinicId(user, function (clinicId) {
       CLINIC_ID = clinicId;
-      r3adsTrialGate.cargar(CLINIC_ID).then(function (estado) { if (estado === 'prueba_bloqueada' || estado === 'suspendida' || estado === 'cancelada') r3adsTrialGate.mostrarBanner(estado); });
+      r3adsTrialGate.evaluar(CLINIC_ID);
       cargarBrandingReal();
       r3adsStaff.checkAdmin(user, CLINIC_ID, function (ok) {
         if (!ok) { window.location.href = 'Auth.html'; return; }

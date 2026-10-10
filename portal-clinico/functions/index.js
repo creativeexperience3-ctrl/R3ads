@@ -108,17 +108,31 @@ exports.onUsuarioWrite = functions.firestore
  * círculo, y solo hace dos cosas, nunca más: crear la clínica que pide
  * quien llama, y volverlo admin de ESA clínica y de ninguna otra.
  *
- * Decisión de producto (2026-09-24, revisada el mismo día): la clínica
- * NACE en `estado: 'prueba_bloqueada'` — puede iniciar sesión y mirar el
- * sistema, pero clinicActiva() en firestore.rules exige 'activa' para
- * leer/escribir cualquier dato clínico real, así que en la práctica solo
- * puede ver el cascarón vacío hasta activar su prueba. La activación
- * (agregar tarjeta vía PayPal, ver crearSuscripcionPayPal más abajo) es
- * lo único que la pasa a 'activa' — eso dispara el ciclo de prueba de 7
- * días en $0 que ya trae el Billing Plan de PayPal, y al día 8 PayPal
- * cobra solo el plan elegido acá. `origenAlta: 'self-service'` queda
- * marcado para distinguir estas clínicas de las dadas de alta a mano.
+ * Decisión de producto (2026-10-10, reemplaza a la del 2026-09-24): la
+ * clínica NACE en `estado: 'prueba_libre'` con `pruebaExpira` a
+ * PRUEBA_LIBRE_DIAS días — trabaja con el portal COMPLETO, sin tarjeta,
+ * hasta esa fecha. clinicActiva() en firestore.rules acepta ese estado
+ * mientras el reloj no la pase; cuando la pasa, el portal queda de solo
+ * mirar hasta que active con PayPal.
+ *
+ * Antes nacía en 'prueba_bloqueada', que exigía tarjeta ANTES de poder
+ * guardar un solo paciente. Vendiéndole a consultorios de Honduras ese
+ * muro mataba la conversión del autoservicio: se pagaba el clic y el
+ * prospecto moría en Mi-Suscripcion.html sin haber visto el producto
+ * funcionando. Ver FUNNEL.md, Fase 2. 'prueba_bloqueada' sigue soportado
+ * en las reglas y en clinic-trial-gate.js por las clínicas que se dieron
+ * de alta antes de este cambio.
+ *
+ * OJO con el solape: el Billing Plan de PayPal ya trae su propio ciclo de
+ * prueba de 7 días en $0, así que una clínica que activa durante su prueba
+ * libre puede acumular hasta 14 días gratis. Es a propósito por ahora
+ * (premia activar temprano), pero si se quiere cortar, se quita el ciclo
+ * de prueba del plan en PayPal, no de acá.
+ *
+ * `origenAlta: 'self-service'` queda marcado para distinguir estas
+ * clínicas de las dadas de alta a mano.
  */
+const PRUEBA_LIBRE_DIAS = 7;
 const PLAN_BASICO_MODULOS = {
   laboratorio: false,
   pruebasRapidas: false,
@@ -324,7 +338,16 @@ exports.crearClinicaSelfService = functions
           sitioWeb: '',
           modulos: modulosDelPlan,
           planElegido: planElegido,
-          estado: 'prueba_bloqueada',
+          estado: 'prueba_libre',
+          /* Fecha dura, no "creadoEn + 7" calculado al leer: firestore.rules
+             tiene que poder compararla contra request.time sin hacer
+             aritmética, y el admin tiene que poder ver la misma fecha que
+             aplican las reglas. No se puede usar serverTimestamp() acá
+             porque no admite sumarle días — el reloj del servidor de
+             Functions alcanza y sobra para esto. */
+          pruebaExpira: admin.firestore.Timestamp.fromMillis(
+            Date.now() + PRUEBA_LIBRE_DIAS * 24 * 60 * 60 * 1000
+          ),
           origenAlta: 'self-service',
           /* Constancia del contrato: qué versión del texto se aceptó, quién
              la aceptó y cuándo. La versión importa — "aceptó los términos"

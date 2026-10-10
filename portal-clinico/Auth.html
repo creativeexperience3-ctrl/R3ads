@@ -657,27 +657,24 @@
         </div>
 
         <!-- ── Tu clínica ya está lista (post-creación) ──
-             La clínica ya existe en 'prueba_bloqueada'. Entrar es la acción
-             PRINCIPAL y activar es la secundaria, a propósito: pedir una
-             tarjeta antes de dejar ver el producto hace que parezca
-             obligatoria, y no lo es. En 'prueba_bloqueada' firestore.rules
-             sí deja leer /clinics/{clinicId} (branding, nombre), así que el
-             portal carga con la marca de la clínica y sus pestañas se
-             recorren; lo que clinicActiva() bloquea son los datos clínicos
-             —expedientes, consultas— que en una clínica recién creada están
-             vacíos igual. De explicar por qué no se puede guardar se encarga
-             la banda de clinic-trial-gate.js, ya dentro del portal, con su
-             propio botón para activar cuando quieran. -->
+             La clínica ya existe en 'prueba_libre' con su `pruebaExpira` a 7
+             días (2026-10-10 — antes nacía en 'prueba_bloqueada' y no podía
+             guardar nada hasta poner tarjeta; ver FUNNEL.md, Fase 2).
+             Entrar es la acción PRINCIPAL y activar la secundaria, a
+             propósito: durante esos días el portal funciona COMPLETO, así
+             que pedir la tarjeta acá sería pedirla para nada. De avisar
+             cuántos días quedan se encarga la banda de
+             clinic-trial-gate.js, ya dentro del portal, con su propio botón
+             para activar cuando quieran. -->
         <form id="view-activate" class="auth-view" novalidate>
           <h1>Tu clínica ya está lista</h1>
           <div class="founder-badge">🚀 Precio Fundador — por ser de los primeros en usar Ancla</div>
           <p style="font-size:14px;color:#4B5563;line-height:1.5;margin:0">
-            Puedes entrar y recorrerla ahora mismo, sin pagar nada. Cuando
-            quieras empezar a guardar pacientes y consultas, activas tu
-            prueba: <strong>7 días gratis</strong>, hoy no se cobra nada, y
-            el día 8 se cobra el plan
-            <strong id="activate-plan-name">Básico ($40/mes)</strong> solo si
-            no cancelas antes.
+            Tienes <strong>7 días gratis, sin tarjeta</strong>, con todo
+            desbloqueado: puedes guardar pacientes, consultas y caja desde
+            ahora mismo. Cuando se acerque el final te avisamos para que
+            elijas tu plan — el tuyo sería
+            <strong id="activate-plan-name">Básico ($40/mes)</strong>.
           </p>
           <div id="activate-error" class="auth-error"></div>
 
@@ -685,13 +682,13 @@
             <span class="auth-btn-text">Entrar a mi clínica</span>
           </button>
           <p class="auth-hint">
-            Entras en modo vista previa: puedes recorrer todo el portal, pero
-            todavía no guardar datos. Activas cuando quieras, desde adentro.
+            Tu prueba vence en 7 días. Puedes elegir tu plan cuando quieras,
+            desde adentro — no hace falta hacerlo ahora.
           </p>
 
           <button type="button" class="auth-secondary" id="btn-activate-trial">
             <div class="auth-spinner"></div>
-            <span class="auth-btn-text">Activar prueba gratis con PayPal</span>
+            <span class="auth-btn-text">Prefiero elegir mi plan ahora</span>
           </button>
           <!-- Alternativa sin PayPal: no llama a ninguna función ni cobra
                nada — solo abre WhatsApp para que el equipo de Ancla verifique
@@ -1174,8 +1171,9 @@
       });
   });
 
-  /* ── Activa tu prueba gratis ──
-     La clínica ya existe en 'prueba_bloqueada'. Este paso llama a
+  /* ── Elegir plan ahora (opcional) ──
+     La clínica ya existe en 'prueba_libre' y puede trabajar sin esto. Es
+     un atajo para quien prefiere dejar el pago resuelto de una. Llama a
      crearSuscripcionPayPal (que arma la suscripción del plan elegido en
      PayPal, con 7 días de prueba en $0) y redirige a PayPal para que
      apruebe con tarjeta — la activación real la hace paypalWebhook
@@ -1221,9 +1219,10 @@
         showError(err.message || 'No se pudo conectar con PayPal. Intenta de nuevo.');
       });
   });
-  /* Entrar sin activar. No llama a ninguna función ni cambia el estado de la
-     clínica: queda en 'prueba_bloqueada' y el portal se encarga del resto
-     (clinic-trial-gate.js muestra la banda de vista previa con su CTA). */
+  /* Entrar sin elegir plan — el camino esperado. No llama a ninguna función
+     ni cambia el estado: queda en 'prueba_libre' con acceso completo hasta
+     su pruebaExpira, y el portal se encarga del resto (clinic-trial-gate.js
+     muestra cuántos días quedan, con su CTA). */
   document.getElementById('btn-enter-preview').addEventListener('click', function () {
     window.location.href = returnTo;
   });

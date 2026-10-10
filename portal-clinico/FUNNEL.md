@@ -23,7 +23,7 @@ Documento de trabajo: las casillas se van tachando.
 |---|---|
 | Portal clínico + portal paciente | Desplegados |
 | Autoservicio de alta | `Auth.html?view=register&plan=basico` / `&plan=completo` → `crearClinicaSelfService` |
-| Prueba gratis | 7 días, **exige PayPal** para salir de `prueba_bloqueada` |
+| Prueba gratis | 7 días **sin tarjeta** (`prueba_libre` + `pruebaExpira`) — implementado 2026-10-10, Fase 2 |
 | Cobro | PayPal Subscriptions (migración Sandbox→Live en curso) |
 | Precios | `Precios.html` |
 | Materia prima de VSL | `Ancla_Webinar_Demo.pptx`, `anuncio.html` ("De Excel a un sistema real") |
@@ -115,7 +115,7 @@ El evento estrella del board es `Schedule`. Acá no.
 |---|---|---|
 | Visita landing | `PageView` | navegador |
 | Clic "Crear mi clínica" | `InitiateCheckout` | navegador |
-| Clínica creada (`prueba_bloqueada`) | `Lead` | navegador + CAPI |
+| Clínica creada (`prueba_libre`) | `Lead` | navegador + CAPI |
 | Prueba activada con PayPal | `StartTrial` | **servidor** |
 | Primer cobro real (día 8) | `Subscribe` + `value` | **servidor** |
 | Demo agendada (carril B) | `Schedule` | Calendly → Zapier |
@@ -140,28 +140,63 @@ volumen lo aguante.
 
 ---
 
-## Fase 2 — La fricción del trial *(decisión pendiente)*
+## Fase 2 — La fricción del trial *(hecho 2026-10-10)*
 
-Hoy la prueba de 7 días **exige meter PayPal antes de guardar un solo
-paciente**. La clínica se registra, entra, ve el banner de
-`prueba_bloqueada` (`clinic-trial-gate.js`) y para hacer cualquier cosa
-tiene que sacar la tarjeta.
-
+**Problema:** la prueba exigía meter PayPal antes de guardar un solo
+paciente. La clínica se registraba, entraba, veía el banner de
+`prueba_bloqueada` y para hacer cualquier cosa tenía que sacar la tarjeta.
 Vendiéndole a dueños de consultorio en Honduras eso es un muro: baja
-penetración de tarjeta, desconfianza con PayPal, y se pide el pago **antes**
-de que vean valor. Se van a pagar clics que mueren en `Mi-Suscripcion.html`.
+penetración de tarjeta, desconfianza con PayPal, y se pedía el pago **antes**
+de que vieran valor.
 
-| Opción | Qué implica | Veredicto |
-|---|---|---|
-| **A — Prueba sin tarjeta, limitada** | Estado nuevo `prueba_libre` en `firestore.rules`: permite N pacientes/consultas reales; PayPal se pide al topar el límite o al día 7 | **Recomendada.** Es cambio de producto, pero es lo que más mueve la aguja |
-| **B — Demo con datos de ejemplo** | Clínica sandbox precargada, sin registro | Barato, no toca las reglas |
-| **C — Dejarlo como está** | Asumir baja conversión del carril A | Menor esfuerzo, peor economía |
+**Decisión: prueba libre de 7 días, acotada por tiempo.** La clínica nace en
+`estado: 'prueba_libre'` con un `pruebaExpira` a 7 días y trabaja con el
+portal completo, sin tarjeta, hasta esa fecha.
 
-> Esta decisión define qué landing se escribe y qué CTA va en el anuncio. Si
-> sale A, el gancho pasa a ser *"probalo gratis 7 días, sin tarjeta"*, que es
-> el doble de fuerte que lo que se puede decir hoy.
+> *Corrección a la primera versión de este documento:* se había planteado
+> acotar la prueba por **cantidad** ("N pacientes"). No se puede: las reglas
+> de Firestore no cuentan documentos de una colección, así que un tope por
+> volumen necesita un contador mantenido por un trigger aparte. Acotar por
+> **tiempo** sí entra en las reglas, porque `request.time` se compara contra
+> un timestamp guardado.
 
-- [ ] **Decidir A / B / C.**
+Descartadas: clínica demo precargada (no quita el muro para quien sí se
+registra) y dejarlo como estaba.
+
+### Qué se cambió
+
+- [x] `functions/index.js` → `crearClinicaSelfService` nace en
+      `prueba_libre` y escribe `pruebaExpira` (constante
+      `PRUEBA_LIBRE_DIAS = 7`).
+- [x] `firestore.rules` → `clinicActiva()` ahora delega en `clinicVigente()`,
+      que acepta `'activa'` **o** `'prueba_libre'` con `request.time <
+      pruebaExpira`. Un solo punto de control: todos los roles pasan por ahí.
+- [x] `clinic-trial-gate.js` → banda nueva que cuenta los días restantes
+      (tono neutro, no de alarma) y distingue `prueba_vencida`. Se agregó
+      `evaluar(clinicId)` como único punto de entrada: **qué estados muestran
+      banda ahora se decide en un solo archivo**, no repetido en el auth
+      guard de las 15 páginas.
+- [x] Las 15 páginas → el one-liner del guard pasó a
+      `r3adsTrialGate.evaluar(CLINIC_ID);`.
+- [x] `Mi-Suscripcion.html` → estados `prueba_libre` / `prueba_vencida`,
+      fecha de fin de prueba y copy de activación acorde.
+- [x] `Auth.html` → pantalla post-creación: "7 días gratis, sin tarjeta, con
+      todo desbloqueado". Entrar es la acción principal; elegir plan es el
+      atajo opcional.
+- [x] `Precios.html`, `anuncio.html` → CTA "sin tarjeta".
+
+`prueba_bloqueada` sigue soportado en reglas y en la banda: las clínicas
+dadas de alta antes del cambio no heredan la prueba libre.
+
+### Decisión abierta: el solape de 14 días
+
+El Billing Plan de PayPal ya trae su propio ciclo de prueba de 7 días en $0.
+Una clínica que elige plan durante su prueba libre puede acumular **hasta 14
+días gratis**. Hoy queda así a propósito (premia activar temprano). Si se
+quiere cortar, se quita el ciclo de prueba del plan en PayPal — no del
+código.
+
+- [ ] Decidir si se deja el solape o se quita el trial del plan de PayPal.
 
 ---
 
@@ -228,7 +263,7 @@ quién lo hace y cuándo (sugerencia: el closer, mismo día).
       `Deal Closed` / `Deal Not Closed`, con `Long Term Nurture` como salida
       lateral.
 - [ ] **Pipeline carril A** (no está en el board, hace falta):
-      `Registrado (prueba_bloqueada)` → `Prueba activada` → `Pagó mes 1` →
+      `Registrado (prueba_libre)` → `Plan elegido` → `Pagó mes 1` →
       `Churn`. Alimentado por `paypalWebhook`, no por Zapier.
 - [ ] **Zap de deal owner** (igual al board): host de Calendly → buscar
       contacto y deal → asignarlo como owner.
@@ -243,7 +278,7 @@ quién lo hace y cuándo (sugerencia: el closer, mismo día).
 - [ ] **Activación (carril A) — la que más plata deja.** La clínica que se
       registró y **no** activó la prueba es el segmento más caliente y hoy no
       recibe nada. Secuencia día 0 / 1 / 3 / 6 por email + WhatsApp,
-      disparada por `estado == 'prueba_bloqueada'`.
+      disparada por `estado == 'prueba_libre'` sin `paypalSubscriptionId`.
 - [ ] **Día 5–7 de prueba:** aviso de que arranca el cobro, con lo que
       lograron en la semana. Reduce disputas y churn.
 - [ ] **Churn:** `BILLING.SUBSCRIPTION.CANCELLED` y `.SUSPENDED` ya llegan al
@@ -282,7 +317,7 @@ prender el carril A solo y sumar el B en la segunda vuelta.
 
 ## Pendientes de decisión
 
-1. **Fase 2: ¿A, B o C?** Es lo que más cambia el resto del plan.
+1. ~~Fase 2: ¿A, B o C?~~ → resuelto 2026-10-10: prueba libre de 7 días por tiempo. Queda abierto solo el solape de 14 días con el trial del plan de PayPal.
 2. **CRM:** ¿HubSpot Free u otro?
 3. **Presupuesto mensual de ads** — define si el carril B tiene sentido desde
    el día uno o es para después.

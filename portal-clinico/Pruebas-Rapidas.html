@@ -849,7 +849,7 @@
     r3adsStaff.resolveClinicId(user, function (clinicId) {
       if (!clinicId) { window.location.href = 'Auth.html?returnTo=Pruebas-Rapidas.html'; return; }
       CLINIC_ID = clinicId;
-      r3adsTrialGate.cargar(CLINIC_ID).then(function (estado) { if (estado === 'prueba_bloqueada' || estado === 'suspendida' || estado === 'cancelada') r3adsTrialGate.mostrarBanner(estado); });
+      r3adsTrialGate.evaluar(CLINIC_ID);
       cargarBrandingReal();
       r3adsModulos.cargar(CLINIC_ID).then(function () {
         if (!r3adsModulos.exigir('pruebasRapidas', 'Pruebas Rápidas')) return;
